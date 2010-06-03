@@ -4,8 +4,8 @@ srcdir = src
 builddir = build
 
 CXX = g++
-CPPFLAGS = -Iinclude 
-LIBS = -lgsl -lgslcblas -lMinuit2
+CPPFLAGS = -Iinclude -Llib
+LIBS = -lgsl -lgslcblas -lMinuit2 -lcoul
 
 OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/CNuc.o \
 	$(srcdir)/Config.o $(srcdir)/DataLine.o $(srcdir)/Decay.o \
@@ -26,7 +26,7 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 
 azure2 : $(OBJS) azure2.cpp
 	$(CXX) $(CPPFLAGS) -o $@ azure2.cpp $(OBJS) $(LIBS)
-	
+
 .PHONY : clean
 clean :
 	-rm $(OBJS)
@@ -34,4 +34,3 @@ clean :
 .PHONY : install
 install :
 	-cp azure2 /usr/local/bin
-
