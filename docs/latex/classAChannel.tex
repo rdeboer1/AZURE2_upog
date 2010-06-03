@@ -1,0 +1,87 @@
+\section{AChannel Class Reference}
+\label{classAChannel}\index{AChannel@{AChannel}}
+An AZURE channel object.  
+
+
+{\tt \#include $<$AChannel.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{AChannel} (Nuc\-Line, int)
+\item 
+\bf{AChannel} (int, double, int, char)
+\item 
+int \bf{Get\-Pair\-Num} () const 
+\item 
+int \bf{Get\-L} () const 
+\item 
+double \bf{Get\-S} () const 
+\item 
+double \bf{Get\-Boundary\-Condition} () const 
+\item 
+char \bf{Get\-Rad\-Type} () const 
+\item 
+void \bf{Set\-Boundary\-Condition} (double)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE channel object. 
+
+An R-Matrix channel for a given $J^\pi$ group represents a specfic combination of $ \alpha,s,l $ couplings. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{AChannel@{AChannel}!AChannel@{AChannel}}
+\index{AChannel@{AChannel}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AChannel::AChannel (Nuc\-Line {\em nuc\-Line}, int {\em pair\-Num})}\label{classAChannel_556c9f764e458ae0a592339b2ccd3ac9}
+
+
+This constructor can be used if a channel is to be created from a specific line of the nuclear input file. \index{AChannel@{AChannel}!AChannel@{AChannel}}
+\index{AChannel@{AChannel}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AChannel::AChannel (int {\em l\-Value}, double {\em s\-Value}, int {\em pair\-Num}, char {\em rad\-Type})}\label{classAChannel_62160323fe4a68af2b7a7c5ec941be8a}
+
+
+This constructor can be used if a channel is to be created directly using specified channel couplings. 
+
+\subsection{Member Function Documentation}
+\index{AChannel@{AChannel}!GetBoundaryCondition@{GetBoundaryCondition}}
+\index{GetBoundaryCondition@{GetBoundaryCondition}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double AChannel::Get\-Boundary\-Condition () const}\label{classAChannel_aaa76e0abc5d42245e4492101d300533}
+
+
+Returns the boundary condition for the channel. The energy of the boundary condition is fixed at the first level given in the nuclear input file for a given $ J^\pi $ group. \index{AChannel@{AChannel}!GetL@{GetL}}
+\index{GetL@{GetL}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int AChannel::Get\-L () const}\label{classAChannel_6034d5c938ccc6f87376f7a27df05fd8}
+
+
+Returns the orbital angular momentum for the channel. \index{AChannel@{AChannel}!GetPairNum@{GetPairNum}}
+\index{GetPairNum@{GetPairNum}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int AChannel::Get\-Pair\-Num () const}\label{classAChannel_b171ddbcd632358ebbcfb294e5f39549}
+
+
+Returns the pair number, or position of the corresponding particle pair in the \doxyref{PPair}{p.}{classPPair} vector, for the channel. \index{AChannel@{AChannel}!GetRadType@{GetRadType}}
+\index{GetRadType@{GetRadType}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}char AChannel::Get\-Rad\-Type () const}\label{classAChannel_f0b07c80e95c906eb79f945c934289d8}
+
+
+Returns the radiation type for the channel. Radiation types are:\begin{itemize}
+\item P: Particle Radiation\item E: EL Electromagnetic Radiation\item M: ML Electromagnetic Radiation \end{itemize}
+\index{AChannel@{AChannel}!GetS@{GetS}}
+\index{GetS@{GetS}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double AChannel::Get\-S () const}\label{classAChannel_ea5b7de816a89315731b7fa50262f7f4}
+
+
+Returns the coupled channel spin for the channel. \index{AChannel@{AChannel}!SetBoundaryCondition@{SetBoundaryCondition}}
+\index{SetBoundaryCondition@{SetBoundaryCondition}!AChannel@{AChannel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void AChannel::Set\-Boundary\-Condition (double {\em boundary\-Condition})}\label{classAChannel_c97e3a820c80ea0ef74723cc89ca7fdf}
+
+
+This function is used to set the boundary condition for the channel. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/AChannel.h\item 
+azure\_\-v2/src/AChannel.cpp\end{CompactItemize}

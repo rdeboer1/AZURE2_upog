@@ -1,0 +1,30 @@
+\section{azure\_\-v2/src/Reaction\-Rate.cpp File Reference}
+\label{ReactionRate_8cpp}\index{azure_v2/src/ReactionRate.cpp@{azure\_\-v2/src/ReactionRate.cpp}}
+{\tt \#include \char`\"{}Reaction\-Rate.h\char`\"{}}\par
+{\tt \#include $<$math.h$>$}\par
+{\tt \#include $<$gsl/gsl\_\-integration.h$>$}\par
+\subsection*{Classes}
+\begin{CompactItemize}
+\item 
+struct \bf{gsl\_\-reactionrate\_\-params}
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+double \bf{gsl\_\-reactionrate\_\-integrand} (double x, void $\ast$p)
+\item 
+double \bf{gsl\_\-reactionrate\_\-integration} (double temperature, \bf{CNuc} $\ast$compound, const \bf{Config} \&configure, int entrance\-Key, int exit\-Key)
+\end{CompactItemize}
+
+
+\subsection{Function Documentation}
+\index{ReactionRate.cpp@{Reaction\-Rate.cpp}!gsl_reactionrate_integrand@{gsl\_\-reactionrate\_\-integrand}}
+\index{gsl_reactionrate_integrand@{gsl\_\-reactionrate\_\-integrand}!ReactionRate.cpp@{Reaction\-Rate.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double gsl\_\-reactionrate\_\-integrand (double {\em x}, void $\ast$ {\em p})}\label{ReactionRate_8cpp_59173caaa38ba0bcbcc55fda96031a9f}
+
+
+\index{ReactionRate.cpp@{Reaction\-Rate.cpp}!gsl_reactionrate_integration@{gsl\_\-reactionrate\_\-integration}}
+\index{gsl_reactionrate_integration@{gsl\_\-reactionrate\_\-integration}!ReactionRate.cpp@{Reaction\-Rate.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double gsl\_\-reactionrate\_\-integration (double {\em temperature}, \bf{CNuc} $\ast$ {\em compound}, const \bf{Config} \& {\em configure}, int {\em entrance\-Key}, int {\em exit\-Key})}\label{ReactionRate_8cpp_186fb255ef86fb574fa1773bd331c2a2}
+
+

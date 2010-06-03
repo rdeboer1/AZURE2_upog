@@ -1,0 +1,84 @@
+\section{Shft\-Func Class Reference}
+\label{classShftFunc}\index{ShftFunc@{ShftFunc}}
+A function class for negative energy shift functions.  
+
+
+{\tt \#include $<$Shft\-Func.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{Shft\-Func} (\bf{PPair} $\ast$p\-Pair)
+\item 
+int \bf{z1} () const 
+\item 
+int \bf{z2} () const 
+\item 
+double \bf{redmass} () const 
+\item 
+double \bf{total\-Sep\-E} () const 
+\item 
+double \bf{radius} () const 
+\item 
+double \bf{operator()} (int l, double energy) const 
+\item 
+double \bf{Energy\-Derivative} (int l, double energy) const 
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A function class for negative energy shift functions. 
+
+A shift function for negative energy channels is calculated as $ S=\rho \frac{W_c'(k\rho)}{W_c(k\rho)} $, where the prime indicates the derivative with respect to $ \rho $. The AZURE function class \doxyref{Shft\-Func}{p.}{classShftFunc} uses the GSL package to calculates the numerical derivative. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ShftFunc@{Shft\-Func}!ShftFunc@{ShftFunc}}
+\index{ShftFunc@{ShftFunc}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}Shft\-Func::Shft\-Func (\bf{PPair} $\ast$ {\em p\-Pair})\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_be6d3191736d78712c237ccb6dbb602a}
+
+
+The \doxyref{Shft\-Func}{p.}{classShftFunc} object is created with reference to a particle pair. 
+
+\subsection{Member Function Documentation}
+\index{ShftFunc@{Shft\-Func}!EnergyDerivative@{EnergyDerivative}}
+\index{EnergyDerivative@{EnergyDerivative}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Shft\-Func::Energy\-Derivative (int {\em l}, double {\em energy}) const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_3c00feeb37d2279df0b98d0cb17181dd}
+
+
+Returns the energy derivative of the shift function at the specified orbital angular momentum and energy in the compound system. \index{ShftFunc@{Shft\-Func}!operator()@{operator()}}
+\index{operator()@{operator()}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Shft\-Func::operator() (int {\em l}, double {\em energy}) const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_b94abdf2446a774869cc90ab58582637}
+
+
+The parenthesis operator is defined to make the class instance callable as a function. The orbital angular momentum and energy in the compound system are the dependent variables. The function returns the value of the shift function. \index{ShftFunc@{Shft\-Func}!radius@{radius}}
+\index{radius@{radius}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Shft\-Func::radius () const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_c1506d395c2b1399866041bc5c64464f}
+
+
+Returns the channel radius of the particle pair. \index{ShftFunc@{Shft\-Func}!redmass@{redmass}}
+\index{redmass@{redmass}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Shft\-Func::redmass () const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_b44fcd8f6c029814fac975975b6c5a6f}
+
+
+Returns the reduced mass of the particle pair. \index{ShftFunc@{Shft\-Func}!totalSepE@{totalSepE}}
+\index{totalSepE@{totalSepE}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Shft\-Func::total\-Sep\-E () const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_45e84f1eddb2e2103bf5d97308e35b7b}
+
+
+Returns the total seperation energy of the particle pair. \index{ShftFunc@{Shft\-Func}!z1@{z1}}
+\index{z1@{z1}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Shft\-Func::z1 () const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_8979cf969e7d64e5eb6924a9389c4b80}
+
+
+Returns the atomic number of the first particle in the pair. \index{ShftFunc@{Shft\-Func}!z2@{z2}}
+\index{z2@{z2}!ShftFunc@{Shft\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Shft\-Func::z2 () const\hspace{0.3cm}{\tt  [inline]}}\label{classShftFunc_fefc96a9e4be04d337c5787433fa6322}
+
+
+Returns the atomic number of the second particle in the pair. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/Shft\-Func.h\end{CompactItemize}

@@ -1,0 +1,253 @@
+\section{ALevel Class Reference}
+\label{classALevel}\index{ALevel@{ALevel}}
+An AZURE level object.  
+
+
+{\tt \#include $<$ALevel.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{ALevel} (Nuc\-Line)
+\item 
+\bf{ALevel} (double)
+\item 
+bool \bf{Is\-In\-RMatrix} () const 
+\item 
+bool \bf{Energy\-Fixed} () const 
+\item 
+bool \bf{Channel\-Fixed} (int) const 
+\item 
+int \bf{Num\-NFIntegrals} () const 
+\item 
+int \bf{Get\-Transform\-Iterations} () const 
+\item 
+double \bf{Get\-E} () const 
+\item 
+double \bf{Get\-Gamma} (int) const 
+\item 
+double \bf{Get\-Fit\-Gamma} (int) const 
+\item 
+double \bf{Get\-Fit\-E} () const 
+\item 
+double \bf{Get\-NFIntegral} (int) const 
+\item 
+double \bf{Get\-Sqrt\-NFFactor} () const 
+\item 
+double \bf{Get\-ECConversion\-Factor} (int) const 
+\item 
+double \bf{Get\-Transform\-Gamma} (int) const 
+\item 
+double \bf{Get\-Transform\-E} () const 
+\item 
+double \bf{Get\-Big\-Gamma} (int) const 
+\item 
+std::complex$<$ double $>$ \bf{Get\-External\-Gamma} (int) const 
+\item 
+void \bf{Add\-Gamma} (Nuc\-Line)
+\item 
+void \bf{Add\-Gamma} (double)
+\item 
+void \bf{Set\-Gamma} (int, double)
+\item 
+void \bf{Set\-E} (double)
+\item 
+void \bf{Set\-Fit\-Gamma} (int, double)
+\item 
+void \bf{Set\-Fit\-E} (double)
+\item 
+void \bf{Add\-NFIntegral} (double)
+\item 
+void \bf{Set\-Sqrt\-NFFactor} (double)
+\item 
+void \bf{Add\-ECConversion\-Factor} (double)
+\item 
+void \bf{Set\-Transform\-Gamma} (int, double)
+\item 
+void \bf{Set\-Transform\-E} (double)
+\item 
+void \bf{Set\-Big\-Gamma} (int, double)
+\item 
+void \bf{Set\-Transform\-Iterations} (int)
+\item 
+void \bf{Set\-External\-Gamma} (int, std::complex$<$ double $>$)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE level object. 
+
+An R-matrix level represents a specific eigenstate of the compound nucleus. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ALevel@{ALevel}!ALevel@{ALevel}}
+\index{ALevel@{ALevel}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}ALevel::ALevel (Nuc\-Line {\em nuc\-Line})}\label{classALevel_aa406d92786470eb211e9fa0f5ba5496}
+
+
+This constructor is used when a level object is created from an entry in the nuclear file. \index{ALevel@{ALevel}!ALevel@{ALevel}}
+\index{ALevel@{ALevel}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}ALevel::ALevel (double {\em energy})}\label{classALevel_e9c0cda96b6300572e75beade96eb0ca}
+
+
+This constructor is used when a level object is created using a specific energy. 
+
+\subsection{Member Function Documentation}
+\index{ALevel@{ALevel}!AddECConversionFactor@{AddECConversionFactor}}
+\index{AddECConversionFactor@{AddECConversionFactor}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Add\-ECConversion\-Factor (double {\em conversion\-Factor})}\label{classALevel_fb03bc09889b8f81773eb05ccc11e54b}
+
+
+This function adds a conversion factor from reduced width amplitude to ANC. \index{ALevel@{ALevel}!AddGamma@{AddGamma}}
+\index{AddGamma@{AddGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Add\-Gamma (double {\em reduced\-Width})}\label{classALevel_c7caa4d63534a97745d9b9507c46a05a}
+
+
+This function adds a position in the width vectors corresponding to a new channel. The initial reduced width amplitude is set directly. \index{ALevel@{ALevel}!AddGamma@{AddGamma}}
+\index{AddGamma@{AddGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Add\-Gamma (Nuc\-Line {\em nuc\-Line})}\label{classALevel_972a2181abf39f8ebc035530bdf0a890}
+
+
+This function adds a position in the width vectors corresponding to a new channel. The initial reduced width amplitude is set from an entry in the nuclear input file. \index{ALevel@{ALevel}!AddNFIntegral@{AddNFIntegral}}
+\index{AddNFIntegral@{AddNFIntegral}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Add\-NFIntegral (double {\em integral})}\label{classALevel_18a1700f5bf7b91e240fb4c1307ffb27}
+
+
+This function creates and fills a position for the channel integral in the denominator of the $N_f^{1/2}$ term. The integral is of the form $ \int_a^\infty \left[ \frac{W_c(kr)}{W_c{ka_c}} \right]^2 $. \index{ALevel@{ALevel}!ChannelFixed@{ChannelFixed}}
+\index{ChannelFixed@{ChannelFixed}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}bool ALevel::Channel\-Fixed (int {\em channel\-Num}) const}\label{classALevel_78daf0cd95cdef89c0a742fb796c70aa}
+
+
+Returns true if the reduced width amplitude for corresponding channel number is to be fixed in the fitting process, otherwise returns false. \index{ALevel@{ALevel}!EnergyFixed@{EnergyFixed}}
+\index{EnergyFixed@{EnergyFixed}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}bool ALevel::Energy\-Fixed () const}\label{classALevel_ab127808b9f980219acb20963b8ed0b3}
+
+
+Returns true if the level energy is to be fixed in the fitting process, otherwise returns false. \index{ALevel@{ALevel}!GetBigGamma@{GetBigGamma}}
+\index{GetBigGamma@{GetBigGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Big\-Gamma (int {\em channel\-Num}) const}\label{classALevel_2f21c67d6773bc665e4203d53013631a}
+
+
+Returns the Breit-Wigner partial width for a given channel number. \index{ALevel@{ALevel}!GetE@{GetE}}
+\index{GetE@{GetE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-E () const}\label{classALevel_aa22d7e25798d04d69bab208d3c4e7e4}
+
+
+Returns the energy of the level. \index{ALevel@{ALevel}!GetECConversionFactor@{GetECConversionFactor}}
+\index{GetECConversionFactor@{GetECConversionFactor}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-ECConversion\-Factor (int {\em channel\-Num}) const}\label{classALevel_4d41dd96f513eb5c7232da5077d50995}
+
+
+Returns the conversion factor from reduced width amplitude to ANC for a given channel number. \index{ALevel@{ALevel}!GetExternalGamma@{GetExternalGamma}}
+\index{GetExternalGamma@{GetExternalGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::complex$<$ double $>$ ALevel::Get\-External\-Gamma (int {\em channel\-Num}) const}\label{classALevel_4f3b10f52fcfc9f4f3c8abcb2a396a60}
+
+
+Returns the external portion of the reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!GetFitE@{GetFitE}}
+\index{GetFitE@{GetFitE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Fit\-E () const}\label{classALevel_c44f25d7d8117ae4602edaca92a8e2c8}
+
+
+Returns the fitted energy of the level. \index{ALevel@{ALevel}!GetFitGamma@{GetFitGamma}}
+\index{GetFitGamma@{GetFitGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Fit\-Gamma (int {\em channel\-Num}) const}\label{classALevel_40c97f2b98a5462463d99eab30bc0759}
+
+
+Returns the fitted internal reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!GetGamma@{GetGamma}}
+\index{GetGamma@{GetGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Gamma (int {\em channel\-Num}) const}\label{classALevel_d9a5bfa377381e871e873a0bf98ad34a}
+
+
+Returns the internal reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!GetNFIntegral@{GetNFIntegral}}
+\index{GetNFIntegral@{GetNFIntegral}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-NFIntegral (int {\em channel\-Num}) const}\label{classALevel_bf0c916fcfffe3bd2c6579e62f5187d8}
+
+
+Returns the calculated channel integral in the denominator of the $N_f^{1/2} $ term for a given channel number. \index{ALevel@{ALevel}!GetSqrtNFFactor@{GetSqrtNFFactor}}
+\index{GetSqrtNFFactor@{GetSqrtNFFactor}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Sqrt\-NFFactor () const}\label{classALevel_d30896b8e21011a2ebca8d2e2e634ca1}
+
+
+Returns the $N_f^{1/2}$ term for the level. \index{ALevel@{ALevel}!GetTransformE@{GetTransformE}}
+\index{GetTransformE@{GetTransformE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Transform\-E () const}\label{classALevel_9a0e4a0e05a1db6898ed7cb0233fe969}
+
+
+Returns the physical level energy. \index{ALevel@{ALevel}!GetTransformGamma@{GetTransformGamma}}
+\index{GetTransformGamma@{GetTransformGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ALevel::Get\-Transform\-Gamma (int {\em channel\-Num}) const}\label{classALevel_9db61f904cf1dee62de0e84d211d07ca}
+
+
+Returns the physical internal reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!GetTransformIterations@{GetTransformIterations}}
+\index{GetTransformIterations@{GetTransformIterations}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ALevel::Get\-Transform\-Iterations () const}\label{classALevel_61023b8c28d5b6d219ca6a1240b7f7d7}
+
+
+Returns the number of iterations required to transform the level from formal to physical parameters. \index{ALevel@{ALevel}!IsInRMatrix@{IsInRMatrix}}
+\index{IsInRMatrix@{IsInRMatrix}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}bool ALevel::Is\-In\-RMatrix () const}\label{classALevel_676875f3240be1331290b09b6d0b207a}
+
+
+Returns true if the level is to be included in the A-/R-Matrix calculation, otherwise returns false. A level may specify a bound state for external capture, but may not be an R-Matrix state (i.e. subthreshold state). \index{ALevel@{ALevel}!NumNFIntegrals@{NumNFIntegrals}}
+\index{NumNFIntegrals@{NumNFIntegrals}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ALevel::Num\-NFIntegrals () const}\label{classALevel_e1bf8431aea6b6037271219d118e3808}
+
+
+Returns non-zero only if the level is a final state for external capture. \index{ALevel@{ALevel}!SetBigGamma@{SetBigGamma}}
+\index{SetBigGamma@{SetBigGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Big\-Gamma (int {\em channel\-Num}, double {\em partial\-Width})}\label{classALevel_c115f07710b71697e07f58c3b9cdb3e4}
+
+
+This function sets the Breit-Wigner partial width for a given channel number. \index{ALevel@{ALevel}!SetE@{SetE}}
+\index{SetE@{SetE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-E (double {\em energy})}\label{classALevel_c90b2f45ac13d664f64d9b4ad39f595b}
+
+
+This function sets the level energy. \index{ALevel@{ALevel}!SetExternalGamma@{SetExternalGamma}}
+\index{SetExternalGamma@{SetExternalGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-External\-Gamma (int {\em channel\-Num}, std::complex$<$ double $>$ {\em reduced\-Width})}\label{classALevel_bc6c899b8e3a7d2295fbd96c5ad0cb30}
+
+
+This function sets the external reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!SetFitE@{SetFitE}}
+\index{SetFitE@{SetFitE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Fit\-E (double {\em energy})}\label{classALevel_f8eb63fcaf925f7d038eb68f1ceed9f7}
+
+
+This function sets the fitted level energy. \index{ALevel@{ALevel}!SetFitGamma@{SetFitGamma}}
+\index{SetFitGamma@{SetFitGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Fit\-Gamma (int {\em channel\-Num}, double {\em reduced\-Width})}\label{classALevel_7fd8095ecf5a30af03f778c56876539e}
+
+
+This function sets the fitted internal reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!SetGamma@{SetGamma}}
+\index{SetGamma@{SetGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Gamma (int {\em channel\-Num}, double {\em reduced\-Width})}\label{classALevel_81e74a679c89b2ace84390657f472ed9}
+
+
+This function sets the internal reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!SetSqrtNFFactor@{SetSqrtNFFactor}}
+\index{SetSqrtNFFactor@{SetSqrtNFFactor}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Sqrt\-NFFactor (double {\em term})}\label{classALevel_c77b8a557bf77997c5dcc0c4c860a800}
+
+
+This function sets the $N_f^{1/2}$ term for the level. \index{ALevel@{ALevel}!SetTransformE@{SetTransformE}}
+\index{SetTransformE@{SetTransformE}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Transform\-E (double {\em energy})}\label{classALevel_abcc4bc03020020ea8873cb5ffeb1f36}
+
+
+This function sets the physical level energy. \index{ALevel@{ALevel}!SetTransformGamma@{SetTransformGamma}}
+\index{SetTransformGamma@{SetTransformGamma}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Transform\-Gamma (int {\em channel\-Num}, double {\em reduced\-Width})}\label{classALevel_e167fd806cf1a1a25bec6966d6428beb}
+
+
+This function sets the physical reduced width amplitude for a given channel number. \index{ALevel@{ALevel}!SetTransformIterations@{SetTransformIterations}}
+\index{SetTransformIterations@{SetTransformIterations}!ALevel@{ALevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ALevel::Set\-Transform\-Iterations (int {\em iterations})}\label{classALevel_2f14b9242293227ffad8eeb4024bb6d7}
+
+
+This function sets the number of iterations that were required for the transformation from formal to physical parameters. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/ALevel.h\item 
+azure\_\-v2/src/ALevel.cpp\end{CompactItemize}

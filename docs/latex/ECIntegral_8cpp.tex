@@ -1,0 +1,44 @@
+\section{azure\_\-v2/src/ECIntegral.cpp File Reference}
+\label{ECIntegral_8cpp}\index{azure_v2/src/ECIntegral.cpp@{azure\_\-v2/src/ECIntegral.cpp}}
+{\tt \#include $<$math.h$>$}\par
+{\tt \#include $<$gsl/gsl\_\-integration.h$>$}\par
+{\tt \#include \char`\"{}ECIntegral.h\char`\"{}}\par
+\subsection*{Classes}
+\begin{CompactItemize}
+\item 
+struct \bf{gsl\_\-ec\_\-integral\_\-params}
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+double \bf{gsl\_\-ec\_\-fw\_\-integrand} (double x, void $\ast$p)
+\item 
+double \bf{gsl\_\-ec\_\-gw\_\-integrand} (double x, void $\ast$p)
+\item 
+double \bf{gsl\_\-ec\_\-ww\_\-integrand} (double x, void $\ast$p)
+\item 
+\bf{ECInt\-Result} \bf{gsl\_\-ec\_\-integral} (\bf{Coul\-Func} $\ast$coul, \bf{Whit\-Func} $\ast$whit, int li, int lf, int mult\-L, double energy, double bindingenergy, double chanrad)
+\end{CompactItemize}
+
+
+\subsection{Function Documentation}
+\index{ECIntegral.cpp@{ECIntegral.cpp}!gsl_ec_fw_integrand@{gsl\_\-ec\_\-fw\_\-integrand}}
+\index{gsl_ec_fw_integrand@{gsl\_\-ec\_\-fw\_\-integrand}!ECIntegral.cpp@{ECIntegral.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double gsl\_\-ec\_\-fw\_\-integrand (double {\em x}, void $\ast$ {\em p})}\label{ECIntegral_8cpp_8c8a66f3132a7406ab4c0823aaf9da43}
+
+
+\index{ECIntegral.cpp@{ECIntegral.cpp}!gsl_ec_gw_integrand@{gsl\_\-ec\_\-gw\_\-integrand}}
+\index{gsl_ec_gw_integrand@{gsl\_\-ec\_\-gw\_\-integrand}!ECIntegral.cpp@{ECIntegral.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double gsl\_\-ec\_\-gw\_\-integrand (double {\em x}, void $\ast$ {\em p})}\label{ECIntegral_8cpp_a9ab4681ce9a4c21647f27bbd16af399}
+
+
+\index{ECIntegral.cpp@{ECIntegral.cpp}!gsl_ec_integral@{gsl\_\-ec\_\-integral}}
+\index{gsl_ec_integral@{gsl\_\-ec\_\-integral}!ECIntegral.cpp@{ECIntegral.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}struct \bf{ECInt\-Result} gsl\_\-ec\_\-integral (\bf{Coul\-Func} $\ast$ {\em coul}, \bf{Whit\-Func} $\ast$ {\em whit}, int {\em li}, int {\em lf}, int {\em mult\-L}, double {\em energy}, double {\em bindingenergy}, double {\em chanrad})}\label{ECIntegral_8cpp_10f1e819a1a4b4a369b065ff93779621}
+
+
+\index{ECIntegral.cpp@{ECIntegral.cpp}!gsl_ec_ww_integrand@{gsl\_\-ec\_\-ww\_\-integrand}}
+\index{gsl_ec_ww_integrand@{gsl\_\-ec\_\-ww\_\-integrand}!ECIntegral.cpp@{ECIntegral.cpp}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double gsl\_\-ec\_\-ww\_\-integrand (double {\em x}, void $\ast$ {\em p})}\label{ECIntegral_8cpp_2b9d293298639fe70be7ff74a849c43e}
+
+

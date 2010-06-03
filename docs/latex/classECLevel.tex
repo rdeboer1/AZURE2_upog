@@ -1,0 +1,113 @@
+\section{ECLevel Class Reference}
+\label{classECLevel}\index{ECLevel@{ECLevel}}
+An AZURE external capture component.  
+
+
+{\tt \#include $<$ECLevel.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{ECLevel} (ECLine)
+\item 
+int \bf{Get\-Min\-L} () const 
+\item 
+int \bf{Get\-Max\-L} () const 
+\item 
+int \bf{Get\-Max\-Mult} () const 
+\item 
+int \bf{Get\-JGroup\-Num} () const 
+\item 
+int \bf{Get\-Level\-Num} () const 
+\item 
+int \bf{Get\-Pair\-Num} () const 
+\item 
+double \bf{Get\-Min\-J} () const 
+\item 
+double \bf{Get\-Max\-J} () const 
+\item 
+void \bf{Set\-Level\-Num} (int)
+\item 
+void \bf{Set\-JGroup\-Num} (int)
+\item 
+void \bf{Set\-Pair\-Num} (int)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE external capture component. 
+
+When the external capture file is read, they configuration parameters are stored in a \doxyref{ECLevel}{p.}{classECLevel} object under the corresponding entrance pair. The size of the vector of \doxyref{ECLevel}{p.}{classECLevel} objects for a given entrance pair will be determined by the number of entries coresponding to that entrance pair in the external capture file. The final state \doxyref{JGroup}{p.}{classJGroup} and \doxyref{ALevel}{p.}{classALevel} objects are either created or determined to exist in from the nuclear input file, and are subsequently stored in the \doxyref{ECLevel}{p.}{classECLevel} object. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ECLevel@{ECLevel}!ECLevel@{ECLevel}}
+\index{ECLevel@{ECLevel}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}ECLevel::ECLevel (ECLine {\em ec\-Line})}\label{classECLevel_a893169f6b822a42da0b93a2c73aa5f5}
+
+
+\doxyref{ECLevel}{p.}{classECLevel} objects are created from entries in the external capture file. 
+
+\subsection{Member Function Documentation}
+\index{ECLevel@{ECLevel}!GetJGroupNum@{GetJGroupNum}}
+\index{GetJGroupNum@{GetJGroupNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-JGroup\-Num () const}\label{classECLevel_cfc1ce966ef7e598c65181a520c9ac3e}
+
+
+Returns the position of the final state $ J^\pi $ group in the \doxyref{JGroup}{p.}{classJGroup} vector. \index{ECLevel@{ECLevel}!GetLevelNum@{GetLevelNum}}
+\index{GetLevelNum@{GetLevelNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-Level\-Num () const}\label{classECLevel_32461c4041b26426314b79cd2b00f91f}
+
+
+Returns the position of the final state level in the \doxyref{ALevel}{p.}{classALevel} vector. \index{ECLevel@{ECLevel}!GetMaxJ@{GetMaxJ}}
+\index{GetMaxJ@{GetMaxJ}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ECLevel::Get\-Max\-J () const}\label{classECLevel_f21c8e331cc562b1d37d59e863cfa409}
+
+
+Returns the maximum value of the initial total spin. \index{ECLevel@{ECLevel}!GetMaxL@{GetMaxL}}
+\index{GetMaxL@{GetMaxL}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-Max\-L () const}\label{classECLevel_da91496ae0a6866952de38ebad68f875}
+
+
+Returns the maximum value for the intial orbital angular momentum. \index{ECLevel@{ECLevel}!GetMaxMult@{GetMaxMult}}
+\index{GetMaxMult@{GetMaxMult}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-Max\-Mult () const}\label{classECLevel_7a83d73705f41adda6599ae8c429264b}
+
+
+Returns the maximum multipolarity for the capture gamma. \index{ECLevel@{ECLevel}!GetMinJ@{GetMinJ}}
+\index{GetMinJ@{GetMinJ}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ECLevel::Get\-Min\-J () const}\label{classECLevel_bb372bb644e671e9f5cb10cb4e43b33c}
+
+
+Returns the minimum value of the initial total spin. \index{ECLevel@{ECLevel}!GetMinL@{GetMinL}}
+\index{GetMinL@{GetMinL}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-Min\-L () const}\label{classECLevel_8161d2d096e9b36d07a1f6a65212459f}
+
+
+Returns the minumum value for the initial orbital angular momentum. \index{ECLevel@{ECLevel}!GetPairNum@{GetPairNum}}
+\index{GetPairNum@{GetPairNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECLevel::Get\-Pair\-Num () const}\label{classECLevel_685cd262e67d1437739c66228583a3ab}
+
+
+Returns the position of the gamma,particle pair in the \doxyref{PPair}{p.}{classPPair} vector. \index{ECLevel@{ECLevel}!SetJGroupNum@{SetJGroupNum}}
+\index{SetJGroupNum@{SetJGroupNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ECLevel::Set\-JGroup\-Num (int {\em j\-Group\-Num})}\label{classECLevel_179d8cf7ef8e60fcb7232006c79ac08b}
+
+
+Sets the position of the final state $ J^\pi $ group in the \doxyref{JGroup}{p.}{classJGroup} vector. \index{ECLevel@{ECLevel}!SetLevelNum@{SetLevelNum}}
+\index{SetLevelNum@{SetLevelNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ECLevel::Set\-Level\-Num (int {\em level\-Num})}\label{classECLevel_219f7b5430aaf674a601df6e3a07b906}
+
+
+Sets the position of the final state level in the \doxyref{ALevel}{p.}{classALevel} vector. \index{ECLevel@{ECLevel}!SetPairNum@{SetPairNum}}
+\index{SetPairNum@{SetPairNum}!ECLevel@{ECLevel}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ECLevel::Set\-Pair\-Num (int {\em pair\-Num})}\label{classECLevel_26231a549980bcc1643deee31950d63b}
+
+
+Sets the position of the gamma,particle pair in the \doxyref{PPair}{p.}{classPPair} vector. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/ECLevel.h\item 
+azure\_\-v2/src/ECLevel.cpp\end{CompactItemize}

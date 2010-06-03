@@ -1,0 +1,162 @@
+\section{EData Class Reference}
+\label{classEData}\index{EData@{EData}}
+An AZURE data object.  
+
+
+{\tt \#include $<$EData.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{EData} ()
+\item 
+int \bf{Num\-Segments} () const 
+\item 
+int \bf{Fill} (std::string, \bf{CNuc} $\ast$)
+\item 
+int \bf{Make\-Points} (std::string, \bf{CNuc} $\ast$)
+\item 
+int \bf{iterations} () const 
+\item 
+void \bf{iterate} ()
+\item 
+void \bf{Initialize} (\bf{CNuc} $\ast$, const \bf{Config} \&)
+\item 
+void \bf{Add\-Segment} (\bf{ESegment})
+\item 
+void \bf{Print\-Data} (const \bf{Config} \&)
+\item 
+void \bf{Calc\-Legendre\-P} (int)
+\item 
+void \bf{Print\-Legendre\-P} (const \bf{Config} \&)
+\item 
+void \bf{Calc\-EDependent\-Values} (\bf{CNuc} $\ast$)
+\item 
+void \bf{Print\-EDependent\-Values} (const \bf{Config} \&, \bf{CNuc} $\ast$)
+\item 
+void \bf{Calc\-Coulomb\-Amplitude} (\bf{CNuc} $\ast$)
+\item 
+void \bf{Print\-Coulomb\-Amplitude} (const \bf{Config} \&, \bf{CNuc} $\ast$)
+\item 
+void \bf{Write\-Output\-Files} (std::string)
+\item 
+void \bf{Calculate\-ECAmplitudes} (\bf{CNuc} $\ast$, const \bf{Config} \&)
+\item 
+void \bf{Map\-Data} ()
+\item 
+\bf{ESegment} $\ast$ \bf{Get\-Segment} (int)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE data object. 
+
+The \doxyref{EData}{p.}{classEData} object is the top level data object in AZURE. It is the container object for a vector of \doxyref{ESegment}{p.}{classESegment} objects. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{EData@{EData}!EData@{EData}}
+\index{EData@{EData}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}EData::EData ()}\label{classEData_afad011c034ee3075d49f62d3df0dc96}
+
+
+The \doxyref{EData}{p.}{classEData} object has a private attribute containing the number of iterations needed to find the best fit parameters. At creation, this attribute is set to 0. 
+
+\subsection{Member Function Documentation}
+\index{EData@{EData}!AddSegment@{AddSegment}}
+\index{AddSegment@{AddSegment}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Add\-Segment (\bf{ESegment} {\em segment})}\label{classEData_777a4564ed00308f8f44c5523979d117}
+
+
+Adds a segment to the \doxyref{ESegment}{p.}{classESegment} vector. \index{EData@{EData}!CalcCoulombAmplitude@{CalcCoulombAmplitude}}
+\index{CalcCoulombAmplitude@{CalcCoulombAmplitude}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Calc\-Coulomb\-Amplitude (\bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_097a2a9da090a84c76b9dafa47efa0a0}
+
+
+Calls \doxyref{EPoint::Calc\-Coulomb\-Amplitude}{p.}{classEPoint_ffd7ea786ef0e19b3d46134f53e746c7} for each point in the entire \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!CalcEDependentValues@{CalcEDependentValues}}
+\index{CalcEDependentValues@{CalcEDependentValues}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Calc\-EDependent\-Values (\bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_d9ff8b2d5c81afd5fa64b74f9bc3f6f3}
+
+
+Calls \doxyref{EPoint::Calc\-EDependent\-Values}{p.}{classEPoint_9b4331ffbd04beea4d72c30a23d52d3c} for each point in the entire \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!CalcLegendreP@{CalcLegendreP}}
+\index{CalcLegendreP@{CalcLegendreP}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Calc\-Legendre\-P (int {\em max\-L})}\label{classEData_053a743e669c3ca01785c008b02d34b3}
+
+
+Calls \doxyref{EPoint::Calc\-Legendre\-P}{p.}{classEPoint_79d03969f79ecb2ebbc9138eca68c48c} for each point in the entire \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!CalculateECAmplitudes@{CalculateECAmplitudes}}
+\index{CalculateECAmplitudes@{CalculateECAmplitudes}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Calculate\-ECAmplitudes (\bf{CNuc} $\ast$ {\em the\-CNuc}, const \bf{Config} \& {\em configure})}\label{classEData_1d71fdc8950852b4204569852c86dccd}
+
+
+If external capture amplitudes are to be calculated, \doxyref{EPoint::Calculate\-ECAmplitudes}{p.}{classEPoint_df29f8821795525ff16f73cba339d23e} is called for each point with a corresponding external capture component in the \doxyref{EData}{p.}{classEData} object. Otherwise, the amplitudes are read from the specified file. \index{EData@{EData}!Fill@{Fill}}
+\index{Fill@{Fill}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int EData::Fill (std::string {\em infile}, \bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_48e9ba25684d4e4b19ed667827fbaf1d}
+
+
+This function fills the data object with segments from the segment data files. After a segment is created, the \doxyref{ESegment::Fill}{p.}{classESegment_59482ef602b330c82665afd0d1f6543b} method is called for that segment. Returns -1 if the input files could not be read, otherwise returns 0. \index{EData@{EData}!GetSegment@{GetSegment}}
+\index{GetSegment@{GetSegment}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{ESegment} $\ast$ EData::Get\-Segment (int {\em segment\-Num})}\label{classEData_1bfef816b6a3b83223c15ca292ca504f}
+
+
+Returns a pointer to a segment specified by a position in the \doxyref{ESegment}{p.}{classESegment} vector. \index{EData@{EData}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Initialize (\bf{CNuc} $\ast$ {\em compound}, const \bf{Config} \& {\em configure})}\label{classEData_5447df571d5db241f8d06871283994a8}
+
+
+This function is identical in role to the \doxyref{EPoint::Initialize}{p.}{classEPoint_72e399c1bb43db68ad15f5dfe22e2315} function, except that it initializes and entire \doxyref{EData}{p.}{classEData} object instead of a single \doxyref{EPoint}{p.}{classEPoint} object. \index{EData@{EData}!iterate@{iterate}}
+\index{iterate@{iterate}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::iterate ()}\label{classEData_99da0045e42cb5395acf5f215bf9fef9}
+
+
+This function updates the number of fit iterations per iteration during the fitting process. \index{EData@{EData}!iterations@{iterations}}
+\index{iterations@{iterations}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int EData::iterations () const}\label{classEData_8a10b0e87c0c129c671117d0088352dd}
+
+
+Returns the number of fit iterations needed to minimize the parameters to the data. \index{EData@{EData}!MakePoints@{MakePoints}}
+\index{MakePoints@{MakePoints}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int EData::Make\-Points (std::string {\em infile}, \bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_f3e1bc09a8979cf695f0bc95aeec89b4}
+
+
+If the AZURE calculation is not data driven, this function is called in place of the \doxyref{EData::Fill}{p.}{classEData_48e9ba25684d4e4b19ed667827fbaf1d} function to create points at specified energies and angles. Returns -1 if the input files could not be read, otherwise returns 0. \index{EData@{EData}!MapData@{MapData}}
+\index{MapData@{MapData}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Map\-Data ()}\label{classEData_61d184eba726604d37f614e7e598e6bf}
+
+
+This function determined what points should be mapped to another to reduce redundant calculations at like energies. \index{EData@{EData}!NumSegments@{NumSegments}}
+\index{NumSegments@{NumSegments}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int EData::Num\-Segments () const}\label{classEData_10f23d896167c2433e947ae4dc2f8e46}
+
+
+Returns the number of segment objects in the \doxyref{ESegment}{p.}{classESegment} vector. \index{EData@{EData}!PrintCoulombAmplitude@{PrintCoulombAmplitude}}
+\index{PrintCoulombAmplitude@{PrintCoulombAmplitude}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Print\-Coulomb\-Amplitude (const \bf{Config} \& {\em configure}, \bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_4cdafdd60318f4dc4e3b5c39ef7596e9}
+
+
+Prints the values calculated by \doxyref{EPoint::Calc\-Coulomb\-Amplitude}{p.}{classEPoint_ffd7ea786ef0e19b3d46134f53e746c7} for each point in the entire \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!PrintData@{PrintData}}
+\index{PrintData@{PrintData}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Print\-Data (const \bf{Config} \& {\em configure})}\label{classEData_e63f5b20981ad5476ccb120cba05802b}
+
+
+Prints the data point after the object is filled or points are created. \index{EData@{EData}!PrintEDependentValues@{PrintEDependentValues}}
+\index{PrintEDependentValues@{PrintEDependentValues}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Print\-EDependent\-Values (const \bf{Config} \& {\em configure}, \bf{CNuc} $\ast$ {\em the\-CNuc})}\label{classEData_8ab5d27ae106038c798677162e995b26}
+
+
+Prints the values calculated by \doxyref{EPoint::Calc\-EDependent\-Values}{p.}{classEPoint_9b4331ffbd04beea4d72c30a23d52d3c} for each point in the entire \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!PrintLegendreP@{PrintLegendreP}}
+\index{PrintLegendreP@{PrintLegendreP}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Print\-Legendre\-P (const \bf{Config} \& {\em configure})}\label{classEData_3bb522603370c94b72cca688c3c70ed8}
+
+
+Prints the Legendre polynomials for each point in the \doxyref{EData}{p.}{classEData} object. \index{EData@{EData}!WriteOutputFiles@{WriteOutputFiles}}
+\index{WriteOutputFiles@{WriteOutputFiles}!EData@{EData}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void EData::Write\-Output\-Files (std::string {\em outputdir})}\label{classEData_16f9f5417f14467045eabea4b93d288f}
+
+
+Writes the output files for the calculation. The output files are all in center of mass frame, and contain columns for energy, angle, calculated cross section, calculated s-factor, experimental cross section and error and experimental s-factor and error. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/EData.h\item 
+azure\_\-v2/src/EData.cpp\end{CompactItemize}

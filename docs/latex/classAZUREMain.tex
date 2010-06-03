@@ -1,0 +1,71 @@
+\section{AZUREMain Class Reference}
+\label{classAZUREMain}\index{AZUREMain@{AZUREMain}}
+The top-level AZURE function class.  
+
+
+{\tt \#include $<$AZUREMain.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{AZUREMain} (const \bf{Config} \&configure)
+\item 
+\bf{$\sim$AZUREMain} ()
+\item 
+int \bf{operator()} ()
+\item 
+const \bf{Config} \& \bf{configure} () const 
+\item 
+\bf{CNuc} $\ast$ \bf{compound} () const 
+\item 
+\bf{EData} $\ast$ \bf{data} () const 
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+The top-level AZURE function class. 
+
+The \doxyref{AZUREMain}{p.}{classAZUREMain} function class is the top level function class in the AZURE package. It is called directly from them main() using the configuration parameters read from the runtime file as well as from the command shell prompt. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{AZUREMain@{AZUREMain}!AZUREMain@{AZUREMain}}
+\index{AZUREMain@{AZUREMain}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AZUREMain::AZUREMain (const \bf{Config} \& {\em configure})\hspace{0.3cm}{\tt  [inline]}}\label{classAZUREMain_5ad95cc68ecd0e65c75aca3685a70411}
+
+
+The \doxyref{AZUREMain}{p.}{classAZUREMain} function class is created using a \doxyref{Config}{p.}{structConfig} structure. New \doxyref{CNuc}{p.}{classCNuc} and \doxyref{EData}{p.}{classEData} objects are created at initialization of an \doxyref{AZUREMain}{p.}{classAZUREMain} object. \index{AZUREMain@{AZUREMain}!~AZUREMain@{$\sim$AZUREMain}}
+\index{~AZUREMain@{$\sim$AZUREMain}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AZUREMain::$\sim$AZUREMain ()\hspace{0.3cm}{\tt  [inline]}}\label{classAZUREMain_7dcd41c3bd2f5dabcd352a80a7c912dc}
+
+
+The \doxyref{CNuc}{p.}{classCNuc} and \doxyref{EData}{p.}{classEData} objects are destroyed with the \doxyref{AZUREMain}{p.}{classAZUREMain} instance. 
+
+\subsection{Member Function Documentation}
+\index{AZUREMain@{AZUREMain}!compound@{compound}}
+\index{compound@{compound}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{CNuc}$\ast$ AZUREMain::compound () const\hspace{0.3cm}{\tt  [inline]}}\label{classAZUREMain_0d14eda656b4a51bac4ee6ee8fcbab69}
+
+
+Returns a pointer to the \doxyref{CNuc}{p.}{classCNuc} object. \index{AZUREMain@{AZUREMain}!configure@{configure}}
+\index{configure@{configure}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}const \bf{Config}\& AZUREMain::configure () const\hspace{0.3cm}{\tt  [inline]}}\label{classAZUREMain_91c819dc90dcf36600575859201c7725}
+
+
+Returns a reference to the \doxyref{Config}{p.}{structConfig} structure. \index{AZUREMain@{AZUREMain}!data@{data}}
+\index{data@{data}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{EData}$\ast$ AZUREMain::data () const\hspace{0.3cm}{\tt  [inline]}}\label{classAZUREMain_a0990ed1fba1e4d698f753a637b4e665}
+
+
+Returns a pointer to the \doxyref{EData}{p.}{classEData} object. \index{AZUREMain@{AZUREMain}!operator()@{operator()}}
+\index{operator()@{operator()}!AZUREMain@{AZUREMain}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int AZUREMain::operator() ()}\label{classAZUREMain_6dd46db1e65d08347b1accbf88267495}
+
+
+The parenthesis operator is defined so the instance of \doxyref{AZUREMain}{p.}{classAZUREMain} can be called as a function. This executes AZURE against the configuration parameters. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/AZUREMain.h\item 
+azure\_\-v2/src/AZUREMain.cpp\end{CompactItemize}

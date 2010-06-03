@@ -1,0 +1,28 @@
+\section{ECInt\-Result Struct Reference}
+\label{structECIntResult}\index{ECIntResult@{ECIntResult}}
+Return structure for \doxyref{ECIntegral}{p.}{classECIntegral} function class.  
+
+
+{\tt \#include $<$ECIntegral.h$>$}
+
+\subsection*{Public Attributes}
+\begin{CompactItemize}
+\item 
+double \bf{FW}\label{structECIntResult_b65d8c176b0d3780e5fd1c1047d1b8e8}
+
+\begin{CompactList}\small\item\em Integral of regular Coulomb solution, Whittaker function, and operator. \item\end{CompactList}\item 
+double \bf{GW}\label{structECIntResult_61fa31028b88d6e3f48a2fd8130e1fde}
+
+\begin{CompactList}\small\item\em Integral of irregular Coulomb solution (or Whittaker function for negative energies), Whittaker function, and operator. \item\end{CompactList}\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Return structure for \doxyref{ECIntegral}{p.}{classECIntegral} function class. 
+
+The ECint\-Result structure contains the result of the integral of regular and irregular Coulomb functions multiplied by Whittaker functions and $ r^L $ for EL capture transitions (term not present for M1 transitions). Negative energy initial channels are also considered, where the Coulomb function is replaced by a Whittaker function. In such a case, the result is returned in the GW attribute. 
+
+
+
+The documentation for this struct was generated from the following file:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/ECIntegral.h\end{CompactItemize}

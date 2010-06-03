@@ -1,0 +1,70 @@
+\section{NFIntegral Class Reference}
+\label{classNFIntegral}\index{NFIntegral@{NFIntegral}}
+A function class to calculate the channel integrals in the denominator of the $ N_f^{1/2} $ term.  
+
+
+{\tt \#include $<$NFIntegral.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{NFIntegral} (\bf{PPair} $\ast$p\-Pair)
+\item 
+\bf{$\sim$NFIntegral} ()
+\item 
+double \bf{operator()} (int l\-Final, double level\-Energy) const 
+\item 
+\bf{Whit\-Func} $\ast$ \bf{whitfunction} () const 
+\item 
+double \bf{Chan\-Rad} () const 
+\item 
+double \bf{Total\-Sep\-E} () const 
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A function class to calculate the channel integrals in the denominator of the $ N_f^{1/2} $ term. 
+
+The \doxyref{NFIntegral}{p.}{classNFIntegral} class returns the channel integral given by $ \int_a^\infty \left[ \frac{W_c(kr)}{W_c{ka_c}} \right]^2 $. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{NFIntegral@{NFIntegral}!NFIntegral@{NFIntegral}}
+\index{NFIntegral@{NFIntegral}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}NFIntegral::NFIntegral (\bf{PPair} $\ast$ {\em p\-Pair})\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_0903eaf1f0b88701a265d7b4df04c649}
+
+
+The \doxyref{NFIntegral}{p.}{classNFIntegral} object is created with reference to a \doxyref{PPair}{p.}{classPPair} object. A \doxyref{Whit\-Func}{p.}{classWhitFunc} object is also created. \index{NFIntegral@{NFIntegral}!~NFIntegral@{$\sim$NFIntegral}}
+\index{~NFIntegral@{$\sim$NFIntegral}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}NFIntegral::$\sim$NFIntegral ()\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_a27234f9f791514657077ba1275ecc67}
+
+
+The \doxyref{Whit\-Func}{p.}{classWhitFunc} object is destroyed with the \doxyref{NFIntegral}{p.}{classNFIntegral} object. 
+
+\subsection{Member Function Documentation}
+\index{NFIntegral@{NFIntegral}!ChanRad@{ChanRad}}
+\index{ChanRad@{ChanRad}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double NFIntegral::Chan\-Rad () const\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_380469e0861417012683d4968d3aabdb}
+
+
+Returns the channel radius of the particle pair. \index{NFIntegral@{NFIntegral}!operator()@{operator()}}
+\index{operator()@{operator()}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double NFIntegral::operator() (int {\em l\-Final}, double {\em level\-Energy}) const\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_b23bb498c13f4d1fd187722910253c48}
+
+
+The parenthesis operator is defined so the instance can be callable as a function. The final channel orbital angular momentum and final state energy in the compound system are passed as dependent variables. \index{NFIntegral@{NFIntegral}!TotalSepE@{TotalSepE}}
+\index{TotalSepE@{TotalSepE}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double NFIntegral::Total\-Sep\-E () const\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_c06458413d91d3e73f263b4b59a8c2aa}
+
+
+Returns the total seperation energy of the particle pair. \index{NFIntegral@{NFIntegral}!whitfunction@{whitfunction}}
+\index{whitfunction@{whitfunction}!NFIntegral@{NFIntegral}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{Whit\-Func}$\ast$ NFIntegral::whitfunction () const\hspace{0.3cm}{\tt  [inline]}}\label{classNFIntegral_43f4f68138310de70338d3f5738768c3}
+
+
+Returns a pointer to the \doxyref{Whit\-Func}{p.}{classWhitFunc} object. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/NFIntegral.h\end{CompactItemize}

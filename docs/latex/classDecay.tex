@@ -1,0 +1,99 @@
+\section{Decay Class Reference}
+\label{classDecay}\index{Decay@{Decay}}
+An AZURE decay pair.  
+
+
+{\tt \#include $<$Decay.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{Decay} (int)
+\item 
+int \bf{Get\-Pair\-Num} () const 
+\item 
+int \bf{Num\-KGroups} () const 
+\item 
+int \bf{Num\-KLGroups} () const 
+\item 
+int \bf{Is\-KGroup} (\bf{KGroup})
+\item 
+int \bf{Is\-KLGroup} (\bf{KLGroup})
+\item 
+void \bf{Add\-KGroup} (\bf{KGroup})
+\item 
+void \bf{Add\-KLGroup} (\bf{KLGroup})
+\item 
+\bf{KGroup} $\ast$ \bf{Get\-KGroup} (int)
+\item 
+\bf{KLGroup} $\ast$ \bf{Get\-KLGroup} (int)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE decay pair. 
+
+In AZURE, a \doxyref{Decay}{p.}{classDecay} object represents a decay pair of the compound nucleus. The \doxyref{Decay}{p.}{classDecay} object is keyed to a particle pair in the \doxyref{PPair}{p.}{classPPair} vector, and serves as a container class for the \doxyref{KGroup}{p.}{classKGroup} and the \doxyref{KLGroup}{p.}{classKLGroup} vectors and their subsequent reaction pathways. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{Decay@{Decay}!Decay@{Decay}}
+\index{Decay@{Decay}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}Decay::Decay (int {\em pair\-Num})}\label{classDecay_31d213b511bdb2435f5f13d57b8da18e}
+
+
+The \doxyref{Decay}{p.}{classDecay} object is created with a reference to a particle pair number, which represents a position in the \doxyref{PPair}{p.}{classPPair} vector. 
+
+\subsection{Member Function Documentation}
+\index{Decay@{Decay}!AddKGroup@{AddKGroup}}
+\index{AddKGroup@{AddKGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Decay::Add\-KGroup (\bf{KGroup} {\em k\-Group})}\label{classDecay_24d2aa7b6889475654755549f8c3c05c}
+
+
+Adds a $ s,s' $ combination to the \doxyref{KGroup}{p.}{classKGroup} vector. \index{Decay@{Decay}!AddKLGroup@{AddKLGroup}}
+\index{AddKLGroup@{AddKLGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Decay::Add\-KLGroup (\bf{KLGroup} {\em kl\-Group})}\label{classDecay_4a4609983f52fc5b8cf70520fcc84fc3}
+
+
+Adds a $ k,L $ combination to the \doxyref{KLGroup}{p.}{classKLGroup} vector. \index{Decay@{Decay}!GetKGroup@{GetKGroup}}
+\index{GetKGroup@{GetKGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{KGroup} $\ast$ Decay::Get\-KGroup (int {\em k\-Group\-Num})}\label{classDecay_63acd6bb55959e66e1b543b2eb4c9c24}
+
+
+Returns a pointer to a $ s,s' $ combination specified by a position in the \doxyref{KGroup}{p.}{classKGroup} vector. \index{Decay@{Decay}!GetKLGroup@{GetKLGroup}}
+\index{GetKLGroup@{GetKLGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{KLGroup} $\ast$ Decay::Get\-KLGroup (int {\em kl\-Group\-Num})}\label{classDecay_0f2a3a045a4b027df3c3eb6b6c37b085}
+
+
+Returns a pointer to a $ k,L $ combination specified by a position in the \doxyref{KLGroup}{p.}{classKLGroup} vector. \index{Decay@{Decay}!GetPairNum@{GetPairNum}}
+\index{GetPairNum@{GetPairNum}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Decay::Get\-Pair\-Num () const}\label{classDecay_9b24f3e49d0ff58364b5bfd27d077d16}
+
+
+Returns the pair number of the decay. \index{Decay@{Decay}!IsKGroup@{IsKGroup}}
+\index{IsKGroup@{IsKGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Decay::Is\-KGroup (\bf{KGroup} {\em a})}\label{classDecay_b57eef9ed93a95cc66c0e1b7ce52fb61}
+
+
+Tests a specific $ s,s' $ combination to determine if it exists in the \doxyref{KGroup}{p.}{classKGroup} vector. If the combination exists, the position of the combination in the vector is returned. Otherwise, the function returns 0. \index{Decay@{Decay}!IsKLGroup@{IsKLGroup}}
+\index{IsKLGroup@{IsKLGroup}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Decay::Is\-KLGroup (\bf{KLGroup} {\em a})}\label{classDecay_c31716d13a71f74ff938d92663096034}
+
+
+Tests a specific $ k,L $ combination to determine if it exists in the \doxyref{KLGroup}{p.}{classKLGroup} vector. If the combination exists, the position of the combination in the vector is returned. Otherwise, the function returns 0. \index{Decay@{Decay}!NumKGroups@{NumKGroups}}
+\index{NumKGroups@{NumKGroups}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Decay::Num\-KGroups () const}\label{classDecay_3a767714677c808898d655c7727cf6af}
+
+
+Returns the number of $ s,s' $ combinations in the \doxyref{KGroup}{p.}{classKGroup} vector. \index{Decay@{Decay}!NumKLGroups@{NumKLGroups}}
+\index{NumKLGroups@{NumKLGroups}!Decay@{Decay}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Decay::Num\-KLGroups () const}\label{classDecay_156584ea0cfc390b71fa9e0560646ece}
+
+
+Returns the number of $ k,L $ combinations in the \doxyref{KLGroup}{p.}{classKLGroup} vector. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/Decay.h\item 
+azure\_\-v2/src/Decay.cpp\end{CompactItemize}

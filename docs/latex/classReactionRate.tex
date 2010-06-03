@@ -1,0 +1,79 @@
+\section{Reaction\-Rate Class Reference}
+\label{classReactionRate}\index{ReactionRate@{ReactionRate}}
+A function class to calculate the reaction rate.  
+
+
+{\tt \#include $<$Reaction\-Rate.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{Reaction\-Rate} (\bf{CNuc} $\ast$compound, const std::vector$<$ double $>$ \&params, const \bf{Config} \&configure, int entrance\-Key, int exit\-Key)
+\item 
+\bf{CNuc} $\ast$ \bf{compound} () const 
+\item 
+const \bf{Config} \& \bf{configure} () const 
+\item 
+int \bf{entrance\-Key} () const 
+\item 
+int \bf{exit\-Key} () const 
+\item 
+void \bf{Calculate\-Rates} (double, double, double)
+\item 
+void \bf{Write\-Rates} ()
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A function class to calculate the reaction rate. 
+
+The \doxyref{Reaction\-Rate}{p.}{classReactionRate} function class is used to calculate the reaction rate based on a set of R-Matrix parameters over a range of stellar temperatures. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ReactionRate@{Reaction\-Rate}!ReactionRate@{ReactionRate}}
+\index{ReactionRate@{ReactionRate}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}Reaction\-Rate::Reaction\-Rate (\bf{CNuc} $\ast$ {\em compound}, const std::vector$<$ double $>$ \& {\em params}, const \bf{Config} \& {\em configure}, int {\em entrance\-Key}, int {\em exit\-Key})\hspace{0.3cm}{\tt  [inline]}}\label{classReactionRate_12e870458b02333cdb063b000690fd9a}
+
+
+The \doxyref{Reaction\-Rate}{p.}{classReactionRate} object is created with reference to a \doxyref{CNuc}{p.}{classCNuc} object, a vector of Minuit parameters, a \doxyref{Config}{p.}{structConfig} structure, and a set of entrance and exit pair keys. 
+
+\subsection{Member Function Documentation}
+\index{ReactionRate@{Reaction\-Rate}!CalculateRates@{CalculateRates}}
+\index{CalculateRates@{CalculateRates}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Reaction\-Rate::Calculate\-Rates (double {\em min\-Temp}, double {\em max\-Temp}, double {\em temp\-Step})}\label{classReactionRate_68107568b4744366ca4650cbe0a4e59a}
+
+
+Calculates the astrophysical reaction rates over a range of stellar temperatures. \index{ReactionRate@{Reaction\-Rate}!compound@{compound}}
+\index{compound@{compound}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{CNuc}$\ast$ Reaction\-Rate::compound () const\hspace{0.3cm}{\tt  [inline]}}\label{classReactionRate_4162f604f759e077c382189d18d4d406}
+
+
+Returns a pointer to the \doxyref{CNuc}{p.}{classCNuc} object. \index{ReactionRate@{Reaction\-Rate}!configure@{configure}}
+\index{configure@{configure}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}const \bf{Config}\& Reaction\-Rate::configure () const\hspace{0.3cm}{\tt  [inline]}}\label{classReactionRate_bfc6a26b89418d58fdaad66d304d5293}
+
+
+Returns a reference to the \doxyref{Config}{p.}{structConfig} structure. \index{ReactionRate@{Reaction\-Rate}!entranceKey@{entranceKey}}
+\index{entranceKey@{entranceKey}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Reaction\-Rate::entrance\-Key () const\hspace{0.3cm}{\tt  [inline]}}\label{classReactionRate_8e7ec81bd01f6e15a827653896abdbbd}
+
+
+Returns the entrance pair key. \index{ReactionRate@{Reaction\-Rate}!exitKey@{exitKey}}
+\index{exitKey@{exitKey}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Reaction\-Rate::exit\-Key () const\hspace{0.3cm}{\tt  [inline]}}\label{classReactionRate_c5bebc3618e4a00c976c93f36144a82e}
+
+
+Returns the exit pair key. \index{ReactionRate@{Reaction\-Rate}!WriteRates@{WriteRates}}
+\index{WriteRates@{WriteRates}!ReactionRate@{Reaction\-Rate}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Reaction\-Rate::Write\-Rates ()}\label{classReactionRate_d7ab12ce1daf6ca172a13d19caa85525}
+
+
+Writes the rates to an output file. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/Reaction\-Rate.h\item 
+azure\_\-v2/src/Reaction\-Rate.cpp\item 
+azure\_\-v2/src/Reaction\-Rate\_\-SPO.cpp\end{CompactItemize}

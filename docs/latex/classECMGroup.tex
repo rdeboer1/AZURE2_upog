@@ -1,0 +1,127 @@
+\section{ECMGroup Class Reference}
+\label{classECMGroup}\index{ECMGroup@{ECMGroup}}
+An AZURE external reaction pathway.  
+
+
+{\tt \#include $<$ECMGroup.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{ECMGroup} (char, int, int, double, int, int)
+\item 
+\bf{ECMGroup} (char, int, int, double, int, int, int, int, int)
+\item 
+bool \bf{Is\-Channel\-Capture} () const 
+\item 
+char \bf{Get\-Rad\-Type} () const 
+\item 
+int \bf{Get\-Mult} () const 
+\item 
+int \bf{Get\-L} () const 
+\item 
+int \bf{Get\-Final\-Channel} () const 
+\item 
+int \bf{Get\-ECNum} () const 
+\item 
+int \bf{Get\-Chan\-Cap\-Decay} () const 
+\item 
+int \bf{Get\-Chan\-Cap\-KGroup} () const 
+\item 
+int \bf{Get\-Chan\-Cap\-MGroup} () const 
+\item 
+double \bf{Get\-J} () const 
+\item 
+double \bf{Get\-Stat\-Spin\-Factor} () const 
+\item 
+void \bf{Set\-Stat\-Spin\-Factor} (double)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+An AZURE external reaction pathway. 
+
+An external reaction pathways in AZURE is one of two types: a hard sphere pathway or a resonant pathway. The hard sphere pathways refers to the portion of the initial incoming plus outgoing scattering wavefunction that is hard-shpere scattered and captured directly to a final state. The resonant pathways refer to the portion of the outgoing scattering wavefunction that is scattered/transformed by the R-Matrix. This type of pathway is linked to the internal resonant pathways, and can be thought of as first passing through a the resonant T-matrix before being captured directly to a final state. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ECMGroup@{ECMGroup}!ECMGroup@{ECMGroup}}
+\index{ECMGroup@{ECMGroup}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}ECMGroup::ECMGroup (char {\em rad\-Type}, int {\em multipolarity}, int {\em l\-Initial}, double {\em j\-Initial}, int {\em final\-Channel\-Num}, int {\em ec\-Num})}\label{classECMGroup_8d845cd03ba9182eac6624d364d62f6a}
+
+
+This constructor is used to create hard sphere external reaction pathways. The type of radiation is specified, as well as the position of the final state in the \doxyref{ECLevel}{p.}{classECLevel} vector. The final channel number is also specified. \index{ECMGroup@{ECMGroup}!ECMGroup@{ECMGroup}}
+\index{ECMGroup@{ECMGroup}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}ECMGroup::ECMGroup (char {\em rad\-Type}, int {\em multipolarity}, int {\em l\-Initial}, double {\em j\-Initial}, int {\em final\-Channel\-Num}, int {\em ec\-Num}, int {\em decay\-Num}, int {\em k\-Group\-Num}, int {\em m\-Group\-Num})}\label{classECMGroup_60f90e75adb26024ef899ec2e7a3b4a1}
+
+
+This constructor is used to create resonant external reaction pathways. The constructor is passed identical information as in the previous case, with the addition of references to the resonant reaction pathways through which the external pathways will pass. 
+
+\subsection{Member Function Documentation}
+\index{ECMGroup@{ECMGroup}!GetChanCapDecay@{GetChanCapDecay}}
+\index{GetChanCapDecay@{GetChanCapDecay}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-Chan\-Cap\-Decay () const}\label{classECMGroup_584bb79a74d53f04aeecdaa647b0c32d}
+
+
+Returns the position of the resonant exit pair in the \doxyref{Decay}{p.}{classDecay} vector. Used only for resonant external pathways. \index{ECMGroup@{ECMGroup}!GetChanCapKGroup@{GetChanCapKGroup}}
+\index{GetChanCapKGroup@{GetChanCapKGroup}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-Chan\-Cap\-KGroup () const}\label{classECMGroup_0e93164325040cb3334744895b6d48bd}
+
+
+Returns the resonant \doxyref{KGroup}{p.}{classKGroup} number. Used only for resonant external pathways. \index{ECMGroup@{ECMGroup}!GetChanCapMGroup@{GetChanCapMGroup}}
+\index{GetChanCapMGroup@{GetChanCapMGroup}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-Chan\-Cap\-MGroup () const}\label{classECMGroup_3da846934c68ede8524561577512a9e6}
+
+
+Returns the resonant \doxyref{MGroup}{p.}{classMGroup} number. Used only for resonant external pathways. \index{ECMGroup@{ECMGroup}!GetECNum@{GetECNum}}
+\index{GetECNum@{GetECNum}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-ECNum () const}\label{classECMGroup_ea1edca16945ab06d943f513b854289b}
+
+
+Returns the position of the final state in the \doxyref{ECLevel}{p.}{classECLevel} vector. \index{ECMGroup@{ECMGroup}!GetFinalChannel@{GetFinalChannel}}
+\index{GetFinalChannel@{GetFinalChannel}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-Final\-Channel () const}\label{classECMGroup_3698a63fa5ce23bdd9ef51505806babe}
+
+
+Returns the final channel number for the pathway. \index{ECMGroup@{ECMGroup}!GetJ@{GetJ}}
+\index{GetJ@{GetJ}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ECMGroup::Get\-J () const}\label{classECMGroup_baa4d8ee4b8dd60bc038a00994d1aa88}
+
+
+Returns the initial spin value for the pathway. \index{ECMGroup@{ECMGroup}!GetL@{GetL}}
+\index{GetL@{GetL}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-L () const}\label{classECMGroup_69c46638c331a5b8a00b1476311bf628}
+
+
+Returns the initial orbital momentum value for the reaction pathway. \index{ECMGroup@{ECMGroup}!GetMult@{GetMult}}
+\index{GetMult@{GetMult}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int ECMGroup::Get\-Mult () const}\label{classECMGroup_c6f5f9a02c83d247c820ca866dc34be4}
+
+
+Returns the multipolarity of the capture gamma. \index{ECMGroup@{ECMGroup}!GetRadType@{GetRadType}}
+\index{GetRadType@{GetRadType}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}char ECMGroup::Get\-Rad\-Type () const}\label{classECMGroup_02ca0cbc1f8b214211cfadbd5482f641}
+
+
+Returns the radiation type for the capture gamma. \index{ECMGroup@{ECMGroup}!GetStatSpinFactor@{GetStatSpinFactor}}
+\index{GetStatSpinFactor@{GetStatSpinFactor}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double ECMGroup::Get\-Stat\-Spin\-Factor () const}\label{classECMGroup_1b9d087788fe7df3f92956dbd51bbd40}
+
+
+Returns the statistical spin factor, $ g_J $, for the pathway. \index{ECMGroup@{ECMGroup}!IsChannelCapture@{IsChannelCapture}}
+\index{IsChannelCapture@{IsChannelCapture}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}bool ECMGroup::Is\-Channel\-Capture () const}\label{classECMGroup_c0ef5ff1ba9f6a7e3af9b208659b098d}
+
+
+Returns true if the pathways is a resonant external pathway, otherwise returns false. \index{ECMGroup@{ECMGroup}!SetStatSpinFactor@{SetStatSpinFactor}}
+\index{SetStatSpinFactor@{SetStatSpinFactor}!ECMGroup@{ECMGroup}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void ECMGroup::Set\-Stat\-Spin\-Factor (double {\em a})}\label{classECMGroup_503261fdd4a620b92eb9b6cf565a5ab2}
+
+
+Sets the statistical spin factor, $ g_J $, for the pathway. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/ECMGroup.h\item 
+azure\_\-v2/src/ECMGroup.cpp\end{CompactItemize}

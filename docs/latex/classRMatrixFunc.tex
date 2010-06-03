@@ -1,0 +1,157 @@
+\section{RMatrix\-Func Class Reference}
+\label{classRMatrixFunc}\index{RMatrixFunc@{RMatrixFunc}}
+A function class to calculate the T-Matrix using the R-Matrix.  
+
+
+{\tt \#include $<$RMatrix\-Func.h$>$}
+
+Inheritance diagram for RMatrix\-Func::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classRMatrixFunc}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{RMatrix\-Func} (\bf{CNuc} $\ast$)
+\item 
+\bf{CNuc} $\ast$ \bf{compound} () const 
+\item 
+void \bf{Clear\-Matrices} ()
+\item 
+void \bf{Fill\-Matrices} (\bf{EPoint} $\ast$)
+\item 
+void \bf{Invert\-Matrices} ()
+\item 
+void \bf{Calculate\-TMatrix} (\bf{EPoint} $\ast$)
+\item 
+void \bf{Calculate\-Cross\-Section} ()
+\item 
+double \bf{Get\-RMatrix\-Element} (int, int, int) const 
+\item 
+std::complex$<$ double $>$ \bf{Get\-RLMatrix\-Element} (int, int, int) const 
+\item 
+std::complex$<$ double $>$ \bf{Get\-RLInv\-Matrix\-Element} (int, int, int) const 
+\item 
+std::complex$<$ double $>$ \bf{Get\-RLInv\-RMatrix\-Element} (int, int, int) const 
+\item 
+std::vector$<$ std::vector$<$ std::complex$<$ double $>$ $>$ $>$ $\ast$ \bf{Get\-JSpec\-RLMatrix} (int)
+\item 
+void \bf{Add\-RMatrix\-Element} (int, int, int, double)
+\item 
+void \bf{Add\-RLMatrix\-Element} (int, int, int, std::complex$<$ double $>$)
+\item 
+void \bf{Add\-RLInv\-Matrix} (std::vector$<$ std::vector$<$ std::complex$<$ double $>$ $>$ $>$)
+\item 
+void \bf{Add\-RLInv\-RMatrix\-Element} (int, int, int, std::complex$<$ double $>$)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A function class to calculate the T-Matrix using the R-Matrix. 
+
+The \doxyref{RMatrix\-Func}{p.}{classRMatrixFunc} function class calculates the T-Matrix for a given energy point using the compound nucleus object. The \doxyref{RMatrix\-Func}{p.}{classRMatrixFunc} class is a child class of \doxyref{Gen\-Matrix\-Func}{p.}{classGenMatrixFunc}, where the cross section is calculated from the T-Matrix. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{RMatrixFunc@{RMatrix\-Func}!RMatrixFunc@{RMatrixFunc}}
+\index{RMatrixFunc@{RMatrixFunc}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}RMatrix\-Func::RMatrix\-Func (\bf{CNuc} $\ast$ {\em compound})}\label{classRMatrixFunc_a225ad7579d7cfa0c40e54da71e986db}
+
+
+The \doxyref{RMatrix\-Func}{p.}{classRMatrixFunc} object is created with reference to a \doxyref{CNuc}{p.}{classCNuc} object. 
+
+\subsection{Member Function Documentation}
+\index{RMatrixFunc@{RMatrix\-Func}!AddRLInvMatrix@{AddRLInvMatrix}}
+\index{AddRLInvMatrix@{AddRLInvMatrix}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Add\-RLInv\-Matrix (std::vector$<$ std::vector$<$ std::complex$<$ double $>$ $>$ $>$ {\em matrix})}\label{classRMatrixFunc_2cdb7f84e8356bf35f014e96cd8af828}
+
+
+This function adds an entire $ [1-RL]^{-1} $ matrix to a vector. \index{RMatrixFunc@{RMatrix\-Func}!AddRLInvRMatrixElement@{AddRLInvRMatrixElement}}
+\index{AddRLInvRMatrixElement@{AddRLInvRMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Add\-RLInv\-RMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}, std::complex$<$ double $>$ {\em matrix\-Element})}\label{classRMatrixFunc_c16e6b9095f30a66e5d16cdc94debb0d}
+
+
+This function adds a $ [1-RL]^{-1}R $ matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!AddRLMatrixElement@{AddRLMatrixElement}}
+\index{AddRLMatrixElement@{AddRLMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Add\-RLMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}, std::complex$<$ double $>$ {\em matrix\-Element})}\label{classRMatrixFunc_c9d2e6c32e32cd0b91b04767350ef7e0}
+
+
+This function adds a $ [1-RL] $ matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!AddRMatrixElement@{AddRMatrixElement}}
+\index{AddRMatrixElement@{AddRMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Add\-RMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}, double {\em matrix\-Element})}\label{classRMatrixFunc_28a73ef30a53ea24ebef4c00179d3ac5}
+
+
+This function adds an R-Matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!CalculateCrossSection@{CalculateCrossSection}}
+\index{CalculateCrossSection@{CalculateCrossSection}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Calculate\-Cross\-Section ()}\label{classRMatrixFunc_790ee4a3d57ac489848666e676ac8f83}
+
+
+Instantiated in the parent class. \index{RMatrixFunc@{RMatrix\-Func}!CalculateTMatrix@{CalculateTMatrix}}
+\index{CalculateTMatrix@{CalculateTMatrix}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Calculate\-TMatrix (\bf{EPoint} $\ast$ {\em point})\hspace{0.3cm}{\tt  [virtual]}}\label{classRMatrixFunc_62be4a71a76ecdbb75277b62cf30f0e8}
+
+
+This function calculates the T-Matrix for each reaction pathways based on the $ [1-RL]^{-1}R $ matrix. 
+
+Implements \bf{Gen\-Matrix\-Func} \doxyref{p.}{classGenMatrixFunc_f89bf73a0a2f230c2187947520c1f360}.\index{RMatrixFunc@{RMatrix\-Func}!ClearMatrices@{ClearMatrices}}
+\index{ClearMatrices@{ClearMatrices}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Clear\-Matrices ()\hspace{0.3cm}{\tt  [virtual]}}\label{classRMatrixFunc_ef604251f6135d99ccf051e623d76ad7}
+
+
+Clears all matrices associated with the \doxyref{RMatrix\-Func}{p.}{classRMatrixFunc} object. 
+
+Implements \bf{Gen\-Matrix\-Func} \doxyref{p.}{classGenMatrixFunc_41a9098087eac97b9c7de7aee82fa3d8}.\index{RMatrixFunc@{RMatrix\-Func}!compound@{compound}}
+\index{compound@{compound}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{CNuc}$\ast$ RMatrix\-Func::compound () const\hspace{0.3cm}{\tt  [inline, virtual]}}\label{classRMatrixFunc_9cfee7ffe97466ba19e1e5014567713a}
+
+
+Returns a pointer to the compound nucleus object. 
+
+Implements \bf{Gen\-Matrix\-Func} \doxyref{p.}{classGenMatrixFunc_12603673326e93fb80d8db05fad085de}.\index{RMatrixFunc@{RMatrix\-Func}!FillMatrices@{FillMatrices}}
+\index{FillMatrices@{FillMatrices}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Fill\-Matrices (\bf{EPoint} $\ast$ {\em point})\hspace{0.3cm}{\tt  [virtual]}}\label{classRMatrixFunc_7ad8de01bb08e66e2576bbb0271ff65b}
+
+
+This function creates the $ [1-RL] $ and $ R $ Matrices from the \doxyref{CNuc}{p.}{classCNuc} object. 
+
+Implements \bf{Gen\-Matrix\-Func} \doxyref{p.}{classGenMatrixFunc_0ce6fcce1afbd13bfdb753fcdfbe196c}.\index{RMatrixFunc@{RMatrix\-Func}!GetJSpecRLMatrix@{GetJSpecRLMatrix}}
+\index{GetJSpecRLMatrix@{GetJSpecRLMatrix}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::vector$<$ std::complex$<$ double $>$ $>$ $>$ $\ast$ RMatrix\-Func::Get\-JSpec\-RLMatrix (int {\em j\-Group\-Num})}\label{classRMatrixFunc_26114cdd2ec140c0bbfeb7356ba0796f}
+
+
+Returns an entire $ [1-RL] $ Matrix specified by a position in the \doxyref{JGroup}{p.}{classJGroup} vector. \index{RMatrixFunc@{RMatrix\-Func}!GetRLInvMatrixElement@{GetRLInvMatrixElement}}
+\index{GetRLInvMatrixElement@{GetRLInvMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::complex$<$ double $>$ RMatrix\-Func::Get\-RLInv\-Matrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}) const}\label{classRMatrixFunc_17190e37f593a1954ca8405ba67ba3e6}
+
+
+Returns a $ [1-RL]^{-1} $ Matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!GetRLInvRMatrixElement@{GetRLInvRMatrixElement}}
+\index{GetRLInvRMatrixElement@{GetRLInvRMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::complex$<$ double $>$ RMatrix\-Func::Get\-RLInv\-RMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}) const}\label{classRMatrixFunc_79ec1505027cddfa737cf3f04287da7a}
+
+
+Returns a $ [1-RL]^{-1}R $ Matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!GetRLMatrixElement@{GetRLMatrixElement}}
+\index{GetRLMatrixElement@{GetRLMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::complex$<$ double $>$ RMatrix\-Func::Get\-RLMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}) const}\label{classRMatrixFunc_8c5d6b896008bdfeb976370e7e139959}
+
+
+Returns an $ [1-RL] $ Matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!GetRMatrixElement@{GetRMatrixElement}}
+\index{GetRMatrixElement@{GetRMatrixElement}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double RMatrix\-Func::Get\-RMatrix\-Element (int {\em j\-Group\-Num}, int {\em channel\-Num}, int {\em channel\-Prime\-Num}) const}\label{classRMatrixFunc_9f0b4b468efed5e2c3a571ea789cb62f}
+
+
+Returns an R-Matrix element specified by positions in the \doxyref{JGroup}{p.}{classJGroup} and \doxyref{AChannel}{p.}{classAChannel} vectors. \index{RMatrixFunc@{RMatrix\-Func}!InvertMatrices@{InvertMatrices}}
+\index{InvertMatrices@{InvertMatrices}!RMatrixFunc@{RMatrix\-Func}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void RMatrix\-Func::Invert\-Matrices ()\hspace{0.3cm}{\tt  [virtual]}}\label{classRMatrixFunc_b67c0ad184bf6e38343b5c24e64a9b43}
+
+
+This function inverts the $ [1-RL] $ matrices and creates the $ [1-RL]^{-1}R $ matrices. 
+
+Implements \bf{Gen\-Matrix\-Func} \doxyref{p.}{classGenMatrixFunc_2dbfafa4c608ad5c1b27db7684f8f839}.
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/RMatrix\-Func.h\item 
+azure\_\-v2/src/RMatrix\-Func.cpp\end{CompactItemize}

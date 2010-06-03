@@ -1,0 +1,85 @@
+\section{AZUREOutput Class Reference}
+\label{classAZUREOutput}\index{AZUREOutput@{AZUREOutput}}
+A class to assist in writing AZURE output files.  
+
+
+{\tt \#include $<$AZUREOutput.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\bf{AZUREOutput} (std::string)
+\item 
+\bf{$\sim$AZUREOutput} ()
+\item 
+std::filebuf $\ast$ \bf{operator()} (int, int)
+\item 
+int \bf{Num\-AZUREFBuffers} () const 
+\item 
+int \bf{Is\-AZUREFBuffer} (int, int)
+\item 
+std::string \bf{Get\-Output\-Dir} () const 
+\item 
+void \bf{Add\-AZUREFBuffer} (\bf{AZUREFBuffer} $\ast$)
+\item 
+\bf{AZUREFBuffer} $\ast$ \bf{Get\-AZUREFBuffer} (int)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A class to assist in writing AZURE output files. 
+
+The \doxyref{EData::Write\-Output\-Files}{p.}{classEData_16f9f5417f14467045eabea4b93d288f} function simply loops over all \doxyref{ESegment}{p.}{classESegment} and \doxyref{EPoint}{p.}{classEPoint} objects when writing the output of an AZURE calculation. To ensure that all output for a given entrance and exit pair combination is written to a single file, the \doxyref{AZUREOutput}{p.}{classAZUREOutput} class is used. The \doxyref{AZUREOutput}{p.}{classAZUREOutput} object is a container for a vector of \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} objects. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{AZUREOutput@{AZUREOutput}!AZUREOutput@{AZUREOutput}}
+\index{AZUREOutput@{AZUREOutput}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AZUREOutput::AZUREOutput (std::string {\em outputdir})}\label{classAZUREOutput_f1c62484313c9697ea274794316fecd7}
+
+
+The \doxyref{AZUREOutput}{p.}{classAZUREOutput} object is created with reference to an output directory. \index{AZUREOutput@{AZUREOutput}!~AZUREOutput@{$\sim$AZUREOutput}}
+\index{~AZUREOutput@{$\sim$AZUREOutput}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}AZUREOutput::$\sim$AZUREOutput ()}\label{classAZUREOutput_1de72879a35e492afbadaca832025238}
+
+
+On destruction of the \doxyref{AZUREOutput}{p.}{classAZUREOutput} instance, each \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object is also destroyed. 
+
+\subsection{Member Function Documentation}
+\index{AZUREOutput@{AZUREOutput}!AddAZUREFBuffer@{AddAZUREFBuffer}}
+\index{AddAZUREFBuffer@{AddAZUREFBuffer}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void AZUREOutput::Add\-AZUREFBuffer (\bf{AZUREFBuffer} $\ast$ {\em azure\-FBuffer})}\label{classAZUREOutput_77b2179c2b51d607552b281e07cb8c5a}
+
+
+Adds a pointer to an \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object to the vector. \index{AZUREOutput@{AZUREOutput}!GetAZUREFBuffer@{GetAZUREFBuffer}}
+\index{GetAZUREFBuffer@{GetAZUREFBuffer}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}\bf{AZUREFBuffer} $\ast$ AZUREOutput::Get\-AZUREFBuffer (int {\em f\-Buffer\-Num})}\label{classAZUREOutput_c7130df2eb622c234419ab9b5f8c8346}
+
+
+Returns a pointer to the \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object specified by a position in the vector. \index{AZUREOutput@{AZUREOutput}!GetOutputDir@{GetOutputDir}}
+\index{GetOutputDir@{GetOutputDir}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::string AZUREOutput::Get\-Output\-Dir () const}\label{classAZUREOutput_51e4ce503deaddf42589961685d2b095}
+
+
+Returns the output directory for the \doxyref{AZUREOutput}{p.}{classAZUREOutput} object. \index{AZUREOutput@{AZUREOutput}!IsAZUREFBuffer@{IsAZUREFBuffer}}
+\index{IsAZUREFBuffer@{IsAZUREFBuffer}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int AZUREOutput::Is\-AZUREFBuffer (int {\em entrance\-Key}, int {\em exit\-Key})}\label{classAZUREOutput_8e4b2e9df5d4f2455c13631990a7624a}
+
+
+Tests if a pointer to an \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object corresponding to the specified entrance and exit keys exists in the vector. If such a pointer exists, the position in the vector is returned. Otherwise, the function returns 0. \index{AZUREOutput@{AZUREOutput}!NumAZUREFBuffers@{NumAZUREFBuffers}}
+\index{NumAZUREFBuffers@{NumAZUREFBuffers}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int AZUREOutput::Num\-AZUREFBuffers () const}\label{classAZUREOutput_86b3e62ba655f65582918bd3714d9e17}
+
+
+Returns the number of pointers to \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} objects stored in the vector. \index{AZUREOutput@{AZUREOutput}!operator()@{operator()}}
+\index{operator()@{operator()}!AZUREOutput@{AZUREOutput}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::filebuf $\ast$ AZUREOutput::operator() (int {\em entrance\-Key}, int {\em exit\-Key})}\label{classAZUREOutput_67885c872f33b61273b235e818248a60}
+
+
+The parenthesis operator is defined so that the instance of \doxyref{AZUREOutput}{p.}{classAZUREOutput} can be called as a function. The instance is called using a reference to an entrance and exit pair key combination. The function tests if there is a pointer to an \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object in a vector. If such a pointer exists, the pointer to the actual file buffer contained in the corresponding \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object is returned. Otherwise, a new \doxyref{AZUREFBuffer}{p.}{classAZUREFBuffer} object is created with the entrance and exit key, a pointer to that object is stored in a vector, and the pointer to the actual new file buffer is returned. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+azure\_\-v2/include/AZUREOutput.h\item 
+azure\_\-v2/src/AZUREOutput.cpp\end{CompactItemize}
