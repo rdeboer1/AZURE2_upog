@@ -29,7 +29,7 @@ double AZURECalc::operator()(const std::vector<double>&p) const {
 					    << std::setw(15) << chiSquared
 					    << std::endl;
   if(data()->iterations()%1000==0) {
-    data()->WriteOutputFiles(configure().outputdir);
+    data()->WriteOutputFiles(configure());
     compound()->TransformOut(configure().isEC);
     compound()->PrintTransformParams(configure().outputdir);
   }

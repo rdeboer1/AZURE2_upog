@@ -86,7 +86,7 @@ int AZUREMain::operator()(){
 
     //Write Output Files
     std::cout << "Writing output files..." << std::endl;
-    data()->WriteOutputFiles(configure().outputdir);
+    data()->WriteOutputFiles(configure());
   } else {
     //Calculate Reaction Rate
     // This uses the adaptive integration routines of GSL.  As the energy stepsize is 

@@ -435,8 +435,9 @@ void EData::PrintCoulombAmplitude(const Config &configure,CNuc *theCNuc) {
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(std::string outputdir) {
-  AZUREOutput output(outputdir);
+void EData::WriteOutputFiles(const Config &configure) {
+  AZUREOutput output(configure.outputdir);
+  if(!configure.withData) output.SetExtrap();
   for(int i=1;i<=this->NumSegments();i++) {
     int aa=this->GetSegment(i)->GetEntranceKey();
     int ir=this->GetSegment(i)->GetExitKey();
@@ -447,12 +448,14 @@ void EData::WriteOutputFiles(std::string outputdir) {
       out << std::setw(9)  << std::fixed      << point->GetCMEnergy()
 	  << std::setw(10) << std::fixed      << point->GetCMAngle()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
-	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSection()
+	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
+      if(!output.IsExtrap()) {
+      out << std::setw(13) << std::scientific << point->GetCMCrossSection()
 	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()
 	  << std::setw(13) << std::scientific << point->GetCMCrossSection()*point->GetSFactorConversion()
 	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*point->GetSFactorConversion()
 	  << std::endl;
+      } else out << std::endl;
     }
     out<<std::endl<<std::endl;out.flush();
   }
@@ -467,7 +470,9 @@ void EData::WriteOutputFiles(std::string outputdir) {
 void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
   std::ifstream in;
   std::ofstream out;
-  std::string outputfile=configure.outputdir+"intEC.dat";
+  std::string outputfile;
+  if(configure.withData) outputfile=configure.outputdir+"intEC.dat";
+  else outputfile=configure.outputdir+"intEC.extrap";
   if(configure.oldECFile) in.open(configure.integralsfile.c_str());
   else {
     out.open(outputfile.c_str());

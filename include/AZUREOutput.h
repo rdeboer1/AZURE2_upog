@@ -17,13 +17,16 @@ class AZUREOutput {
  public:
   AZUREOutput(std::string);
   ~AZUREOutput();
+  bool IsExtrap() const;
   std::filebuf *operator()(int,int);
   int NumAZUREFBuffers() const;
   int IsAZUREFBuffer(int,int);
   std::string GetOutputDir() const;
   void AddAZUREFBuffer(AZUREFBuffer*);
+  void SetExtrap();
   AZUREFBuffer *GetAZUREFBuffer(int);
  private:
+  bool is_extrap_;
   std::string outputdir_;
   std::vector<AZUREFBuffer*> azurefbuffers_;
 };
