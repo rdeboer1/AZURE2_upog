@@ -6,6 +6,7 @@
 
 AZUREOutput::AZUREOutput(std::string outputdir) {
   outputdir_=outputdir;
+  is_extrap_=false;
 }
 
 /*! 
@@ -14,6 +15,14 @@ AZUREOutput::AZUREOutput(std::string outputdir) {
 
 AZUREOutput::~AZUREOutput() {
   for(int i=0;i<azurefbuffers_.size();i++) delete azurefbuffers_[i];
+}
+
+/*!
+ * Returns true if the output is an extrapolation.
+ */
+
+bool AZUREOutput::IsExtrap() const {
+  return is_extrap_;
 }
 
 /*!
@@ -28,7 +37,7 @@ AZUREOutput::~AZUREOutput() {
 std::filebuf *AZUREOutput::operator()(int entranceKey, int exitKey) {
   int c=this->IsAZUREFBuffer(entranceKey,exitKey);
   if(!c) {
-    AZUREFBuffer *d = new AZUREFBuffer(entranceKey,exitKey,this->GetOutputDir());
+    AZUREFBuffer *d = new AZUREFBuffer(entranceKey,exitKey,this->GetOutputDir(),this->IsExtrap());
     this->AddAZUREFBuffer(d);
     c=this->IsAZUREFBuffer(entranceKey,exitKey);
   }
@@ -75,6 +84,14 @@ std::string AZUREOutput::GetOutputDir() const {
 
 void AZUREOutput::AddAZUREFBuffer(AZUREFBuffer *azureFBuffer) {
   azurefbuffers_.push_back(azureFBuffer);
+}
+
+/*!
+ * Sets the extrapolation flag to true.
+ */
+
+void AZUREOutput::SetExtrap() {
+  is_extrap_=true;
 }
 
 /*!

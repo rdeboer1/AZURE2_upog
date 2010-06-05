@@ -27,7 +27,7 @@ class EData {
   void PrintEDependentValues(const Config&,CNuc*);
   void CalcCoulombAmplitude(CNuc*);
   void PrintCoulombAmplitude(const Config&,CNuc*); 
-  void WriteOutputFiles(std::string);
+  void WriteOutputFiles(const Config&);
   void CalculateECAmplitudes(CNuc*,const Config&);
   void MapData();
   ESegment *GetSegment(int);

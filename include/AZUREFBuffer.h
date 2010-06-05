@@ -18,11 +18,12 @@ class AZUREFBuffer {
    * The AZUREFBuffer object is created with an entrance and exit pair key, as well as an output directory.
    * The filename is determined, and a file buffer is created with that filename.
    */
-  AZUREFBuffer(int entranceKey,int exitKey,std::string outputdir) {
+  AZUREFBuffer(int entranceKey,int exitKey,std::string outputdir,bool isExtrap) {
     char filename[256];
     entrancekey_=entranceKey;
     exitkey_=exitKey;
-    sprintf(filename,"%sAZUREOut_aa=%d_R=%d.out",outputdir.c_str(),entranceKey,exitKey);
+    if(!isExtrap) sprintf(filename,"%sAZUREOut_aa=%d_R=%d.out",outputdir.c_str(),entranceKey,exitKey);
+    else sprintf(filename,"%sAZUREOut_aa=%d_R=%d.extrap",outputdir.c_str(),entranceKey,exitKey);
     fbuffer_=new std::filebuf;
     fbuffer_->open(filename,std::ios::out);
     assert(fbuffer_->is_open());
