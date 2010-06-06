@@ -85,6 +85,8 @@ int main(int argc,char *argv[]){
     while(!validInfile) {
       char *line = readline("External Parameter File (leave blank for new file): ");
       inFile=line;
+      size_t endpos = inFile.find_last_not_of(" \t");
+      if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
       if(line && *line) add_history(line);
       free(line);
       if(!inFile.empty()) {
@@ -170,6 +172,8 @@ int main(int argc,char *argv[]){
       while(!validInfile) {
 	char *line = readline("External Capture Amplitude File (leave blank for new file): ");
 	inFile=line;
+	size_t endpos = inFile.find_last_not_of(" \t");	
+	if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
 	if(line && *line) add_history(line);
 	free(line);
 	if(!inFile.empty()) {
