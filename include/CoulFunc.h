@@ -114,7 +114,7 @@ class CoulFunc {
    * angular momentum, radius, and energy in the center of mass system are the dependent variables.
    * The function returns the Coulomb waves.
    */
-    struct CoulWaves operator()(int l,double radius,double energy)  {
+    CoulWaves operator()(int l,double radius,double energy)  {
       struct CoulWaves result={0.0,0.0,0.0,0.0};
       if(l==lLast()&&radius==radiusLast()&&energy==energyLast()) {
 	result=coulLast();
