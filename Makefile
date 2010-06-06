@@ -34,5 +34,5 @@ clean :
 
 .PHONY : install
 install :
-	-cp azure2 /usr/local/bin
+	-cp azure2 $(HOME)/bin
 
