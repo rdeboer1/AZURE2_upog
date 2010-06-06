@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 struct SegPairs {int firstPair; int secondPair;};
 
@@ -22,6 +24,7 @@ int main(int argc,char *argv[]){
 	      << "\tSyntax: azure2 configfile" << std::endl;
     return -1;
   }
+  read_history("./.azure_history");
   std::cout << std::endl
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << "| #### #### #  # ###  #### | Version 2.0                |" << std::endl
@@ -77,11 +80,13 @@ int main(int argc,char *argv[]){
     bool calcRate=false;
     std::string inFile;
     std::ifstream in;
-    std::cout << std::endl 
-	      << "External Parameter File (leave blank for new file): ";
+    std::cout << std::endl;
     std::cin.ignore(1000,'\n');
     while(!validInfile) {
-      getline(std::cin,inFile);
+      char *line = readline("External Parameter File (leave blank for new file): ");
+      inFile=line;
+      if(line && *line) add_history(line);
+      free(line);
       if(!inFile.empty()) {
 	in.open(inFile.c_str());
 	if(in) {
@@ -92,8 +97,7 @@ int main(int argc,char *argv[]){
 	}
 	in.clear();
       } else validInfile=true;
-      if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl
-				 << "External Parameter File (leave blank for new file): ";
+      if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
     }
     bool isEC=false;
     std::vector<SegPairs> segPairs;
@@ -162,10 +166,12 @@ int main(int argc,char *argv[]){
     validInfile=false;
     bool oldECFile=false;
     if(isEC&&command!=4) {
-      std::cout << std::endl
-		<< "External Capture Amplitude File (leave blank for new file): ";
+      std::cout << std::endl;
       while(!validInfile) {
-	getline(std::cin,inFile);
+	char *line = readline("External Capture Amplitude File (leave blank for new file): ");
+	inFile=line;
+	if(line && *line) add_history(line);
+	free(line);
 	if(!inFile.empty()) {
 	  std::ifstream in;
 	  in.open(inFile.c_str());
@@ -177,8 +183,7 @@ int main(int argc,char *argv[]){
 	  }
 	  in.clear();
 	} else validInfile=true;
-	if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl
-				   << "External Capture Amplitude File (leave blank for new file): ";
+	if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
       }
     }
     if(command==1) {
@@ -216,5 +221,6 @@ int main(int argc,char *argv[]){
 
   std::cout << std::endl
 	    << "Thanks for using AZURE." << std::endl;
+  write_history("./.azure_history");
   return 0;
 }
