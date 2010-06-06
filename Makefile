@@ -6,7 +6,7 @@ builddir = build
 CXX = icc
 CPPFLAGS = -Iinclude 
 CPPFLAGS +=  -I../include -L../lib
-LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline
+LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline -lglib-2.0 -lncurses -limf
 
 OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/CNuc.o \
 	$(srcdir)/Config.o $(srcdir)/DataLine.o $(srcdir)/Decay.o \
