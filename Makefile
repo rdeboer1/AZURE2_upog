@@ -5,7 +5,7 @@ builddir = build
 
 CXX = g++
 CPPFLAGS = -Iinclude -Llib
-LIBS = -lgsl -lgslcblas -lMinuit2 -lcoul
+LIBS = -lgsl -lgslcblas -lMinuit2 -lcoul -lreadline
 
 OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/CNuc.o \
 	$(srcdir)/Config.o $(srcdir)/DataLine.o $(srcdir)/Decay.o \
