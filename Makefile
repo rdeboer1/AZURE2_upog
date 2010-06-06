@@ -3,8 +3,9 @@ SHELL = /bin/sh
 srcdir = src
 builddir = build
 
-CXX = g++
+CXX = icc
 CPPFLAGS = -Iinclude 
+CPPFLAGS +=  -I../include -L../lib
 LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline
 
 OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/CNuc.o \
