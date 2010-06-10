@@ -144,7 +144,7 @@ double ALevel::GetBigGamma(int channelNum) const {
  * Returns the external portion of the reduced width amplitude for a given channel number.
  */
 
-std::complex<double> ALevel::GetExternalGamma(int channelNum) const {
+complex ALevel::GetExternalGamma(int channelNum) const {
   return external_gammas_[channelNum-1];
 }
 
@@ -159,7 +159,7 @@ void ALevel::AddGamma(NucLine nucLine) {
   fitgammas_.push_back(0.0);
   transform_gammas_.push_back(0.0);
   big_gammas_.push_back(0.0);
-  external_gammas_.push_back(std::complex<double>(0.0,0.0));
+  external_gammas_.push_back(complex(0.0,0.0));
   if(nucLine.channelFix==1) channelfixed_.push_back(true);
   else channelfixed_.push_back(false);
 }
@@ -174,7 +174,7 @@ void ALevel::AddGamma(double reducedWidth) {
   fitgammas_.push_back(0.0);
   transform_gammas_.push_back(0.0);
   big_gammas_.push_back(0.0);
-  external_gammas_.push_back(std::complex<double>(0.0,0.0));
+  external_gammas_.push_back(complex(0.0,0.0));
   channelfixed_.push_back(false);
 }
 
@@ -272,6 +272,6 @@ void ALevel::SetTransformIterations(int iterations) {
  * This function sets the external reduced width amplitude for a given channel number.
  */
 
-void ALevel::SetExternalGamma(int channelNum, std::complex<double> reducedWidth) {
+void ALevel::SetExternalGamma(int channelNum, complex reducedWidth) {
   external_gammas_[channelNum-1]=reducedWidth;
 }

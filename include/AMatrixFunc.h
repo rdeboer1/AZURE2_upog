@@ -29,14 +29,14 @@ class AMatrixFunc : public GenMatrixFunc {
    */
   void CalculateCrossSection();
 
-  std::complex<double> GetAMatrixElement(int,int,int) const;
-  std::vector<std::vector<std::complex<double> > > *GetJSpecAInvMatrix(int);
-  void AddAInvMatrixElement(int,int,int,std::complex<double>);
-  void AddAMatrix(std::vector<std::vector<std::complex<double> > >);
+  complex GetAMatrixElement(int,int,int) const;
+  matrix_c *GetJSpecAInvMatrix(int);
+  void AddAInvMatrixElement(int,int,int,complex);
+  void AddAMatrix(matrix_c);
  private:
   CNuc *compound_;
-  std::vector<std::vector<std::vector<std::complex<double> > > > a_inv_matrices_;
-  std::vector<std::vector<std::vector<std::complex<double> > > > a_matrices_;
+  vector_matrix_c a_inv_matrices_;
+  vector_matrix_c a_matrices_;
 };
 
 #endif

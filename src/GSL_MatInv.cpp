@@ -1,10 +1,9 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix_complex_double.h>
-#include <complex>
-#include <vector>
 #include <iostream>
+#include "Constants.h"
 
-std::vector<std::vector<std::complex<double> > > MatInv(const std::vector<std::vector<std::complex<double> > > &A) {
+matrix_c MatInv(const std::vector<vector_c > &A) {
   gsl_complex x;
   gsl_matrix_complex * m = gsl_matrix_complex_alloc (A.size(), A.size());
   for(int i=0;i<A.size();i++) {
@@ -19,13 +18,13 @@ std::vector<std::vector<std::complex<double> > > MatInv(const std::vector<std::v
   gsl_linalg_complex_LU_decomp(m,p,&psign);
   gsl_linalg_complex_LU_invert(m,p,mi);
 
-  std::vector<std::vector<std::complex<double> > > AI;
-  std::vector<std::complex<double> > AI_row;
+  matrix_c AI;
+  vector_c AI_row;
   for(int i=0;i<A.size();i++) {
     AI.push_back(AI_row);
     for(int ii=0;ii<A.size();ii++) {
       x=gsl_matrix_complex_get(mi,i,ii);
-      std::complex<double> inv(GSL_REAL(x),GSL_IMAG(x));
+      complex inv(GSL_REAL(x),GSL_IMAG(x));
       AI[i].push_back(inv);
     }
   }

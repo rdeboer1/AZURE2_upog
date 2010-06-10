@@ -1,8 +1,7 @@
 #ifndef ALEVEL_H
 #define ALEVEL_H
 
-#include <vector>
-#include <complex>
+#include "Constants.h"
 #include "NucLine.h"
 
 ///An AZURE level object.
@@ -30,7 +29,7 @@ class ALevel {
   double GetTransformGamma(int) const;
   double GetTransformE() const;
   double GetBigGamma(int) const;
-  std::complex<double> GetExternalGamma(int) const;
+  complex GetExternalGamma(int) const;
   void AddGamma(NucLine);
   void AddGamma(double);
   void SetGamma(int,double);
@@ -44,7 +43,7 @@ class ALevel {
   void SetTransformE(double);
   void SetBigGamma(int,double);
   void SetTransformIterations(int);
-  void SetExternalGamma(int,std::complex<double>);
+  void SetExternalGamma(int,complex);
  private:
   bool isinrmatrix_;
   bool energyfixed_;
@@ -54,13 +53,13 @@ class ALevel {
   double sqrt_nf_factor_;
   double transform_e_;
   std::vector<bool> channelfixed_;
-  std::vector<double> gammas_;
-  std::vector<double> fitgammas_;
-  std::vector<double> nf_integrals_;
-  std::vector<double> ec_conv_factors_;
-  std::vector<double> transform_gammas_;
-  std::vector<double> big_gammas_;
-  std::vector<std::complex<double> > external_gammas_;
+  vector_r gammas_;
+  vector_r fitgammas_;
+  vector_r nf_integrals_;
+  vector_r ec_conv_factors_;
+  vector_r transform_gammas_;
+  vector_r big_gammas_;
+  vector_c external_gammas_;
 };
 
 #endif

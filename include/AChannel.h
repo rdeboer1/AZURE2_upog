@@ -2,8 +2,6 @@
 #define ACHANNEL_H
 
 #include <math.h>
-#include <vector>
-#include <complex>
 #include <assert.h>
 #include "NucLine.h"
 

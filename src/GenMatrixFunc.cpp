@@ -8,7 +8,7 @@
  */
 
 void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
-  std::complex<double> sum(0.,0.);
+  complex sum(0.,0.);
   int aa=compound()->GetPairNumFromKey(point->GetEntranceKey());
   int ir=compound()->GetPairNumFromKey(point->GetExitKey());
   Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
@@ -51,7 +51,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	    ->NumInterferences();inter++) {
 	Interference *theInterference=theDecay->GetKLGroup(kL)
 	  ->GetInterference(inter);
-	std::complex<double> T1(0.0,0.0),T2(0.0,0.0);
+	complex T1(0.0,0.0),T2(0.0,0.0);
 	std::string interferenceType=theInterference->GetInterferenceType();
 	if(interferenceType=="RR") {
 	  T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
@@ -70,15 +70,15 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  point->GetLegendreP(theDecay->GetKLGroup(kL)->GetLOrder());
       }
     }
-    std::complex<double> RT=sum/pi*point->GetGeometricalFactor()*
+    complex RT=sum/pi*point->GetGeometricalFactor()*
       compound()->GetPair(aa)->GetI1I2Factor();
     
-    std::complex<double> CT(0.,0.), IT(0.,0.);
+    complex CT(0.,0.), IT(0.,0.);
     if(aa==ir) {
-      std::complex<double> coulombAmplitude=point->GetCoulombAmplitude();
+      complex coulombAmplitude=point->GetCoulombAmplitude();
       CT=coulombAmplitude*conj(coulombAmplitude)*point->GetGeometricalFactor();
       
-      sum=std::complex<double>(0.,0.);
+      sum=complex(0.,0.);
       for(int k=1;k<=theDecay->NumKGroups();k++) {
 	for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
 	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);	
@@ -91,7 +91,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 				GetChannel(theMGroup->GetChNum())->GetL());
 	}
       }
-      IT=std::complex<double>(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
+      IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
     }
     point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
   }
@@ -107,9 +107,9 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	int lValue=entranceChannel->GetL();	
 	AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
 	if(jValue==segmentJ&&lValue==segmentL&&entranceChannel==exitChannel) {
-	  std::complex<double> expCoulPhaseSquared=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	  complex expCoulPhaseSquared=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	    point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
-	  std::complex<double> theUMatrix=(expCoulPhaseSquared-this->GetTMatrixElement(k,m))/expCoulPhaseSquared;
+	  complex theUMatrix=(expCoulPhaseSquared-this->GetTMatrixElement(k,m))/expCoulPhaseSquared;
 	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lValue);
 	  if(!tempTNum) {
 	    TempTMatrix temptmatrix={jValue,lValue,lValue,theUMatrix};
@@ -146,7 +146,7 @@ void GenMatrixFunc::NewTempTMatrix(TempTMatrix tempTMatrix) {
  * Adds a value to the temporary T-Matrix element specified by its position in the TempTMatrix vector.
  */
 
-void GenMatrixFunc::AddToTempTMatrix(int tempTMatrixNum, std::complex<double> tempValue) {
+void GenMatrixFunc::AddToTempTMatrix(int tempTMatrixNum, complex tempValue) {
   this->GetTempTMatrix(tempTMatrixNum)->TMatrix+=tempValue;
   
 }
@@ -164,8 +164,8 @@ void GenMatrixFunc::ClearTempTMatrices() {
  * corresponding to a specified internal reaction pathway.
  */
 
-void GenMatrixFunc::AddTMatrixElement(int kGroupNum ,int mGroupNum,std::complex<double> tMatrixElement) {
-  std::vector<std::complex<double> > d;
+void GenMatrixFunc::AddTMatrixElement(int kGroupNum ,int mGroupNum,complex tMatrixElement) {
+  vector_c d;
   while(kGroupNum>tmatrix_.size()) tmatrix_.push_back(d);
   tmatrix_[kGroupNum-1].push_back(tMatrixElement);
   assert(mGroupNum==tmatrix_[kGroupNum-1].size());
@@ -176,8 +176,8 @@ void GenMatrixFunc::AddTMatrixElement(int kGroupNum ,int mGroupNum,std::complex<
  * corresponding to a specified external reaction pathway.
  */
 
-void GenMatrixFunc::AddECTMatrixElement(int kGroupNum ,int mGroupNum,std::complex<double> tMatrixElement) {
-  std::vector<std::complex<double> > d;
+void GenMatrixFunc::AddECTMatrixElement(int kGroupNum ,int mGroupNum,complex tMatrixElement) {
+  vector_c d;
   while(kGroupNum>ec_tmatrix_.size()) ec_tmatrix_.push_back(d);
   ec_tmatrix_[kGroupNum-1].push_back(tMatrixElement);
   assert(mGroupNum==ec_tmatrix_[kGroupNum-1].size());
@@ -222,7 +222,7 @@ TempTMatrix *GenMatrixFunc::GetTempTMatrix(int tempTMatrixNum) {
  * Returns the value of the internal T-Matrix element specified by an internal reaction pathway.
  */
 
-std::complex<double> GenMatrixFunc::GetTMatrixElement(int kGroupNum, int mGroupNum) const {
+complex GenMatrixFunc::GetTMatrixElement(int kGroupNum, int mGroupNum) const {
   return tmatrix_[kGroupNum-1][mGroupNum-1];
 }
 
@@ -230,6 +230,6 @@ std::complex<double> GenMatrixFunc::GetTMatrixElement(int kGroupNum, int mGroupN
  * Returns the value of the external T-Matrix element specified by an external reaction pathway.
  */
 
-std::complex<double> GenMatrixFunc::GetECTMatrixElement(int kGroupNum, int ecMGroupNum) const {
+complex GenMatrixFunc::GetECTMatrixElement(int kGroupNum, int ecMGroupNum) const {
   return ec_tmatrix_[kGroupNum-1][ecMGroupNum-1];
 }

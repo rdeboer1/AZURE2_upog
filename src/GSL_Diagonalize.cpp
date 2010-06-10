@@ -2,7 +2,7 @@
 #include <gsl/gsl_eigen.h>
 #include <math.h>
 
-struct EigenSolve Diagonalize(const std::vector<std::vector<double> > &A) {
+struct EigenSolve Diagonalize(const matrix_r &A) {
 
   gsl_matrix * m = gsl_matrix_alloc(A.size(),A.size());
   for(int i=0;i<A.size();i++) {
@@ -21,7 +21,7 @@ struct EigenSolve Diagonalize(const std::vector<std::vector<double> > &A) {
   struct EigenSolve result;
   for(int i=0;i<A.size();i++) {
     result.eigenvalues.push_back(gsl_vector_get(eval,i));
-    std::vector<double> tempRow;
+    vector_r tempRow;
     result.eigenvectors.push_back(tempRow);
     for(int ii=0;ii<A.size();ii++) {
       result.eigenvectors[i].push_back(gsl_matrix_get(evec,i,ii));
@@ -36,7 +36,7 @@ struct EigenSolve Diagonalize(const std::vector<std::vector<double> > &A) {
   return result;
 }
 
-struct EigenSolve Solve(const std::vector<std::vector<double> > &A, const std::vector<std::vector<double> > &B) {
+struct EigenSolve Solve(const matrix_r &A, const std::vector<vector_r > &B) {
   gsl_matrix * n = gsl_matrix_alloc(A.size(),A.size());
   gsl_matrix * m = gsl_matrix_alloc(B.size(),B.size());
   for(int i=0;i<A.size();i++) {
@@ -57,14 +57,14 @@ struct EigenSolve Solve(const std::vector<std::vector<double> > &A, const std::v
   struct EigenSolve result;
   for(int i=0;i<A.size();i++) {
     result.eigenvalues.push_back(gsl_vector_get(eval,i));
-    std::vector<double> tempRow;
+    vector_r tempRow;
     result.eigenvectors.push_back(tempRow);
     for(int ii=0;ii<A.size();ii++) {
       result.eigenvectors[i].push_back(gsl_matrix_get(evec,i,ii));
     }
   }
 
-  std::vector<double> tempNormVec;
+  vector_r tempNormVec;
   for(int i=0;i<A.size();i++) tempNormVec.push_back(0.0);
 
   for(int i=0;i<A.size();i++) {

@@ -31,7 +31,7 @@ class ReactionRate {
    * The ReactionRate object is created with reference to a CNuc object, a vector of Minuit parameters,
    * a Config structure, and a set of entrance and exit pair keys.
    */
-  ReactionRate(CNuc *compound, const std::vector<double>&params, 
+  ReactionRate(CNuc *compound, const vector_r&params, 
 	       const Config &configure, int entranceKey, int exitKey) : 
     configure_(configure) {
     compound_=compound;

@@ -20,7 +20,7 @@ struct TempTMatrix {
   /// Exit orbital angular momentum for temporary matrix element
   int lpValue;
   ///Value of temporary matrix element
-  std::complex<double> TMatrix;
+  complex TMatrix;
 };
 
 
@@ -54,15 +54,15 @@ class GenMatrixFunc {
   virtual void CalculateTMatrix(EPoint*)=0;
   void CalculateCrossSection(EPoint*);
   void NewTempTMatrix(TempTMatrix);
-  void AddToTempTMatrix(int,std::complex<double>);
+  void AddToTempTMatrix(int,complex);
   void ClearTempTMatrices();
-  void AddTMatrixElement(int,int,std::complex<double>);
-  void AddECTMatrixElement(int,int,std::complex<double>);
+  void AddTMatrixElement(int,int,complex);
+  void AddECTMatrixElement(int,int,complex);
   int IsTempTMatrix(double,int,int);
   int NumTempTMatrices() const;
   TempTMatrix *GetTempTMatrix(int);
-  std::complex<double> GetTMatrixElement(int,int) const;
-  std::complex<double> GetECTMatrixElement(int,int) const;
+  complex GetTMatrixElement(int,int) const;
+  complex GetECTMatrixElement(int,int) const;
 
   /*!
    *This virtual function in instantiated in the child class.
@@ -70,9 +70,9 @@ class GenMatrixFunc {
   virtual CNuc *compound() const = 0;
  protected:
   ///Vector of internal T-matrix elements accessable to child class.
-  std::vector<std::vector<std::complex<double > > > tmatrix_;
+  matrix_c tmatrix_;
   ///Vector of external T-matrix elements accessable to child class.
-  std::vector<std::vector<std::complex<double > > > ec_tmatrix_;
+  matrix_c ec_tmatrix_;
  private:
   std::vector<TempTMatrix> temp_t_matrices_;
 };

@@ -1,8 +1,7 @@
 #ifndef ECMGROUP_H
 #define ECMGROUP_H
 
-#include <vector>
-#include <complex>
+#include "Constants.h"
 #include <assert.h>
 
 ///An AZURE external reaction pathway.
@@ -44,7 +43,7 @@ class ECMGroup {
   int chkgroup_;
   int chmgroup_;
   double statspinfactor_;
-  std::complex<double> tmatrix_;
+  complex tmatrix_;
 };
 
 #endif

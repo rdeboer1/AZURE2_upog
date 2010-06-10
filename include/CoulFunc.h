@@ -2,7 +2,6 @@
 #define COULFUNC_H
 
 #include <gsl/gsl_sf_coulomb.h>
-#include "Constants.h"
 #include "PPair.h"
 
 class CoulFunc;

@@ -1,14 +1,14 @@
 #ifndef DIAGONALIZE_H
 #define DIAGONALIZE_H
 
-#include <vector>
+#include "Constants.h"
 
 struct EigenSolve {
-  std::vector<double> eigenvalues;
-  std::vector<std::vector<double> > eigenvectors;
+  vector_r eigenvalues;
+  matrix_r eigenvectors;
 };
   
-extern struct EigenSolve Diagonalize(const std::vector<std::vector<double> >&);
-extern struct EigenSolve Solve(const std::vector<std::vector<double> >&,const std::vector<std::vector<double> >&);
+extern struct EigenSolve Diagonalize(const matrix_r&);
+extern struct EigenSolve Solve(const matrix_r&,const std::vector<vector_r >&);
 
 #endif

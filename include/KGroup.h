@@ -1,7 +1,6 @@
 #ifndef KGROUP_H
 #define KGROUP_H
 
-#include <vector>
 #include "MGroup.h"
 #include "ECMGroup.h"
 

@@ -30,20 +30,20 @@ class RMatrixFunc : public GenMatrixFunc {
   void CalculateCrossSection();
 
   double GetRMatrixElement(int,int,int) const;
-  std::complex<double> GetRLMatrixElement(int,int,int) const;
-  std::complex<double> GetRLInvMatrixElement(int,int,int) const;
-  std::complex<double> GetRLInvRMatrixElement(int,int,int) const;
-  std::vector<std::vector<std::complex<double> > > *GetJSpecRLMatrix(int);
+  complex GetRLMatrixElement(int,int,int) const;
+  complex GetRLInvMatrixElement(int,int,int) const;
+  complex GetRLInvRMatrixElement(int,int,int) const;
+  matrix_c *GetJSpecRLMatrix(int);
   void AddRMatrixElement(int,int,int,double);
-  void AddRLMatrixElement(int,int,int,std::complex<double>);
-  void AddRLInvMatrix(std::vector<std::vector<std::complex<double> > >);
-  void AddRLInvRMatrixElement(int,int,int,std::complex<double>);
+  void AddRLMatrixElement(int,int,int,complex);
+  void AddRLInvMatrix(matrix_c);
+  void AddRLInvRMatrixElement(int,int,int,complex);
  private:
   CNuc *compound_;
-  std::vector<std::vector<std::vector<double> > > r_matrices_;
-  std::vector<std::vector<std::vector<std::complex<double> > > > rl_matrices_;
-  std::vector<std::vector<std::vector<std::complex<double> > > > rl_inv_matrices_;
-  std::vector<std::vector<std::vector<std::complex<double> > > > rl_inv_r_matrices_;
+  vector_matrix_r r_matrices_;
+  vector_matrix_c rl_matrices_;
+  vector_matrix_c rl_inv_matrices_;
+  vector_matrix_c rl_inv_r_matrices_;
 };
 
 #endif
