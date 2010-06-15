@@ -4,7 +4,6 @@
 #include "NucLine.h"
 #include "Decay.h"
 #include "ECLevel.h"
-#include <complex>
 #include <assert.h>
 
 ///An AZURE Particle Pair

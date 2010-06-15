@@ -381,9 +381,9 @@ void CNuc::TransformIn(bool isEC) {
       for(int la=1;la<=theJGroup->NumLevels();la++) {
 	ALevel *theLevel=theJGroup->GetLevel(la);
 	if(theLevel->IsInRMatrix()) {
-	  std::vector<double> tempGammas;
+	  vector_r tempGammas;
 	  std::vector<bool> isNegative;
-	  std::vector<double> penes;
+	  vector_r penes;
 	  double denom=2.0;
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
 	    AChannel *theChannel=theJGroup->GetChannel(ch);
@@ -466,15 +466,15 @@ void CNuc::TransformIn(bool isEC) {
     JGroup *theJGroup=this->GetJGroup(j);
     if(theJGroup->IsInRMatrix()) {
       std::vector<int> levelKeys;
-      std::vector<double> tempEnergies;
-      std::vector<std::vector<double> > tempGammas;
-      std::vector<std::vector<double> > shifts;
+      vector_r tempEnergies;
+      matrix_r tempGammas;
+      matrix_r shifts;
       for(int la=1;la<=theJGroup->NumLevels();la++) {
 	ALevel *theLevel=theJGroup->GetLevel(la);
 	if(theLevel->IsInRMatrix()) {
 	  levelKeys.push_back(la);
 	  tempEnergies.push_back(theLevel->GetE());
-	  std::vector<double> tempChanVector;
+	  vector_r tempChanVector;
 	  tempGammas.push_back(tempChanVector);
 	  shifts.push_back(tempChanVector);
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
@@ -497,7 +497,7 @@ void CNuc::TransformIn(bool isEC) {
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
 	      if(isEC) {
-		std::complex<double> externalWidth = 
+		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
 		  if(tempGammas[levelKeys.size()-1][ch-1]<0.0) 
@@ -516,10 +516,10 @@ void CNuc::TransformIn(bool isEC) {
 	  }
 	}
       }	  
-      std::vector<std::vector<double> > nMatrix;
-      std::vector<std::vector<double> > mMatrix;      
+      matrix_r nMatrix;
+      matrix_r mMatrix;      
       for(int mu=0;mu<tempEnergies.size();mu++) {
-	std::vector<double> tempLevelVector;
+	vector_r tempLevelVector;
 	nMatrix.push_back(tempLevelVector);
 	mMatrix.push_back(tempLevelVector);
 	for(int la=0;la<tempEnergies.size();la++) {
@@ -1108,7 +1108,7 @@ void CNuc::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
  * Fills the CNuc object from the Minuit parameter array.
  */
 
-void CNuc::FillCompoundFromParams(const std::vector<double> &p) {
+void CNuc::FillCompoundFromParams(const vector_r &p) {
   int i=0;
   for(int j=1;j<=this->NumJGroups();j++) {
     for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
@@ -1142,14 +1142,14 @@ void CNuc::TransformOut(bool isEC) {
 	int iteration=1;
 	int thisLevel=0;
 	bool done=false;
-	std::vector<double> tempE;
-	std::vector<double> tempBoundary;
-	std::vector<std::vector<double> > tempGamma;
+	vector_r tempE;
+	vector_r tempBoundary;
+	matrix_r tempGamma;
 	for(int lap=1;lap<=this->GetJGroup(j)->NumLevels();lap++) {
 	  if(this->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) {
 	    tempE.push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitE());
 	    if(this->GetJGroup(j)->GetLevel(lap)==theLevel) thisLevel=tempE.size()-1;
-	    std::vector<double> tempChanVector;
+	    vector_r tempChanVector;
 	    tempGamma.push_back(tempChanVector);
 	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	      tempGamma[tempE.size()-1].push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitGamma(ch));
@@ -1158,7 +1158,7 @@ void CNuc::TransformOut(bool isEC) {
 	  }
 	}
 	while(iteration<=maxIterations&&!done) {
-	  std::vector<double> boundaryDiff;
+	  vector_r boundaryDiff;
 	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	    double newBoundary=0.0;
 	    AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
@@ -1178,9 +1178,9 @@ void CNuc::TransformOut(bool isEC) {
 	      tempBoundary[ch-1]=newBoundary;
 	    } else boundaryDiff.push_back(boundaryDiff[0]);
 	  }
-	  std::vector<std::vector<double > > cMatrix;
+	  matrix_r cMatrix;
 	  for(int mu=0;mu<tempE.size();mu++) {
-	    std::vector<double> tempRow;
+	    vector_r tempRow;
 	    cMatrix.push_back(tempRow);
 	    for (int mup=0;mup<tempE.size();mup++) {
 	      double chanSum=0.0;
@@ -1196,9 +1196,9 @@ void CNuc::TransformOut(bool isEC) {
 	  struct EigenSolve eigenResult=Diagonalize(cMatrix);	
 	  if(fabs(eigenResult.eigenvalues[thisLevel]-tempE[thisLevel])<=energyTolerance) 
 	    done=true;
-	  std::vector<std::vector<double> > newGamma;
+	  matrix_r newGamma;
 	  for(int mu=0;mu<tempE.size();mu++) {
-	    std::vector<double> tempChanVector;
+	    vector_r tempChanVector;
 	    newGamma.push_back(tempChanVector);
 	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	      double gammaSum=0.0;
@@ -1255,7 +1255,7 @@ void CNuc::TransformOut(bool isEC) {
     for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
       ALevel *theLevel=this->GetJGroup(j)->GetLevel(la);
       double normSum=0.0;
-      std::vector<double> tempPene;
+      vector_r tempPene;
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
 	PPair *exitPair=this->GetPair(theChannel->GetPairNum());
@@ -1299,12 +1299,12 @@ void CNuc::TransformOut(bool isEC) {
 	}
       }
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	std::complex<double> externalWidth(0.0,0.0);
+	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P'&&
 	   theLevel->IsInRMatrix()&&isEC) 
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
-	std::complex<double> totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
+	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
 	double bigGamma=2.0*real(totalWidth*conj(totalWidth))*tempPene[ch-1]/
 	  (1.0+normSum);
 	theLevel->SetBigGamma(ch,bigGamma);
@@ -1396,8 +1396,8 @@ void CNuc::SetMaxLValue(int maxL) {
  * Calculates the external reduced width amplitudes for a given channel.
  */
 
-std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *theChannel,bool isInitial) {
-  std::complex<double> externalWidth(0.0,0.0);
+complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *theChannel,bool isInitial) {
+  complex externalWidth(0.0,0.0);
   if(theChannel->GetRadType()!='P') {
     bool isExternal=false;
     int aa=0;
@@ -1450,12 +1450,12 @@ std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel
 		    PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
 		    PPair *theInitialPair=this->GetPair(initialChannel->GetPairNum());
 		    double localEnergy=theLevelEnergy-theInitialPair->GetSepE()-theInitialPair->GetExE();
-		    std::complex<double> expHSP;
+		    complex expHSP;
 		    double sqrtPene;
 		    if(localEnergy>0.0) {
 		      CoulFunc theCoulFunc(theInitialPair);
 		      struct CoulWaves coul=theCoulFunc(initialChannel->GetL(),theInitialPair->GetChRad(),localEnergy);
-		      expHSP=std::complex<double>(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
+		      expHSP=complex(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
 						  -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
 		      sqrtPene=sqrt(theCoulFunc.Penetrability(initialChannel->GetL(),theInitialPair->GetChRad(),localEnergy));
 		    } else {
@@ -1463,14 +1463,14 @@ std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel
 		      double whit=newWhitFunc(initialChannel->GetL(),theInitialPair->GetChRad(),fabs(localEnergy));
 		      double rho=sqrt(2.*uconv)/hbarc*theInitialPair->GetChRad()*sqrt(theInitialPair->GetRedMass()*fabs(localEnergy));
 		      sqrtPene=sqrt(rho)/whit;
-		      expHSP=std::complex<double>(1.0,0.0);
+		      expHSP=complex(1.0,0.0);
 		    }
 		    double ecNormParam=theFinalChannelGamma*
 		      theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
 		    ECIntegral theECIntegral(theFinalPair);
 		    struct ECIntResult integrals;
 		    double effectiveCharge;
-		    std::complex<double> ecAmplitude;
+		    complex ecAmplitude;
 		    if(theChannel->GetRadType()=='E') {
 		      integrals=theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
 					      multL,theLevelEnergy,theFinalLevelEnergy);
@@ -1479,7 +1479,7 @@ std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel
 							  theFinalPair->GetZ(2)*pow(-theFinalPair->GetM(1)/totalM,multL));
 		      ecAmplitude=
 			effectiveCharge*sqrt((2.*(2.*multL+1.)*(multL+1.))/multL)/DoubleFactorial(2*multL+1)*
-			pow(std::complex<double>(0.,1.0),initialChannel->GetL()+multL-finalChannel->GetL())*
+			pow(complex(0.,1.0),initialChannel->GetL()+multL-finalChannel->GetL())*
 			pow(theFinalPair->GetRedMass()*uconv/2./fabs(localEnergy),0.25)/sqrt(hbarc)*
 			ClebGord(initialChannel->GetL(),multL,finalChannel->GetL(),0,0,0)*sqrt(2.*initialChannel->GetL()+1.)*sqrt(2.*theFinalJGroup->GetJ()+1.)*
 			Racah(multL,finalChannel->GetL(),theJGroup->GetJ(),initialChannel->GetS(),initialChannel->GetL(),theFinalJGroup->GetJ());
@@ -1489,19 +1489,19 @@ std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel
 		      effectiveCharge=theFinalPair->GetRedMass()*1.00727638*
 			(theFinalPair->GetZ(1)/pow(theFinalPair->GetM(1),2.)+
 			 theFinalPair->GetZ(2)/pow(theFinalPair->GetM(2),2.));
-		      std::complex<double> orbitalTerm=effectiveCharge*
+		      complex orbitalTerm=effectiveCharge*
 			sqrt((2.*initialChannel->GetL()+1.)*(initialChannel->GetL()+1.)*initialChannel->GetL())*
 			Racah(1.,initialChannel->GetL(),theJGroup->GetJ(),initialChannel->GetS(),initialChannel->GetL(),theFinalJGroup->GetJ());
-		      std::complex<double> tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
-			(pow(std::complex<double>(-1.,0.),finalChannel->GetS())*
+		      complex tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
+			(pow(complex(-1.,0.),finalChannel->GetS())*
 			 sqrt(theFinalPair->GetJ(1)*(theFinalPair->GetJ(1)+1.)*(2.*theFinalPair->GetJ(1)+1.))*
 			 Racah(finalChannel->GetS(),theFinalPair->GetJ(1),initialChannel->GetS(),theFinalPair->GetJ(1),theFinalPair->GetJ(2),1.)*
 			 theFinalPair->GetG(1)+
-			 pow(std::complex<double>(-1.,0.),initialChannel->GetS())*
+			 pow(complex(-1.,0.),initialChannel->GetS())*
 			 sqrt(theFinalPair->GetJ(2)*(theFinalPair->GetJ(2)+1.)*(2.*theFinalPair->GetJ(2)+1.))*
 			 Racah(finalChannel->GetS(),theFinalPair->GetJ(2),initialChannel->GetS(),theFinalPair->GetJ(2),theFinalPair->GetJ(1),1.)*
 			 theFinalPair->GetG(2));
-		      std::complex<double> spinTerm=-sqrt((2.*initialChannel->GetS()+1.)*(2.*finalChannel->GetS()+1.))*
+		      complex spinTerm=-sqrt((2.*initialChannel->GetS()+1.)*(2.*finalChannel->GetS()+1.))*
 			Racah(1,initialChannel->GetS(),theFinalJGroup->GetJ(),initialChannel->GetL(),finalChannel->GetS(),theJGroup->GetJ())*tau;
 		      ecAmplitude=-1.0*sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*
 			sqrt(4/3)*sqrt(2*theFinalJGroup->GetJ()+1.)*
@@ -1509,7 +1509,7 @@ std::complex<double> CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel
 			(orbitalTerm+spinTerm);
 		    }
 		    externalWidth+=sqrtPene*expHSP*ecNormParam*theInitialChannelGamma*
-		      (integrals.GW+std::complex<double>(0.0,1.0)*integrals.FW)*ecAmplitude;
+		      (integrals.GW+complex(0.0,1.0)*integrals.FW)*ecAmplitude;
 		  }
 		}
 	      }

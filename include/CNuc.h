@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
-#include <complex>
 #include "NFIntegral.h"
 #include "JGroup.h"
 #include "CoulFunc.h"
@@ -48,11 +47,11 @@ public:
   void CalcAngularDists(int);
   void PrintAngularDists(const Config&);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
-  void FillCompoundFromParams(const std::vector<double> &);
+  void FillCompoundFromParams(const vector_r &);
   void TransformOut(bool);
   void PrintTransformParams(std::string);
   void SetMaxLValue(int);
-  std::complex<double> CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
+  complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
   PPair *GetPair(int);
   JGroup *GetJGroup(int);
 private:

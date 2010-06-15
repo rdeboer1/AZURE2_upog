@@ -12,7 +12,7 @@ AMatrixFunc::AMatrixFunc(CNuc* compound) :
  * Returns an A-Matrix element specified by positions in the JGroup and ALevel vectors. 
  */
 
-std::complex<double> AMatrixFunc::GetAMatrixElement(int jGroupNum, int lambdaNum, int muNum) const {
+complex AMatrixFunc::GetAMatrixElement(int jGroupNum, int lambdaNum, int muNum) const {
   return a_matrices_[jGroupNum-1][lambdaNum-1][muNum-1];
 }
 
@@ -20,8 +20,8 @@ std::complex<double> AMatrixFunc::GetAMatrixElement(int jGroupNum, int lambdaNum
  * Returns a pointer to an entire A-Matrix specified by a position in the JGroup vector.
  */
 
-std::vector<std::vector<std::complex<double> > > *AMatrixFunc::GetJSpecAInvMatrix(int jGroupNum) {
-  std::vector<std::vector<std::complex<double> > > *b=&a_inv_matrices_[jGroupNum-1];
+matrix_c *AMatrixFunc::GetJSpecAInvMatrix(int jGroupNum) {
+  matrix_c *b=&a_inv_matrices_[jGroupNum-1];
   return b;
 }
 
@@ -49,11 +49,11 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 	  for(int lap=1;lap<=compound()->GetJGroup(j)->NumLevels();lap++) {
 	    if(compound()->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) {
 	      ALevel *levelp=compound()->GetJGroup(j)->GetLevel(lap);
-	      std::complex<double>sum(0.0,0.0);
+	      complex sum(0.0,0.0);
 	      for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
 		double gammaCh=level->GetFitGamma(ch);
 		double gammaChp=levelp->GetFitGamma(ch);
-		std::complex<double> loElement=point->GetLoElement(j,ch);
+		complex loElement=point->GetLoElement(j,ch);
 		sum+=gammaCh*gammaChp*loElement;
 	      }
 	      if(la==lap) {
@@ -82,8 +82,8 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 void AMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
-      std::vector<std::vector<std::complex<double> > > *theAInvMatrix = this->GetJSpecAInvMatrix(j);
-      std::vector<std::vector<std::complex<double> > > theAMatrix=MatInv(*theAInvMatrix);
+      matrix_c *theAInvMatrix = this->GetJSpecAInvMatrix(j);
+      matrix_c theAMatrix=MatInv(*theAInvMatrix);
       this->AddAMatrix(theAMatrix);
     }
   }
@@ -103,18 +103,18 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
       JGroup *theJGroup=compound()->GetJGroup(theMGroup->GetJNum());
       AChannel *entranceChannel=theJGroup->GetChannel(theMGroup->GetChNum());
       AChannel *exitChannel=theJGroup->GetChannel(theMGroup->GetChpNum());
-      std::complex<double> uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+      complex uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChpNum())*
 	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChpNum());
-      std::complex<double> umatrix(0.,0.);
+      complex umatrix(0.,0.);
       for(int la=1;la<=compound()->GetJGroup(theMGroup->GetJNum())->NumLevels();la++) {
 	if(compound()->GetJGroup(theMGroup->GetJNum())->GetLevel(la)->IsInRMatrix()) {
 	  ALevel *level=compound()->GetJGroup(theMGroup->GetJNum())->GetLevel(la);
 	  for(int lap=1;lap<=compound()->GetJGroup(theMGroup->GetJNum())->NumLevels();lap++) {
 	    if(compound()->GetJGroup(theMGroup->GetJNum())->GetLevel(lap)->IsInRMatrix()) {
 	      ALevel *levelp=compound()->GetJGroup(theMGroup->GetJNum())->GetLevel(lap);
-	      umatrix+=2.0*std::complex<double>(0.0,1.0)*
+	      umatrix+=2.0*complex(0.0,1.0)*
 		point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChNum())*
 		point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChpNum())*
 		level->GetFitGamma(theMGroup->GetChNum())*
@@ -124,9 +124,9 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	  }
 	}
       }
-      std::complex<double> tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+      complex tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
-      std::complex<double> tmatrix;
+      complex tmatrix;
       if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
 	tmatrix=tphase-uphase*(1.0+umatrix);
       } else tmatrix=-uphase*umatrix;
@@ -139,7 +139,7 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	->GetLevel(compound()->GetPair(aa)->GetECLevel(ecNum)->GetLevelNum());
       double ecNormParam=finalLevel->GetFitGamma(theECMGroup->GetFinalChannel())*
 	finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
-      std::complex<double> tmatrix=ecNormParam*point->GetECAmplitude(k,m);
+      complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);
       if(theECMGroup->IsChannelCapture()) {
 	MGroup *chanMGroup=compound()->GetPair(aa)->GetDecay(theECMGroup->GetChanCapDecay())
 	  ->GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
@@ -147,14 +147,14 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	  ->GetChannel(chanMGroup->GetChNum());
 	AChannel *chanExitChannel=compound()->GetJGroup(chanMGroup->GetJNum())
 	  ->GetChannel(chanMGroup->GetChpNum());
-	std::complex<double> umatrix(0.,0.);
+	complex umatrix(0.,0.);
 	for(int la=1;la<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();la++) {
 	  if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la)->IsInRMatrix()) {
 	    ALevel *level=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la);
 	    for(int lap=1;lap<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();lap++) {
 	      if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap)->IsInRMatrix()) {
 		ALevel *levelp=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap);
-		umatrix+=2.0*std::complex<double>(0.0,1.0)*
+		umatrix+=2.0*complex(0.0,1.0)*
 		  point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
 		  level->GetFitGamma(chanMGroup->GetChNum())*
 		  levelp->GetFitGamma(chanMGroup->GetChpNum())*
@@ -174,9 +174,9 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
  * This function adds an inverse A-Matrix element specified by positions in the JGroup and ALevel vectors.
  */
 
-void AMatrixFunc::AddAInvMatrixElement(int jGroupNum, int lambdaNum, int muNum, std::complex<double> aMatrixElement) {
-  std::vector<std::vector<std::complex<double> > > e;
-  std::vector<std::complex<double> > f;
+void AMatrixFunc::AddAInvMatrixElement(int jGroupNum, int lambdaNum, int muNum, complex aMatrixElement) {
+  matrix_c e;
+  vector_c f;
   while(jGroupNum>a_inv_matrices_.size()) a_inv_matrices_.push_back(e);
   while(lambdaNum>a_inv_matrices_[jGroupNum-1].size()) a_inv_matrices_[jGroupNum-1].push_back(f);
   a_inv_matrices_[jGroupNum-1][lambdaNum-1].push_back(aMatrixElement);
@@ -187,6 +187,6 @@ void AMatrixFunc::AddAInvMatrixElement(int jGroupNum, int lambdaNum, int muNum, 
  * This function adds an entire A-Matrix to a vector.
  */
 
-void AMatrixFunc::AddAMatrix(std::vector<std::vector <std::complex<double> > > aMatrix) {
+void AMatrixFunc::AddAMatrix(std::vector<std::vector <complex > > aMatrix) {
   a_matrices_.push_back(aMatrix);
 }

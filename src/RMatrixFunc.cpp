@@ -20,7 +20,7 @@ double RMatrixFunc::GetRMatrixElement(int jGroupNum, int channelNum, int channel
  * Returns an \f$ [1-RL] \f$ Matrix element specified by positions in the JGroup and AChannel vectors. 
  */
 
-std::complex<double> RMatrixFunc::GetRLMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
+complex RMatrixFunc::GetRLMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
   return rl_matrices_[jGroupNum-1][channelNum-1][channelPrimeNum-1];
 }
 
@@ -28,7 +28,7 @@ std::complex<double> RMatrixFunc::GetRLMatrixElement(int jGroupNum, int channelN
  * Returns a \f$ [1-RL]^{-1} \f$ Matrix element specified by positions in the JGroup and AChannel vectors. 
  */
 
-std::complex<double> RMatrixFunc::GetRLInvMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
+complex RMatrixFunc::GetRLInvMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
   return rl_inv_matrices_[jGroupNum-1][channelNum-1][channelPrimeNum-1];
 }
 
@@ -36,7 +36,7 @@ std::complex<double> RMatrixFunc::GetRLInvMatrixElement(int jGroupNum, int chann
  * Returns a \f$ [1-RL]^{-1}R \f$ Matrix element specified by positions in the JGroup and AChannel vectors. 
  */
 
-std::complex<double> RMatrixFunc::GetRLInvRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
+complex RMatrixFunc::GetRLInvRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
   return rl_inv_r_matrices_[jGroupNum-1][channelNum-1][channelPrimeNum-1];
 }
 
@@ -44,8 +44,8 @@ std::complex<double> RMatrixFunc::GetRLInvRMatrixElement(int jGroupNum, int chan
  * Returns an entire \f$ [1-RL] \f$ Matrix specified by a position in the JGroup vector. 
  */
 
-std::vector<std::vector<std::complex<double> > > *RMatrixFunc::GetJSpecRLMatrix(int jGroupNum) {
-  std::vector<std::vector<std::complex<double> > > *b=&rl_matrices_[jGroupNum-1];
+matrix_c *RMatrixFunc::GetJSpecRLMatrix(int jGroupNum) {
+  matrix_c *b=&rl_matrices_[jGroupNum-1];
   return b;
 }
 
@@ -89,7 +89,7 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 	    }
 	  }
 	  this->AddRMatrixElement(j,ch,chp,sum);
-	  std::complex<double> loElement =point->GetLoElement(j,chp);
+	  complex loElement =point->GetLoElement(j,chp);
 	  if(ch==chp) this->AddRLMatrixElement(j,ch,chp,1.0-sum*loElement);
 	  else this->AddRLMatrixElement(j,ch,chp,-sum*loElement);
 	}
@@ -106,12 +106,12 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 void RMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
-      std::vector<std::vector<std::complex<double> > > *theRLMatrix = this->GetJSpecRLMatrix(j);
-      std::vector<std::vector<std::complex<double> > > theInvRLMatrix=MatInv(*theRLMatrix);
+      matrix_c *theRLMatrix = this->GetJSpecRLMatrix(j);
+      matrix_c theInvRLMatrix=MatInv(*theRLMatrix);
       this->AddRLInvMatrix(theInvRLMatrix);
       for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
 	for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
-	  std::complex<double> rlinvrElement(0.,0.);
+	  complex rlinvrElement(0.,0.);
 	  for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) {
 	    rlinvrElement+=this->GetRLInvMatrixElement(j,ch,chpp)*
 	      this->GetRMatrixElement(j,chpp,chp);
@@ -137,19 +137,19 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
       JGroup *theJGroup=compound()->GetJGroup(theMGroup->GetJNum());
       AChannel *entranceChannel=theJGroup->GetChannel(theMGroup->GetChNum());
       AChannel *exitChannel=theJGroup->GetChannel(theMGroup->GetChpNum());
-      std::complex<double> uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+      complex uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChpNum())*
 	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChpNum());
-      std::complex<double> umatrix=2.0*std::complex<double>(0.0,1.0)*
+      complex umatrix=2.0*std::complex<double>(0.0,1.0)*
 	point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChpNum())*
 	this->GetRLInvRMatrixElement(theMGroup->GetJNum(),
 				    theMGroup->GetChpNum(),
 				    theMGroup->GetChNum());
-      std::complex<double> tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+      complex tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
-      std::complex<double> tmatrix;
+      complex tmatrix;
       if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
 	tmatrix=tphase-uphase*(1.0+umatrix);
       } else tmatrix=-uphase*umatrix;
@@ -162,7 +162,7 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
 	->GetLevel(compound()->GetPair(aa)->GetECLevel(ecNum)->GetLevelNum());
       double ecNormParam=finalLevel->GetFitGamma(theECMGroup->GetFinalChannel())*
 	finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
-      std::complex<double> tmatrix=ecNormParam*point->GetECAmplitude(k,m);
+      complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);
       if(theECMGroup->IsChannelCapture()) {
 	MGroup *chanMGroup=compound()->GetPair(aa)->GetDecay(theECMGroup->GetChanCapDecay())
 	  ->GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
@@ -170,7 +170,7 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
 	  ->GetChannel(chanMGroup->GetChNum());
 	AChannel *chanExitChannel=compound()->GetJGroup(chanMGroup->GetJNum())
 	  ->GetChannel(chanMGroup->GetChpNum());
-	std::complex<double> umatrix=2.0*std::complex<double>(0.0,1.0)*
+	complex umatrix=2.0*std::complex<double>(0.0,1.0)*
 	  point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
 	  this->GetRLInvRMatrixElement(chanMGroup->GetJNum(),
 				       chanMGroup->GetChpNum(),
@@ -187,8 +187,8 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
  */
 
 void RMatrixFunc::AddRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, double matrixElement) {
-  std::vector<std::vector<double> > e;
-  std::vector<double> f;
+  matrix_r e;
+  vector_r f;
   while(jGroupNum>r_matrices_.size()) r_matrices_.push_back(e);
   while(channelNum>r_matrices_[jGroupNum-1].size()) r_matrices_[jGroupNum-1].push_back(f);
   r_matrices_[jGroupNum-1][channelNum-1].push_back(matrixElement);
@@ -199,9 +199,9 @@ void RMatrixFunc::AddRMatrixElement(int jGroupNum, int channelNum, int channelPr
  * This function adds a \f$ [1-RL] \f$ matrix element specified by positions in the JGroup and AChannel vectors.
  */
 
-void RMatrixFunc::AddRLMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, std::complex<double> matrixElement) {
-  std::vector<std::vector<std::complex<double> > > e;
-  std::vector<std::complex<double> > f;
+void RMatrixFunc::AddRLMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, complex matrixElement) {
+  matrix_c e;
+  vector_c f;
   while(jGroupNum>rl_matrices_.size()) rl_matrices_.push_back(e);
   while(channelNum>rl_matrices_[jGroupNum-1].size()) rl_matrices_[jGroupNum-1].push_back(f);
   rl_matrices_[jGroupNum-1][channelNum-1].push_back(matrixElement);
@@ -212,9 +212,9 @@ void RMatrixFunc::AddRLMatrixElement(int jGroupNum, int channelNum, int channelP
  * This function adds a \f$ [1-RL]^{-1}R \f$ matrix element specified by positions in the JGroup and AChannel vectors.
  */
 
-void RMatrixFunc::AddRLInvRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, std::complex<double> matrixElement) {
-  std::vector<std::vector<std::complex<double> > > e;
-  std::vector<std::complex<double> > f;
+void RMatrixFunc::AddRLInvRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, complex matrixElement) {
+  matrix_c e;
+  vector_c f;
   while(jGroupNum>rl_inv_r_matrices_.size()) rl_inv_r_matrices_.push_back(e);
   while(channelNum>rl_inv_r_matrices_[jGroupNum-1].size()) rl_inv_r_matrices_[jGroupNum-1].push_back(f);
   rl_inv_r_matrices_[jGroupNum-1][channelNum-1].push_back(matrixElement);
@@ -225,6 +225,6 @@ void RMatrixFunc::AddRLInvRMatrixElement(int jGroupNum, int channelNum, int chan
  * This function adds an entire \f$ [1-RL]^{-1} \f$ matrix to a vector.
  */
 
-void RMatrixFunc::AddRLInvMatrix(std::vector<std::vector <std::complex<double> > > matrix) {
+void RMatrixFunc::AddRLInvMatrix(std::vector<std::vector <complex > > matrix) {
   rl_inv_matrices_.push_back(matrix);
 }

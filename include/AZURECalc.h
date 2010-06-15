@@ -34,7 +34,7 @@ class AZURECalc : public ROOT::Minuit2::FCNBase {
    * A Minuit parameter array is passed as the dependent variable.  The function
    * returns the total chi-squared value.
    */
-  virtual double operator()(const std::vector<double>&) const;
+  virtual double operator()(const vector_r&) const;
   
   /*!
    * Returns a reference to the Config structure.

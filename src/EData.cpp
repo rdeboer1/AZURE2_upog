@@ -511,7 +511,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 		  if(!configure.oldECFile) {
 		    if(out.is_open()) out << segment->GetPoint(ii)->GetECAmplitude(k,ecm) << std::endl;
 		  } else {
-		    std::complex<double> ecAmplitude(0.0,0.0);
+		    complex ecAmplitude(0.0,0.0);
 		    in >> ecAmplitude;
 		    segment->GetPoint(ii)->AddECAmplitude(k,ecm,ecAmplitude);
 		  }

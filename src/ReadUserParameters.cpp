@@ -1,11 +1,12 @@
 #include <Minuit2/MnUserParameters.h>
 #include <iostream>
 #include <fstream>
+#include "Constants.h"
 
 void ReadUserParameters(ROOT::Minuit2::MnUserParameters &params,std::string infile) {
   std::vector<std::string> names;
-  std::vector<double> values;
-  std::vector<double> errors;
+  vector_r values;
+  vector_r errors;
   std::vector<bool> fixed;
   std::string tempname,tempfixed,tempfixed_nows;
   double tempvalue,temperror;

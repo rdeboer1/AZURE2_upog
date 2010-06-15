@@ -2,7 +2,6 @@
 #define COULFUNC_H
 
 #include <coul/cwfcomp.H>
-#include "Constants.h"
 #include "PPair.h"
 
 class CoulFunc;

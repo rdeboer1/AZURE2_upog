@@ -1,6 +1,6 @@
 #include "AZURECalc.h"
 
-double AZURECalc::operator()(const std::vector<double>&p) const {
+double AZURECalc::operator()(const vector_r&p) const {
 
   data()->iterate();
   

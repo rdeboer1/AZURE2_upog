@@ -1,7 +1,7 @@
 #ifndef MGROUP_H
 #define MGROUP_H
 
-#include <complex>
+#include "Constants.h"
 
 ///An AZURE internal reaction pathway.
 
@@ -23,7 +23,7 @@ class MGroup {
   int ch_;
   int chp_;
   double statspinfactor_;
-  std::complex<double> tmatrix_;
+  complex tmatrix_;
 };
 
 #endif

@@ -276,7 +276,7 @@ double EPoint::GetJ() const {
  * by positions in the JGroup and subsequent AChannel vectors.
  */
 
-std::complex<double> EPoint::GetLoElement(int jGroupNum, int channelNum) const {
+complex EPoint::GetLoElement(int jGroupNum, int channelNum) const {
   return lo_elements_[jGroupNum-1][channelNum-1];
 }
 
@@ -286,7 +286,7 @@ std::complex<double> EPoint::GetLoElement(int jGroupNum, int channelNum) const {
  * by positions in the JGroup and subsequent AChannel vectors.
  */
 
-std::complex<double> EPoint::GetExpCoulombPhase(int jGroupNum, int channelNum) const {
+complex EPoint::GetExpCoulombPhase(int jGroupNum, int channelNum) const {
   return coulombphase_[jGroupNum-1][channelNum-1];
 }
 
@@ -296,7 +296,7 @@ std::complex<double> EPoint::GetExpCoulombPhase(int jGroupNum, int channelNum) c
  * by positions in the JGroup and subsequent AChannel vectors.
  */
 
-std::complex<double> EPoint::GetExpHardSpherePhase(int jGroupNum, int channelNum) const {
+complex EPoint::GetExpHardSpherePhase(int jGroupNum, int channelNum) const {
   return hardspherephase_[jGroupNum-1][channelNum-1];
 }
 
@@ -304,7 +304,7 @@ std::complex<double> EPoint::GetExpHardSpherePhase(int jGroupNum, int channelNum
  * Returns the Coulomb amplitude \f$ C_\alpha \f$ for the data point.
  */
 
-std::complex<double> EPoint::GetCoulombAmplitude() const {
+complex EPoint::GetCoulombAmplitude() const {
   return coulombamplitude_;
 }
 
@@ -313,7 +313,7 @@ std::complex<double> EPoint::GetCoulombAmplitude() const {
  * specified by positions in the KGroup and subsequent ECMGroup vectors.
  */
 
-std::complex<double> EPoint::GetECAmplitude(int kGroupNum, int ecMGroupNum) const {
+complex EPoint::GetECAmplitude(int kGroupNum, int ecMGroupNum) const {
   return ec_amplitudes_[kGroupNum-1][ecMGroupNum-1];
 }
 
@@ -489,7 +489,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
 	    ShftFunc theShiftFunction(thePair);
 	    double localShift=theShiftFunction(lValue,inEnergy);
 	    double boundary=theChannel->GetBoundaryCondition();
-	    std::complex<double> loElement(localShift-boundary,0.0);
+	    complex loElement(localShift-boundary,0.0);
 	    this->AddLoElement(j,ch,loElement);
 	    this->AddSqrtPenetrability(j,ch,0.0);
 	    this->AddExpCoulombPhase(j,ch,1.0);
@@ -500,17 +500,17 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
 	    double localPene=theCoulombFunction.Penetrability(lValue,radius,localEnergy);
 	    double localShift=theCoulombFunction.PEShift(lValue,radius,localEnergy);
 	    double boundary=theChannel->GetBoundaryCondition();
-	    std::complex<double> loElement(localShift-boundary,localPene);
+	    complex loElement(localShift-boundary,localPene);
 	    double redmass=thePair->GetRedMass();
 	    double eta=sqrt(uconv/2.)*fstruc*thePair->GetZ(1)*thePair->GetZ(2)*
 	      sqrt(redmass/localEnergy);
-	    std::complex<double> expCP(1.0,0.0);
+	    complex expCP(1.0,0.0);
 	    for(int ll=1;ll<=theChannel->GetL();ll++) 
-	      expCP*=std::complex<double>((double)ll/sqrt(pow(eta,2.0)+pow((double)ll,2.0)),
+	      expCP*=complex((double)ll/sqrt(pow(eta,2.0)+pow((double)ll,2.0)),
 					  eta/sqrt(pow(eta,2.0)+pow((double)ll,2.0)));
 	    struct CoulWaves 
 	      coul=theCoulombFunction(lValue,radius,localEnergy);
-	    std::complex<double> expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
+	    complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
 					-coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
 	    this->AddLoElement(j,ch,loElement);
 	    this->AddSqrtPenetrability(j,ch,sqrt(localPene));
@@ -518,7 +518,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
 	    this->AddExpHardSpherePhase(j,ch,expHSP);
 	  }
 	} else if(thePair->GetPType()==10){
-	  std::complex<double> loElement(0.0,0.0);
+	  complex loElement(0.0,0.0);
 	  this->AddLoElement(j,ch,loElement);
 	  this->AddSqrtPenetrability(j,ch,pow(localEnergy/hbarc, (double) lValue+0.5));
 	  this->AddExpCoulombPhase(j,ch,1.0);
@@ -543,8 +543,8 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
  * AChannel vectors.  
  */
 
-void EPoint::AddLoElement(int jGroupNum, int channelNum, std::complex<double> loElement) {
-  std::vector<std::complex<double> > d;
+void EPoint::AddLoElement(int jGroupNum, int channelNum, complex loElement) {
+  vector_c d;
   while(jGroupNum>lo_elements_.size()) lo_elements_.push_back(d);
   lo_elements_[jGroupNum-1].push_back(loElement);
   assert(channelNum=lo_elements_[jGroupNum-1].size());
@@ -556,7 +556,7 @@ void EPoint::AddLoElement(int jGroupNum, int channelNum, std::complex<double> lo
  */
 
 void EPoint::AddSqrtPenetrability(int jGroupNum, int channelNum, double sqrtPene) {
-  std::vector<double> d;
+  vector_r d;
   while(jGroupNum>penetrabilities_.size()) penetrabilities_.push_back(d);
   penetrabilities_[jGroupNum-1].push_back(sqrtPene);
   assert(channelNum=penetrabilities_[jGroupNum-1].size());
@@ -567,8 +567,8 @@ void EPoint::AddSqrtPenetrability(int jGroupNum, int channelNum, double sqrtPene
  * AChannel vectors.  
  */
 
-void EPoint::AddExpCoulombPhase(int jGroupNum, int channelNum, std::complex<double> expShift) {
-  std::vector<std::complex<double> > d;
+void EPoint::AddExpCoulombPhase(int jGroupNum, int channelNum, complex expShift) {
+  vector_c d;
   while(jGroupNum>coulombphase_.size()) coulombphase_.push_back(d);
   coulombphase_[jGroupNum-1].push_back(expShift);
   assert(channelNum=coulombphase_[jGroupNum-1].size());
@@ -579,8 +579,8 @@ void EPoint::AddExpCoulombPhase(int jGroupNum, int channelNum, std::complex<doub
  * AChannel vectors.  
  */
 
-void EPoint::AddExpHardSpherePhase(int jGroupNum, int channelNum, std::complex<double> expShift) {
-  std::vector<std::complex<double> > d;
+void EPoint::AddExpHardSpherePhase(int jGroupNum, int channelNum, complex expShift) {
+  vector_c d;
   while(jGroupNum>hardspherephase_.size()) hardspherephase_.push_back(d);
   hardspherephase_[jGroupNum-1].push_back(expShift);
   assert(channelNum=hardspherephase_[jGroupNum-1].size());
@@ -602,16 +602,16 @@ void EPoint::CalcCoulombAmplitude(CNuc *theCNuc) {
       sqrt(redmass/energy);
     double cal=(1.0/(2.0*sqrt(pi)))*eta*(1.0/pow(sin(angle*pi/360.0),2.));
     double cex=2.0*eta*log(sin(angle*pi/360.0));
-    std::complex<double> calpha(cal*cos(cex),-cal*sin(cex));
+    complex calpha(cal*cos(cex),-cal*sin(cex));
     this->SetCoulombAmplitude(calpha);
-  } else this->SetCoulombAmplitude(std::complex<double>(0.,0.));
+  } else this->SetCoulombAmplitude(complex(0.,0.));
 }
 
 /*!
  * Sets the Coulomb amplitude \f$ C_\alpha \f$ for the data point.
  */
 
-void EPoint::SetCoulombAmplitude(std::complex<double> amplitude) {
+void EPoint::SetCoulombAmplitude(complex amplitude) {
   coulombamplitude_=amplitude;
 }
 
@@ -640,11 +640,11 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 				      this->GetCMEnergy());		
 	    double eta=sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*entrancePair->GetZ(2)*
 	      sqrt(entrancePair->GetRedMass()/this->GetCMEnergy());
-	    std::complex<double> expCP(1.0,0.0);
+	    complex expCP(1.0,0.0);
 	    for(int ll=1;ll<=theECMGroup->GetL();ll++) 
-	      expCP*=std::complex<double>((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
+	      expCP*=complex((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
 					  eta/sqrt(pow((double)ll,2.0)+pow(eta,2.0)));
-	    std::complex<double> expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
+	    complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
 					-coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
 	    
 	    double levelEnergy=theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->
@@ -694,7 +694,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 					 0,inEnergy,levelEnergy);
 	    
 	    //calculate the total radial integral
-	    std::complex<double> overlapIntegral(0.,0.);
+	    complex overlapIntegral(0.,0.);
 	    double outEnergy=inEnergy-theFinalPair->GetSepE()-theFinalPair->GetExE();
 	    if(theECMGroup->IsChannelCapture()) {
 	      if(outEnergy>0.0) {
@@ -702,18 +702,18 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 		struct CoulWaves 
 		  chanCoul=theChannelCoulombFunction(theInitialLValue,theFinalPair->GetChRad(),
 						     inEnergy-theFinalPair->GetSepE()-theFinalPair->GetExE());		
-		std::complex<double> chanExpHSP(chanCoul.G/sqrt(pow(chanCoul.F,2.0)+pow(chanCoul.G,2.0)),
+		complex chanExpHSP(chanCoul.G/sqrt(pow(chanCoul.F,2.0)+pow(chanCoul.G,2.0)),
 						-chanCoul.F/sqrt(pow(chanCoul.F,2.0)+pow(chanCoul.G,2.0)));    
-		overlapIntegral=std::complex<double>(0.0,-0.5)*
+		overlapIntegral=complex(0.0,-0.5)*
 		  sqrt(theChannelCoulombFunction.Penetrability(theInitialLValue,
 							       theFinalPair->GetChRad(),
 							       outEnergy))*
 		  pow(theFinalPair->GetRedMass()*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc)*
-		  chanExpHSP*(integrals.GW+std::complex<double>(0.0,1.0)*integrals.FW);
+		  chanExpHSP*(integrals.GW+complex(0.0,1.0)*integrals.FW);
 	      } else {
 		WhitFunc whitFunc(theFinalPair);
 		double whit=whitFunc(theInitialLValue,theFinalPair->GetChRad(),fabs(outEnergy));
-		overlapIntegral=std::complex<double>(0.0,-0.5)*integrals.GW/whit*
+		overlapIntegral=complex(0.0,-0.5)*integrals.GW/whit*
 		  sqrt(theFinalPair->GetRedMass()*uconv*theFinalPair->GetChRad()*uconv)/hbarc;
 	      }
 	    } else overlapIntegral=(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*integrals.FW
@@ -721,29 +721,29 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 		pow(theFinalPair->GetRedMass()*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc);
 	    
 	    //calculate the total external capture amplitude for the pathway
-	    std::complex<double> ecAmplitude(0.0,0.0);
+	    complex ecAmplitude(0.0,0.0);
 	    if(theECMGroup->GetRadType()=='E') {
-	      ecAmplitude=std::complex<double>(0.0,-1.0)*
+	      ecAmplitude=complex(0.0,-1.0)*
 		effectiveCharge*sqrt((8.*(2.*theLMult+1.)*(theLMult+1.))/theLMult)/DoubleFactorial(2*theLMult+1)*
-		pow(std::complex<double>(0.,1.0),theInitialLValue+theLMult-theFinalLValue)*
+		pow(complex(0.,1.0),theInitialLValue+theLMult-theFinalLValue)*
 		ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
 		Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
 	    } else {
-	      std::complex<double> orbitalTerm=effectiveCharge*
+	      complex orbitalTerm=effectiveCharge*
 		sqrt((2.*theInitialLValue+1.)*(theInitialLValue+1.)*theInitialLValue)*
 		Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
-	      std::complex<double> tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
-		(pow(std::complex<double>(-1.,0.),theFinalSValue)*
+	      complex tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
+		(pow(complex(-1.,0.),theFinalSValue)*
 		 sqrt(theFinalPair->GetJ(1)*(theFinalPair->GetJ(1)+1.)*(2.*theFinalPair->GetJ(1)+1.))*
 		 Racah(theFinalSValue,theFinalPair->GetJ(1),theInitialSValue,theFinalPair->GetJ(1),theFinalPair->GetJ(2),1.)*
 		 theFinalPair->GetG(1)+
-		 pow(std::complex<double>(-1.,0.),theInitialSValue)*
+		 pow(complex(-1.,0.),theInitialSValue)*
 		 sqrt(theFinalPair->GetJ(2)*(theFinalPair->GetJ(2)+1.)*(2.*theFinalPair->GetJ(2)+1.))*
 		 Racah(theFinalSValue,theFinalPair->GetJ(2),theInitialSValue,theFinalPair->GetJ(2),theFinalPair->GetJ(1),1.)*
 		 theFinalPair->GetG(2));
-	      std::complex<double> spinTerm=-sqrt((2.*theInitialSValue+1.)*(2.*theFinalSValue+1.))*
+	      complex spinTerm=-sqrt((2.*theInitialSValue+1.)*(2.*theFinalSValue+1.))*
 		Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
-	      ecAmplitude=std::complex<double>(0.0,1.0)*
+	      ecAmplitude=complex(0.0,1.0)*
 		sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*sqrt(16/3)*sqrt(2*theFinalJValue+1.)*
 		(orbitalTerm+spinTerm);
 	    }
@@ -760,8 +760,8 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
  * Adds an external capture amplitude with reference to a specified reaction pathway.
  */
 
-void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, std::complex<double> ecAmplitude) {
-  std::vector<std::complex<double> > d;
+void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude) {
+  vector_c d;
   while(kGroupNum>ec_amplitudes_.size()) ec_amplitudes_.push_back(d);
   ec_amplitudes_[kGroupNum-1].push_back(ecAmplitude);
   assert(ecMGroupNum=ec_amplitudes_[kGroupNum-1].size());
