@@ -61,7 +61,7 @@ int main(int argc,char *argv[]){
       std::cout << "Please enter an integer." << std::endl;
       std::cout << "azure2: ";
     }
-    if(command!=1&&command!=2&&command!=3&&command!=4) {
+    if(command!=1&&command!=2&&command!=3&&command!=4&&command!=5) {
       std::cout << "Invalid option.  Please try again."
 		<< std::endl;
     }
