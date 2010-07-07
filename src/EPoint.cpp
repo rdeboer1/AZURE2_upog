@@ -389,6 +389,7 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
     E3PerEt=a13*pow(cos(this->GetLabAngle()*pi/180.)-sqrt(a24/a13-pow(sin(this->GetLabAngle()*pi/180.),2.0)),2.0);
   }
   cm_angle_=180./pi*asin(sqrt(E3PerEt/a24)*sin(this->GetLabAngle()*pi/180.));
+  if(fabs(this->GetLabAngle()-cm_angle_)>90.) cm_angle_ = fabs(cm_angle_ - 180.);
 }
 
 /*!
