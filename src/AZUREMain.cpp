@@ -62,6 +62,7 @@ int AZUREMain::operator()(){
       //Call Minuit for function minimization, write minimized parameters to params
       if(configure().isAMatrix) std::cout << "Performing A-Matrix Fit..." << std::endl; 
       else std::cout << "Performing R-Matrix Fit..." << std::endl;
+      data()->SetFit(true);
       ROOT::Minuit2::MnMigrad migrad(theFunc,params);
       ROOT::Minuit2::FunctionMinimum min=migrad();
       params=min.UserParameters();
@@ -70,7 +71,7 @@ int AZUREMain::operator()(){
       if(configure().isAMatrix) std::cout << "Performing A-Matrix Calculation..." << std::endl; 
       else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
     }
-    
+    data()->SetFit(false);
     double chiSquared=theFunc(params.Params());
     if(configure().withData) {
       std::cout << std::endl;

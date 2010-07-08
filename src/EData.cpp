@@ -7,6 +7,7 @@
 
 EData::EData() {
   iterations_=0;
+  isFit_=true;
 }
 
 /*!
@@ -118,15 +119,33 @@ int EData::MakePoints(std::string infile, CNuc *theCNuc) {
  * Returns the number of fit iterations needed to minimize the parameters to the data.
  */
 
-int EData::iterations() const {
+int EData::Iterations() const {
   return iterations_;
+}
+
+/*!
+ * Returns true if the data is to be fit, otherwise returns false.  Used in the AZURECalc function class
+ * to determine if a clone of the CNuc and EData objects should be made for thread safety.
+ */
+
+bool EData::IsFit() const {
+  return isFit_;
+}
+
+/*!
+ * Sets the boolean indicating if the data is to be fit by AZURECalc function class. Used in AZUREMain function
+ * class before calls to Minuit and AZURECalc.
+ */
+
+void EData::SetFit(bool fit) {
+  isFit_=fit;
 }
 
 /*!
  * This function updates the number of fit iterations per iteration during the fitting process.
  */
 
-void EData::iterate(){
+void EData::Iterate(){
   iterations_++;
 }
 
@@ -573,4 +592,29 @@ void EData::MapData() {
 ESegment *EData::GetSegment(int segmentNum) {
   ESegment *b=&segments_[segmentNum-1];
   return b;
+}
+
+/*!
+ * Creates a new copy of the EData object in memory and returns a pointer to the new object.
+ * Used in AZURECalc function class for thread safety.
+ */
+
+EData *EData::Clone() const {
+  EData *dataCopy = new EData(*this);
+  
+  for(int i=1;i<=dataCopy->NumSegments();i++) {
+    for(int ii=1;ii<=dataCopy->GetSegment(i)->NumPoints();ii++) {
+      dataCopy->GetSegment(i)->GetPoint(ii)->ClearLocalMappedPoints();
+    }
+  }
+  for(int i=1;i<=dataCopy->NumSegments();i++) {
+    for(int ii=1;ii<=dataCopy->GetSegment(i)->NumPoints();ii++) {
+      if(dataCopy->GetSegment(i)->GetPoint(ii)->IsMapped()) {
+	EPoint *mappedPoint = dataCopy->GetSegment(i)->GetPoint(ii);
+	EnergyMap pointMap = mappedPoint->GetMap();
+	dataCopy->GetSegment(pointMap.segment)->GetPoint(pointMap.point)->AddLocalMappedPoint(mappedPoint);
+      }
+    }
+  }  
+  return dataCopy;
 }

@@ -54,6 +54,7 @@ public:
   complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
   PPair *GetPair(int);
   JGroup *GetJGroup(int);
+  CNuc *Clone() const;
 private:
   std::vector<PPair> pairs_;
   std::vector<JGroup> jgroups_;
