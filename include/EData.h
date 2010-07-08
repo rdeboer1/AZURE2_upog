@@ -16,8 +16,10 @@ class EData {
   int NumSegments() const;
   int Fill(std::string,CNuc*);
   int MakePoints(std::string,CNuc*);
-  int iterations() const;
-  void iterate();
+  int Iterations() const;
+  bool IsFit() const;
+  void SetFit(bool);
+  void Iterate();
   void Initialize(CNuc*,const Config&);
   void AddSegment(ESegment);
   void PrintData(const Config&);
@@ -31,9 +33,11 @@ class EData {
   void CalculateECAmplitudes(CNuc*,const Config&);
   void MapData();
   ESegment *GetSegment(int);
+  EData *Clone() const;
  private:
   std::vector<ESegment> segments_;
   int iterations_;
+  bool isFit_;
 };
 
 #endif

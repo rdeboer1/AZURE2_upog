@@ -6,7 +6,7 @@ builddir = build
 CXX = icc
 CPPFLAGS = -Iinclude -Llib
 CPPFLAGS +=  -I../include -L../lib
-LIBS = -lgsl -lgslcblas -lMinuit2 -lcoul -lreadline -lglib-2.0 -lncurses -limf
+LIBS = -lgsl -lgslcblas -lMinuit2 -lcoul -lreadline -lglib-2.0 -lncurses -limf -liomp5 -lpthread
 OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/CNuc.o \
 	$(srcdir)/Config.o $(srcdir)/DataLine.o $(srcdir)/Decay.o \
 	$(srcdir)/EData.o $(srcdir)/EPoint.o $(srcdir)/ESegment.o \
@@ -24,8 +24,8 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 	$(srcdir)/ExtrapLine.o $(srcdir)/ReactionRate.o \
 	$(srcdir)/GSL_Target_Integration.o $(srcdir)/ECLevel.o
 
-azure2 : $(OBJS) azure2.cpp
-	$(CXX) $(CPPFLAGS) -o $@ azure2.cpp $(OBJS) $(LIBS)
+AZURE2 : $(OBJS) $(srcdir)/AZURE2.cpp
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/AZURE2.cpp $(OBJS) $(LIBS)
 
 .PHONY : clean
 clean :
@@ -33,5 +33,5 @@ clean :
 
 .PHONY : install
 install :
-	-cp azure2 $(HOME)/bin
+	-cp AZURE2 $(HOME)/bin
 

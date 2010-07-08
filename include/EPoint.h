@@ -78,6 +78,7 @@ class EPoint {
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
   void CalculateTargetEffects(CNuc*,const Config &);
+  void ClearLocalMappedPoints();
   EPoint* GetLocalMappedPoint(int) const;
  private:
   int entrance_key_;

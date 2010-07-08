@@ -1539,3 +1539,13 @@ JGroup *CNuc::GetJGroup(int jGroupNum) {
   JGroup *b = &jgroups_[jGroupNum-1];
   return b;
 }
+
+/*!
+ * Creates a new copy of the CNuc object in memory and returns a pointer to the new object.
+ * Used in AZURECalc function class for thread safety.
+ */
+
+CNuc *CNuc::Clone() const {
+  CNuc *localCompound = new CNuc(*this);
+  return localCompound;
+}

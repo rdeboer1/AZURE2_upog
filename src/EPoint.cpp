@@ -818,6 +818,14 @@ void EPoint::CalculateTargetEffects(CNuc* theCNuc,const Config &configure) {
   this->SetFitCrossSection(yield);
 }
 
+/*! 
+ * Clears vector containing pointers to points mapped to the current point.
+ */
+
+void EPoint::ClearLocalMappedPoints() {
+  local_mapped_points_.clear();
+}
+
 /*!
  * Returns a pointer to a point mapped to the current point specified by a position in the mapped point vector.
  */
