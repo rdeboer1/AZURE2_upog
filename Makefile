@@ -25,8 +25,8 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 	$(srcdir)/ExtrapLine.o $(srcdir)/ReactionRate.o \
 	$(srcdir)/GSL_Target_Integration.o $(srcdir)/ECLevel.o
 
-azure2 : $(OBJS) azure2.cpp
-	$(CXX) $(CPPFLAGS) -o $@ azure2.cpp $(OBJS) $(LIBS)
+AZURE2 : $(OBJS) $(srcdir)/AZURE2.cpp
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/AZURE2.cpp $(OBJS) $(LIBS)
 
 .PHONY : clean
 clean :
@@ -34,5 +34,5 @@ clean :
 
 .PHONY : install
 install :
-	-cp azure2 $(HOME)/bin
+	-cp AZURE2 $(HOME)/bin
 
