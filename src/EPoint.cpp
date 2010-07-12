@@ -379,17 +379,27 @@ void EPoint::ConvertLabAngle(PPair *pPair) {
 
 void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
   double qValue=entrancePair->GetSepE()+entrancePair->GetExE()-exitPair->GetSepE()-exitPair->GetExE();
-  double a13=(entrancePair->GetM(1)*exitPair->GetM(1))*this->GetCMEnergy()/(this->GetCMEnergy()+qValue)/
+  double a13=(entrancePair->GetM(1)*exitPair->GetM(1))*this->GetLabEnergy()/(this->GetLabEnergy()+qValue)/
     (entrancePair->GetM(1)+entrancePair->GetM(2))/(exitPair->GetM(1)+exitPair->GetM(2));
-  double a24=(entrancePair->GetM(2)*exitPair->GetM(2))*(1+entrancePair->GetM(1)/entrancePair->GetM(2)*qValue/(this->GetCMEnergy()+qValue))/
+  double a24=(entrancePair->GetM(2)*exitPair->GetM(2))*(1+entrancePair->GetM(1)/entrancePair->GetM(2)*qValue/(this->GetLabEnergy()+qValue))/
     (entrancePair->GetM(1)+entrancePair->GetM(2))/(exitPair->GetM(1)+exitPair->GetM(2));
-  double E3PerEt;
-  if(a13<=a24) E3PerEt=a13*pow(cos(this->GetLabAngle()*pi/180.)+sqrt(a24/a13-pow(sin(this->GetLabAngle()*pi/180.),2.0)),2.0);
-  else {
-    E3PerEt=a13*pow(cos(this->GetLabAngle()*pi/180.)-sqrt(a24/a13-pow(sin(this->GetLabAngle()*pi/180.),2.0)),2.0);
+
+  if(a13>a24) {
+    double thetaMax=asin(sqrt(a24/a13))*180./pi;
+    if(thetaMax<this->GetLabAngle()) std::cout << std::endl << "Lab Angle (" << this->GetLabAngle() 
+					       << " degrees) is not kinematically possible.  Maximum angle is " 
+					       << thetaMax << " degrees." << std::endl;
+    assert(thetaMax>=this->GetLabAngle());
   }
+
+  double E3PerEt=a13*pow(cos(this->GetLabAngle()*pi/180.)+sqrt(a24/a13-pow(sin(this->GetLabAngle()*pi/180.),2.0)),2.0);
+  double tempE3PerEt = a13*pow(cos((this->GetLabAngle()+0.001)*pi/180.)+sqrt(a24/a13-pow(sin((this->GetLabAngle()+0.001)*pi/180.),2.0)),2.0);
+  double slope = sqrt(tempE3PerEt/a24)*sin((this->GetLabAngle()+0.001)*pi/180.)-sqrt(E3PerEt/a24)*sin(this->GetLabAngle()*pi/180.);
+  bool switchDomain=false;
+  if(slope<0.) switchDomain=true;
+  
   cm_angle_=180./pi*asin(sqrt(E3PerEt/a24)*sin(this->GetLabAngle()*pi/180.));
-  if(fabs(this->GetLabAngle()-cm_angle_)>90.) cm_angle_ = fabs(cm_angle_ - 180.);
+  if(switchDomain) cm_angle_ = 180.- cm_angle_;
 }
 
 /*!
