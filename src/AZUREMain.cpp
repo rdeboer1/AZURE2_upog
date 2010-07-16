@@ -65,6 +65,21 @@ int AZUREMain::operator()(){
       data()->SetFit(true);
       ROOT::Minuit2::MnMigrad migrad(theFunc,params);
       ROOT::Minuit2::FunctionMinimum min=migrad();
+      if(configure().performError) {
+	std::cout << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
+	data()->SetError(true);
+	theFunc.SetErrorDef(configure().chiVariance);
+	ROOT::Minuit2::MnMinos minos(theFunc,min);
+	std::vector<std::pair<double,double> > errors;
+	for(int i = 0; i<params.Params().size(); i++) { 
+	  std::cout << "\tParameter " << i+1 << "..." << std::endl;
+	  if(!params.Parameter(i).IsFixed()) {
+	    std::pair< double, double > error=minos(i);
+	    errors.push_back(error);
+	  } else errors.push_back(std::pair< double, double > (0.,0.));
+	}
+	WriteParameterErrors(params,errors,configure().outputdir);
+      }
       params=min.UserParameters();
       WriteUserParameters(params,configure().outputdir,true);
     } else {
@@ -72,6 +87,7 @@ int AZUREMain::operator()(){
       else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
     }
     data()->SetFit(false);
+    data()->SetError(false);
     double chiSquared=theFunc(params.Params());
     if(configure().withData) {
       std::cout << std::endl;

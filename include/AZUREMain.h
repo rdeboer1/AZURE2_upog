@@ -5,10 +5,11 @@
 #include "ReactionRate.h"
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
+#include <Minuit2/MnMinos.h>
 
 extern void WriteUserParameters(const ROOT::Minuit2::MnUserParameters&,std::string,bool);
 extern void ReadUserParameters(ROOT::Minuit2::MnUserParameters&,std::string);
-
+extern void WriteParameterErrors(const ROOT::Minuit2::MnUserParameters&,const std::vector<std::pair<double,double> >&,std::string);
 
 ///The top-level AZURE function class
 
