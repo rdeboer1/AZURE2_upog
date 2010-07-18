@@ -49,11 +49,12 @@ int main(int argc,char *argv[]){
   std::cout << "Please select from the following options: " << std::endl
 	    << "\t1. Data Fit" << std::endl
 	    << "\t2. Data Calculate" << std::endl
-	    << "\t3. Extrapolate (no data)" << std::endl
-	    << "\t4. Reaction Rate" << std::endl
-	    << "\t5. Exit" << std::endl;
+	    << "\t3. Perform MINOS Error Analysis" << std::endl
+	    << "\t4. Extrapolate (no data)" << std::endl
+	    << "\t5. Reaction Rate" << std::endl
+	    << "\t6. Exit" << std::endl;
 
-  while(command!=1&&command!=2&&command!=3&&command!=4&&command!=5) {
+  while(command<1||command>6) {
     std::cout << "azure2: ";
     while(!(std::cin >> command)) {
       std::cin.clear();
@@ -61,19 +62,21 @@ int main(int argc,char *argv[]){
       std::cout << "Please enter an integer." << std::endl;
       std::cout << "azure2: ";
     }
-    if(command!=1&&command!=2&&command!=3&&command!=4&&command!=5) {
+    if(command<1||command>6) {
       std::cout << "Invalid option.  Please try again."
 		<< std::endl;
     }
   }
   
-  if(command!=5) {
+  if(command!=6) {
     int rateEntrancePair=0;
     int rateExitPair=0;
     double rateMinTemp=0.0;
     double rateMaxTemp=0.0;
     double rateTempStep=0.0;
+    double chiVariance=1.0;
     bool performFit=false;
+    bool performError=false;
     bool oldParameters=false;
     bool validInfile=false;
     bool withData=true;
@@ -103,9 +106,9 @@ int main(int argc,char *argv[]){
     }
     bool isEC=false;
     std::vector<SegPairs> segPairs;
-    if(command==1||command==2||command==3) {
-      if(command==1||command==2) in.open(configure.segfile.c_str());
-      else if(command==3) in.open(configure.extrapfile.c_str());
+    if(command<=4) {
+      if(command<=3) in.open(configure.segfile.c_str());
+      else if(command==4) in.open(configure.extrapfile.c_str());
       if(in) {
 	int isActive,firstPair,secondPair;
 	std::string dummy;
@@ -123,7 +126,7 @@ int main(int argc,char *argv[]){
 	return -1;
       }
       in.clear();
-    } else if(command==4) {
+    } else if(command==5) {
       while(rateEntrancePair==rateExitPair){
 	std::cout << std::endl;
 	std::cout << std::setw(30) << "Reaction Rate Entrance Pair: ";
@@ -167,7 +170,7 @@ int main(int argc,char *argv[]){
     in.clear();
     validInfile=false;
     bool oldECFile=false;
-    if(isEC&&command!=4) {
+    if(isEC&&command!=5) {
       std::cout << std::endl;
       while(!validInfile) {
 	char *line = readline("External Capture Amplitude File (leave blank for new file): ");
@@ -198,16 +201,26 @@ int main(int argc,char *argv[]){
       std::cout << std::endl
 		<< "Calling AZURE in calculate mode..." << std::endl;
     } else if(command==3) {
+      std::cout << std::endl;
+      std::cout << std::setw(30) << "Allowed Chi-Squared Variance: ";
+      std::cin >> chiVariance;
+      performFit=true;
+      performError=true;
+      std::cout << std::endl
+		<< "Calling AZURE in calculate mode..." << std::endl;
+    } else if(command==4) {
       withData=false;
       std::cout << std::endl
 		<< "Calling AZURE in extrapolate mode..." << std::endl;
-    } else if(command==4) {
+    } else if(command==5) {
       withData=false;
       calcRate=true;
       std::cout << std::endl
 		<< "Calling AZURE in reaction rate mode..." << std::endl;      
     }
     configure.performFit=performFit;
+    configure.performError=performError;
+    configure.chiVariance=chiVariance;
     configure.withData=withData;
     configure.oldParameters=oldParameters;
     configure.isEC=isEC;

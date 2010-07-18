@@ -7,10 +7,6 @@ int ReadConfigFile(Config &a) {
   in >> temp;getline(in,dummy);
   if(temp=="true") a.isAMatrix=true;
   else a.isAMatrix=false;
-  in >> temp;getline(in,dummy);
-  if(temp=="true") a.performError=true;
-  else a.performError=false;
-  in >> a.chiVariance;getline(in,dummy);
   in >> a.nucfile;getline(in,dummy);
   in >> a.ecfile;getline(in,dummy);
   in >> a.segfile;getline(in,dummy);
