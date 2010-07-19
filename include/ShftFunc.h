@@ -2,9 +2,12 @@
 #define SHIFTFUNC_H
 
 #include "PPair.h"
+#include "WhitFunc.h"
 
-extern double gsl_shift_function(int,double,double,double,double,int,int);
-extern double gsl_shift_function_dE(int,double,double,double,double,int,int);
+class ShftFunc;
+
+extern double gsl_shift_function(int,double,double,double,WhitFunc*);
+extern double gsl_shift_function_dE(int,double,const ShftFunc*);
 
 ///A function class for negative energy shift functions.
 
@@ -26,6 +29,13 @@ class ShftFunc {
     redmass_=(double) pPair->GetRedMass();
     totalSepE_=pPair->GetSepE()+pPair->GetExE();
     radius_=(double) pPair->GetChRad();
+    whit_= new WhitFunc(pPair);
+  };
+  /*!
+   *
+   */
+  ~ShftFunc() {
+    delete whit_;
   };
   /*!
    * Returns the atomic number of the first particle in the pair.
@@ -53,16 +63,17 @@ class ShftFunc {
    * The function returns the value of the shift function.
    */
   double operator()(int l,double energy) const {
-    return gsl_shift_function(l,energy,totalSepE(),radius(),redmass(),
-			      z1(),z2());
+    return gsl_shift_function(l,energy,totalSepE(),radius(),whit());
   };
   /*!
    * Returns the energy derivative of the shift function at the specified orbital 
    * angular momentum and energy in the compound system.
    */
   double EnergyDerivative(int l,double energy) const {
-    return gsl_shift_function_dE(l,energy,totalSepE(),radius(),redmass(),
-				 z1(),z2());
+    return gsl_shift_function_dE(l,energy,this);
+  };
+  WhitFunc *whit() const {
+    return whit_;
   };
  private:
   int z1_;
@@ -70,6 +81,7 @@ class ShftFunc {
   double redmass_;
   double totalSepE_;
   double radius_;
+  WhitFunc *whit_;
 };
 
 #endif

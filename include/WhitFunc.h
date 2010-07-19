@@ -2,6 +2,8 @@
 #define WHITFUNC_H
 
 #include "PPair.h"
+#include <gsl/gsl_sf_hyperg.h>
+#include "Constants.h"
 
 extern double gsl_whit_function(int,double,double,double,int,int);
 
@@ -45,7 +47,14 @@ class WhitFunc {
    * The function returns the value of the Whittaker function.
    */
   double operator()(int l, double radius, double energy) const {
-    return gsl_whit_function(l,radius,energy,redmass(),z1(),z2());
+    const double k=-sqrt(uconv/2.)*fstruc*z1()*z2()*sqrt(redmass()/energy);
+    const double m=l+0.5;
+    const double z=2.0*sqrt(2.0*uconv)/hbarc*radius*sqrt(redmass()*energy);
+
+    const double a=m-k+0.5;
+    const double b=1.0+2.0*m;
+    
+    return exp(-z/2.0)*pow(z,m+0.50)*gsl_sf_hyperg_U(a,b,z);
   };
   private:
     int z1_;

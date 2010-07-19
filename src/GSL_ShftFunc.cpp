@@ -1,14 +1,11 @@
 #include <math.h>
 #include <gsl/gsl_deriv.h>
-
-extern double gsl_whit_function(int,double,double,double,int,int);
+#include "ShftFunc.h"
 
 struct gsl_shift_function_whit_params {
   int l;
   double bindingenergy;
-  double redmass;
-  int z1;
-  int z2;
+  WhitFunc *whit;
 };
 
 double gsl_shift_function_whit(double x, void * p) {
@@ -16,22 +13,20 @@ double gsl_shift_function_whit(double x, void * p) {
     (struct gsl_shift_function_whit_params *)p;
   int l = (params->l);
   double bindingenergy = (params->bindingenergy);
-  double redmass = (params->redmass);
-  int z1 = (params->z1);
-  int z2 = (params->z2);
- 
-  return gsl_whit_function(l,x,bindingenergy,redmass,z1,z2);
+  WhitFunc *whit = (params->whit);
+  
+  return whit->operator()(l,x,bindingenergy);
 }
 
 double gsl_shift_function(int l, double energy, double seperationenergy, 
-			  double radius, double redmass, int z1, int z2) {
+			  double radius, WhitFunc *whit) {
   double bindingenergy=fabs(energy-seperationenergy);
 
   double result;
   double error;
 
   struct gsl_shift_function_whit_params 
-    params={l,bindingenergy,redmass,z1,z2};
+    params={l,bindingenergy,whit};
  
   gsl_function F;
   F.function = &gsl_shift_function_whit;

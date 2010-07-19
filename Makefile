@@ -12,7 +12,7 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 	$(srcdir)/Config.o $(srcdir)/DataLine.o $(srcdir)/Decay.o \
 	$(srcdir)/EData.o $(srcdir)/EPoint.o $(srcdir)/ESegment.o \
 	$(srcdir)/GSL_AngCoeff.o $(srcdir)/GSL_ShftFunc.o \
-	$(srcdir)/GSL_ShftFunc_dE.o $(srcdir)/GSL_WhitFunc.o \
+	$(srcdir)/GSL_ShftFunc_dE.o \
 	$(srcdir)/Interference.o $(srcdir)/JGroup.o $(srcdir)/KGroup.o \
 	$(srcdir)/KLGroup.o $(srcdir)/MGroup.o $(srcdir)/NucLine.o \
 	$(srcdir)/PPair.o $(srcdir)/SegLine.o $(srcdir)/AZURECalc.o \
