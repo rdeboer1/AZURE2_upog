@@ -17,14 +17,13 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 	$(srcdir)/KLGroup.o $(srcdir)/MGroup.o $(srcdir)/NucLine.o \
 	$(srcdir)/PPair.o $(srcdir)/SegLine.o $(srcdir)/AZURECalc.o \
 	$(srcdir)/GenMatrixFunc.o $(srcdir)/RMatrixFunc.o $(srcdir)/GSL_MatInv.o \
-	$(srcdir)/AZUREOutput.o $(srcdir)/WriteUserParameters.o \
-	$(srcdir)/ReadUserParameters.o $(srcdir)/AMatrixFunc.o \
+	$(srcdir)/AZUREOutput.o $(srcdir)/AMatrixFunc.o \
 	$(srcdir)/ECLine.o $(srcdir)/ECMGroup.o $(srcdir)/ECIntegral.o \
 	$(srcdir)/NFIntegral.o $(srcdir)/GSL_Diagonalize.o \
 	$(srcdir)/GSL_PEshift_dE.o $(srcdir)/DoubleFactorial.o \
 	$(srcdir)/ExtrapLine.o $(srcdir)/ReactionRate.o \
 	$(srcdir)/GSL_Target_Integration.o $(srcdir)/ECLevel.o \
-        $(srcdir)/WriteParameterErrors.o
+	$(srcdir)/AZUREParams.o
 
 AZURE2 : $(OBJS) $(srcdir)/AZURE2.cpp
 	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/AZURE2.cpp $(OBJS) $(LIBS)

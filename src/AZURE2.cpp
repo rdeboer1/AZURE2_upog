@@ -49,8 +49,8 @@ int main(int argc,char *argv[]){
   std::cout << "Please select from the following options: " << std::endl
 	    << "\t1. Data Fit" << std::endl
 	    << "\t2. Data Calculate" << std::endl
-	    << "\t3. Perform MINOS Error Analysis" << std::endl
-	    << "\t4. Extrapolate (no data)" << std::endl
+	    << "\t3. Extrapolate (no data)" << std::endl
+	    << "\t4. Perform MINOS Error Analysis" << std::endl
 	    << "\t5. Reaction Rate" << std::endl
 	    << "\t6. Exit" << std::endl;
 
@@ -107,8 +107,8 @@ int main(int argc,char *argv[]){
     bool isEC=false;
     std::vector<SegPairs> segPairs;
     if(command<=4) {
-      if(command<=3) in.open(configure.segfile.c_str());
-      else if(command==4) in.open(configure.extrapfile.c_str());
+      if(command<=2||command==4) in.open(configure.segfile.c_str());
+      else if(command==3) in.open(configure.extrapfile.c_str());
       if(in) {
 	int isActive,firstPair,secondPair;
 	std::string dummy;
@@ -201,17 +201,17 @@ int main(int argc,char *argv[]){
       std::cout << std::endl
 		<< "Calling AZURE in calculate mode..." << std::endl;
     } else if(command==3) {
+      withData=false;
+      std::cout << std::endl
+		<< "Calling AZURE in extrapolate mode..." << std::endl;
+    } else if(command==4) {
       std::cout << std::endl;
       std::cout << std::setw(30) << "Allowed Chi-Squared Variance: ";
       std::cin >> chiVariance;
       performFit=true;
       performError=true;
       std::cout << std::endl
-		<< "Calling AZURE in calculate mode..." << std::endl;
-    } else if(command==4) {
-      withData=false;
-      std::cout << std::endl
-		<< "Calling AZURE in extrapolate mode..." << std::endl;
+		<< "Calling AZURE in error analysis mode..." << std::endl;
     } else if(command==5) {
       withData=false;
       calcRate=true;

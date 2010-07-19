@@ -2,6 +2,7 @@
 #define AZUREMAIN_H
 
 #include "AZURECalc.h"
+#include "AZUREParams.h"
 #include "ReactionRate.h"
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
