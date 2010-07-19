@@ -67,7 +67,7 @@ int AZUREMain::operator()(){
       ROOT::Minuit2::FunctionMinimum min=migrad();
       if(configure().performError) {
 	std::cout << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
-	data()->SetError(true);
+	data()->SetErrorAnalysis(true);
 	theFunc.SetErrorDef(configure().chiVariance);
 	ROOT::Minuit2::MnMinos minos(theFunc,min);
 	std::vector<std::pair<double,double> > errors;
@@ -87,7 +87,7 @@ int AZUREMain::operator()(){
       else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
     }
     data()->SetFit(false);
-    data()->SetError(false);
+    data()->SetErrorAnalysis(false);
     double chiSquared=theFunc(params.GetMinuitParams().Params());
     if(configure().withData) {
       std::cout << std::endl;

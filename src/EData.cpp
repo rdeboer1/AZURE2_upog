@@ -8,7 +8,7 @@
 EData::EData() {
   iterations_=0;
   isFit_=true;
-  isError_=false;
+  isErrorAnalysis_=false;
 }
 
 /*!
@@ -138,8 +138,8 @@ bool EData::IsFit() const {
  * class to suppress transformation and file output during error analysis.
  */
 
-bool EData::IsError() const {
-  return isError_;
+bool EData::IsErrorAnalysis() const {
+  return isErrorAnalysis_;
 }
 
 /*!
@@ -155,8 +155,8 @@ void EData::SetFit(bool fit) {
  * Sets the boolean indicating if the call to the function is for error analysis via Minos.
  */
 
-void EData::SetError(bool error) {
-  isError_=error;
+void EData::SetErrorAnalysis(bool errorAnalysis) {
+  isErrorAnalysis_=errorAnalysis;
 }
 
 /*!
