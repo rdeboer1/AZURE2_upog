@@ -16,6 +16,10 @@ struct Config {
   std::string configfile;
   ///A boolean specifying if the calculation should use the A-Matrix.
   bool isAMatrix;
+  ///A boolean specifying if error analysis via Minos should be performed.
+  bool performError;
+  ///If performError is true, sets the value of Up (the acceptable variance from the minimum chi-squared.
+  double chiVariance;
   ///The nuclear input file name.
   std::string nucfile;
   ///The external capture input file name.

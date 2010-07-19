@@ -8,6 +8,7 @@
 EData::EData() {
   iterations_=0;
   isFit_=true;
+  isError_=false;
 }
 
 /*!
@@ -133,6 +134,15 @@ bool EData::IsFit() const {
 }
 
 /*!
+ * Returns true if the call to function is for error analysis via Minos, otherwise returns false.  Used in the AZURECalc function
+ * class to suppress transformation and file output during error analysis.
+ */
+
+bool EData::IsError() const {
+  return isError_;
+}
+
+/*!
  * Sets the boolean indicating if the data is to be fit by AZURECalc function class. Used in AZUREMain function
  * class before calls to Minuit and AZURECalc.
  */
@@ -142,11 +152,27 @@ void EData::SetFit(bool fit) {
 }
 
 /*!
+ * Sets the boolean indicating if the call to the function is for error analysis via Minos.
+ */
+
+void EData::SetError(bool error) {
+  isError_=error;
+}
+
+/*!
  * This function updates the number of fit iterations per iteration during the fitting process.
  */
 
 void EData::Iterate(){
   iterations_++;
+}
+
+/*!
+ * This function sets the number of iterations to zero.
+ */
+
+void EData::ResetIterations(){
+  iterations_=0;
 }
 
 /*!

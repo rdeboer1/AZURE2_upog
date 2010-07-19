@@ -1,15 +1,10 @@
 #include <math.h>
 #include <gsl/gsl_deriv.h>
-
-extern double gsl_shift_function(int,double,double,double,double,int,int);
+#include "ShftFunc.h"
 
 struct gsl_shift_function_dE_shift_params {
   int l;
-  double seperationenergy;
-  double radius;
-  double redmass;
-  int z1;
-  int z2;
+  const ShftFunc *shift;
 };
 
 double gsl_shift_function_dE_shift (double x, void *p) {
@@ -17,24 +12,18 @@ double gsl_shift_function_dE_shift (double x, void *p) {
     (struct gsl_shift_function_dE_shift_params *)p;
 
   int l= (params->l);
-  double seperationenergy = (params->seperationenergy);
-  double radius = (params->radius);
-  double redmass = (params->redmass);
-  int z1 = (params->z1);
-  int z2 = (params->z2);
+  const ShftFunc *shift = (params->shift);
 
-  return gsl_shift_function(l,x,seperationenergy,radius,redmass,
-		     z1,z2);
+  return shift->operator()(l,x);
 }
 
-double gsl_shift_function_dE (int l, double energy, double seperationenergy, 
-			      double radius, double redmass, int z1, int z2) {
+double gsl_shift_function_dE (int l, double energy, const ShftFunc* shift) {
 
   double result;
   double error;
    
   struct gsl_shift_function_dE_shift_params params = {
-    l,seperationenergy,radius,redmass,z1,z2};
+    l,shift};
   
   gsl_function F;
   F.function = &gsl_shift_function_dE_shift;

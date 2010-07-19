@@ -40,14 +40,14 @@ int AZUREMain::operator()(){
   compound()->Initialize(configure());
  
   //Create new parameters for minuit, fill them from compound nucleus object
-  ROOT::Minuit2::MnUserParameters params;
-  compound()->FillMnParams(params);
+  AZUREParams params;
+  compound()->FillMnParams(params.GetMinuitParams());
   if(!configure().oldParameters) {
     std::cout << "Creating New param.par File..." << std::endl;
-    WriteUserParameters(params,configure().outputdir,false);
+    params.WriteUserParameters(configure().outputdir,false);
   } else {
     std::cout << "Reading User Parameter File..." << std::endl;
-    ReadUserParameters(params,configure().paramfile);
+    params.ReadUserParameters(configure().paramfile);
   }
 
   if(!configure().calcRate) {
@@ -63,16 +63,32 @@ int AZUREMain::operator()(){
       if(configure().isAMatrix) std::cout << "Performing A-Matrix Fit..." << std::endl; 
       else std::cout << "Performing R-Matrix Fit..." << std::endl;
       data()->SetFit(true);
-      ROOT::Minuit2::MnMigrad migrad(theFunc,params);
+      ROOT::Minuit2::MnMigrad migrad(theFunc,params.GetMinuitParams());
       ROOT::Minuit2::FunctionMinimum min=migrad();
-      params=min.UserParameters();
-      WriteUserParameters(params,configure().outputdir,true);
+      if(configure().performError) {
+	std::cout << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
+	data()->SetError(true);
+	theFunc.SetErrorDef(configure().chiVariance);
+	ROOT::Minuit2::MnMinos minos(theFunc,min);
+	std::vector<std::pair<double,double> > errors;
+	for(int i = 0; i<params.GetMinuitParams().Params().size(); i++) { 
+	  std::cout << "\tParameter " << i+1 << "..." << std::endl;
+	  if(!params.GetMinuitParams().Parameter(i).IsFixed()) {
+	    std::pair< double, double > error=minos(i);
+	    errors.push_back(error);
+	  } else errors.push_back(std::pair< double, double > (0.,0.));
+	}
+	params.WriteParameterErrors(errors,configure().outputdir);
+      }
+      params.GetMinuitParams()=min.UserParameters();
+      params.WriteUserParameters(configure().outputdir,true);
     } else {
       if(configure().isAMatrix) std::cout << "Performing A-Matrix Calculation..." << std::endl; 
       else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
     }
     data()->SetFit(false);
-    double chiSquared=theFunc(params.Params());
+    data()->SetError(false);
+    double chiSquared=theFunc(params.GetMinuitParams().Params());
     if(configure().withData) {
       std::cout << std::endl;
       for(int i=1;i<=data()->NumSegments();i++) 
@@ -96,7 +112,7 @@ int AZUREMain::operator()(){
     // dependent terms calculated) the routine is slow.  This should be a tradeoff 
     // for good accuracy.
     std::cout << "Performing reaction rate calculation..." << std::endl;
-    ReactionRate reactionRate(compound(),params.Params(),configure(),
+    ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateEntrancePair,configure().rateExitPair);
     reactionRate.CalculateRates(configure().rateMinTemp,configure().rateMaxTemp,configure().rateTempStep);
     reactionRate.WriteRates();
