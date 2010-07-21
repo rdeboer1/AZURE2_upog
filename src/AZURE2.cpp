@@ -11,20 +11,33 @@ struct SegPairs {int firstPair; int secondPair;};
 /*!
  * \mainpage AZURE R-Matrix Package
  * AZURE is created to be general A-/R- Matrix program for the analysis of
- * data relavent to nuclear astrophysics.  This release of AZURE has been 
+ * data relevant to nuclear astrophysics.  This release of AZURE has been 
  * completely rewritten in object-oriented C++.  The documentation contained 
  * within these pages should serve as an introduction to the object structure of
  * AZURE Version 2.0.
+ * Most mathematical functions in AZURE utilized the GNU Scientific Libraries (GSL),
+ * while the minimization routines are handled by Minuit2 (C++ version of Minuit). Minuit2
+ * uses OpenMP to parallel the fitting process, therefore the performance boost of AZURE
+ * will be significant when used on multicore multiprocessor machines.
  */
 
 int main(int argc,char *argv[]){
+
+  bool useReadline=true;
+  Config configure;
 
   if(argc<2) {
     std::cout << "Too few arguments.  Configuration file must be specified." << std::endl
 	      << "\tSyntax: azure2 configfile" << std::endl;
     return -1;
-  }
-  read_history("./.azure_history");
+  } else if(argc>2) {
+    std::string arg=argv[1];
+    if(arg=="--no-readline") useReadline=false;
+    else std::cout << "Unknown option " << arg << '.' << std::endl;
+    configure.configfile=argv[argc-1];
+  } else configure.configfile=argv[1];
+
+  if(useReadline) read_history("./.azure_history");
   std::cout << std::endl
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << "| #### #### #  # ###  #### | Version 2.0                |" << std::endl
@@ -35,9 +48,6 @@ int main(int argc,char *argv[]){
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << std::endl;
   
-  //Read Runtime file
-  Config configure;
-  configure.configfile=argv[1];
   if(ReadConfigFile(configure)==-1) {
     std::cout << "Could not open " << configure.configfile << ".  Check that file exists." 
 	      << std::endl;
@@ -84,14 +94,18 @@ int main(int argc,char *argv[]){
     std::string inFile;
     std::ifstream in;
     std::cout << std::endl;
+    if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
     std::cin.ignore(1000,'\n');
     while(!validInfile) {
-      char *line = readline("External Parameter File (leave blank for new file): ");
-      inFile=line;
-      size_t endpos = inFile.find_last_not_of(" \t");
-      if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
-      if(line && *line) add_history(line);
-      free(line);
+      if(!useReadline) getline(std::cin,inFile);
+      else {
+	char *line = readline("External Parameter File (leave blank for new file): ");
+	inFile=line;
+	size_t endpos = inFile.find_last_not_of(" \t");
+	if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
+	if(line && *line) add_history(line);
+	free(line);
+      }
       if(!inFile.empty()) {
 	in.open(inFile.c_str());
 	if(in) {
@@ -102,7 +116,10 @@ int main(int argc,char *argv[]){
 	}
 	in.clear();
       } else validInfile=true;
-      if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+      if(!validInfile) {
+	std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+	if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
+      }
     }
     bool isEC=false;
     std::vector<SegPairs> segPairs;
@@ -172,13 +189,17 @@ int main(int argc,char *argv[]){
     bool oldECFile=false;
     if(isEC&&command!=5) {
       std::cout << std::endl;
+      if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
       while(!validInfile) {
-	char *line = readline("External Capture Amplitude File (leave blank for new file): ");
-	inFile=line;
-	size_t endpos = inFile.find_last_not_of(" \t");	
-	if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
-	if(line && *line) add_history(line);
-	free(line);
+	if(!useReadline) getline(std::cin,inFile);
+	else {
+	  char *line = readline("External Capture Amplitude File (leave blank for new file): ");
+	  inFile=line;
+	  size_t endpos = inFile.find_last_not_of(" \t");	
+	  if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
+	  if(line && *line) add_history(line);
+	  free(line);
+	}
 	if(!inFile.empty()) {
 	  std::ifstream in;
 	  in.open(inFile.c_str());
@@ -190,7 +211,10 @@ int main(int argc,char *argv[]){
 	  }
 	  in.clear();
 	} else validInfile=true;
-	if(!validInfile) std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+	if(!validInfile) {
+	  std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+	  if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
+	}
       }
     }
     if(command==1) {
@@ -238,6 +262,6 @@ int main(int argc,char *argv[]){
 
   std::cout << std::endl
 	    << "Thanks for using AZURE." << std::endl;
-  write_history("./.azure_history");
+  if(useReadline) write_history("./.azure_history");
   return 0;
 }

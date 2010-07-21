@@ -72,6 +72,9 @@ class ShftFunc {
   double EnergyDerivative(int l,double energy) const {
     return gsl_shift_function_dE(l,energy,this);
   };
+  /*!
+   * Returns a pointer to the Whittaker functions used in the calculation of the shift functions.
+   */
   WhitFunc *whit() const {
     return whit_;
   };
