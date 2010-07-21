@@ -18,9 +18,9 @@ class EData {
   int MakePoints(std::string,CNuc*);
   int Iterations() const;
   bool IsFit() const;
-  bool IsError() const;
+  bool IsErrorAnalysis() const;
   void SetFit(bool);
-  void SetError(bool);
+  void SetErrorAnalysis(bool);
   void Iterate();
   void ResetIterations();
   void Initialize(CNuc*,const Config&);
@@ -41,7 +41,7 @@ class EData {
   std::vector<ESegment> segments_;
   int iterations_;
   bool isFit_;
-  bool isError_;
+  bool isErrorAnalysis_;
 };
 
 #endif

@@ -37,15 +37,16 @@ double AZURECalc::operator()(const vector_r&p) const {
     chiSquared+=segmentChiSquared;
   }
 
-  if(thisIteration%100==0&&thisIteration!=0&&!localData->IsError()) std::cout << std::setw(15) << thisIteration
-				     << std::setw(15) << chiSquared  
-				     << std::endl;
-  if(thisIteration%1000==0&&thisIteration!=0&&!localData->IsError()) {
-    localData->WriteOutputFiles(configure());
-    localCompound->TransformOut(configure().isEC);
-    localCompound->PrintTransformParams(configure().outputdir);
+  if(!localData->IsErrorAnalysis()&&thisIteration!=0) {
+    if(thisIteration%100==0) std::cout << std::setw(15) << thisIteration
+				       << std::setw(15) << chiSquared  
+				       << std::endl;
+    if(thisIteration%1000==0) {
+      localData->WriteOutputFiles(configure());
+      localCompound->TransformOut(configure().isEC);
+      localCompound->PrintTransformParams(configure().outputdir);
+    }
   }
-
   if(isFit) {
     delete localCompound;
     delete localData;

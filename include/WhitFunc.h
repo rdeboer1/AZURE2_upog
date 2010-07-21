@@ -10,7 +10,7 @@ extern double gsl_whit_function(int,double,double,double,int,int);
 /// A function class to calculate Whittaker functions for negative energy channels.
 
 /*!
- * The function class WhitFunc uses the GSL package to calculate Whittaker functions for negative energy channels in integral form.  
+ * The function class WhitFunc uses the GSL package to calculate Whittaker functions for negative energy channels from the GSL confluent hypergeometric functions.  
  */
 
 class WhitFunc {
