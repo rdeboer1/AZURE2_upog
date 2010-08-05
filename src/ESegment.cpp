@@ -1,4 +1,5 @@
 #include "ESegment.h"
+#include "EData.h"
 
 /*!
  * This constructor is used if the segment contains actual experimental data.  The segment
@@ -27,6 +28,8 @@ ESegment::ESegment(SegLine segLine) {
     l_=0;
   }
   datafile_=segLine.datafile;
+  targetEffectNum_=0;
+  isTargetEffect_=false;
 }
 
 /*!
@@ -57,6 +60,8 @@ ESegment::ESegment(ExtrapLine extrapLine) {
     l_=0;
   }
   datafile_="";
+  targetEffectNum_=0;
+  isTargetEffect_=false;
 }
 
 /*!
@@ -89,6 +94,11 @@ bool ESegment::IsPhase() const {
   return isphase_;
 }
 
+
+bool ESegment::IsTargetEffect() const {
+  return isTargetEffect_;
+}
+
 /*!
  * Returns the number of data point objects in the segment.
  */
@@ -119,7 +129,7 @@ int ESegment::GetExitKey() const {
  * in the lab frame, and conversions are performed to the center of mass frame.
  */
 
-int ESegment::Fill(CNuc *theCNuc) {
+int ESegment::Fill(CNuc *theCNuc, EData *theData) {
   std::string infile=this->GetDataFile();
   std::ifstream in(infile.c_str());
   if(!in) return -1;
@@ -131,6 +141,7 @@ int ESegment::Fill(CNuc *theCNuc) {
 	this->AddPoint(NewEPoint);
 	PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
 	PPair *exitPair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetExitKey()));
+	this->GetPoint(this->NumPoints())->SetParentData(theData);
 	this->GetPoint(this->NumPoints())->ConvertLabEnergy(entrancePair);
 	if(exitPair->GetPType()==0&&this->IsDifferential()&&!this->IsPhase()) {
 	  if(this->GetEntranceKey()==this->GetExitKey()) {
@@ -153,6 +164,10 @@ int ESegment::Fill(CNuc *theCNuc) {
 
 int ESegment::GetL() const {
   return l_;
+}
+
+int ESegment::GetTargetEffectNum() const {
+  return targetEffectNum_;
 }
 
 /*!
@@ -241,6 +256,11 @@ void ESegment::AddPoint(EPoint point) {
 
 void ESegment::SetSegmentChiSquared(double chiSquared) {
   segment_chi_squared_=chiSquared;
+}
+
+void ESegment::SetTargetEffectNum(int targetEffectNum) {
+  targetEffectNum_=targetEffectNum;
+  isTargetEffect_=true;
 }
 
 /*!

@@ -5,6 +5,8 @@
 #include "SegLine.h"
 #include "ExtrapLine.h"
 
+class EData;
+
 ///An AZURE data segment
 
 /*!
@@ -19,11 +21,13 @@ class ESegment {
   bool IsInSegment(EPoint);
   bool IsDifferential() const;
   bool IsPhase() const;
+  bool IsTargetEffect() const;
   int NumPoints() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
-  int Fill(CNuc*);
+  int Fill(CNuc*,EData*);
   int GetL() const;
+  int GetTargetEffectNum() const;
   double GetMinEnergy() const;
   double GetMaxEnergy() const;
   double GetMinAngle() const;
@@ -35,13 +39,16 @@ class ESegment {
   std::string GetDataFile() const;
   void AddPoint(EPoint);
   void SetSegmentChiSquared(double);
+  void SetTargetEffectNum(int);
   EPoint *GetPoint(int);
  private:
   bool isdifferential_;
   bool isphase_;
+  bool isTargetEffect_;
   int entrancekey_;
   int exitkey_;
   int l_;
+  int targetEffectNum_;
   double min_e_;
   double max_e_;
   double min_a_;

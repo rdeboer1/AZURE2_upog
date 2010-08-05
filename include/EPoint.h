@@ -4,6 +4,7 @@
 #include "DataLine.h"
 #include "RMatrixFunc.h"
 #include "AMatrixFunc.h"
+#include "TargetEffect.h"
 
 ///A container structure for a reference to a data point.
 
@@ -13,6 +14,7 @@ struct EnergyMap {
 };
 
 class ESegment;
+class EData;
 
 ///An AZURE data point
 
@@ -30,11 +32,14 @@ class EPoint {
   bool IsDifferential() const;
   bool IsPhase() const;
   bool IsMapped() const;
+  bool IsTargetEffect() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
   int GetMaxLOrder() const;
   int GetL() const;
   int NumLocalMappedPoints() const;
+  int NumSubPoints() const;
+  int GetTargetEffectNum() const;
   double GetLabAngle() const;
   double GetCMAngle() const;
   double GetLabEnergy() const;
@@ -49,6 +54,7 @@ class EPoint {
   double GetSFactorConversion() const;
   double GetSqrtPenetrability(int,int) const;
   double GetJ() const;
+  double GetStoppingPower() const;
   complex GetLoElement(int,int) const;
   complex GetExpCoulombPhase(int,int) const;
   complex GetExpHardSpherePhase(int,int) const;
@@ -74,15 +80,27 @@ class EPoint {
   void SetCoulombAmplitude(complex);
   void CalculateECAmplitudes(CNuc*);
   void AddECAmplitude(int,int,complex);
-  void Calculate(CNuc*,const Config &configure);
+  void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
   void CalculateTargetEffects(CNuc*,const Config &);
   void ClearLocalMappedPoints();
+  void SetTargetEffectNum(int);
+  void AddSubPoint(EPoint);
+  void IntegrateTargetEffect();
+  void SetParentData(EData*);
+  void SetStoppingPower(double);
+  EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
+  EPoint* GetSubPoint(int);
  private:
+  bool is_differential_;
+  bool is_phase_;
+  bool is_mapped_;
   int entrance_key_;
   int exit_key_;
+  int l_value_;
+  int targetEffectNum_;
   double cm_angle_;
   double lab_angle_;
   double cm_energy_;
@@ -94,11 +112,8 @@ class EPoint {
   double geofactor_;
   double fitcrosssection_;
   double sfactorconv_;
-  bool is_differential_;
-  bool is_phase_;
-  bool is_mapped_;
   double j_value_;
-  int l_value_;
+  double stoppingPower_;
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;
@@ -108,6 +123,8 @@ class EPoint {
   matrix_c hardspherephase_;
   matrix_c ec_amplitudes_;
   std::vector<EPoint*> local_mapped_points_;
+  std::vector<EPoint> integrationPoints_;
+  EData* parentData_;
 };
 
 #endif

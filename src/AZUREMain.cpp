@@ -16,12 +16,12 @@ int AZUREMain::operator()(){
     //  center of mass conversions, s-factor conversions, etc.
     std::cout << "Filling Data Structures..." << std::endl;
     if(configure().withData) {
-      if(data()->Fill(configure().segfile,compound())==-1) {
+      if(data()->Fill(configure(),compound())==-1) {
 	std::cout << "Could not fill data object from segments file." << std::endl;
 	return -1;
       }
     } else {
-      if(data()->MakePoints(configure().extrapfile,compound())==-1) {
+      if(data()->MakePoints(configure(),compound())==-1) {
 	std::cout << "Could not fill data object from extrapolation file." << std::endl;
 	return -1;
       }

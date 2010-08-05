@@ -23,7 +23,8 @@ OBJS =  $(srcdir)/AZUREMain.o $(srcdir)/AChannel.o $(srcdir)/ALevel.o $(srcdir)/
 	$(srcdir)/GSL_PEshift_dE.o $(srcdir)/DoubleFactorial.o \
 	$(srcdir)/ExtrapLine.o $(srcdir)/ReactionRate.o \
 	$(srcdir)/GSL_Target_Integration.o $(srcdir)/ECLevel.o \
-	$(srcdir)/AZUREParams.o
+	$(srcdir)/AZUREParams.o $(srcdir)/Equation.o \
+	$(srcdir)/TargetEffect.o
 
 AZURE2 : $(OBJS) $(srcdir)/AZURE2.cpp
 	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/AZURE2.cpp $(OBJS) $(LIBS)

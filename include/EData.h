@@ -14,9 +14,10 @@ class EData {
  public:
   EData();
   int NumSegments() const;
-  int Fill(std::string,CNuc*);
-  int MakePoints(std::string,CNuc*);
+  int Fill(const Config&,CNuc*);
+  int MakePoints(const Config&,CNuc*);
   int Iterations() const;
+  int NumTargetEffects() const;
   bool IsFit() const;
   bool IsErrorAnalysis() const;
   void SetFit(bool);
@@ -35,9 +36,13 @@ class EData {
   void WriteOutputFiles(const Config&);
   void CalculateECAmplitudes(CNuc*,const Config&);
   void MapData();
+  void AddTargetEffect(TargetEffect);
+  void ReadTargetEffectsFile(std::string);
   ESegment *GetSegment(int);
   EData *Clone() const;
+  TargetEffect *GetTargetEffect(int);
  private:
+  std::vector<TargetEffect> targetEffects_;
   std::vector<ESegment> segments_;
   int iterations_;
   bool isFit_;

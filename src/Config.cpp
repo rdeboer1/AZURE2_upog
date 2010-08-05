@@ -11,6 +11,7 @@ int ReadConfigFile(Config &a) {
   in >> a.ecfile;getline(in,dummy);
   in >> a.segfile;getline(in,dummy);
   in >> a.extrapfile;getline(in,dummy);
+  in >> a.targeteffectsfile;getline(in,dummy);
   in >> a.outputdir;getline(in,dummy);
   in >> a.checkdir;getline(in,dummy);
   in >> a.checknucleus;getline(in,dummy);
