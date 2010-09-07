@@ -127,6 +127,10 @@ int EData::Iterations() const {
   return iterations_;
 }
 
+/*!
+ * Returns the number of TargetEffect objects contained in the present object.
+ */
+
 int EData::NumTargetEffects() const {
   return targetEffects_.size();
 }
@@ -639,9 +643,18 @@ void EData::MapData() {
   }
 }
 
+/*!
+ * Adds a TargetEffect object to the vector contained within the present object.
+ */
+
 void EData::AddTargetEffect(TargetEffect targetEffect) {
   targetEffects_.push_back(targetEffect);
 }
+
+/*!
+ * Reads the target effects input file and creates the TargetEffect objects 
+ * to be applied to the data.
+ */
 
 void EData::ReadTargetEffectsFile(std::string infile) {
   std::ifstream in(infile.c_str());
@@ -730,6 +743,10 @@ EData *EData::Clone() const {
   }  
   return dataCopy;
 }
+
+/*!
+ * Returns a pointer to the specified TargetEffect object.
+ */
 
 TargetEffect *EData::GetTargetEffect(int effectNumber) {
   TargetEffect *temp;

@@ -7,6 +7,14 @@
 #include <iomanip>
 #include "Constants.h"
 
+///A container class to hold Minuit parameters in AZURE
+
+/*!
+ * The AZUREParams class holds the Minuit parameters determined in the fit.
+ * The class also has member functions corresponding to reading and writing of 
+ * the parameters and their errors.
+ */
+
 class AZUREParams {
  public:
   ROOT::Minuit2::MnUserParameters &GetMinuitParams();

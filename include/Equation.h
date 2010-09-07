@@ -4,6 +4,15 @@
 #include <string>
 #include <vector>
 
+///A class for parsing algebraic expressions
+
+/*!
+ * The Equation class is used in AZURE to parametrize stopping cross sections
+ * as a function of energy.  An arbitrary equation can be given, and parameters
+ * specified, which is then parsed and evaluated on the fly whenever
+ * stopping cross section is needed.
+ */
+
 class Equation {
   enum TokenType {NUMBER,OPERATOR,VARIABLE,PARAMETER,LEFTPAR,RIGHTPAR,FUNCTION,BADTOKEN};
   enum OperatorType {ADD=0,SUBTRACT=0,MULT=1,DIVIDE=1,POWER=2,BADTYPE=10};

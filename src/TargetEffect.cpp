@@ -2,6 +2,11 @@
 #include <sstream>
 #include <iostream>
 
+/*!
+ * Constructor reads directly from an std::ifstream pointing to the target
+ * effect input file.  If a valid target effect is read, a TargetEffect object is
+ * created.
+ */
 
 TargetEffect::TargetEffect(std::ifstream &stream) {
   int isActive;
@@ -52,37 +57,81 @@ TargetEffect::TargetEffect(std::ifstream &stream) {
   }
 }
 
+/*!
+ * Returns true if the target effect was marked as active in the target effects 
+ * input file, otherwise returns false.
+ */
+
 bool TargetEffect::IsActive() const {
   return isActive_;
 }
+
+/*!
+ * Returns true if the target effect contains Gaussian beam convolution,
+ * otherwise returns false.
+ */
 
 bool TargetEffect::IsConvolution() const {
   return isConvolution_;
 }
 
+/*!
+ * Returns true if the target effect contains target integration, otherwise
+ * returns false.
+ */
+
 bool TargetEffect::IsTargetIntegration() const {
   return isTargetIntegration_;
 }
+
+/*!
+ * Returns the number of sub-points specified for the target effect in 
+ * the input file.
+ */
 
 int TargetEffect::NumSubPoints() const {
   return numIntegrationPoints_;
 }
 
+/*!
+ * Returns the sigma of the Guassian for beam convolution.
+ */
+
 double TargetEffect::GetSigma() const {
   return sigma_;
 }
+
+/*!
+ * Returns the density of the target in atoms/cm^2.  Only needed for 
+ * target integration, not Gaussian beam convolution.
+ */
 
 double TargetEffect::GetDensity() const {
   return density_;
 }
 
+/*!
+ * Calculates the Target thickness from the stopping cross section and
+ * the target density as a function of energy.
+ */
+
 double TargetEffect::TargetThickness(double energy)  {
   return this->GetStoppingPowerEq()->Evaluate(energy)*this->GetDensity();
 }
 
+/*!
+ * Sets the number of sub-points for the TargetEffect object.
+ */
+
 void TargetEffect::SetNumSubPoints(int numPoints) {
   numIntegrationPoints_=numPoints;
 }
+
+/*!
+ * Parses and returns a vector of integers corresponding to the 
+ * segment list specified as a string.  The segments list contains the
+ * segments for which the target effect is applicable.
+ */
 
 std::vector<int> TargetEffect::GetSegmentsList() const {
   std::vector<int> tempList;
@@ -112,11 +161,21 @@ std::vector<int> TargetEffect::GetSegmentsList() const {
   return tempList;
 }
 
+/*!
+ * Returns the Equation object corresponding to the parametrized stopping 
+ * cross section.
+ */
+
 Equation *TargetEffect::GetStoppingPowerEq() {
   Equation *tempEquation;
   tempEquation=&stoppingPowerEq_;
   return tempEquation;
 }
+
+/*!
+ * Returns the multiplicative convolution factor for evaluation of the integrand
+ * of a target effect.  
+ */
 
 double TargetEffect::GetConvolutionFactor(double energy, double centroid) const {
   double sigma=this->GetSigma();

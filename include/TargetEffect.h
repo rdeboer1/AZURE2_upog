@@ -7,6 +7,15 @@
 #include "Constants.h"
 #include "Equation.h"
 
+///An AZURE target effect entry
+
+/*!
+ * Experimential effects including gaussian beam convolution, target 
+ * integration, and a combination of the two are grouped under the TargetEffect
+ * class. An object is created corresponding to each corresponding entry in 
+ * AZURESetup2.
+ */
+
 class TargetEffect {
  public:
   TargetEffect(std::ifstream &);

@@ -1,8 +1,6 @@
 #include "ESegment.h"
 #include "EData.h"
 
-double gsl_target_integration(EPoint *point,CNuc *compound, const Config&  configure);
-
 /*!
  * This constructor is used if the data point is to be created from a line in a data file.
  * A pointer to the parent segment is passed to the constructor for the intialization of
@@ -122,6 +120,10 @@ bool EPoint::IsMapped() const {
   return is_mapped_;
 }
 
+/*!
+ * This function retruns true if the point has a corresponding TargetEffect object, otherwise it returns false.
+ */
+
 bool EPoint::IsTargetEffect() const {
   if(GetTargetEffectNum()!=0&&NumSubPoints()>0) return true;
   else return false;
@@ -172,9 +174,17 @@ int EPoint::NumLocalMappedPoints() const {
   return local_mapped_points_.size();
 }
 
+/*!
+ * Returns the total number of sub-points contained within the present objet.  The sub-points are used to calculate the target effect integrals.
+ */
+
 int EPoint::NumSubPoints() const {
   return integrationPoints_.size();
 }
+
+/*! 
+ * Returns the position of the corresponding TargetEffect object in the parent EData object.
+ */
 
 int EPoint::GetTargetEffectNum() const {
   return targetEffectNum_;
@@ -293,6 +303,10 @@ double EPoint::GetSqrtPenetrability(int jGroupNum, int channelNum) const {
 double EPoint::GetJ() const {
   return j_value_;
 }
+
+/*!
+ * For target integration to fit yield curves, the stopping power (or, rather, stopping cross section) is calculated and stored for each sub-point.  This function returns the precalculated value.
+ */
 
 double EPoint::GetStoppingPower() const {
 	return stoppingPower_;
@@ -885,16 +899,6 @@ void EPoint::AddLocalMappedPoint(EPoint *point) {
   local_mapped_points_.push_back(point);
 }
 
-/*!
- * A function that can replace EPoint::Calculate if target effects are to be included.  If implemented,
- * the user MUST set up the appropriate functions in the GSL_TargetIntegration.cpp file. 
- */
-
-void EPoint::CalculateTargetEffects(CNuc* theCNuc,const Config &configure) {
-  double yield=gsl_target_integration(this,theCNuc,configure);
-  this->SetFitCrossSection(yield);
-}
-
 /*! 
  * Clears vector containing pointers to points mapped to the current point.
  */
@@ -903,13 +907,27 @@ void EPoint::ClearLocalMappedPoints() {
   local_mapped_points_.clear();
 }
 
+/*!
+ * Sets the position of the corresponding TargetEffect object in the parent EData object.
+ */
+
 void EPoint::SetTargetEffectNum(int targetEffectNum) {
   targetEffectNum_=targetEffectNum;
 }
 
+/*!
+ * Adds a sub-point to the current point object for target effect integration.
+ */
+
 void EPoint::AddSubPoint(EPoint subPoint) {
   integrationPoints_.push_back(subPoint);
 }
+
+/*!
+ * This function is called to integrate the vector of sub-points to determine 
+ * the yield considering a given target effect. The function uses Simpson's 
+ * rule to perform the integration.
+ */
 
 void EPoint::IntegrateTargetEffect() {
   double yield=0.0;
@@ -1013,13 +1031,26 @@ void EPoint::IntegrateTargetEffect() {
   this->SetFitCrossSection(yield);
 }
 
+/*!
+ * This function sets an internal pointer to the parent EData object.
+ */
+
 void EPoint::SetParentData(EData* parentData) {
   parentData_=parentData;
 }
 
+/*!
+ * This function sets the stopping cross section (effective) for the current
+ * EPoint object.  Used only for sub-point involoved in target effect integration.
+ */
+
 void EPoint::SetStoppingPower(double stoppingPower) {
  stoppingPower_=stoppingPower;
 }
+
+/*!
+ * Returns a pointer to the parent EData object.
+ */
 
 EData *EPoint::GetParentData() const {
   return parentData_;
@@ -1032,6 +1063,10 @@ EData *EPoint::GetParentData() const {
 EPoint* EPoint::GetLocalMappedPoint(int mappedPointNum) const {
   return local_mapped_points_[mappedPointNum-1];
 }
+
+/*!
+ * Returns a pointer to the specified sub-point in the current EPoint object.
+ */
 
 EPoint* EPoint::GetSubPoint(int subPoint) {
   EPoint *tempPoint;

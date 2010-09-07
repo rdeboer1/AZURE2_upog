@@ -83,7 +83,6 @@ class EPoint {
   void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
-  void CalculateTargetEffects(CNuc*,const Config &);
   void ClearLocalMappedPoints();
   void SetTargetEffectNum(int);
   void AddSubPoint(EPoint);

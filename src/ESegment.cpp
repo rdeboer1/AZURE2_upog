@@ -94,6 +94,10 @@ bool ESegment::IsPhase() const {
   return isphase_;
 }
 
+/*!
+ * Returns true if the segment has a corresponding TargetEffect object, otherwise
+ * returns false.
+ */
 
 bool ESegment::IsTargetEffect() const {
   return isTargetEffect_;
@@ -165,6 +169,11 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData) {
 int ESegment::GetL() const {
   return l_;
 }
+
+/*!
+ * Returns the position of the corresponding TargetEffect object in the vector
+ *  of the parent EData object.
+ */
 
 int ESegment::GetTargetEffectNum() const {
   return targetEffectNum_;
@@ -257,6 +266,11 @@ void ESegment::AddPoint(EPoint point) {
 void ESegment::SetSegmentChiSquared(double chiSquared) {
   segment_chi_squared_=chiSquared;
 }
+
+/*!
+ * Sets the position of the corresponding TargetEffect object in the vector
+ * of the parent EData object.
+ */
 
 void ESegment::SetTargetEffectNum(int targetEffectNum) {
   targetEffectNum_=targetEffectNum;

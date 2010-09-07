@@ -3,8 +3,18 @@
 #include <sstream>
 #include <cmath>
 
+/*!
+ * Empty constructor.
+ */
+
 Equation::Equation() {
 }
+
+/*!
+ * This constructor is used to create an Equation object with a equation 
+ * string, and a specified number of parameters.  The parameters are only 
+ * initialized, and must be set with the Equation::SetParameter() function.
+ */
 
 Equation::Equation(std::string equation, int numParams) : infixEquation_(equation) {
   for(int i=0;i<numParams;i++) {
@@ -14,15 +24,34 @@ Equation::Equation(std::string equation, int numParams) : infixEquation_(equatio
   Parse();
 }
 
+/*!
+ * This constructor is used to create and Equation object with an equation
+ * string and an already created parameter vector.  The size of the parameter 
+ * vector must correspond to the number of parameters in the equation
+ * string.
+ */
+
 Equation::Equation(std::string equation,std::vector<double> parameters) : 
   infixEquation_(equation), parameters_(parameters) {
   Parse();
 }
 
+/*!
+ * This constructor is used to create an Equation object with an equation
+ * string and an array of parameters.  The array must be of the size corresponding
+ * to the number of parameters in the equation string.  
+ */
+
 Equation::Equation(std::string equation,double parameters[], size_t arraySize) : infixEquation_(equation) {
   parameters_=std::vector<double>(parameters,parameters+arraySize/sizeof(double));
   Parse();
 }
+
+/*!
+ * If the empty constructor was used to create the Equation object, this 
+ * function can be used to set the equation string and initialize the parameter
+ * array.  The parameters must be set manually.
+ */
 
 void Equation::Initialize(std::string equation, int numParams) {
   infixEquation_=equation;
@@ -32,6 +61,15 @@ void Equation::Initialize(std::string equation, int numParams) {
   }
   Parse();
 }
+
+/*!
+ * This equation is called from all constructors, with the exception of the
+ * empty constructor, and the Equation::Initialize() function.  The purpose is 
+ * to parse an infix equation string into a vector of tokens in RPN format.  
+ * This is neccessary to evaluate the equation on-the-fly later without having 
+ * to determine precidence each time.  The function uses the shunting-yard 
+ * algorithm.
+ */
 
 void Equation::Parse() {
   int position=0;
@@ -80,14 +118,27 @@ void Equation::Parse() {
   //for(int j = 0; j<output_.size();j++) std::cout << output_[j].second << ' ';std::cout<<std::endl;
 }
 
+/*!
+ * Returns the vector containing all the parameters in the Equation object.
+ */
+
 std::vector<double> Equation::GetParameters() const {
   return parameters_;
 }
+
+/*!
+ * Sets the specified parameter.
+ */
 
 void Equation::SetParameter(int index, double value) {
   if(index<parameters_.size()) parameters_[index]=value;
   else std::cout << "ERROR: CANNOT SET PARAMETER." << std::endl;
 }
+
+/*!
+ * Used to determine if a character is an operator.  Returns true if the character
+ * is an operator, otherwise returns false.
+ */
 
 bool Equation::IsOperator(char c) const {
   if(c=='+'||c=='-'||c=='*'||c=='/'||c=='^')
@@ -95,10 +146,21 @@ bool Equation::IsOperator(char c) const {
   else return false;
 }
 
+/*!
+ * Returns true if the character is a digit between 1-9, otherwise returns 
+ * false.
+ */
+
 bool Equation::IsDigit(char c) const {
   if(c>='0'&&c<='9') return true;
   else return false;
 }
+
+/*!
+ * Reads the infix equation and returns the next token, advancing the 
+ * position in the string. The return value is a token pair, which contains
+ * the token itself as well as the type.
+ */
 
 Equation::TokenPair Equation::GetToken(int &position) const {
   TokenType tempType;
@@ -223,6 +285,10 @@ Equation::TokenPair Equation::GetToken(int &position) const {
   return TokenPair(tempType,tempString);
 } 
 
+/*!
+ * Returns the opterator enumerated type from a character.
+ */
+
 Equation::OperatorType Equation::GetOperatorType(char c) const {
   if(c=='+') return ADD;
   else if(c=='-') return SUBTRACT;
@@ -234,6 +300,10 @@ Equation::OperatorType Equation::GetOperatorType(char c) const {
     return BADTYPE;
   }
 }
+
+/*!
+ * Evaluates an operator for two specified numbers.  Returns the result in a string.
+ */
 
 std::string Equation::BinaryOperation(double left, double right, char op) const {
   std::ostringstream stm;
@@ -254,6 +324,10 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
   stm<<result;
   return stm.str();
 }
+
+/*!
+ * Evaluates a function token with a specified dependent variable.
+ */
 
 double Equation::FunctionOperation(TokenPair token, double x) const {
   std::istringstream stm;
@@ -285,6 +359,10 @@ double Equation::FunctionOperation(TokenPair token, double x) const {
   return result;
 }
 
+/*!
+ * Returns the value of a token as a double.
+ */
+
 double Equation::GetTokenValue(TokenPair token, double x) const {
   double value;
   std::istringstream stm;
@@ -305,6 +383,10 @@ double Equation::GetTokenValue(TokenPair token, double x) const {
   else value=0.0;
   return value;
 }
+
+/*!
+ * Evaluates the Equation object for a specified dependent variable.
+ */
 
 double Equation::Evaluate(double x) const {
   std::vector<TokenPair> localOutput=output_;
