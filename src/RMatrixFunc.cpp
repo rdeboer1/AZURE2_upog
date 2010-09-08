@@ -1,5 +1,8 @@
-#include "RMatrixFunc.h"
 #include "EPoint.h"
+#include "CNuc.h"
+#include "MatInv.h"
+#include "RMatrixFunc.h"
+#include <assert.h>
 
 /*!
  * The RMatrixFunc object is created with reference to a CNuc object.

@@ -1,4 +1,16 @@
+#include <iostream>
+#include <iomanip>
+#include "AngCoeff.h"
 #include "CNuc.h"
+#include "Config.h"
+#include "CoulFunc.h"
+#include "Diagonalize.h"
+#include "ECIntegral.h"
+#include "ECLine.h"
+#include "NucLine.h"
+#include "Minuit2/MnUserParameters.h"
+#include "NFIntegral.h"
+#include "ShftFunc.h"
 
 /*!
  * Returns true if a specified pair key exists in the PPair vector, otherwise returns false.

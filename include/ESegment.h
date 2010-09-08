@@ -2,8 +2,6 @@
 #define ESEGMENT_H
 
 #include "EPoint.h"
-#include "SegLine.h"
-#include "ExtrapLine.h"
 
 class EData;
 
@@ -16,8 +14,8 @@ class EData;
 
 class ESegment {
  public:
-  ESegment(SegLine); 
-  ESegment(ExtrapLine); 
+  ESegment(struct SegLine); 
+  ESegment(struct ExtrapLine); 
   bool IsInSegment(EPoint);
   bool IsDifferential() const;
   bool IsPhase() const;

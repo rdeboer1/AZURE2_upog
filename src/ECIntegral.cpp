@@ -1,6 +1,6 @@
+#include "ECIntegral.h"
 #include <math.h>
 #include <gsl/gsl_integration.h>
-#include "ECIntegral.h"
 
 struct gsl_ec_integral_params {
   CoulFunc *theCoulFunc;

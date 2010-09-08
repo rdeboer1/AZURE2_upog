@@ -1,6 +1,6 @@
+#include "ShftFunc.h"
 #include <math.h>
 #include <gsl/gsl_deriv.h>
-#include "ShftFunc.h"
 
 struct gsl_shift_function_dE_shift_params {
   int l;

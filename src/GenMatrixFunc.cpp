@@ -1,5 +1,7 @@
-#include "GenMatrixFunc.h"
+#include "CNuc.h"
 #include "EPoint.h"
+#include "GenMatrixFunc.h"
+#include <assert.h>
 
 /*!
  * The child classes AMatrixFunc or RMatrixFunc contain functions

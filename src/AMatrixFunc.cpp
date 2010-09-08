@@ -1,5 +1,9 @@
 #include "AMatrixFunc.h"
+#include "CNuc.h"
 #include "EPoint.h"
+#include "MatInv.h"
+#include <assert.h>
+
 
 /*!
  * The AMatrixFunc object is created with reference to a CNuc object.

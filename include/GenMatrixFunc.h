@@ -1,9 +1,11 @@
 #ifndef GENMATRIXFUNC_H
 #define GENMATRIXFUNC_H
 
-#include "CNuc.h"
+#include "Constants.h"
 
 class EPoint;
+class CNuc;
+
 /// A temporaray T-Matrix structure
 
 /*!

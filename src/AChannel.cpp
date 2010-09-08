@@ -1,10 +1,14 @@
 #include "AChannel.h"
+#include "Nucline.h"
+#include <math.h>
+#include <assert.h>
+
 
 /*!
  * This constructor can be used if a channel is to be created from a specific line of the nuclear input file.
  */
 
-AChannel::AChannel(NucLine nucLine, int pairNum) {
+AChannel::AChannel(struct NucLine nucLine, int pairNum) {
   l_=nucLine.l;
   s_=nucLine.s;
   pair_=pairNum;

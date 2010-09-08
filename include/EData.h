@@ -2,7 +2,9 @@
 #define EDATA_H
 
 #include "ESegment.h"
-#include "AZUREOutput.h"
+#include "TargetEffect.h"
+
+class CNuc;
 
 ///An AZURE data object
 
@@ -14,8 +16,8 @@ class EData {
  public:
   EData();
   int NumSegments() const;
-  int Fill(const Config&,CNuc*);
-  int MakePoints(const Config&,CNuc*);
+  int Fill(const struct Config&,CNuc*);
+  int MakePoints(const struct Config&,CNuc*);
   int Iterations() const;
   int NumTargetEffects() const;
   bool IsFit() const;
@@ -24,17 +26,17 @@ class EData {
   void SetErrorAnalysis(bool);
   void Iterate();
   void ResetIterations();
-  void Initialize(CNuc*,const Config&);
+  void Initialize(CNuc*,const struct Config&);
   void AddSegment(ESegment);
-  void PrintData(const Config&);
+  void PrintData(const struct Config&);
   void CalcLegendreP(int);
-  void PrintLegendreP(const Config&);
+  void PrintLegendreP(const struct Config&);
   void CalcEDependentValues(CNuc*);
-  void PrintEDependentValues(const Config&,CNuc*);
+  void PrintEDependentValues(const struct Config&,CNuc*);
   void CalcCoulombAmplitude(CNuc*);
-  void PrintCoulombAmplitude(const Config&,CNuc*); 
-  void WriteOutputFiles(const Config&);
-  void CalculateECAmplitudes(CNuc*,const Config&);
+  void PrintCoulombAmplitude(const struct Config&,CNuc*); 
+  void WriteOutputFiles(const struct Config&);
+  void CalculateECAmplitudes(CNuc*,const struct Config&);
   void MapData();
   void AddTargetEffect(TargetEffect);
   void ReadTargetEffectsFile(std::string);

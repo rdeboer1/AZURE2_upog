@@ -1,7 +1,7 @@
 #ifndef NUCLINE_H
 #define NUCLINE_H
 
-#include<fstream>
+#include <fstream>
 
 struct NucLine {
   double LevelJ;

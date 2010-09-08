@@ -1,4 +1,11 @@
+#include "AZUREOutput.h"
+#include "CNuc.h"
+#include "Config.h"
 #include "EData.h"
+#include "ExtrapLine.h"
+#include "SegLine.h"
+#include <iostream>
+#include <iomanip>
 
 /*!
  * The EData object has a private attribute containing the number of iterations needed to find the best fit parameters.

@@ -2,7 +2,6 @@
 #define AMATRIXFUNC_H
 
 #include "GenMatrixFunc.h"
-#include "MatInv.h"
 
 ///A function class to calculate the T-Matrix using the A-Matrix
 

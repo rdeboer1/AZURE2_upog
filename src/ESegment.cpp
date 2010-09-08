@@ -1,5 +1,9 @@
-#include "ESegment.h"
+#include "CNuc.h"
+#include "DataLine.h"
 #include "EData.h"
+#include "ESegment.h"
+#include "ExtrapLine.h"
+#include "SegLine.h"
 
 /*!
  * This constructor is used if the segment contains actual experimental data.  The segment

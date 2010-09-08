@@ -1,4 +1,8 @@
+#include "AZURECalc.h"
 #include "AZUREMain.h"
+#include "AZUREParams.h"
+#include "Config.h"
+#include "ReactionRate.h"
 
 int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile

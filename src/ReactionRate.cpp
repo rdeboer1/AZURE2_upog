@@ -1,4 +1,9 @@
+#include "CNuc.h"
+#include "Config.h"
+#include "EPoint.h"
 #include "ReactionRate.h"
+#include <iomanip>
+#include <iostream>
 #include <math.h>
 #include <gsl/gsl_integration.h>
 
@@ -57,6 +62,15 @@ double gsl_reactionrate_integration(double temperature,CNuc *compound,const Conf
   gsl_integration_workspace_free (w);
 
   return rate;
+}
+
+ReactionRate::ReactionRate(CNuc *compound, const vector_r&params, 
+			   const Config &configure, int entranceKey, int exitKey) : 
+  configure_(configure) {
+  compound_=compound;
+  compound_->FillCompoundFromParams(params);
+  entrance_key_=entranceKey;
+  exit_key_=exitKey;
 }
 
 /*!

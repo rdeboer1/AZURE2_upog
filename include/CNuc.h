@@ -2,18 +2,14 @@
 #define CNUC_H
 
 #include <string>
-#include <iostream>
-#include <iomanip>
-#include "NFIntegral.h"
 #include "JGroup.h"
-#include "CoulFunc.h"
-#include "ShftFunc.h"
-#include "AngCoeff.h"
-#include "Minuit2/MnUserParameters.h"
-#include "Diagonalize.h"
-#include "ECIntegral.h"
-#include "Config.h"
+#include "PPair.h"
 
+namespace ROOT {
+  namespace Minuit2 {
+    class MnUserParameters;
+  }
+}
 
 ///An AZURE compound nucleus
 
@@ -32,20 +28,20 @@ public:
   int IsPair(PPair);
   int IsJGroup(JGroup);
   int GetPairNumFromKey(int);
-  int Fill(const Config&);
+  int Fill(const struct Config&);
   int ReadECFile(std::string);
   int GetMaxLValue() const;
-  void Initialize(const Config&);
+  void Initialize(const struct Config&);
   void AddPair(PPair);
   void AddJGroup(JGroup);
-  void PrintNuc(const Config&);
+  void PrintNuc(const struct Config&);
   void TransformIn(bool);
   void SortPathways();
-  void PrintPathways(const Config&);
+  void PrintPathways(const struct Config&);
   void CalcBoundaryConditions();
-  void PrintBoundaryConditions(const Config&);
+  void PrintBoundaryConditions(const struct Config&);
   void CalcAngularDists(int);
-  void PrintAngularDists(const Config&);
+  void PrintAngularDists(const struct Config&);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillCompoundFromParams(const vector_r &);
   void TransformOut(bool);

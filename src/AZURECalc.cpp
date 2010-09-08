@@ -1,4 +1,9 @@
 #include "AZURECalc.h"
+#include "Config.h"
+#include "CNuc.h"
+#include "EData.h"
+#include <iostream>
+#include <iomanip>
 
 double AZURECalc::operator()(const vector_r&p) const {
 

@@ -1,10 +1,7 @@
 #ifndef EPOINT_H
 #define EPOINT_H
 
-#include "DataLine.h"
-#include "RMatrixFunc.h"
-#include "AMatrixFunc.h"
-#include "TargetEffect.h"
+#include "Constants.h"
 
 ///A container structure for a reference to a data point.
 
@@ -15,6 +12,10 @@ struct EnergyMap {
 
 class ESegment;
 class EData;
+class CNuc;
+class PPair;
+class TargetEffect;
+
 
 ///An AZURE data point
 
@@ -26,7 +27,7 @@ class EData;
 
 class EPoint {
  public:
-  EPoint(DataLine, ESegment*);
+  EPoint(struct DataLine, ESegment*);
   EPoint(double, double, ESegment*);
   EPoint(double, double, int, int, bool, bool, double, int);
   bool IsDifferential() const;
@@ -61,7 +62,7 @@ class EPoint {
   complex GetCoulombAmplitude() const;
   complex GetECAmplitude(int,int) const;
   EnergyMap GetMap() const;
-  void Initialize(CNuc*,const Config&);
+  void Initialize(CNuc*,const struct Config&);
   void ConvertLabEnergy(PPair*);
   void ConvertLabAngle(PPair*);
   void ConvertLabAngle(PPair*,PPair*);
@@ -80,7 +81,7 @@ class EPoint {
   void SetCoulombAmplitude(complex);
   void CalculateECAmplitudes(CNuc*);
   void AddECAmplitude(int,int,complex);
-  void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
+  void Calculate(CNuc*,const struct Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
   void ClearLocalMappedPoints();

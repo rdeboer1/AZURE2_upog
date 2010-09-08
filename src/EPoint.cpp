@@ -1,5 +1,17 @@
-#include "ESegment.h"
+#include "AMatrixFunc.h"
+#include "AngCoeff.h"
+#include "CNuc.h"
+#include "Config.h"
+#include "CoulFunc.h"
+#include "DataLine.h"
+#include "ECIntegral.h"
 #include "EData.h"
+#include "ESegment.h"
+#include "RMatrixFunc.h"
+#include "ShftFunc.h"
+#include "TargetEffect.h"
+#include <iostream>
+#include <assert.h>
 
 /*!
  * This constructor is used if the data point is to be created from a line in a data file.

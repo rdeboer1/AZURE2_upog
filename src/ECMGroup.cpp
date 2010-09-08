@@ -1,4 +1,5 @@
 #include "ECMGroup.h"
+#include <assert.h>
 
 /*!
  * This constructor is used to create hard sphere external reaction pathways. The type of radiation

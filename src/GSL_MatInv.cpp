@@ -1,7 +1,7 @@
+#include "Constants.h"
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix_complex_double.h>
 #include <iostream>
-#include "Constants.h"
 
 matrix_c MatInv(const std::vector<vector_c > &A) {
   gsl_complex x;

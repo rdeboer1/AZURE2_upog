@@ -1,4 +1,6 @@
+#include "NucLine.h"
 #include "PPair.h"
+#include <assert.h>
 
 /*!
  * A particle pair object is created from and entry in the nuclear input file.
