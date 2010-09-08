@@ -100,7 +100,7 @@ int CNuc::GetPairNumFromKey(int key) {
  * input files.  Returns -1 if the files could not be read, and 0 if the files were read successfully.
  */
 
-int CNuc::Fill(const Config &configure) {
+int CNuc::Fill(const struct Config &configure) {
   int PairNum,LevelNum,ChannelNum,JGroupNum;
   int maxLValue=0;
   std::ifstream in(configure.nucfile.c_str());
@@ -264,7 +264,7 @@ int CNuc::GetMaxLValue() const {
  * contributions and coefficients.  A CNuc object can only be initialized for use AFTER it is filled.
  */
 
-void CNuc::Initialize(const Config &configure) {
+void CNuc::Initialize(const struct Config &configure) {
   //Calculate Boundary Conditions
   std::cout << "Calculating Boundary Conditions..." << std::endl;
   this->CalcBoundaryConditions();
@@ -310,7 +310,7 @@ void CNuc::AddJGroup(JGroup jGroup) {
  * This includes all particle pairs, \f$ J^\pi \f$ groups, levels and channels.
  */
 
-void CNuc::PrintNuc(const Config &configure) {
+void CNuc::PrintNuc(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checknucleus=="file") {
@@ -760,7 +760,7 @@ void CNuc::SortPathways() {
  * Prints the internal and external reaction pathways.
  */
   
-void CNuc::PrintPathways(const Config &configure) {
+void CNuc::PrintPathways(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkpathways=="file") {
@@ -902,7 +902,7 @@ void CNuc::CalcBoundaryConditions(){
  * Prints the boundary conditions.
  */
 
-void CNuc::PrintBoundaryConditions(const Config &configure) {
+void CNuc::PrintBoundaryConditions(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkboundcon=="file") {
@@ -1040,7 +1040,7 @@ void CNuc::CalcAngularDists(int maxL) {
  * Prints the KLGroup and Interference object structure as well as the calculated coefficients.
  */
 
-void CNuc::PrintAngularDists(const Config &configure) {
+void CNuc::PrintAngularDists(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkangdists=="file") {

@@ -392,7 +392,7 @@ EnergyMap EPoint::GetMap() const {
  * to calculate all energy dependent quantities that do no rely on the R-Matrix fit parameters.
  */
 
-void EPoint::Initialize(CNuc *compound,const Config &configure) {
+void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
   this->CalcEDependentValues(compound);
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder);
@@ -856,7 +856,7 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
  * Calculates the cross section for a data point based on the fit parameters in the compound nucleus.
  */
 
-void EPoint::Calculate(CNuc* theCNuc,const Config &configure, EPoint *parent, int subPointNum) {
+void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *parent, int subPointNum) {
 
   if(this->IsTargetEffect()&&subPointNum==0&&parent==NULL) {
     for(int i = 1; i<=this->NumSubPoints();i++) {
