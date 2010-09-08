@@ -1,4 +1,6 @@
 #include "AZUREMain.h"
+#include "Config.h"
+#include "ECLine.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>

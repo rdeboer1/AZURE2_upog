@@ -28,6 +28,8 @@ struct Config {
   std::string segfile;
   ///The extrapolation segments input file name.
   std::string extrapfile;
+  ///The target effects input file name.
+  std::string targeteffectsfile;
   ///The path of the output directory
   std::string outputdir;
   ///The name of the parameters file from which to read.

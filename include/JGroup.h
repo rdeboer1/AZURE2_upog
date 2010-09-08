@@ -1,6 +1,7 @@
 #ifndef JGROUP_H
 #define JGROUP_H
 
+#include "Constants.h"
 #include "ALevel.h"
 #include "AChannel.h"
 
@@ -13,7 +14,7 @@
 
 class JGroup {
  public:
-  JGroup(NucLine);
+  JGroup(struct NucLine);
   JGroup(double,int);
   bool IsInRMatrix() const;
   int IsLevel(ALevel);

@@ -1,6 +1,17 @@
+#include "AMatrixFunc.h"
+#include "AngCoeff.h"
+#include "CNuc.h"
+#include "Config.h"
+#include "CoulFunc.h"
+#include "DataLine.h"
+#include "ECIntegral.h"
+#include "EData.h"
 #include "ESegment.h"
-
-double gsl_target_integration(EPoint *point,CNuc *compound, const Config&  configure);
+#include "RMatrixFunc.h"
+#include "ShftFunc.h"
+#include "TargetEffect.h"
+#include <iostream>
+#include <assert.h>
 
 /*!
  * This constructor is used if the data point is to be created from a line in a data file.
@@ -27,6 +38,9 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
+  targetEffectNum_=0;
+  parentData_=NULL;
+  stoppingPower_=0.0;
 }
  
 /*!
@@ -54,6 +68,9 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
+  targetEffectNum_=0;
+  parentData_=NULL;
+  stoppingPower_=0.0;
 }
   
 /*!
@@ -83,6 +100,9 @@ EPoint::EPoint(double angle, double energy, int entranceKey,
   j_value_=jValue;
   l_value_=lValue;
   is_mapped_=false;
+  targetEffectNum_=0;
+  parentData_=NULL;
+  stoppingPower_=0.0;
 }    
 
 /*!
@@ -110,6 +130,15 @@ bool EPoint::IsPhase() const {
 
 bool EPoint::IsMapped() const {
   return is_mapped_;
+}
+
+/*!
+ * This function retruns true if the point has a corresponding TargetEffect object, otherwise it returns false.
+ */
+
+bool EPoint::IsTargetEffect() const {
+  if(GetTargetEffectNum()!=0&&NumSubPoints()>0) return true;
+  else return false;
 }
 
 /*!
@@ -155,6 +184,22 @@ int EPoint::GetL() const {
 
 int EPoint::NumLocalMappedPoints() const {
   return local_mapped_points_.size();
+}
+
+/*!
+ * Returns the total number of sub-points contained within the present objet.  The sub-points are used to calculate the target effect integrals.
+ */
+
+int EPoint::NumSubPoints() const {
+  return integrationPoints_.size();
+}
+
+/*! 
+ * Returns the position of the corresponding TargetEffect object in the parent EData object.
+ */
+
+int EPoint::GetTargetEffectNum() const {
+  return targetEffectNum_;
 }
 
 /*! 
@@ -272,6 +317,14 @@ double EPoint::GetJ() const {
 }
 
 /*!
+ * For target integration to fit yield curves, the stopping power (or, rather, stopping cross section) is calculated and stored for each sub-point.  This function returns the precalculated value.
+ */
+
+double EPoint::GetStoppingPower() const {
+	return stoppingPower_;
+}
+
+/*!
  * Returns the \f$ L_o \f$ diagonal matrix element for a channel specified
  * by positions in the JGroup and subsequent AChannel vectors.
  */
@@ -339,7 +392,7 @@ EnergyMap EPoint::GetMap() const {
  * to calculate all energy dependent quantities that do no rely on the R-Matrix fit parameters.
  */
 
-void EPoint::Initialize(CNuc *compound,const Config &configure) {
+void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
   this->CalcEDependentValues(compound);
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder);
@@ -469,6 +522,9 @@ void EPoint::CalcLegendreP(int maxL) {
       }
     }
   }
+  for(int i=1;i<=this->NumSubPoints();i++) {
+    this->GetSubPoint(i)->CalcLegendreP(maxL);
+  }
 }
 
 /*!
@@ -483,8 +539,8 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
   double geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
   this->SetGeometricalFactor(geofactor);
   double sfactorconv=this->GetCMEnergy()*exp(2*pi*sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*
-					      entrancePair->GetZ(2)*sqrt(entrancePair->GetRedMass()
-									 /this->GetCMEnergy()));
+					     entrancePair->GetZ(2)*sqrt(entrancePair->GetRedMass()
+									/this->GetCMEnergy()));
   this->SetSFactorConversion(sfactorconv);
   double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
   for(int j=1;j<=theCNuc->NumJGroups();j++) {
@@ -518,11 +574,11 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
 	    complex expCP(1.0,0.0);
 	    for(int ll=1;ll<=theChannel->GetL();ll++) 
 	      expCP*=complex((double)ll/sqrt(pow(eta,2.0)+pow((double)ll,2.0)),
-					  eta/sqrt(pow(eta,2.0)+pow((double)ll,2.0)));
+			     eta/sqrt(pow(eta,2.0)+pow((double)ll,2.0)));
 	    struct CoulWaves 
 	      coul=theCoulombFunction(lValue,radius,localEnergy);
 	    complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
-					-coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
+			   -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
 	    this->AddLoElement(j,ch,loElement);
 	    this->AddSqrtPenetrability(j,ch,sqrt(localPene));
 	    this->AddExpCoulombPhase(j,ch,expCP);
@@ -538,6 +594,9 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
       }
     }
   }
+  for(int i=1;i<=this->NumSubPoints();i++) {
+    this->GetSubPoint(i)->CalcEDependentValues(theCNuc);
+  }
   for(int i=1;i<=this->NumLocalMappedPoints();i++) {
     EPoint *mappedPoint=this->GetLocalMappedPoint(i);
     mappedPoint->geofactor_=geofactor_;
@@ -546,6 +605,15 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
     mappedPoint->penetrabilities_=penetrabilities_;
     mappedPoint->coulombphase_=coulombphase_;
     mappedPoint->hardspherephase_=hardspherephase_;
+    for(int ii=1;ii<=this->NumSubPoints();ii++) {
+      EPoint *subMappedPoint=mappedPoint->GetSubPoint(ii);
+      subMappedPoint->geofactor_=this->GetSubPoint(ii)->geofactor_;
+      subMappedPoint->sfactorconv_=this->GetSubPoint(ii)->sfactorconv_;
+      subMappedPoint->lo_elements_=this->GetSubPoint(ii)->lo_elements_;
+      subMappedPoint->penetrabilities_=this->GetSubPoint(ii)->penetrabilities_;
+      subMappedPoint->coulombphase_=this->GetSubPoint(ii)->coulombphase_;
+      subMappedPoint->hardspherephase_=this->GetSubPoint(ii)->hardspherephase_;
+    }
   }
 }
 
@@ -616,6 +684,9 @@ void EPoint::CalcCoulombAmplitude(CNuc *theCNuc) {
     complex calpha(cal*cos(cex),-cal*sin(cex));
     this->SetCoulombAmplitude(calpha);
   } else this->SetCoulombAmplitude(complex(0.,0.));
+  for(int i=1;i<=this->NumSubPoints();i++) {
+    this->GetSubPoint(i)->CalcCoulombAmplitude(theCNuc);
+  }
 }
 
 /*!
@@ -765,6 +836,9 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
       }
     }
   }
+  for(int i=1;i<=this->NumSubPoints();i++) {
+    this->GetSubPoint(i)->CalculateECAmplitudes(theCNuc);
+  }
 }
 
 /*!
@@ -782,22 +856,41 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
  * Calculates the cross section for a data point based on the fit parameters in the compound nucleus.
  */
 
-void EPoint::Calculate(CNuc* theCNuc,const Config &configure) {
-  GenMatrixFunc *theMatrixFunc;
-  if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc);
-  else theMatrixFunc=new RMatrixFunc(theCNuc);
+void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *parent, int subPointNum) {
 
-  theMatrixFunc->ClearMatrices();
-  theMatrixFunc->FillMatrices(this);
-  theMatrixFunc->InvertMatrices();
-  theMatrixFunc->CalculateTMatrix(this);
-  theMatrixFunc->CalculateCrossSection(this);
-  for(int i=1;i<=this->NumLocalMappedPoints();i++) {
-    EPoint *mappedPoint = this->GetLocalMappedPoint(i);
-    theMatrixFunc->CalculateCrossSection(mappedPoint);
+  if(this->IsTargetEffect()&&subPointNum==0&&parent==NULL) {
+    for(int i = 1; i<=this->NumSubPoints();i++) {
+      EPoint *subPoint=this->GetSubPoint(i);
+      if(this->NumLocalMappedPoints()>0)
+	subPoint->Calculate(theCNuc,configure,this,i);
+      else subPoint->Calculate(theCNuc,configure);
+    }
+    this->IntegrateTargetEffect();
+    for(int i=1;i<=this->NumLocalMappedPoints();i++)
+      this->GetLocalMappedPoint(i)->IntegrateTargetEffect();
+  } else {
+    GenMatrixFunc *theMatrixFunc;
+    if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc);
+    else theMatrixFunc=new RMatrixFunc(theCNuc);
+    theMatrixFunc->ClearMatrices();
+    theMatrixFunc->FillMatrices(this);
+    theMatrixFunc->InvertMatrices();
+    theMatrixFunc->CalculateTMatrix(this);
+    theMatrixFunc->CalculateCrossSection(this);
+    if(subPointNum!=0&&parent!=NULL) {
+      for(int i=1;i<=parent->NumLocalMappedPoints();i++) {
+	EPoint *mappedSubPoint = parent->GetLocalMappedPoint(i)->
+	  GetSubPoint(subPointNum);
+	theMatrixFunc->CalculateCrossSection(mappedSubPoint);
+      }
+    } else {
+      for(int i=1;i<=this->NumLocalMappedPoints();i++) {
+	EPoint *mappedPoint = this->GetLocalMappedPoint(i);
+	theMatrixFunc->CalculateCrossSection(mappedPoint);
+      }
+    }
+    delete theMatrixFunc;
   }
-
-  delete theMatrixFunc;
 }
 
 /*!
@@ -818,16 +911,6 @@ void EPoint::AddLocalMappedPoint(EPoint *point) {
   local_mapped_points_.push_back(point);
 }
 
-/*!
- * A function that can replace EPoint::Calculate if target effects are to be included.  If implemented,
- * the user MUST set up the appropriate functions in the GSL_TargetIntegration.cpp file. 
- */
-
-void EPoint::CalculateTargetEffects(CNuc* theCNuc,const Config &configure) {
-  double yield=gsl_target_integration(this,theCNuc,configure);
-  this->SetFitCrossSection(yield);
-}
-
 /*! 
  * Clears vector containing pointers to points mapped to the current point.
  */
@@ -837,9 +920,169 @@ void EPoint::ClearLocalMappedPoints() {
 }
 
 /*!
+ * Sets the position of the corresponding TargetEffect object in the parent EData object.
+ */
+
+void EPoint::SetTargetEffectNum(int targetEffectNum) {
+  targetEffectNum_=targetEffectNum;
+}
+
+/*!
+ * Adds a sub-point to the current point object for target effect integration.
+ */
+
+void EPoint::AddSubPoint(EPoint subPoint) {
+  integrationPoints_.push_back(subPoint);
+}
+
+/*!
+ * This function is called to integrate the vector of sub-points to determine 
+ * the yield considering a given target effect. The function uses Simpson's 
+ * rule to perform the integration.
+ */
+
+void EPoint::IntegrateTargetEffect() {
+  double yield=0.0;
+  TargetEffect *targetEffect=this->GetParentData()->GetTargetEffect(this->GetTargetEffectNum());
+  double energyStep=this->GetSubPoint(1)->GetCMEnergy()-this->GetSubPoint(2)->GetCMEnergy();
+  if(targetEffect->IsConvolution()&&targetEffect->IsTargetIntegration()) {
+    int outerLowerLimit=round((this->GetSubPoint(1)->GetCMEnergy()-this->GetCMEnergy())/energyStep)+1;
+    int outerUpperLimit=outerLowerLimit-1+
+    	round(targetEffect->TargetThickness(this->GetSubPoint(outerLowerLimit)->GetCMEnergy())/energyStep);
+    double outerIntFirst=0.0;
+    double outerIntEvenSum=0.0;
+    double outerIntOddSum=0.0;
+    double outerIntegral=0.0;
+    int outerCounter=0;
+    for(int i=outerLowerLimit;i<=outerUpperLimit;i++) {
+      int innerLowerLimit;
+      if(i-round(targetEffect->convolutionRange*targetEffect->GetSigma()/energyStep)>1) 
+	innerLowerLimit=i-round(targetEffect->convolutionRange*targetEffect->GetSigma()/energyStep);
+      else innerLowerLimit=1;
+      int innerUpperLimit;
+      if(i+round(targetEffect->convolutionRange*targetEffect->GetSigma()/energyStep)-1<targetEffect->NumSubPoints())
+	innerUpperLimit=i+round(targetEffect->convolutionRange*targetEffect->GetSigma()/energyStep)-1;
+      else innerUpperLimit=targetEffect->NumSubPoints();
+      double innerIntFirst=0.0;
+      double innerIntEvenSum=0.0;
+      double innerIntOddSum=0.0;
+      double innerIntegral=0.0;
+      double centroid=this->GetSubPoint(i)->GetCMEnergy();
+      int innerCounter=0;
+      for(int ii=innerLowerLimit;ii<=innerUpperLimit;ii++) {
+	double thisEnergy=this->GetSubPoint(ii)->GetCMEnergy();
+	double innerIntegrand=this->GetSubPoint(ii)->GetFitCrossSection()/
+	  this->GetSubPoint(ii)->GetStoppingPower()/1e24*targetEffect->GetConvolutionFactor(thisEnergy,centroid);
+	if(innerCounter==0) innerIntFirst=innerIntegrand;
+	else if(innerCounter%2==0) {
+	  innerIntEvenSum+=innerIntegrand;
+	  if(innerCounter>=2) innerIntegral=energyStep/3.0*(innerIntFirst+4.0*innerIntOddSum+2.0*innerIntEvenSum-innerIntegrand);
+	} else if(innerCounter%2!=0) {
+	  innerIntOddSum+=innerIntegrand;
+	  if(innerCounter>=2) innerIntegral=energyStep/3.0*(innerIntFirst+4.0*innerIntOddSum+2.0*innerIntEvenSum-3.0*innerIntegrand);
+	}
+	innerCounter++;
+      }
+      if(outerCounter==0) outerIntFirst=innerIntegral;
+      else if(outerCounter%2==0) {
+	outerIntEvenSum+=innerIntegral;
+	if(outerCounter>=2) outerIntegral=energyStep/3.0*
+		   (outerIntFirst+4.0*outerIntOddSum+2.0*outerIntEvenSum-innerIntegral);
+      } else if(outerCounter%2!=0) {
+	outerIntOddSum+=innerIntegral;
+	if(outerCounter>=2) outerIntegral=energyStep/3.0*
+		   (outerIntFirst+4.0*outerIntOddSum+2.0*outerIntEvenSum-3.0*innerIntegral);
+      }
+      outerCounter++;
+    }
+    yield=outerIntegral;
+  } else if(targetEffect->IsConvolution()) {
+    double intFirst=0.0;
+    double intEvenSum=0.0;
+    double intOddSum=0.0;
+    double integral=0.0;
+    double centroid=this->GetCMEnergy();
+    for(int i=0;i<this->NumSubPoints();i++) {
+      double thisEnergy=this->GetSubPoint(i+1)->GetCMEnergy();
+      double integrand=this->GetSubPoint(i+1)->GetFitCrossSection()
+	*targetEffect->GetConvolutionFactor(thisEnergy,centroid);
+      /*std::cout << thisEnergy << ' '
+		<< centroid << ' '
+		<< integrand << ' ' 
+		<< targetEffect->GetConvolutionFactor(thisEnergy,centroid) << std::endl;*/
+      if(i==0) intFirst=integrand;
+      else if(i%2==0) {
+	intEvenSum+=integrand;
+	if(i>=2) integral=energyStep/3.0*(intFirst+4.0*intOddSum+2.0*intEvenSum-integrand);
+      } else if(i%2!=0) {
+	  intOddSum+=integrand;
+	  if(i>=2) integral=energyStep/3.0*(intFirst+4.0*intOddSum+2.0*intEvenSum-3.0*integrand);
+      }
+    }
+    yield=integral;
+  } else if(targetEffect->IsTargetIntegration()) {
+    double intFirst=0.0;
+    double intEvenSum=0.0;
+    double intOddSum=0.0;
+    double integral=0.0;
+    for(int i=0;i<this->NumSubPoints();i++) {
+      double thisEnergy=this->GetSubPoint(i+1)->GetCMEnergy();
+      double integrand=this->GetSubPoint(i+1)->GetFitCrossSection()/
+	this->GetSubPoint(i+1)->GetStoppingPower()/1e24;
+      if(i==0) intFirst=integrand;
+      else if(i%2==0) {
+	intEvenSum+=integrand;
+	if(i>=2) integral=energyStep/3.0*(intFirst+4.0*intOddSum+2.0*intEvenSum-integrand);
+      } else if(i%2!=0) {
+	  intOddSum+=integrand;
+	  if(i>=2) integral=energyStep/3.0*(intFirst+4.0*intOddSum+2.0*intEvenSum-3.0*integrand);
+      }
+    }
+    yield=integral;    
+  }
+  this->SetFitCrossSection(yield);
+}
+
+/*!
+ * This function sets an internal pointer to the parent EData object.
+ */
+
+void EPoint::SetParentData(EData* parentData) {
+  parentData_=parentData;
+}
+
+/*!
+ * This function sets the stopping cross section (effective) for the current
+ * EPoint object.  Used only for sub-point involoved in target effect integration.
+ */
+
+void EPoint::SetStoppingPower(double stoppingPower) {
+ stoppingPower_=stoppingPower;
+}
+
+/*!
+ * Returns a pointer to the parent EData object.
+ */
+
+EData *EPoint::GetParentData() const {
+  return parentData_;
+}
+
+/*!
  * Returns a pointer to a point mapped to the current point specified by a position in the mapped point vector.
  */
 
 EPoint* EPoint::GetLocalMappedPoint(int mappedPointNum) const {
   return local_mapped_points_[mappedPointNum-1];
+}
+
+/*!
+ * Returns a pointer to the specified sub-point in the current EPoint object.
+ */
+
+EPoint* EPoint::GetSubPoint(int subPoint) {
+  EPoint *tempPoint;
+  if(subPoint<=integrationPoints_.size()) tempPoint=&integrationPoints_[subPoint-1];
+  else tempPoint= NULL;
+  return tempPoint;
 }

@@ -1,4 +1,5 @@
 #include "JGroup.h"
+#include "NucLine.h"
 
 /*!
  * This constructor is used when a \f$ J^\pi \f$ group is created from an entry in the nuclear input file.

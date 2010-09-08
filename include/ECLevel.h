@@ -1,8 +1,6 @@
 #ifndef ECLEVEL_H
 #define ECLEVEL_H
 
-#include "ECLine.h"
-
 ///An AZURE external capture component.
 
 /*!
@@ -15,7 +13,7 @@
 
 class ECLevel {
  public:
-  ECLevel(ECLine);
+  ECLevel(struct ECLine);
   int GetMinL() const;
   int GetMaxL() const;
   int GetMaxMult() const;

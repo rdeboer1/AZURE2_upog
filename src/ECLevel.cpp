@@ -1,4 +1,5 @@
 #include "ECLevel.h"
+#include "ECLine.h"
 
 /*!
  * ECLevel objects are created from entries in the external capture file.

@@ -1,8 +1,19 @@
 #include "AZUREParams.h"
 
+/*!
+ * This function returns the MnUserParameters object used by Minuit to store 
+ * the fit parameters.
+ */
+
 ROOT::Minuit2::MnUserParameters &AZUREParams::GetMinuitParams() {
   return params_;
 }
+
+/*!
+ * This function reads the user specified parameters from a given file.  
+ * These parameters are formal R-matrix parameters, and overwrite any
+ * initial parameters determined from the nuclear input file.
+ */
 
 void AZUREParams::ReadUserParameters(std::string infile) {
   std::vector<std::string> names;
@@ -47,6 +58,10 @@ void AZUREParams::ReadUserParameters(std::string infile) {
   }
 }
 
+/*!
+ * This function writes the formal R-matrix parameters to a file.
+ */
+
 void AZUREParams::WriteUserParameters(std::string outdir, bool fitParameters) {
   char filename[256];
   if(fitParameters) sprintf(filename,"%sparam.sav",outdir.c_str());
@@ -64,6 +79,10 @@ void AZUREParams::WriteUserParameters(std::string outdir, bool fitParameters) {
     out.close();
   } else std::cout << "Could not save param.par file." << std::endl;
 }
+
+/*!
+ * This function writes the parameter errors to a file if Minos has been invoked. 
+ */
 
 void AZUREParams::WriteParameterErrors(const std::vector<std::pair<double,double> > &errors,std::string outdir) {
   char filename[256];

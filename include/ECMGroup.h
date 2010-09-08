@@ -2,7 +2,6 @@
 #define ECMGROUP_H
 
 #include "Constants.h"
-#include <assert.h>
 
 ///An AZURE external reaction pathway.
 

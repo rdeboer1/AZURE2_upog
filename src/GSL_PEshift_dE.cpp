@@ -1,5 +1,5 @@
-#include "CoulFunc.h"
 #include "Constants.h"
+#include "CoulFunc.h"
 #include <math.h>
 #include <gsl/gsl_deriv.h>
 

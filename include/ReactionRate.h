@@ -1,9 +1,11 @@
 #ifndef REACTIONRATE_H
 #define REACTIONRATE_H
 
-#include "EPoint.h"
+#include "Constants.h"
 
-extern double gsl_reactionrate_integration(double,CNuc*,const Config&,int,int);
+class CNuc;
+
+extern double gsl_reactionrate_integration(double,CNuc*,const struct Config&,int,int);
 
 ///A container structure for a reaction rate.
 
@@ -31,14 +33,7 @@ class ReactionRate {
    * The ReactionRate object is created with reference to a CNuc object, a vector of Minuit parameters,
    * a Config structure, and a set of entrance and exit pair keys.
    */
-  ReactionRate(CNuc *compound, const vector_r&params, 
-	       const Config &configure, int entranceKey, int exitKey) : 
-    configure_(configure) {
-    compound_=compound;
-    compound_->FillCompoundFromParams(params);
-    entrance_key_=entranceKey;
-    exit_key_=exitKey;
-  };
+  ReactionRate(CNuc*, const vector_r&, const struct Config &, int, int);
   /*!
    * Returns a pointer to the CNuc object.
    */
@@ -46,7 +41,7 @@ class ReactionRate {
   /*!
    * Returns a reference to the Config structure.
    */
-  const Config &configure() const {return configure_;};
+  const struct Config &configure() const {return configure_;};
   /*!
    * Returns the entrance pair key.
    */
@@ -64,7 +59,7 @@ class ReactionRate {
   int entrance_key_;
   int exit_key_;
   CNuc *compound_;
-  const Config &configure_;
+  const struct Config &configure_;
   std::vector<RateData> rates_;
 };
 

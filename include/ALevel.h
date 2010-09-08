@@ -2,7 +2,6 @@
 #define ALEVEL_H
 
 #include "Constants.h"
-#include "NucLine.h"
 
 ///An AZURE level object.
 
@@ -12,7 +11,7 @@
 
 class ALevel {
  public:
-  ALevel(NucLine);
+  ALevel(struct NucLine);
   ALevel(double);
   bool IsInRMatrix() const;
   bool EnergyFixed() const;
@@ -30,7 +29,7 @@ class ALevel {
   double GetTransformE() const;
   double GetBigGamma(int) const;
   complex GetExternalGamma(int) const;
-  void AddGamma(NucLine);
+  void AddGamma(struct NucLine);
   void AddGamma(double);
   void SetGamma(int,double);
   void SetE(double);

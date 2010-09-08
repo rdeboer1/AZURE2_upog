@@ -1,9 +1,8 @@
 #ifndef AZUREMAIN_H
 #define AZUREMAIN_H
 
-#include "AZURECalc.h"
-#include "AZUREParams.h"
-#include "ReactionRate.h"
+#include "CNuc.h"
+#include "EData.h"
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
 #include <Minuit2/MnMinos.h>
@@ -25,7 +24,7 @@ class AZUREMain {
    * The AZUREMain function class is created using a Config structure.  New CNuc and EData objects are created at initialization 
    * of an AZUREMain object.
    */
-  AZUREMain(const Config &configure) : configure_(configure) {
+  AZUREMain(const struct Config &configure) : configure_(configure) {
     compound_ = new CNuc;
     data_ = new EData;
   };
@@ -44,7 +43,7 @@ class AZUREMain {
   /*!
    * Returns a reference to the Config structure.
    */
-  const Config &configure() const {return configure_;};
+  const struct Config &configure() const {return configure_;};
   /*!
    * Returns a pointer to the CNuc object.
    */
@@ -54,7 +53,7 @@ class AZUREMain {
    */
   EData *data() const {return data_;};
  private:
-  const Config &configure_;
+  const struct Config &configure_;
   CNuc *compound_;
   EData *data_;
 };

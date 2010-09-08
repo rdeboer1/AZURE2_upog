@@ -1,10 +1,11 @@
 #include "ALevel.h"
+#include "NucLine.h"
 
 /*!
  * This constructor is used when a level object is created from an entry in the nuclear file.
  */
 
-ALevel::ALevel(NucLine nucLine) :
+ALevel::ALevel(struct NucLine nucLine) :
   level_e_(nucLine.LevelExE),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0) {
   if(nucLine.levelFix==1) energyfixed_=true;
   else energyfixed_=false;
@@ -153,7 +154,7 @@ complex ALevel::GetExternalGamma(int channelNum) const {
  * The initial reduced width amplitude is set from an entry in the nuclear input file.
  */
 
-void ALevel::AddGamma(NucLine nucLine) {
+void ALevel::AddGamma(struct NucLine nucLine) {
   double b=nucLine.Gam;
   gammas_.push_back(b);
   fitgammas_.push_back(0.0);

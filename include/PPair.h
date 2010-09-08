@@ -1,10 +1,8 @@
 #ifndef PPAIR_H
 #define PPAIR_H
 
-#include "NucLine.h"
 #include "Decay.h"
 #include "ECLevel.h"
-#include <assert.h>
 
 ///An AZURE Particle Pair
 
@@ -16,7 +14,7 @@
 
 class PPair {
 public:
-  PPair(NucLine);
+  PPair(struct NucLine);
   bool IsEntrance() const;
   bool IsECEntrance() const;
   int GetZ(int) const;
