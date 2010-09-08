@@ -1,62 +1,45 @@
-SHELL = /bin/sh
+# Running 'make install' will copy file to $(PREFIX)/bin/AZURE2
+
+PREFIX = $(HOME)
+
+# Change the variable below for the compiler.  Compiler should have 
+#  dependency generation with -M.  Ok for intel and g++.
+
+CXX = icc
+
+# Uncomment the following line if Minuit2 and Root are installed
+#  locally.
+
+CPPFLAGS =  -I$(HOME)/include 
+LFLAGS = -L$(HOME)/lib
+
+# Change the following lines for system dependent libraries.  For instace 
+# the OpenMP implimentation might change between compilers
+
+#LIBS = -lgomp #This line is needed for g++
+LIBS  = -lglib-2.0 -lncurses -limf -liomp5  #This line is needed for CRC environment.
+
+# The following portion of the makefile should not need to be changed.
+
+CPPFLAGS += -I../include 
+LIBS += -lgsl -lgslcblas -lMinuit2 -lreadline -lpthread
 
 srcdir = src
-builddir = build
 
-CXX = /usr/local/bin/g++
-CPPFLAGS = -Iinclude 
-#CPPFLAGS +=  -I../include -L../lib
-LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline -lgomp -lpthread
+export CXX
+export CPPFLAGS
+export LFLAGS
+export LIBS
 
-OBJS =  $(srcdir)/AZUREMain.o\
-	$(srcdir)/AChannel.o\
-	$(srcdir)/ALevel.o\
-	$(srcdir)/CNuc.o\
-	$(srcdir)/Config.o\
-	$(srcdir)/DataLine.o\
-	$(srcdir)/Decay.o\
-	$(srcdir)/EData.o\
-	$(srcdir)/EPoint.o\
-	$(srcdir)/ESegment.o\
-	$(srcdir)/GSL_AngCoeff.o\
-	$(srcdir)/GSL_ShftFunc.o\
-	$(srcdir)/GSL_ShftFunc_dE.o\
-	$(srcdir)/Interference.o\
-	$(srcdir)/JGroup.o\
-	$(srcdir)/KGroup.o\
-	$(srcdir)/KLGroup.o\
-	$(srcdir)/MGroup.o\
-	$(srcdir)/NucLine.o\
-	$(srcdir)/PPair.o\
-	$(srcdir)/SegLine.o\
-	$(srcdir)/AZURECalc.o\
-	$(srcdir)/GenMatrixFunc.o\
-	$(srcdir)/RMatrixFunc.o\
-	$(srcdir)/GSL_MatInv.o\
-	$(srcdir)/AZUREOutput.o\
-	$(srcdir)/AMatrixFunc.o\
-	$(srcdir)/ECLine.o\
-	$(srcdir)/ECMGroup.o\
-	$(srcdir)/ECIntegral.o\
-	$(srcdir)/NFIntegral.o\
-	$(srcdir)/GSL_Diagonalize.o\
-	$(srcdir)/GSL_PEshift_dE.o\
-	$(srcdir)/DoubleFactorial.o\
-	$(srcdir)/ExtrapLine.o\
-	$(srcdir)/ReactionRate.o\
-	$(srcdir)/ECLevel.o\
-	$(srcdir)/AZUREParams.o\
-	$(srcdir)/Equation.o\
-	$(srcdir)/TargetEffect.o
-
-AZURE2 : $(OBJS) $(srcdir)/AZURE2.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/AZURE2.cpp $(OBJS) $(LIBS)
+all :   
+	@(echo "Decending Into Source Directory....")
+	@(cd $(srcdir); $(MAKE))
 
 .PHONY : clean
-clean :
-	-rm $(OBJS)
+clean : 
+	@(echo "Cleaning Up...")
+	@(cd $(srcdir); $(MAKE) clean)
 
 .PHONY : install
-install :
-	-cp AZURE2 $(HOME)/bin
-
+install : 
+	cp AZURE2 $(PREFIX)/bin/
