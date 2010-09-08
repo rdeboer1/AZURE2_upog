@@ -41,12 +41,11 @@ SRCS =  AZUREMain.cpp\
 	ECLevel.cpp\
 	AZUREParams.cpp\
 	Equation.cpp\
-	TargetEffect.cpp\
-        AZURE2.cpp
+	TargetEffect.cpp
 
 
-../AZURE2 : $(SRCS:.cpp=.o)
-	$(CXX) $(CPPFLAGS) -o $@ $(SRCS:.cpp=.o) $(LIBS) 
+../AZURE2 : AZURE2.cpp $(SRCS:.cpp=.o)
+	$(CXX) $(CPPFLAGS) $(LFLAGS) -o $@ AZURE2.cpp $(SRCS:.cpp=.o) $(LIBS) 
 
 %.o : %.cpp | $(depsdir)
 	@$(MAKEDEPEND)
