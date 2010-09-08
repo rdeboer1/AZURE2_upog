@@ -32,7 +32,7 @@ int EData::NumSegments() const {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::Fill(const Config& configure, CNuc *theCNuc) {
+int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.segfile.c_str());
   if(!in) {
     return -1;
@@ -71,7 +71,7 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
+int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.extrapfile.c_str());
   if(!in) {
     return -1;
@@ -198,7 +198,7 @@ void EData::ResetIterations(){
  * and entire EData object instead of a single EPoint object.
  */
 
-void EData::Initialize(CNuc *compound,const Config &configure) {
+void EData::Initialize(CNuc *compound,const struct Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
   this->CalcEDependentValues(compound);
@@ -237,7 +237,7 @@ void EData::AddSegment(ESegment segment) {
  * Prints the data point after the object is filled or points are created.
  */
 
-void EData::PrintData(const Config &configure) {
+void EData::PrintData(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkdata=="file") {
@@ -334,7 +334,7 @@ void EData::CalcLegendreP(int maxL) {
  * Prints the Legendre polynomials for each point in the EData object.
  */ 
 
-void EData::PrintLegendreP(const Config &configure) {
+void EData::PrintLegendreP(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checklegpoly=="file") {
@@ -390,7 +390,7 @@ void EData::CalcEDependentValues(CNuc *theCNuc) {
  * Prints the values calculated by EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::PrintEDependentValues(const Config &configure,CNuc *theCNuc) {
+void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkpene=="file") {
@@ -461,7 +461,7 @@ void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
  * Prints the values calculated by EPoint::CalcCoulombAmplitude for each point in the entire EData object.
  */
 
-void EData::PrintCoulombAmplitude(const Config &configure,CNuc *theCNuc) {
+void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.checkcoulamp=="file") {
@@ -507,7 +507,7 @@ void EData::PrintCoulombAmplitude(const Config &configure,CNuc *theCNuc) {
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(const Config &configure) {
+void EData::WriteOutputFiles(const struct Config &configure) {
   AZUREOutput output(configure.outputdir);
   if(!configure.withData) output.SetExtrap();
   for(int i=1;i<=this->NumSegments();i++) {
@@ -539,7 +539,7 @@ void EData::WriteOutputFiles(const Config &configure) {
  * Otherwise, the amplitudes are read from the specified file.
  */
 
-void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
+void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) {
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
