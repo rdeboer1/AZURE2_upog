@@ -1,3 +1,7 @@
+# Running 'make install' will copy file to $(PREFIX)/bin/AZURE2
+
+PREFIX = $(HOME)
+
 # Change the variable below for the compiler.  Compiler should have 
 #  dependency generation with -M.  Ok for intel and g++.
 
@@ -35,3 +39,7 @@ all :
 clean : 
 	@(echo "Cleaning Up...")
 	@(cd $(srcdir); $(MAKE) clean)
+
+.PHONY : install
+install : 
+	cp AZURE2 $(PREFIX)/bin/
