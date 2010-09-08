@@ -1,5 +1,5 @@
 #include "AChannel.h"
-#include "Nucline.h"
+#include "NucLine.h"
 #include <math.h>
 #include <assert.h>
 
