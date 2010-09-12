@@ -689,16 +689,19 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
 	double forwardDepth=0.0;
 	double backwardDepth=0.0;
-	if(targetEffect->IsConvolution()&&targetEffect->IsTargetIntegration()) {
-	  backwardDepth=targetEffect->TargetThickness(point->GetCMEnergy())
-	    +targetEffect->convolutionRange*targetEffect->GetSigma();
-	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	if(targetEffect->IsTargetIntegration()) {
+	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
+	  point->SetTargetThickness(targetThickness);
+	  if(targetEffect->IsConvolution()) {
+	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
+	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	  } else {
+	    backwardDepth=targetThickness;
+	    forwardDepth=0.0;
+	  }
 	} else if(targetEffect->IsConvolution()) {
 	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	} else if(targetEffect->IsTargetIntegration()) {
-	  backwardDepth=targetEffect->TargetThickness(point->GetCMEnergy());
-	  forwardDepth=0.0;
 	}
 	for(int iii=0;iii<targetEffect->NumSubPoints();iii++) {
 	  double subEnergy=point->GetCMEnergy()+forwardDepth

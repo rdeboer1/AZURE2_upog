@@ -325,6 +325,14 @@ double EPoint::GetStoppingPower() const {
 }
 
 /*!
+ * Returns the energy loss of the beam in the target for the current EPoint object.
+ */
+
+double EPoint::GetTargetThickness() const {
+  return targetThickness_;
+}
+
+/*!
  * Returns the \f$ L_o \f$ diagonal matrix element for a channel specified
  * by positions in the JGroup and subsequent AChannel vectors.
  */
@@ -947,8 +955,7 @@ void EPoint::IntegrateTargetEffect() {
   double energyStep=this->GetSubPoint(1)->GetCMEnergy()-this->GetSubPoint(2)->GetCMEnergy();
   if(targetEffect->IsConvolution()&&targetEffect->IsTargetIntegration()) {
     int outerLowerLimit=round((this->GetSubPoint(1)->GetCMEnergy()-this->GetCMEnergy())/energyStep)+1;
-    int outerUpperLimit=outerLowerLimit-1+
-    	round(targetEffect->TargetThickness(this->GetSubPoint(outerLowerLimit)->GetCMEnergy())/energyStep);
+    int outerUpperLimit=outerLowerLimit-1+round(this->GetTargetThickness()/energyStep);
     double outerIntFirst=0.0;
     double outerIntEvenSum=0.0;
     double outerIntOddSum=0.0;
@@ -1058,6 +1065,14 @@ void EPoint::SetParentData(EData* parentData) {
 
 void EPoint::SetStoppingPower(double stoppingPower) {
  stoppingPower_=stoppingPower;
+}
+
+/*!
+ * This functions sets the energy loss of the beam in the target for the current EPoint object.
+ */
+
+void EPoint::SetTargetThickness(double targetThickness) {
+  targetThickness_=targetThickness;
 }
 
 /*!
