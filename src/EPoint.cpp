@@ -19,7 +19,7 @@
  * the EPoint object.
  */
 
-EPoint::EPoint(DataLine dataLine, ESegment *parent) {
+EPoint::EPoint(struct DataLine dataLine, ESegment *parent) {
   entrance_key_=parent->GetEntranceKey();
   exit_key_=parent->GetExitKey();
   cm_angle_=dataLine.angle;

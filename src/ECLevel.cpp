@@ -5,7 +5,7 @@
  * ECLevel objects are created from entries in the external capture file.
  */
 
-ECLevel::ECLevel(ECLine ecLine) {
+ECLevel::ECLevel(struct ECLine ecLine) {
   min_ec_lvalue_=ecLine.limin;
   max_ec_lvalue_=ecLine.limax;
   max_ec_mult_=ecLine.maxmult;

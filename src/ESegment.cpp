@@ -10,7 +10,7 @@
  * is created with reference to an entry in the segments data file.
  */
 
-ESegment::ESegment(SegLine segLine) {
+ESegment::ESegment(struct SegLine segLine) {
   entrancekey_=segLine.entrancekey;
   exitkey_=segLine.exitkey;
   min_e_=segLine.min_e;
@@ -42,7 +42,7 @@ ESegment::ESegment(SegLine segLine) {
  * extrapolation file.
  */
 
-ESegment::ESegment(ExtrapLine extrapLine) {
+ESegment::ESegment(struct ExtrapLine extrapLine) {
   entrancekey_=extrapLine.entrancekey;
   exitkey_=extrapLine.exitkey;
   min_e_=extrapLine.min_e;
