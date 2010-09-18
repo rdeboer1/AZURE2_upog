@@ -56,6 +56,7 @@ class EPoint {
   double GetSqrtPenetrability(int,int) const;
   double GetJ() const;
   double GetStoppingPower() const;
+  double GetTargetThickness() const;
   complex GetLoElement(int,int) const;
   complex GetExpCoulombPhase(int,int) const;
   complex GetExpHardSpherePhase(int,int) const;
@@ -90,6 +91,7 @@ class EPoint {
   void IntegrateTargetEffect();
   void SetParentData(EData*);
   void SetStoppingPower(double);
+  void SetTargetThickness(double);
   EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
   EPoint* GetSubPoint(int);
@@ -114,6 +116,7 @@ class EPoint {
   double sfactorconv_;
   double j_value_;
   double stoppingPower_;
+  double targetThickness_;
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;

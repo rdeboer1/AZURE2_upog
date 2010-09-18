@@ -559,22 +559,32 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	int ir=theCNuc->GetPairNumFromKey(this->GetSegment(i)->GetExitKey());
 	if(entrancePair->GetECLevel(ec)->GetPairNum()==ir) {
 	  if(!configure.oldECFile) {
-	    std::cout << "\tSegment #" << i << std::endl;
-	    double percent=0.1;
-	    double dpercent=0.1;
-	    for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-	      if(ii<=percent*this->GetSegment(i)->NumPoints()&&
-		 ii+1>percent*this->GetSegment(i)->NumPoints()) {
-		std::cout << "\t\t" << percent*100 << "%" << std::endl;
+	    std::cout << "\tSegment #" << i << " [                         ] 0%";std::cout.flush();
+	    double percent=0.05;
+	    double dpercent=0.05;
+	    int numPoints=this->GetSegment(i)->NumPoints();
+	    for(int ii=1;ii<=numPoints;ii++) {
+	      if(ii<=percent*numPoints&&ii+1>percent*numPoints) {
+		std::string progress=" [";
+		for(int j = 1;j<=25;j++) {
+		  if(percent>=j*0.04) progress+='*';
+		  else progress+=' ';
+		} progress+="] ";
+		std::cout << "\r\tSegment #" << i << progress << percent*100 << '%';std::cout.flush();
 		percent+=dpercent;
-	      } else if(ii>=percent*this->GetSegment(i)->NumPoints()) {
-		while(ii>=percent*this->GetSegment(i)->NumPoints()&&
-		      percent<=1.) percent+=dpercent;
-		std::cout << "\t\t" << percent*100 << "%" << std::endl;
+	      } else if(ii>percent*numPoints) {
+		while(ii>percent*numPoints&&percent<1.) percent+=dpercent;
+		std::string progress=" [";
+		for(int j = 1;j<=25;j++) {
+		  if(percent>=j*0.04) progress+='*';
+		  else progress+=' ';
+		} progress+="] ";
+		std::cout << "\r\tSegment #" << i << progress << percent*100 << '%';std::cout.flush();
 		percent+=dpercent;
 	      }
 	      if(!segment->GetPoint(ii)->IsMapped()) segment->GetPoint(ii)->CalculateECAmplitudes(theCNuc);
 	    }
+	    std::cout << std::endl;
 	  }
 	  for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
 	    if(!segment->GetPoint(ii)->IsMapped()) {
@@ -689,16 +699,19 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
 	double forwardDepth=0.0;
 	double backwardDepth=0.0;
-	if(targetEffect->IsConvolution()&&targetEffect->IsTargetIntegration()) {
-	  backwardDepth=targetEffect->TargetThickness(point->GetCMEnergy())
-	    +targetEffect->convolutionRange*targetEffect->GetSigma();
-	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	if(targetEffect->IsTargetIntegration()) {
+	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
+	  point->SetTargetThickness(targetThickness);
+	  if(targetEffect->IsConvolution()) {
+	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
+	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	  } else {
+	    backwardDepth=targetThickness;
+	    forwardDepth=0.0;
+	  }
 	} else if(targetEffect->IsConvolution()) {
 	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	} else if(targetEffect->IsTargetIntegration()) {
-	  backwardDepth=targetEffect->TargetThickness(point->GetCMEnergy());
-	  forwardDepth=0.0;
 	}
 	for(int iii=0;iii<targetEffect->NumSubPoints();iii++) {
 	  double subEnergy=point->GetCMEnergy()+forwardDepth

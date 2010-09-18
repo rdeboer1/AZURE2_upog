@@ -6,7 +6,7 @@
  * A particle pair object is created from and entry in the nuclear input file.
  */
 
-PPair::PPair(NucLine nucLine) 
+PPair::PPair(struct NucLine nucLine) 
 {
   pair_z_[0]=nucLine.Z1;
   pair_z_[1]=nucLine.Z2;

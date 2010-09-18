@@ -1,7 +1,7 @@
 #include "Equation.h"
 #include <iostream>
-#include <sstream>
 #include <cmath>
+#include <cstdlib>
 
 /*!
  * Empty constructor.
@@ -17,11 +17,16 @@ Equation::Equation() {
  */
 
 Equation::Equation(std::string equation, int numParams) : infixEquation_(equation) {
-  for(int i=0;i<numParams;i++) {
-    double tempDouble=0.0;
-    parameters_.push_back(tempDouble);
+  if(equation.size()!=0){
+    for(int i=0;i<numParams;i++) {
+      double tempDouble=0.0;
+      parameters_.push_back(tempDouble);
+    }
+    Parse();
+  } else {
+    std::cout << "Error: empty equation." << std::endl;
+    std::exit(-1);
   }
-  Parse();
 }
 
 /*!
@@ -33,7 +38,12 @@ Equation::Equation(std::string equation, int numParams) : infixEquation_(equatio
 
 Equation::Equation(std::string equation,std::vector<double> parameters) : 
   infixEquation_(equation), parameters_(parameters) {
-  Parse();
+  if(equation.size()!=0){
+    Parse();
+  } else {
+    std::cout << "Error: empty equation." << std::endl;
+    std::exit(-1);
+  }
 }
 
 /*!
@@ -43,8 +53,13 @@ Equation::Equation(std::string equation,std::vector<double> parameters) :
  */
 
 Equation::Equation(std::string equation,double parameters[], size_t arraySize) : infixEquation_(equation) {
-  parameters_=std::vector<double>(parameters,parameters+arraySize/sizeof(double));
-  Parse();
+  if(equation.size()!=0){
+    parameters_=std::vector<double>(parameters,parameters+arraySize/sizeof(double));
+    Parse();
+  } else {
+    std::cout << "Error: empty equation." << std::endl;
+    std::exit(-1);
+  }
 }
 
 /*!
@@ -54,12 +69,17 @@ Equation::Equation(std::string equation,double parameters[], size_t arraySize) :
  */
 
 void Equation::Initialize(std::string equation, int numParams) {
-  infixEquation_=equation;
-  for(int i=0;i<numParams;i++) {
-    double tempDouble=0.0;
-    parameters_.push_back(tempDouble);
+  if(equation.size()!=0){
+    infixEquation_=equation;
+    for(int i=0;i<numParams;i++) {
+      double tempDouble=0.0;
+      parameters_.push_back(tempDouble);
+    }
+    Parse();
+  } else {
+    std::cout << "Error: empty equation." << std::endl;
+    std::exit(-1);
   }
-  Parse();
 }
 
 /*!
@@ -72,52 +92,84 @@ void Equation::Initialize(std::string equation, int numParams) {
  */
 
 void Equation::Parse() {
-  int position=0;
-  std::vector<TokenPair> stack;
-  while(position<infixEquation_.length()) {
-    TokenPair tempPair=GetToken(position);
-    if(tempPair.first==NUMBER||tempPair.first==PARAMETER||tempPair.first==VARIABLE||tempPair.first==FUNCTION) {
-      output_.push_back(tempPair);
-    } else if(tempPair.first==OPERATOR) {
-      if(stack.size()==0) stack.push_back(tempPair);
-      else while(stack.size()>0) {
-        if(IsOperator(stack[stack.size()-1].second[0])) {
-	  char lastChar=stack[stack.size()-1].second[0];
-	  if(GetOperatorType(tempPair.second[0])<=GetOperatorType(lastChar)) {
-	    output_.push_back(stack[stack.size()-1]);
-	    stack.pop_back();
-	    if(stack.size()==0) {
+  try{
+    unsigned int position=0;
+    std::vector<TokenPair> stack;
+    //Initial expectation list
+    unsigned char expecting = FUNCTION|NUMBER|PARAMETER|VARIABLE|LEFTPAR;
+    while(position<infixEquation_.length()) {
+      //Retrieve token
+      TokenPair tempPair=GetToken(position);
+      //If last token, enforce additional expectations.
+      if(position>=infixEquation_.length()) 
+	expecting&=FUNCTION|NUMBER|PARAMETER|VARIABLE|RIGHTPAR;
+      //Check token against expectations
+      if(!(expecting&tempPair.first)) throw SyntaxError(infixEquation_,3,position-1);
+      //Set new expectations for next token
+      if(tempPair.first==NUMBER || tempPair.first==VARIABLE || 
+	 tempPair.first==PARAMETER || tempPair.first==FUNCTION) expecting=OPERATOR|RIGHTPAR;
+      else if(tempPair.first==OPERATOR || tempPair.first==LEFTPAR) expecting=FUNCTION|NUMBER|PARAMETER|VARIABLE|LEFTPAR;
+      else if(tempPair.first==RIGHTPAR) expecting=OPERATOR|RIGHTPAR;
+      //Shunting yard algorithm
+      // Numbers, functions, parameters, and variable go directly to output
+      if(tempPair.first==NUMBER||tempPair.first==PARAMETER||tempPair.first==VARIABLE||tempPair.first==FUNCTION) {
+	output_.push_back(tempPair);
+      } else if(tempPair.first==OPERATOR) {
+	if(stack.size()==0) stack.push_back(tempPair);
+	else while(stack.size()>0) {
+	    //if top of stack is an operator
+	    if(stack[stack.size()-1].first==OPERATOR) {
+	      char lastChar=stack[stack.size()-1].second[0];
+	      //check precidence and associativity, while conditions are met move from stack to output
+	      if((GetOperatorType(tempPair.second[0])<=GetOperatorType(lastChar)&&
+		  GetOperatorAssociativity(tempPair.second[0])==LEFT)||
+		 (GetOperatorType(tempPair.second[0])<GetOperatorType(lastChar)&&
+		  GetOperatorAssociativity(tempPair.second[0])==RIGHT)) {
+		output_.push_back(stack[stack.size()-1]);
+		stack.pop_back();
+		//if stack is empty, push new operator on stack and break loop
+		if(stack.size()==0) {
+		  stack.push_back(tempPair);
+		  break;
+		}
+	      } else {
+		//if conditions aren't met, push new operator on stack and break loop
+		stack.push_back(tempPair);
+		break;
+	      }
+	    } else {
+	      //if top of stack is not operator, push new operator on stack and break loop
 	      stack.push_back(tempPair);
 	      break;
 	    }
-	  } else {
-	    stack.push_back(tempPair);
-	    break;
 	  }
-	} else {
-	  stack.push_back(tempPair);
-	  break;
+      } else if(tempPair.first==LEFTPAR) {
+	//left parentheses go directly to the stack
+	stack.push_back(tempPair);
+      } else if(tempPair.first==RIGHTPAR) {
+	//right parentheses initiate push of stack to output until left parenthesis is found
+	while(stack.size()>0&&stack[stack.size()-1].first!=LEFTPAR) {
+	  output_.push_back(stack[stack.size()-1]);
+	  stack.pop_back();
 	}
+	if(stack.size()==0) {
+	  //if stack is empty, parentheses were mismatched
+	  throw SyntaxError(infixEquation_,2,position-1);
+	} else if(stack[stack.size()-1].first==LEFTPAR) stack.pop_back();
       }
-    } else if(tempPair.first==LEFTPAR) {
-      stack.push_back(tempPair);
-    }else if(tempPair.first==RIGHTPAR) {
-      while(stack.size()>0&&stack[stack.size()-1].first!=LEFTPAR) {
-	output_.push_back(stack[stack.size()-1]);
-	stack.pop_back();
-      }
-      if(stack.size()==0) {
-	std::cout << "Mismatched Parenthesis." << std::endl;
-      } else if(stack[stack.size()-1].first==LEFTPAR) stack.pop_back();
     }
+    //push remaining stack to output after all tokens are read
+    while(stack.size()>0) {
+      //if left parenthesis is found, parentheses were mismatched
+      if(stack[stack.size()-1].first==LEFTPAR) throw SyntaxError(infixEquation_,2);
+      output_.push_back(stack[stack.size()-1]);
+      stack.pop_back();
+    }
+  } catch (SyntaxError e) {
+    std::cout << e.what() << std::endl;
+    std::exit(-1);
   }
-  while(stack.size()>0) {
-    output_.push_back(stack[stack.size()-1]);
-    stack.pop_back();
-  }
-  //for(int j = 0; j<output_.size();j++) std::cout << output_[j].second << ' ';std::cout<<std::endl;
 }
-
 /*!
  * Returns the vector containing all the parameters in the Equation object.
  */
@@ -130,9 +182,11 @@ std::vector<double> Equation::GetParameters() const {
  * Sets the specified parameter.
  */
 
-void Equation::SetParameter(int index, double value) {
-  if(index<parameters_.size()) parameters_[index]=value;
-  else std::cout << "ERROR: CANNOT SET PARAMETER." << std::endl;
+void Equation::SetParameter(unsigned int index, double value) {
+  if(index<parameters_.size()) {
+    parameters_[index]=value;
+    for(unsigned int i = 0; i<subEquations_.size(); i++) subEquations_[i].SetParameter(index,value);
+  } else std::cout << "ERROR: CANNOT SET PARAMETER." << std::endl;
 }
 
 /*!
@@ -162,142 +216,185 @@ bool Equation::IsDigit(char c) const {
  * the token itself as well as the type.
  */
 
-Equation::TokenPair Equation::GetToken(int &position) const {
-  TokenType tempType;
-  std::string tempString;
-  //Number (positive decimal, integer, or exponential notation)
-  if(IsDigit(infixEquation_[position])) {
-    tempType=NUMBER;
-    while((IsDigit(infixEquation_[position])||infixEquation_[position]=='.'||infixEquation_[position]=='e'
-	   ||(infixEquation_[position]=='-'&&infixEquation_[position-1]=='e')
-	   ||(infixEquation_[position]=='+'&&infixEquation_[position-1]=='e'))
-	  &&position<infixEquation_.length()) {
-      tempString+=infixEquation_[position];
-      position++;
+Equation::TokenPair Equation::GetToken(unsigned int &position) {
+  try {
+    TokenType tempType;
+    std::string tempString;
+    //Number (positive decimal, integer, or exponential notation)
+    if(IsDigit(infixEquation_[position])||infixEquation_[position]=='.') {
+      tempType=NUMBER;
+      while((IsDigit(infixEquation_[position])||infixEquation_[position]=='.'||infixEquation_[position]=='e'||infixEquation_[position]=='E'
+	     ||(infixEquation_[position]=='-'&&(infixEquation_[position-1]=='e'||infixEquation_[position-1]=='E'))
+	     ||(infixEquation_[position]=='+'&&(infixEquation_[position-1]=='e'||infixEquation_[position-1]=='E')))
+	    &&position<infixEquation_.length()) {
+	tempString+=infixEquation_[position];
+	position++;
+      }
     }
-  }
-  //Check for negation
-  else if(infixEquation_[position]=='-'&&(position==0||IsOperator(infixEquation_[position-1])||
+    //Check for negation. Implimented as a function.  MUST be checked before minus is parsed as an operator.
+    else if(infixEquation_[position]=='-'&&(position==0||IsOperator(infixEquation_[position-1])||
 					    infixEquation_[position-1]=='(')) {
-    tempType=FUNCTION;
-    position++;
-    tempString="neg";
-    while(infixEquation_[position]!=')'&&!IsOperator(infixEquation_[position])&&position<infixEquation_.length()) {
-      tempString+=infixEquation_[position];
+      tempType=FUNCTION;
       position++;
+      tempString="neg";
     }
-  }
-  //Operator (+,-,*,/, or ^)
-  else if(IsOperator(infixEquation_[position])) {
-    tempType=OPERATOR;
-    tempString+=infixEquation_[position];
-    position++;
-  } 
-  //Parameter (only 10 supported currently, must be of form a0,a1,...)
-  else if(infixEquation_[position]=='a'&&IsDigit(infixEquation_[position+1])) {
-    tempType=PARAMETER;
-    position++;
-    std::istringstream stm;
-    stm.str(infixEquation_.substr(position,1));
-    int paramNumber;stm>>paramNumber;
-    if(paramNumber+1>parameters_.size()) 
-      std::cout << "ERROR: PARAMETER IN " << infixEquation_ 
-		<< " AT POSITION " << position 
-		<< " IS GREATER THAN NUMBER OF SPECIFIED PARAMETERS." 
-		<< std::endl;
-    tempString+=infixEquation_[position];
-    position++;
-  } 
-  //Dependent variable
-  else if(infixEquation_[position]=='x') {
-    tempType=VARIABLE;
-    tempString+=infixEquation_[position];
-    position++;
-  } 
-  //Left Parenthesis
-  else if(infixEquation_[position]=='(') {
-    tempType=LEFTPAR;
-    tempString+=infixEquation_[position];
-    position++;
-  } 
-  //Right Parenthesis
-  else if(infixEquation_[position]==')') {
-    tempType=RIGHTPAR;
-    tempString+=infixEquation_[position];
-    position++;
-  } 
-  //Functions (currently supports: exp, sin, cos, tan)
-  else if(infixEquation_[position]=='e'&&
-	    (infixEquation_.substr(position,4)=="exp("||infixEquation_.substr(position,3)=="e^(")) { 
-    tempType=FUNCTION;
-    if(infixEquation_.substr(position,4)=="exp(") position+=4;
-    else position+=3;
-    tempString="exp";
-    int parenCount=0;
-    while(infixEquation_[position]!=')'||parenCount!=0) {
-      if(infixEquation_[position]=='(') parenCount++;
-      else if(infixEquation_[position]==')') parenCount--;
+    //Operator (+,-,*,/, or ^)
+    else if(IsOperator(infixEquation_[position])) {
+      tempType=OPERATOR;
       tempString+=infixEquation_[position];
       position++;
-    } position++;
-  } else if(infixEquation_.substr(position,4)=="sin(") {
-    tempType=FUNCTION;
-    position+=4;
-    tempString="sin";
-    int parenCount=0;
-    while(infixEquation_[position]!=')'||parenCount!=0) {
-      if(infixEquation_[position]=='(') parenCount++;
-      else if(infixEquation_[position]==')') parenCount--;
+    } 
+    //Parameter (must be of form a0,a1,...)
+    else if(infixEquation_[position]=='a'&&IsDigit(infixEquation_[position+1])) {
+      tempType=PARAMETER;
+      position++;
+      while(IsDigit(infixEquation_[position])&&position<infixEquation_.length()) {
+	tempString+=infixEquation_[position];
+	position++;
+      }
+      std::istringstream stm;
+      stm.str(tempString);
+      unsigned int paramNumber;stm>>paramNumber;
+      if(paramNumber+1>parameters_.size()) throw SyntaxError(infixEquation_,1,position-1);
+    } 
+    //Dependent variable
+    else if(infixEquation_[position]=='x') {
+      tempType=VARIABLE;
       tempString+=infixEquation_[position];
       position++;
-    } position++;
-  } else if(infixEquation_.substr(position,4)=="cos(") {
-    tempType=FUNCTION;
-    position+=4;
-    tempString="cos";
-    int parenCount=0;
-    while(infixEquation_[position]!=')'||parenCount!=0) {
-      if(infixEquation_[position]=='(') parenCount++;
-      else if(infixEquation_[position]==')') parenCount--;
+    } 
+    //Left Parenthesis
+    else if(infixEquation_[position]=='(') {
+      tempType=LEFTPAR;
       tempString+=infixEquation_[position];
       position++;
-    } position++;
-  } else if(infixEquation_.substr(position,4)=="tan(") {
-    tempType=FUNCTION;
-    position+=4;
-    tempString="tan";
-    int parenCount=0;
-    while(infixEquation_[position]!=')'||parenCount!=0) {
-      if(infixEquation_[position]=='(') parenCount++;
-      else if(infixEquation_[position]==')') parenCount--;
+    } 
+    //Right Parenthesis
+    else if(infixEquation_[position]==')') {
+      tempType=RIGHTPAR;
       tempString+=infixEquation_[position];
       position++;
-    } position++;
-  }
-  //Unrecognized Tokens
-  else {
-    std::cout << "ERROR: BAD TOKEN IN " << infixEquation_ 
-	      << " AT INDEX " << position << std::endl;
-    tempType=BADTOKEN;
-    position++;
-  }
-  //std::cout << tempType << ' ' << tempString << std::endl; 
-  return TokenPair(tempType,tempString);
-} 
+    } 
+    //Functions (currently supports: exp, sin, cos, tan, ln, log)
+    else if(infixEquation_[position]=='e'&&
+	    (infixEquation_.substr(position,4)=="exp("||
+	     infixEquation_.substr(position,3)=="e^(")) { 
+      tempType=FUNCTION;
+      if(infixEquation_.substr(position,4)=="exp(") position+=4;
+      else position+=3;
+      tempString="exp";
+    } else if(infixEquation_.substr(position,4)=="sin(") {
+      tempType=FUNCTION;
+      position+=4;
+      tempString="sin";
+    } else if(infixEquation_.substr(position,4)=="cos(") {
+      tempType=FUNCTION;
+      position+=4;
+      tempString="cos";
+    } else if(infixEquation_.substr(position,4)=="tan(") {
+      tempType=FUNCTION;
+      position+=4;
+      tempString="tan";
+    } else if(infixEquation_.substr(position,4)=="log(") {
+      tempType=FUNCTION;
+      position+=4;
+      tempString="log";
+    } else if(infixEquation_.substr(position,3)=="ln(") {
+      tempType=FUNCTION;
+      position+=3;
+      tempString="ln";
+    } else if(infixEquation_.substr(position,5)=="asin(") {
+      tempType=FUNCTION;
+      position+=5;
+      tempString="asin";
+    } else if(infixEquation_.substr(position,5)=="acos(") {
+      tempType=FUNCTION;
+      position+=5;
+      tempString="acos";
+    } else if(infixEquation_.substr(position,5)=="atan(") {
+      tempType=FUNCTION;
+      position+=5;
+      tempString="atan";
+    } else if(infixEquation_.substr(position,5)=="sqrt(") {
+      tempType=FUNCTION;
+      position+=5;
+      tempString="sqrt";
+    } 
+    //Unrecognized Tokens
+    else throw SyntaxError(infixEquation_,0,position);
+    //Read subequation if token is function
+    if(tempType==FUNCTION) {
+      std::string subString;
+      //for negation, read until an operator, or unmatched right paranthesis, is found
+      //  and create subequation
+      if(tempString=="neg") {
+	int parenCount=0;
+	while(((infixEquation_[position]!=')'&&
+		!(IsOperator(infixEquation_[position])&&
+		  !(infixEquation_[position-1]=='e'||infixEquation_[position-1]=='E')))||
+	       parenCount!=0)&&
+	      position<infixEquation_.length()) {
+	  if(infixEquation_[position]=='(') parenCount++;
+	  else if(infixEquation_[position]==')') parenCount--;
+	  subString+=infixEquation_[position];
+	  position++;
+	}
+	if(parenCount>0&&position>=infixEquation_.length()) throw SyntaxError(infixEquation_,2);
+      } else {
+	//for regular functions, read until closing right parenthesis is found
+	// and create subequation
+	int parenCount=1;
+	while(parenCount>0&&position<infixEquation_.length()) {
+	  if(infixEquation_[position]=='(') parenCount++;
+	  else if(infixEquation_[position]==')') parenCount--;
+	  if(parenCount!=0) subString+=infixEquation_[position];
+	  position++;
+	}
+	if(parenCount>0&&position>=infixEquation_.length()) throw SyntaxError(infixEquation_,2);
+      }
+      Equation subEquation(subString,parameters_);
+      subEquations_.push_back(subEquation);
+      int subIndex=subEquations_.size()-1;
+      std::ostringstream stm;
+      stm << subIndex;
+      tempString+=stm.str();
+    }
+    return TokenPair(tempType,tempString);
+  } catch (SyntaxError e) {
+    std::cout << e.what() << std::endl;
+    std::exit(-1);
+  } 
+}
 
 /*!
  * Returns the opterator enumerated type from a character.
  */
 
 Equation::OperatorType Equation::GetOperatorType(char c) const {
-  if(c=='+') return ADD;
-  else if(c=='-') return SUBTRACT;
-  else if(c=='*') return MULT;
-  else if(c=='/') return DIVIDE;
-  else if(c=='^') return POWER;
-  else {
-    std::cout << "WARNING: BAD OPERATOR " << c << std::endl;
-    return BADTYPE;
+  switch (c) {
+    case '+': return ADD;
+    case '-': return SUBTRACT;
+    case '*': return MULT;
+    case '/': return DIVIDE;
+    case '^': return POWER;
+    default :
+      std::cout << "WARNING: BAD OPERATOR " << c << std::endl;
+      return BADTYPE;
+  }
+}
+
+/*!
+ * Returns the Associativity of the operator as an enumerated type.
+ */
+
+Equation::Associativity Equation::GetOperatorAssociativity(char c) const {
+  switch (c) {
+    case '+': return LEFT;
+    case '-': return LEFT;
+    case '*': return LEFT;
+    case '/': return LEFT;
+    case '^': return RIGHT;
+    default : return LEFT;
   }
 }
 
@@ -309,17 +406,27 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
   std::ostringstream stm;
   stm.precision(15);
   double result;
-  if(op=='+') result=left+right;
-  else if(op=='-') result=left-right;
-  else if(op=='*') result=left*right;
-  else if(op=='/') result=left/right;
-  else if(op=='^') {
-    if(left<0.0&&fabs(int(right)-right)>0.0)
-      std::cout << "WARNING: NEGATIVE ARGUMENT RAISED TO FRACTIONAL POWER." << std::endl;
+  switch(op) {
+    case '+': 
+      result=left+right;
+      break;
+    case '-': 
+      result=left-right;
+      break;
+    case '*': 
+      result=left*right;
+      break;
+    case '/': 
+      result=left/right;
+      break;
+    case '^': 
+      if(left<0.0&&fabs(int(right)-right)>0.0)
+	std::cout << "WARNING: NEGATIVE ARGUMENT RAISED TO FRACTIONAL POWER." << std::endl;
       result=pow(left,right);
-  } else {
-    result=0.0;
-    std::cout << "WARNING: BAD OPERATOR " << op << std::endl;
+      break;
+    default:
+      result=0.0;
+      std::cout << "WARNING: BAD OPERATOR " << op << std::endl;
   }
   stm<<result;
   return stm.str();
@@ -330,28 +437,73 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
  */
 
 double Equation::FunctionOperation(TokenPair token, double x) const {
-  std::istringstream stm;
   double result;
   if(token.second.substr(0,3)=="exp") {
-    std::string valueString=token.second.substr(3);
-    Equation tempEquation(valueString,GetParameters());
-    result=exp(tempEquation.Evaluate(x));
+    unsigned int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=exp(subEquations_[subEquationIndex].Evaluate(x));
   } else if(token.second.substr(0,3)=="sin") {
-    std::string valueString=token.second.substr(3);
-    Equation tempEquation(valueString,GetParameters());
-    result=sin(tempEquation.Evaluate(x));
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=sin(subEquations_[subEquationIndex].Evaluate(x));
   } else if(token.second.substr(0,3)=="cos") {
-    std::string valueString=token.second.substr(3);
-    Equation tempEquation(valueString,GetParameters());
-    result=cos(tempEquation.Evaluate(x));
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=cos(subEquations_[subEquationIndex].Evaluate(x));
   } else if(token.second.substr(0,3)=="tan") {
-    std::string valueString=token.second.substr(3);
-    Equation tempEquation(valueString,GetParameters());
-    result=tan(tempEquation.Evaluate(x));
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=tan(subEquations_[subEquationIndex].Evaluate(x));
   }  else if(token.second.substr(0,3)=="neg") {
-    std::string valueString=token.second.substr(3);
-    Equation tempEquation(valueString,GetParameters());
-    result=-1.*tempEquation.Evaluate(x);
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=-1.*subEquations_[subEquationIndex].Evaluate(x);
+  } else if(token.second.substr(0,3)=="log") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(3));
+    stm>>subEquationIndex;
+    result=log10(subEquations_[subEquationIndex].Evaluate(x));
+  } else if(token.second.substr(0,2)=="ln") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(2));
+    stm>>subEquationIndex;
+    result=log(subEquations_[subEquationIndex].Evaluate(x));
+  } else if(token.second.substr(0,4)=="asin") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(4));
+    stm>>subEquationIndex;
+    result=asin(subEquations_[subEquationIndex].Evaluate(x));
+  } else if(token.second.substr(0,4)=="acos") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(4));
+    stm>>subEquationIndex;
+    result=acos(subEquations_[subEquationIndex].Evaluate(x));
+  } else if(token.second.substr(0,4)=="atan") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(4));
+    stm>>subEquationIndex;
+    result=atan(subEquations_[subEquationIndex].Evaluate(x));
+  } else if(token.second.substr(0,4)=="sqrt") {
+    int subEquationIndex;
+    std::istringstream stm;
+    stm.str(token.second.substr(4));
+    stm>>subEquationIndex;
+    result=sqrt(subEquations_[subEquationIndex].Evaluate(x));
   } else {
     result=0.0;
     std::cout << "ERROR: UNRECOGNIZED FUNCTION" << std::endl;
@@ -373,7 +525,7 @@ double Equation::GetTokenValue(TokenPair token, double x) const {
   } else if(token.first==VARIABLE) {
     value=x;
   } else if(token.first==PARAMETER) {
-    int paramNumber;
+    unsigned int paramNumber;
     stm.clear();
     stm.str(token.second);
     stm >> paramNumber;

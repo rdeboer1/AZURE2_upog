@@ -5,7 +5,7 @@
  * This constructor is used when a \f$ J^\pi \f$ group is created from an entry in the nuclear input file.
  */
 
-JGroup::JGroup(NucLine nucLine):
+JGroup::JGroup(struct NucLine nucLine):
     pi_(nucLine.LevelPi), j_(nucLine.LevelJ), isinrmatrix_(true) {};
   
 /*!
