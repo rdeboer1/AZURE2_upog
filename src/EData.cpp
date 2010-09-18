@@ -184,6 +184,11 @@ bool EData::IsSegmentKey(int segmentKey) {
   return isKey;
 }
 
+/*!
+ * Sets an internal variable specifying if the data is to be fit by Minuit.  Needed to determine cloning behavior in AZURECalc for 
+ * thread safety.
+ */
+
 void EData::SetFit(bool fit) {
   isFit_=fit;
 }
