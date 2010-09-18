@@ -39,14 +39,17 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
   }
   std::string dummy;
   getline(in,dummy);
+  int numTotalSegments=0;
   while(!in.eof()) {
     SegLine line=ReadSegLine(in);
     if(!in.eof()) {
+      numTotalSegments++;
       if(line.isActive==1) {
 	ESegment NewSegment(line);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
+	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
 	    if(this->GetSegment(this->NumSegments())->Fill(theCNuc,this)==-1) {
               std::cout << "Could Not Fill Segment " << this->NumSegments() 
@@ -165,6 +168,22 @@ bool EData::IsErrorAnalysis() const {
  * class before calls to Minuit and AZURECalc.
  */
 
+/*!
+ * Returns true if the specified segment key exists corresponds to a segment in the ESegment vector, 
+ * otherwise returns false.
+ */
+
+bool EData::IsSegmentKey(int segmentKey) {
+  bool isKey=false;
+  for (int i=1;i<=this->NumSegments();i++) {
+    if(this->GetSegment(i)->GetSegmentKey()==segmentKey) {
+      isKey=true;
+      break;
+    }
+  }
+  return isKey;
+}
+
 void EData::SetFit(bool fit) {
   isFit_=fit;
 }
@@ -252,6 +271,7 @@ void EData::PrintData(const struct Config &configure) {
 	<< "*            Segments              *" << std::endl
 	<< "************************************" << std::endl;
     out << std::setw(11) << "Segment #"
+	<< std::setw(17) << "Segment Key #"
 	<< std::setw(17) << "Entrance Key #"
 	<< std::setw(13) << "Exit Key #"
 	<< std::setw(12) << "Min Energy"
@@ -262,6 +282,7 @@ void EData::PrintData(const struct Config &configure) {
 	<< std::endl; 
     for(int i=1;i<=this->NumSegments();i++) {
       out << std::setw(11) << i
+	  << std::setw(17) << this->GetSegment(i)->GetSegmentKey()
 	  << std::setw(17) << this->GetSegment(i)->GetEntranceKey()
 	  << std::setw(13) << this->GetSegment(i)->GetExitKey()
 	  << std::setw(12) << this->GetSegment(i)->GetMinEnergy()
@@ -684,8 +705,8 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 	TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
 	std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();
 	for(int i = 1;i<=segmentsList.size();i++) { 
-	  if(segmentsList[i-1]<=this->NumSegments())
-	  this->GetSegment(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
+	  if(this->IsSegmentKey(segmentsList[i-1]))
+	  this->GetSegmentFromKey(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
 	}
       }
     }
@@ -736,6 +757,21 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 ESegment *EData::GetSegment(int segmentNum) {
   ESegment *b=&segments_[segmentNum-1];
   return b;
+}
+
+/*!
+ * Returns a pointer to a segment based on the segment key, as opposed to a position in the ESegment vector.
+ */
+
+ESegment *EData::GetSegmentFromKey(int segmentKey) {
+  int segmentNumber=1;
+  while(segmentNumber <= this->NumSegments()) {
+    if(segmentKey==this->GetSegment(segmentNumber)->GetSegmentKey())
+      break;
+    else segmentNumber++;
+  }
+  if(segmentNumber<= this->NumSegments()) return this->GetSegment(segmentNumber);
+  else return NULL;
 }
 
 /*!

@@ -183,6 +183,15 @@ int ESegment::GetTargetEffectNum() const {
   return targetEffectNum_;
 }
 
+/*! 
+ * Returns the segment key for the current ESegment object.  The segment key is the order of 
+ * the segment specified in the input file, INCLUDING non-active segments.
+ */
+
+int ESegment::GetSegmentKey() const {
+  return segmentKey_;
+}
+
 /*!
  * Returns the minimum energy of the segment (lab frame).
  */
@@ -279,6 +288,14 @@ void ESegment::SetSegmentChiSquared(double chiSquared) {
 void ESegment::SetTargetEffectNum(int targetEffectNum) {
   targetEffectNum_=targetEffectNum;
   isTargetEffect_=true;
+}
+
+/*! 
+ * Sets the segment key for the current ESegment object.
+ */
+
+void ESegment::SetSegmentKey (int segmentKey) {
+  segmentKey_=segmentKey;
 }
 
 /*!

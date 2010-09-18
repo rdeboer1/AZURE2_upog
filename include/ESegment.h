@@ -26,6 +26,7 @@ class ESegment {
   int Fill(CNuc*,EData*);
   int GetL() const;
   int GetTargetEffectNum() const;
+  int GetSegmentKey() const;
   double GetMinEnergy() const;
   double GetMaxEnergy() const;
   double GetMinAngle() const;
@@ -38,6 +39,7 @@ class ESegment {
   void AddPoint(EPoint);
   void SetSegmentChiSquared(double);
   void SetTargetEffectNum(int);
+  void SetSegmentKey(int);
   EPoint *GetPoint(int);
  private:
   bool isdifferential_;
@@ -47,6 +49,7 @@ class ESegment {
   int exitkey_;
   int l_;
   int targetEffectNum_;
+  int segmentKey_;
   double min_e_;
   double max_e_;
   double min_a_;
