@@ -64,8 +64,8 @@ double gsl_reactionrate_integration(double temperature,CNuc *compound,const Conf
   return rate;
 }
 
-ReactionRate::ReactionRate(CNuc *compound, const vector_r&params, 
-			   const Config &configure, int entranceKey, int exitKey) : 
+ReactionRate::ReactionRate(CNuc *compound, const vector_r &params, 
+			   const struct Config &configure, int entranceKey, int exitKey) : 
   configure_(configure) {
   compound_=compound;
   compound_->FillCompoundFromParams(params);
