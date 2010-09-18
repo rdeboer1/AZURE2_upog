@@ -6,7 +6,7 @@ COUL_SRCS=complex_functions.cpp\
 	  cwfcomp.cpp\
 	  ode_int.cpp
 
-../../lib/libcoul.a : $(COUL_SRCS:.cpp=.o)
+../../lib/libcoul.a : $(COUL_SRCS:.cpp=.o) | ../../lib
 	ar cr $@ $(COUL_SRCS:.cpp=.o)
 
 %.o : %.cpp | $(COUL_depsdir)
@@ -14,6 +14,9 @@ COUL_SRCS=complex_functions.cpp\
 	$(CXX)  -I../include -c -o $@ $<
 
 -include $(COUL_SRCS:%.cpp=$(COUL_depsdir)/%.d)
+
+../../lib :
+	@(mkdir ../../lib)
 
 $(COUL_depsdir) :
 	@(mkdir $(COUL_depsdir))
