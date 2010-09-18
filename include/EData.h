@@ -22,6 +22,7 @@ class EData {
   int NumTargetEffects() const;
   bool IsFit() const;
   bool IsErrorAnalysis() const;
+  bool IsSegmentKey(int);
   void SetFit(bool);
   void SetErrorAnalysis(bool);
   void Iterate();
@@ -41,6 +42,7 @@ class EData {
   void AddTargetEffect(TargetEffect);
   void ReadTargetEffectsFile(std::string);
   ESegment *GetSegment(int);
+  ESegment *GetSegmentFromKey(int);
   EData *Clone() const;
   TargetEffect *GetTargetEffect(int);
  private:
