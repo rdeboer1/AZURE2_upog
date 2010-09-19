@@ -25,19 +25,26 @@ else
 endif
 
 srcdir = src
+coul_srcdir = coul/src
 
 export CXX
-export CPPFLAGS
-export LFLAGS
-export LIBS
 
 all :   
 	@(echo "Decending Into Source Directory....")
-	@(cd $(srcdir); $(MAKE))
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="$(CPPFLAGS)" LIBS="$(LIBS)" LFLAGS="$(LFLAGS)")
+
+accurate : 
+	@(echo "Decending Coulomb Library Directory....")
+	@(cd $(coul_srcdir); $(MAKE))
+	@(echo "Decending Into Source Directory....")
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="$(CPPFLAGS) -I../coul/include -DEXT_COUL" LIBS="$(LIBS) -lcoul" LFLAGS="$(LFLAGS) -L../lib")
+
 
 .PHONY : clean
 clean : 
-	@(echo "Cleaning Up...")
+	@(echo "Cleaning Up In Coulomb Library Directory...")
+	@(cd $(coul_srcdir); $(MAKE) clean)
+	@(echo "Cleaning Up In Source Directory...")
 	@(cd $(srcdir); $(MAKE) clean)
 
 .PHONY : install
