@@ -1,0 +1,29 @@
+Thank you for choosing AZURE2 to for all your R-Matrix needs.
+
+This file contains a brief description of how to compile the AZURE2 package.  
+
+WARNING: AZURE2 has only been fully tested using the intel and gcc C++ compilers. While the source code itself should be (mostly) free of compatibility issues, the Makefiles may not be.  Different libraries may need to be included at link time to support readline or OpenMP, and some compiler flags may not be present.  Specifically, the current make routine uses auto-generated dependency files created with the -M flag, and the switching of Coulomb functions implements the -D flag to set compiler macros.  
+
+
+The following steps should be performed to build the AZURE2 package:
+
+1.  Verify prefixes in Makefile.  The PREFIX variable should point at the base directory to which the AZURE2 binary should be copied when 'make install' is invoked.  THE GSL_PREFIX and MINUIT_PREFIX variables should match the prefix used to install the REQUIRED Minuit2 and GSL packages.  
+
+2.  Verify compile command in Makefile.  Again, only g++ and icc have been completely tested.
+
+3.  Execute 'make' in the AZURE2 directory.  The binary should be produced in this root directory.
+
+4.  Execute 'make install' (optional).  This copies the executable to $(PREFIX)/bin/.  The directory should exist prior to executing the command.
+
+5.  Execute 'make clean' to remove all generated files except the AZURE2 binary.
+
+
+A note about the Coulomb Functions:
+
+The AZURE2 package uses, by default, the GSL Coulomb Functions in its calculations.  For certain regions in the rho-eta plane, these functions invoke a WKB approximation which is not very accurate.  This most often manifests itself as discontinuous jump in the calculated excitation curve.  The main advantage of these functions is that they are extremely fast.
+
+A second Coulomb function option is available in AZURE2.  These functions are from N. Michel, Computer Physics Communications 176, 232 (2007).  The files have only been modified to be compilable as a library, and to remove the dependency on a global std namespace.  The routines are otherwise unchanged.  These functions are extremely accurate, but significantly slower. 
+
+The GSL Coulomb functions are used by default when 'make' is called.  To use the alternative Coulomb Functions of Michel, one should invoke 'make accurate' instead.
+
+IMPORTANT:  When switching between Coulomb function versions, 'make clean' should first be called.

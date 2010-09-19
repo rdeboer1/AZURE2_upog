@@ -5,11 +5,12 @@ MINUIT_PREFIX = $(PREFIX)
 GSL_PREFIX = $(PREFIX)
 
 # Change the variable below for the compiler.  Compiler should have 
-#  dependency generation with -M.  Ok for intel and g++.
+#  dependency generation with -M, and macro setting with -D.  Ok for icc and g++.
 
 CXX = icc
 
-# The following portion of the makefile should not need to be changed.
+# The following portion of the makefile should not need to be changed if the g++ or icc compiler
+#  is used.  Otherwise, no promises...
 
 CPPFLAGS = -I../include -I$(MINUIT_PREFIX)/include
 LFLAGS = -L$(MINUIT_PREFIX)/lib
@@ -46,6 +47,7 @@ clean :
 	@(cd $(coul_srcdir); $(MAKE) clean)
 	@(echo "Cleaning Up In Source Directory...")
 	@(cd $(srcdir); $(MAKE) clean)
+	-rm -rf lib
 
 .PHONY : install
 install : 
