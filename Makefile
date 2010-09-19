@@ -11,7 +11,7 @@ CXX = icc
 
 # The following portion of the makefile should not need to be changed.
 
-CPPFLAGS = -I../include -I$(MINUIT_PREFIX)/include
+CPPFLAGS = -I../include -I../coul/include -I$(MINUIT_PREFIX)/include
 LFLAGS = -L$(MINUIT_PREFIX)/lib -L../lib
 ifneq ($(MINUIT_PREFIX),$(GSL_PREFIX))
    CPPFLAGS += -I$(GSL_PREFIX)/include

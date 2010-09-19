@@ -167,36 +167,4 @@ private:
   // and to calculate H+/H- from F(l,eta,z) and F(lp,eta,z) if |Im[l]| >= 1 and |z| <= 1.
 };
 
-double Wronskian_test (const std::complex<double> &z,
-		       class Coulomb_wave_functions &cwf_l,
-		       class Coulomb_wave_functions &cwf_lp1);
-
-void F_dF_l_tables_rec_rel_helper (const int Nl,const int Nz,const std::complex<double> z_tab[],const std::complex<double> R_tab[],
-				   class Coulomb_wave_functions &cwf_l_deb,
-				   class Coulomb_wave_functions &cwf_l_end,
-				   std::complex<double> *const *const F_tab,std::complex<double> *const *const dF_tab,int il_turn_tab[]);
-
-void cwf_l_tables_rec_rel_helper (const int Nl,const std::complex<double> R_tab[],class Coulomb_wave_functions *const cwf_l_tab[],
-				  const std::complex<double> &z,const int il_turn,
-				  const std::complex<double> Fz_tab[],const std::complex<double> dFz_tab[],
-				  std::complex<double> Hp_z_tab[],std::complex<double> dHp_z_tab[],
-				  std::complex<double> Hm_z_tab[],std::complex<double> dHm_z_tab[],
-				  std::complex<double> Gz_tab[],std::complex<double> dGz_tab[]);
-
-void cwf_l_tables_recurrence_relations (const std::complex<double> &l_deb,const int Nl,const std::complex<double> &eta,const bool is_it_normalized,
-					const int Nz,const std::complex<double> z_tab[],
-					std::complex<double> *const *const F_tab,std::complex<double> *const *const dF_tab,
-					std::complex<double> *const *const G_tab,std::complex<double> *const *const dG_tab,
-					std::complex<double> *const *const Hp_tab,std::complex<double> *const *const dHp_tab,
-					std::complex<double> *const *const Hm_tab,std::complex<double> *const *const dHm_tab);
-
-void cwf_l_tables_recurrence_relations (const std::complex<double> &l_deb,const int Nl,const std::complex<double> &eta,const bool is_it_normalized,
-					const std::complex<double> z,
-					std::complex<double> *const F_tab,std::complex<double> *const dF_tab,
-					std::complex<double> *const G_tab,std::complex<double> *const dG_tab,
-					std::complex<double> *const Hp_tab,std::complex<double> *const dHp_tab,
-					std::complex<double> *const Hm_tab,std::complex<double> *const dHm_tab);
-
-
-
 #endif
