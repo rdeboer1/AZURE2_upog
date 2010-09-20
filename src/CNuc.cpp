@@ -111,42 +111,45 @@ int CNuc::Fill(const struct Config &configure) {
   getline(in,dummy);
   while(!in.eof()) {
     NucLine Line=ReadNucLine(in);
-    if(!in.eof()&&Line.yn==1) {
-      PPair NewPair(Line);
-      PairNum=this->IsPair(NewPair);
-      if(!PairNum) {
-	this->AddPair(NewPair);
+    if(!in.eof()) {
+      if(Line.l>maxLValue&&Line.PType==0) maxLValue=Line.l;
+      if(Line.yn==1) {
+	PPair NewPair(Line);
 	PairNum=this->IsPair(NewPair);
-      }
-      JGroup NewJGroup(Line);
-      JGroupNum=this->IsJGroup(NewJGroup);
-      if(!JGroupNum) {
-	this->AddJGroup(NewJGroup);
+	if(!PairNum) {
+	  this->AddPair(NewPair);
+	  PairNum=this->IsPair(NewPair);
+	}
+	JGroup NewJGroup(Line);
 	JGroupNum=this->IsJGroup(NewJGroup);
-      }
-      AChannel NewChannel(Line,PairNum);
-      ChannelNum=this->GetJGroup(JGroupNum)->IsChannel(NewChannel);
-      if(!ChannelNum) {
-	this->GetJGroup(JGroupNum)->AddChannel(NewChannel);
+	if(!JGroupNum) {
+	  this->AddJGroup(NewJGroup);
+	  JGroupNum=this->IsJGroup(NewJGroup);
+	}
+	AChannel NewChannel(Line,PairNum);
 	ChannelNum=this->GetJGroup(JGroupNum)->IsChannel(NewChannel);
-	if(this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetL()>maxLValue&&
-	   this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetRadType()=='P')
-	  maxLValue=this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetL();
-      }
-      ALevel NewLevel(Line);
-      LevelNum=this->GetJGroup(JGroupNum)->IsLevel(NewLevel);
-      if(!LevelNum) {
-	this->GetJGroup(JGroupNum)->AddLevel(NewLevel);
+	if(!ChannelNum) {
+	  this->GetJGroup(JGroupNum)->AddChannel(NewChannel);
+	  ChannelNum=this->GetJGroup(JGroupNum)->IsChannel(NewChannel);
+	  if(this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetL()>maxLValue&&
+	     this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetRadType()=='P')
+	    maxLValue=this->GetJGroup(JGroupNum)->GetChannel(ChannelNum)->GetL();
+	}
+	ALevel NewLevel(Line);
 	LevelNum=this->GetJGroup(JGroupNum)->IsLevel(NewLevel);
+	if(!LevelNum) {
+	  this->GetJGroup(JGroupNum)->AddLevel(NewLevel);
+	  LevelNum=this->GetJGroup(JGroupNum)->IsLevel(NewLevel);
+	}
+	this->GetJGroup(JGroupNum)->GetLevel(LevelNum)->AddGamma(Line);
       }
-      this->GetJGroup(JGroupNum)->GetLevel(LevelNum)->AddGamma(Line);
     }
   }
   in.close();
   
   this->SetMaxLValue(maxLValue);
   if(this->ReadECFile(configure.ecfile)==-1) return -1;
-
+  
   return 0;
 }
 
