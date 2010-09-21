@@ -76,9 +76,12 @@ ESegment::ESegment(struct ExtrapLine extrapLine) {
 bool ESegment::IsInSegment(EPoint point) {
   bool b=false;
   if(point.GetLabEnergy()>=this->GetMinEnergy()&&
-     point.GetLabEnergy()<=this->GetMaxEnergy()&&
-     point.GetLabAngle()>=this->GetMinAngle()&&
-     point.GetLabAngle()<=this->GetMaxAngle()) b=true;
+     point.GetLabEnergy()<=this->GetMaxEnergy()) {
+    if(this->IsDifferential()) {
+      if(point.GetLabAngle()>=this->GetMinAngle()&&
+	 point.GetLabAngle()<=this->GetMaxAngle()) b=true;
+    } else b=true;
+  }
   return b;
 }
 
