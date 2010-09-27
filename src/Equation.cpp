@@ -186,7 +186,7 @@ void Equation::SetParameter(unsigned int index, double value) {
   if(index<parameters_.size()) {
     parameters_[index]=value;
     for(unsigned int i = 0; i<subEquations_.size(); i++) subEquations_[i].SetParameter(index,value);
-  } else std::cout << "ERROR: CANNOT SET PARAMETER." << std::endl;
+  } else std::cout << "Error: Parameter index " << index << " greater than vector size." << std::endl;
 }
 
 /*!
@@ -195,9 +195,7 @@ void Equation::SetParameter(unsigned int index, double value) {
  */
 
 bool Equation::IsOperator(char c) const {
-  if(c=='+'||c=='-'||c=='*'||c=='/'||c=='^')
-    return true;
-  else return false;
+  return (c=='+'||c=='-'||c=='*'||c=='/'||c=='^') ? (true) : (false);
 }
 
 /*!
@@ -206,8 +204,7 @@ bool Equation::IsOperator(char c) const {
  */
 
 bool Equation::IsDigit(char c) const {
-  if(c>='0'&&c<='9') return true;
-  else return false;
+  return (c>='0' && c<='9') ? (true) : (false);
 }
 
 /*!
@@ -377,9 +374,7 @@ Equation::OperatorType Equation::GetOperatorType(char c) const {
     case '*': return MULT;
     case '/': return DIVIDE;
     case '^': return POWER;
-    default :
-      std::cout << "WARNING: BAD OPERATOR " << c << std::endl;
-      return BADTYPE;
+    default : return BADTYPE;
   }
 }
 
@@ -420,13 +415,13 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
       result=left/right;
       break;
     case '^': 
-      if(left<0.0&&fabs(int(right)-right)>0.0)
-	std::cout << "WARNING: NEGATIVE ARGUMENT RAISED TO FRACTIONAL POWER." << std::endl;
-      result=pow(left,right);
+      if(left<0.0&&fabs(int(right)-right)>0.0) {
+	std::cout << "Warning: Exponent results in unsupported imaginary number." << std::endl;
+	result=0.0;
+      }	else result=pow(left,right);
       break;
     default:
       result=0.0;
-      std::cout << "WARNING: BAD OPERATOR " << op << std::endl;
   }
   stm<<result;
   return stm.str();
@@ -504,10 +499,7 @@ double Equation::FunctionOperation(TokenPair token, double x) const {
     stm.str(token.second.substr(4));
     stm>>subEquationIndex;
     result=sqrt(subEquations_[subEquationIndex].Evaluate(x));
-  } else {
-    result=0.0;
-    std::cout << "ERROR: UNRECOGNIZED FUNCTION" << std::endl;
-  }
+  } else result=0.0;
   return result;
 }
 
