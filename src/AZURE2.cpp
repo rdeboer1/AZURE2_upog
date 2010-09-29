@@ -55,6 +55,9 @@ int main(int argc,char *argv[]){
 	      << std::endl;
     return -1;
   }
+#ifndef NO_STAT
+  else if(CheckForInputFiles(configure) == -1) return -1;
+#endif
 
   int command=0;
 
