@@ -80,6 +80,9 @@ struct Config {
   static const int maxLOrder=10;
 };
 
-int ReadConfigFile(Config&);
+extern int ReadConfigFile(Config&);
+#ifndef NO_STAT
+extern int CheckForInputFiles(Config&);
+#endif
 
 #endif

@@ -9,10 +9,19 @@ GSL_PREFIX = $(PREFIX)
 
 CXX = icc
 
+# Change the following variable to 'no' if the system libraries do not include stat() conmmand.
+#  This will turn off checking that input/output files/directories exist at start, 
+#  so you'd better be careful with your paths!
+
+USE_STAT=yes
+
 # The following portion of the makefile should not need to be changed if the g++ or icc compiler
 #  is used.  Otherwise, no promises...
 
 CPPFLAGS = -I../include -I$(MINUIT_PREFIX)/include
+ifneq ($(USE_STAT),yes) 
+   CPPFLAGS += -DNO_STAT
+endif
 LFLAGS = -L$(MINUIT_PREFIX)/lib
 ifneq ($(MINUIT_PREFIX),$(GSL_PREFIX))
    CPPFLAGS += -I$(GSL_PREFIX)/include
