@@ -66,6 +66,8 @@ struct Config {
   bool oldECFile;
   ///A boolean specifying if the reaction rate should be calculated.
   bool calcRate;
+  ///A boolean specifying if the input parameters are to be transformed (set to false by --no-transform)
+  bool transformParams;
   ///If a reaction rate is calculated, value indicates the entrance pair key.
   int rateEntrancePair;
   ///If a reaction rate is calculated, value indicates the exit pair key.  

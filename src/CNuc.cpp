@@ -275,8 +275,10 @@ void CNuc::Initialize(const struct Config &configure) {
      configure.checkboundcon=="file") this->PrintBoundaryConditions(configure);
 
   //Transform Input Parameters
-  std::cout << "Performing Input Parameter Transformation..." << std::endl;
-  this->TransformIn(configure.isEC);
+  if(configure.transformParams) {
+    std::cout << "Performing Input Parameter Transformation..." << std::endl;
+    this->TransformIn(configure.isEC);
+  }
 
   //Sort reaction pathways
   std::cout << "Sorting Reaction Pathways..." << std::endl;

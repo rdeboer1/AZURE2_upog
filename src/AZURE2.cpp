@@ -26,6 +26,7 @@ struct SegPairs {int firstPair; int secondPair;};
 int main(int argc,char *argv[]){
 
   bool useReadline=true;
+  bool transformParams=true;
   Config configure;
 
   if(argc<2) {
@@ -33,9 +34,12 @@ int main(int argc,char *argv[]){
 	      << "\tSyntax: azure2 configfile" << std::endl;
     return -1;
   } else if(argc>2) {
-    std::string arg=argv[1];
-    if(arg=="--no-readline") useReadline=false;
-    else std::cout << "Unknown option " << arg << '.' << std::endl;
+    for(int i=1; i<argc-1; i++) {
+      std::string arg=argv[i];
+      if(arg=="--no-readline") useReadline=false;
+      else if(arg=="--no-transform") transformParams=false;
+      else std::cout << "Unknown option " << arg << '.' << std::endl;
+    }
     configure.configfile=argv[argc-1];
   } else configure.configfile=argv[1];
 
@@ -58,6 +62,7 @@ int main(int argc,char *argv[]){
 #ifndef NO_STAT
   else if(CheckForInputFiles(configure) == -1) return -1;
 #endif
+  configure.transformParams=transformParams;
 
   int command=0;
 
@@ -71,17 +76,17 @@ int main(int argc,char *argv[]){
 
   while(command<1||command>6) {
     std::cout << "azure2: ";
-    while(!(std::cin >> command)) {
-      std::cin.clear();
-      std::cin.ignore(1000,'\n');
+    std::string inString;
+    getline(std::cin,inString);
+    if(inString.empty()) continue;
+    std::istringstream in;
+    in.str(inString);
+    if(!(in>>command)) 
       std::cout << "Please enter an integer." << std::endl;
-      std::cout << "azure2: ";
-    }
-    if(command<1||command>6) {
+    else if(command<1||command>6) 
       std::cout << "Invalid option.  Please try again."
 		<< std::endl;
-    }
-  }
+  } 
   
   if(command!=6) {
     int rateEntrancePair=0;
@@ -100,7 +105,6 @@ int main(int argc,char *argv[]){
     std::ifstream in;
     std::cout << std::endl;
     if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
-    std::cin.ignore(1000,'\n');
     while(!validInfile) {
       if(!useReadline) getline(std::cin,inFile);
       else {
