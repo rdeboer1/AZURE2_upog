@@ -286,7 +286,7 @@ void EData::PrintData(const struct Config &configure) {
 	<< std::setw(25) << "Data File"
 	<< std::endl; 
     for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
-      out << std::setw(11) << GetSegments().begin()-segment+1
+      out << std::setw(11) << segment-GetSegments().begin()+1
 	  << std::setw(17) << segment->GetSegmentKey()
 	  << std::setw(17) << segment->GetEntranceKey()
 	  << std::setw(13) << segment->GetExitKey()
@@ -314,8 +314,8 @@ void EData::PrintData(const struct Config &configure) {
 	<< std::setw(18) << "High Sub Energy"
 	<< std::endl;
     for(EDataIterator data=begin();data!=end();data++) {
-      out << std::setw(11) << GetSegments().begin()-data.segment()+1
-	  << std::setw(14) << (data.segment()->GetPoints()).begin()-data.point()+1
+      out << std::setw(11) << data.segment()-GetSegments().begin()+1
+	  << std::setw(14) << data.point()-(data.segment()->GetPoints()).begin()+1
 	  << std::setw(15) << data.point()->GetLabEnergy() 
 	  << std::setw(15) << data.point()->GetCMEnergy() 
 	  << std::setw(15) << data.point()->GetCMAngle()
@@ -376,8 +376,8 @@ void EData::PrintLegendreP(const struct Config &configure) {
     << std::setw(15) << "Leg. Poly." << std::endl;
     for(EDataIterator data=begin();data!=end();data++) {
       for(int lOrder=0;lOrder<=data.point()->GetMaxLOrder();lOrder++) {
-	out << std::setw(10) << GetSegments().begin()-data.segment()+1
-	    << std::setw(10) << (data.segment()->GetPoints()).begin()-data.point()+1
+	out << std::setw(10) << data.segment()-GetSegments().begin()+1
+	    << std::setw(10) << data.point()-(data.segment()->GetPoints()).begin()+1
 	    << std::setw(15) << data.point()->GetCMEnergy()
 	    << std::setw(15) << data.point()->GetCMAngle()
 	    << std::setw(5)  << lOrder
@@ -435,8 +435,8 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
 	    PPair *thePair=theCNuc->GetPair(theChannel->GetPairNum());
 	    int lValue=theChannel->GetL();
 	    double localEnergy=inEnergy-thePair->GetSepE()-thePair->GetExE();
-	    out << std::setw(10) << GetSegments().begin()-data.segment()+1
-		<< std::setw(10) << (data.segment()->GetPoints()).begin()-data.point()+1
+	    out << std::setw(10) << data.segment()-GetSegments().begin()+1
+		<< std::setw(10) << data.point()-(data.segment()->GetPoints()).begin()+1
 		<< std::setw(5) << j 
 		<< std::setw(5) << ch  
 		<< std::setw(5) << lValue 
@@ -489,8 +489,8 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
     for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
       if(segment->GetEntranceKey()==segment->GetExitKey()) {
 	for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
-	  out << std::setw(10) << GetSegments().begin()-segment+1
-	      << std::setw(10) << segment->GetPoints().begin()-point+1
+	  out << std::setw(10) << segment-GetSegments().begin()+1
+	      << std::setw(10) << point-segment->GetPoints().begin()+1
 	      << std::setw(10) << theCNuc->GetPairNumFromKey(segment->GetEntranceKey())
 	      << std::setw(15) << point->GetCMEnergy()
 	      << std::setw(15) << point->GetCMAngle()
@@ -654,8 +654,8 @@ void EData::MapData() {
 	      if(testPoint->GetCMEnergy()==point->GetCMEnergy()
 		 &&!testPoint->IsMapped()&&point!=testPoint
 		 &&testPoint->GetTargetEffectNum()==point->GetTargetEffectNum()) {
-		point->SetMap(GetSegments().begin()-testSegment+1,
-			      segment->GetPoints().begin()-testPoint+1);
+		point->SetMap(testSegment-GetSegments().begin()+1,
+			      testPoint-testSegment->GetPoints().begin()+1);
 		testPoint->AddLocalMappedPoint(&*point);
 		break;
 	      }

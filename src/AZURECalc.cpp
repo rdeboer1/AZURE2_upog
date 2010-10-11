@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iomanip>
 
-double AZURECalc::operator()(const vector_r&p) const {
+double AZURECalc::operator()(const vector_r& p) const {
 
   int thisIteration=data()->Iterations();
   bool isFit=data()->IsFit();
