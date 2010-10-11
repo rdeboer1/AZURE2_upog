@@ -26,20 +26,20 @@ double AZURECalc::operator()(const vector_r&p) const {
   
   //loop over segments and points
   double chiSquared=0.0;
-  for(int i=1;i<=localData->NumSegments();i++) {
-    double segmentChiSquared=0.0;
-    for(int ii=1;ii<=localData->GetSegment(i)->NumPoints();ii++) {
-      EPoint *point = localData->GetSegment(i)->GetPoint(ii);
-      if(!point->IsMapped()) point->Calculate(localCompound,configure());
-      double fitCrossSection=point->GetFitCrossSection();
-      double CrossSection=point->GetCMCrossSection();
-      double CrossSectionError=point->GetCMCrossSectionError();
-      double chi=(fitCrossSection-CrossSection)/CrossSectionError;
-      double pointChiSquared=pow(chi,2.0);
-      segmentChiSquared+=pointChiSquared;
+  double segmentChiSquared=0.0;
+  for(EDataIterator data=localData->begin();data!=localData->end();data++) {
+    if(data.segment()->GetPoints().begin()==data.point()) segmentChiSquared=0.0;
+    if(!data.point()->IsMapped()) data.point()->Calculate(localCompound,configure());
+    double fitCrossSection=data.point()->GetFitCrossSection();
+    double CrossSection=data.point()->GetCMCrossSection();
+    double CrossSectionError=data.point()->GetCMCrossSectionError();
+    double chi=(fitCrossSection-CrossSection)/CrossSectionError;
+    double pointChiSquared=pow(chi,2.0);
+    segmentChiSquared+=pointChiSquared;
+    if((data.segment()->GetPoints().end()-1==data.point())&&!isFit) {
+      data.segment()->SetSegmentChiSquared(segmentChiSquared);
+      chiSquared+=segmentChiSquared;
     }
-    if(!isFit) data()->GetSegment(i)->SetSegmentChiSquared(segmentChiSquared);
-    chiSquared+=segmentChiSquared;
   }
 
   if(!localData->IsErrorAnalysis()&&thisIteration!=0) {

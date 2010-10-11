@@ -41,6 +41,7 @@ class ESegment {
   void SetTargetEffectNum(int);
   void SetSegmentKey(int);
   EPoint *GetPoint(int);
+  std::vector<EPoint>& GetPoints();
  private:
   bool isdifferential_;
   bool isphase_;

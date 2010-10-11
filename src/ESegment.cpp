@@ -309,3 +309,7 @@ EPoint *ESegment::GetPoint(int pointNum) {
   EPoint *b=&points_[pointNum-1];
   return b;
 }
+
+std::vector<EPoint>& ESegment::GetPoints() {
+  return points_;
+}

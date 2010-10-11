@@ -95,11 +95,12 @@ int AZUREMain::operator()(){
     double chiSquared=theFunc(params.GetMinuitParams().Params());
     if(configure().withData) {
       std::cout << std::endl;
-      for(int i=1;i<=data()->NumSegments();i++) 
+      for(ESegmentIterator segment=data()->GetSegments().begin();
+	  segment<data()->GetSegments().end();segment++) 
 	std::cout << "Segment #"
-		  << i 
+		  << segment->GetSegmentKey() 
 		  << " Chi-Squared/N: "
-		  << data()->GetSegment(i)->GetSegmentChiSquared()/data()->GetSegment(i)->NumPoints()
+		  << segment->GetSegmentChiSquared()/segment->NumPoints()
 		  << std::endl;
       std::cout << "Total Chi-Squared: " 
 		<< chiSquared << std::endl << std::endl;

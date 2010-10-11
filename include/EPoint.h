@@ -95,6 +95,8 @@ class EPoint {
   EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
   EPoint* GetSubPoint(int);
+  std::vector<EPoint>& GetSubPoints();
+  std::vector<EPoint*>& GetMappedPoints();
  private:
   bool is_differential_;
   bool is_phase_;

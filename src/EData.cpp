@@ -175,8 +175,8 @@ bool EData::IsErrorAnalysis() const {
 
 bool EData::IsSegmentKey(int segmentKey) {
   bool isKey=false;
-  for (int i=1;i<=this->NumSegments();i++) {
-    if(this->GetSegment(i)->GetSegmentKey()==segmentKey) {
+  for (ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    if(segment->GetSegmentKey()==segmentKey) {
       isKey=true;
       break;
     }
@@ -285,16 +285,16 @@ void EData::PrintData(const struct Config &configure) {
 	<< std::setw(11) << "Max Angle"
 	<< std::setw(25) << "Data File"
 	<< std::endl; 
-    for(int i=1;i<=this->NumSegments();i++) {
-      out << std::setw(11) << i
-	  << std::setw(17) << this->GetSegment(i)->GetSegmentKey()
-	  << std::setw(17) << this->GetSegment(i)->GetEntranceKey()
-	  << std::setw(13) << this->GetSegment(i)->GetExitKey()
-	  << std::setw(12) << this->GetSegment(i)->GetMinEnergy()
-	  << std::setw(12) << this->GetSegment(i)->GetMaxEnergy()
-	  << std::setw(11) << this->GetSegment(i)->GetMinAngle()
-	  << std::setw(11) << this->GetSegment(i)->GetMaxAngle()
-	  << std::setw(25) << this->GetSegment(i)->GetDataFile()
+    for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+      out << std::setw(11) << GetSegments().begin()-segment+1
+	  << std::setw(17) << segment->GetSegmentKey()
+	  << std::setw(17) << segment->GetEntranceKey()
+	  << std::setw(13) << segment->GetExitKey()
+	  << std::setw(12) << segment->GetMinEnergy()
+	  << std::setw(12) << segment->GetMaxEnergy()
+	  << std::setw(11) << segment->GetMinAngle()
+	  << std::setw(11) << segment->GetMaxAngle()
+	  << std::setw(25) << segment->GetDataFile()
 	  << std::endl;
     }  
     out << std::endl
@@ -313,30 +313,28 @@ void EData::PrintData(const struct Config &configure) {
 	<< std::setw(18) << "Low Sub Energy"
 	<< std::setw(18) << "High Sub Energy"
 	<< std::endl;
-    for(int i=1;i<=this->NumSegments();i++) {
-      for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-	out << std::setw(11) << i 
-	    << std::setw(14) << ii
-	    << std::setw(15) << this->GetSegment(i)->GetPoint(ii)->GetLabEnergy() 
-	    << std::setw(15) << this->GetSegment(i)->GetPoint(ii)->GetCMEnergy() 
-	    << std::setw(15) << this->GetSegment(i)->GetPoint(ii)->GetCMAngle()
-	    << std::setw(20) << this->GetSegment(i)->GetPoint(ii)->GetCMCrossSection()
-	    << std::setw(22) << this->GetSegment(i)->GetPoint(ii)->GetCMCrossSectionError();
-	if(this->GetSegment(i)->GetPoint(ii)->IsMapped()){
-	  EnergyMap map=this->GetSegment(i)->GetPoint(ii)->GetMap();
-	  char tempMap[25];
-	  sprintf(tempMap,"(%d,%d)",map.segment,map.point);
-	  out << std::setw(12) <<  tempMap << std::endl;
-	} else
-	  out << std::setw(12) << "Not Mapped"
-	      << std::setw(18) << this->GetSegment(i)->GetPoint(ii)->NumSubPoints();
-	if(this->GetSegment(i)->GetPoint(ii)->IsTargetEffect()) {
-	  out << std::setw(18) << this->GetSegment(i)->GetPoint(ii)->GetSubPoint(this->GetSegment(i)->GetPoint(ii)->NumSubPoints())->GetCMEnergy() 
-	      << std::setw(18) << this->GetSegment(i)->GetPoint(ii)->GetSubPoint(1)->GetCMEnergy();
-	}
-	out << std::endl;
+    for(EDataIterator data=begin();data!=end();data++) {
+      out << std::setw(11) << GetSegments().begin()-data.segment()+1
+	  << std::setw(14) << (data.segment()->GetPoints()).begin()-data.point()+1
+	  << std::setw(15) << data.point()->GetLabEnergy() 
+	  << std::setw(15) << data.point()->GetCMEnergy() 
+	  << std::setw(15) << data.point()->GetCMAngle()
+	  << std::setw(20) << data.point()->GetCMCrossSection()
+	  << std::setw(22) << data.point()->GetCMCrossSectionError();
+      if(data.point()->IsMapped()){
+	EnergyMap map=data.point()->GetMap();
+	char tempMap[25];
+	sprintf(tempMap,"(%d,%d)",map.segment,map.point);
+	out << std::setw(12) <<  tempMap << std::endl;
+      } else
+	out << std::setw(12) << "Not Mapped"
+	    << std::setw(18) << data.point()->NumSubPoints();
+      if(data.point()->IsTargetEffect()) {
+	out << std::setw(18) << data.point()->GetSubPoint(data.point()->NumSubPoints())->GetCMEnergy() 
+	    << std::setw(18) << data.point()->GetSubPoint(1)->GetCMEnergy();
       }
       out << std::endl;
+      if(data.point()==data.segment()->GetPoints().end()-1) out << std::endl;
     }
   } else std::cout << "Could not write data check file." << std::endl;
   out.flush();
@@ -348,12 +346,8 @@ void EData::PrintData(const struct Config &configure) {
  */
 
 void EData::CalcLegendreP(int maxL) {
-  for(int i=1;i<=this->NumSegments();i++) {
-    for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-      EPoint *point=this->GetSegment(i)->GetPoint(ii);
-      point->CalcLegendreP(maxL);
-    }
-  }
+for(EDataIterator it=this->begin(); it!=this->end(); it++)
+  it.point()->CalcLegendreP(maxL);
 }
 
 /*!
@@ -380,17 +374,14 @@ void EData::PrintLegendreP(const struct Config &configure) {
     << std::setw(15) << "Angle"
     << std::setw(5)  << "L"
     << std::setw(15) << "Leg. Poly." << std::endl;
-    for(int i=1;i<=this->NumSegments();i++) {
-      for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-        EPoint *point=this->GetSegment(i)->GetPoint(ii);
-        for(int lOrder=0;lOrder<=point->GetMaxLOrder();lOrder++) {
-          out << std::setw(10) << i
-          << std::setw(10) << ii
-          << std::setw(15) << point->GetCMEnergy()
-          << std::setw(15) << point->GetCMAngle()
-          << std::setw(5)  << lOrder
-          << std::setw(15) << point->GetLegendreP(lOrder) << std::endl;	
-        }
+    for(EDataIterator data=begin();data!=end();data++) {
+      for(int lOrder=0;lOrder<=data.point()->GetMaxLOrder();lOrder++) {
+	out << std::setw(10) << GetSegments().begin()-data.segment()+1
+	    << std::setw(10) << (data.segment()->GetPoints()).begin()-data.point()+1
+	    << std::setw(15) << data.point()->GetCMEnergy()
+	    << std::setw(15) << data.point()->GetCMAngle()
+	    << std::setw(5)  << lOrder
+	    << std::setw(15) << data.point()->GetLegendreP(lOrder) << std::endl;	
       }
     }
   } else std::cout << "Could not write legendre polynomials check file." << std::endl;
@@ -403,13 +394,8 @@ void EData::PrintLegendreP(const struct Config &configure) {
  */
 
 void EData::CalcEDependentValues(CNuc *theCNuc) {
-  for(int i=1;i<=this->NumSegments();i++) {
-    ESegment *segment=this->GetSegment(i);
-    for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-      EPoint *point=this->GetSegment(i)->GetPoint(ii);
-      if(!point->IsMapped()) point->CalcEDependentValues(theCNuc);
-    }
-  }
+  for(EDataIterator it=this->begin(); it!=this->end(); it++) 
+    if(!(it.point()->IsMapped())) it.point()->CalcEDependentValues(theCNuc);
 }
 
 /*!
@@ -438,33 +424,29 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
     << std::setw(15) << "E chan"
     << std::setw(15) << "pene" 
     << std::setw(25) << "Lo" << std::endl;
-    for(int i=1;i<=this->NumSegments();i++) {
-      ESegment *segment=this->GetSegment(i);
-      for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-        EPoint *point=this->GetSegment(i)->GetPoint(ii);
-        double inEnergy=point->GetCMEnergy()
-        +theCNuc->GetPair(theCNuc->GetPairNumFromKey(segment->GetEntranceKey()))->GetSepE();
-        for(int j=1;j<=theCNuc->NumJGroups();j++) {
-	  if(theCNuc->GetJGroup(j)->IsInRMatrix()) {
-	    JGroup *theJGroup=theCNuc->GetJGroup(j);
-	    for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	      AChannel *theChannel=theJGroup->GetChannel(ch);
-	      PPair *thePair=theCNuc->GetPair(theChannel->GetPairNum());
-	      int lValue=theChannel->GetL();
-	      double localEnergy=inEnergy-thePair->GetSepE()-thePair->GetExE();
-	      out << std::setw(10) << i 
-		  << std::setw(10) << ii 
-		  << std::setw(5) << j 
-		  << std::setw(5) << ch  
-		  << std::setw(5) << lValue 
-		  << std::setw(15) << localEnergy 
-		  << std::setw(15) << point->GetSqrtPenetrability(j,ch)
-		  << std::setw(25) << point->GetLoElement(j,ch) << std::endl;
-	    }           
-	  }
+    for(EDataIterator data=begin();data!=end();data++) {
+      double inEnergy=data.point()->GetCMEnergy()
+        +theCNuc->GetPair(theCNuc->GetPairNumFromKey(data.segment()->GetEntranceKey()))->GetSepE();
+      for(int j=1;j<=theCNuc->NumJGroups();j++) {
+	if(theCNuc->GetJGroup(j)->IsInRMatrix()) {
+	  JGroup *theJGroup=theCNuc->GetJGroup(j);
+	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+	    AChannel *theChannel=theJGroup->GetChannel(ch);
+	    PPair *thePair=theCNuc->GetPair(theChannel->GetPairNum());
+	    int lValue=theChannel->GetL();
+	    double localEnergy=inEnergy-thePair->GetSepE()-thePair->GetExE();
+	    out << std::setw(10) << GetSegments().begin()-data.segment()+1
+		<< std::setw(10) << (data.segment()->GetPoints()).begin()-data.point()+1
+		<< std::setw(5) << j 
+		<< std::setw(5) << ch  
+		<< std::setw(5) << lValue 
+		<< std::setw(15) << localEnergy 
+		<< std::setw(15) << data.point()->GetSqrtPenetrability(j,ch)
+		<< std::setw(25) << data.point()->GetLoElement(j,ch) << std::endl;
+	  }           
 	}
-      }   
-    }
+      }
+    }   
   } else std::cout << "Could not write lo-matrix and penetrabilities check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();    
@@ -475,12 +457,8 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
  */
 
 void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
-  for(int i=1;i<=this->NumSegments();i++) {
-    for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-      EPoint *point=this->GetSegment(i)->GetPoint(ii);
-      point->CalcCoulombAmplitude(theCNuc);
-    }
-  }
+  for(EDataIterator it=this->begin(); it!=this->end(); it++)
+    it.point()->CalcCoulombAmplitude(theCNuc);
 }
 
 /*!
@@ -508,13 +486,12 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 	<< std::setw(15) << "angle"
 	<< std::setw(25) << "coulomb amplitude"
 	<< std::endl;
-    for(int i=1;i<=this->NumSegments();i++) {
-      if(this->GetSegment(i)->GetEntranceKey()==this->GetSegment(i)->GetExitKey()) {
-	for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-	  EPoint *point=this->GetSegment(i)->GetPoint(ii);
-	  out << std::setw(10) << i
-	      << std::setw(10) << ii
-	      << std::setw(10) << theCNuc->GetPairNumFromKey(this->GetSegment(i)->GetEntranceKey())
+    for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+      if(segment->GetEntranceKey()==segment->GetExitKey()) {
+	for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
+	  out << std::setw(10) << GetSegments().begin()-segment+1
+	      << std::setw(10) << segment->GetPoints().begin()-point+1
+	      << std::setw(10) << theCNuc->GetPairNumFromKey(segment->GetEntranceKey())
 	      << std::setw(15) << point->GetCMEnergy()
 	      << std::setw(15) << point->GetCMAngle()
 	      << std::setw(25) << point->GetCoulombAmplitude()
@@ -536,12 +513,12 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 void EData::WriteOutputFiles(const struct Config &configure) {
   AZUREOutput output(configure.outputdir);
   if(!configure.withData) output.SetExtrap();
-  for(int i=1;i<=this->NumSegments();i++) {
-    int aa=this->GetSegment(i)->GetEntranceKey();
-    int ir=this->GetSegment(i)->GetExitKey();
+  for(ESegmentIterator segment=GetSegments().begin();
+      segment<GetSegments().end();segment++) {
+    int aa=segment->GetEntranceKey();
+    int ir=segment->GetExitKey();
     std::ostream out(output(aa,ir));
-    for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-      EPoint *point=this->GetSegment(i)->GetPoint(ii);
+    for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
       out << std::setw(9)  << std::fixed      << point->GetCMEnergy()
 	  << std::setw(10) << std::fixed      << point->GetCMAngle()
@@ -576,66 +553,70 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
     out.open(outputfile.c_str());
     if(!out) std::cout << "Could not write to EC Amplitude File." << std::endl;
   }
-  for(int i=1;i<=this->NumSegments();i++) {
-    ESegment *segment=this->GetSegment(i);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     int aa=theCNuc->GetPairNumFromKey(segment->GetEntranceKey());
     if(theCNuc->GetPair(aa)->IsECEntrance()) {
       PPair *entrancePair=theCNuc->GetPair(aa);
       for(int ec=1;ec<=entrancePair->NumECLevels();ec++) {
-	int ir=theCNuc->GetPairNumFromKey(this->GetSegment(i)->GetExitKey());
+	int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	if(entrancePair->GetECLevel(ec)->GetPairNum()==ir) {
 	  if(!configure.oldECFile) {
-	    std::cout << "\tSegment #" << i << " [                         ] 0%";std::cout.flush();
+	    std::cout << "\tSegment #" << segment->GetSegmentKey() << " [                         ] 0%";std::cout.flush();
 	    double percent=0.05;
 	    double dpercent=0.05;
-	    int numPoints=this->GetSegment(i)->NumPoints();
-	    for(int ii=1;ii<=numPoints;ii++) {
-	      if(ii<=percent*numPoints&&ii+1>percent*numPoints) {
+	    int numPoints=segment->NumPoints();
+	    EPointIterator firstPoint=segment->GetPoints().begin();
+	    for(EPointIterator point=firstPoint;point<segment->GetPoints().end();point++) {
+	      int pointIndex=point-firstPoint+1;
+	      if(pointIndex<=percent*numPoints&&pointIndex+1>percent*numPoints) {
 		std::string progress=" [";
 		for(int j = 1;j<=25;j++) {
 		  if(percent>=j*0.04) progress+='*';
 		  else progress+=' ';
 		} progress+="] ";
-		std::cout << "\r\tSegment #" << i << progress << percent*100 << '%';std::cout.flush();
+		std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
 		percent+=dpercent;
-	      } else if(ii>percent*numPoints) {
-		while(ii>percent*numPoints&&percent<1.) percent+=dpercent;
+	      } else if(pointIndex>percent*numPoints) {
+		while(pointIndex>percent*numPoints&&percent<1.) percent+=dpercent;
 		std::string progress=" [";
 		for(int j = 1;j<=25;j++) {
 		  if(percent>=j*0.04) progress+='*';
 		  else progress+=' ';
 		} progress+="] ";
-		std::cout << "\r\tSegment #" << i << progress << percent*100 << '%';std::cout.flush();
+		std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
 		percent+=dpercent;
 	      }
-	      if(!segment->GetPoint(ii)->IsMapped()) segment->GetPoint(ii)->CalculateECAmplitudes(theCNuc);
+	      if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
 	    }
 	    std::cout << std::endl;
 	  }
-	  for(int ii=1;ii<=this->GetSegment(i)->NumPoints();ii++) {
-	    if(!segment->GetPoint(ii)->IsMapped()) {
+	  for(EPointIterator point=segment->GetPoints().begin();
+	      point<segment->GetPoints().end();point++) {
+	    if(!(point->IsMapped())) {
 	      for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
 		for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
 		  if(!configure.oldECFile) {
-		    if(out.is_open()) out << segment->GetPoint(ii)->GetECAmplitude(k,ecm) << std::endl;
-		    for(int iii=1;iii<=segment->GetPoint(ii)->NumSubPoints();iii++)
-		      if(out.is_open()) out << segment->GetPoint(ii)->GetSubPoint(iii)->GetECAmplitude(k,ecm) << std::endl;
+		    if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
+		    for(EPointIterator subPoint=point->GetSubPoints().begin();
+			subPoint<point->GetSubPoints().end();subPoint++)
+		      if(out.is_open()) out << subPoint->GetECAmplitude(k,ecm) << std::endl;
 		  } else {
 		    complex ecAmplitude(0.0,0.0);
 		    in >> ecAmplitude;
-		    segment->GetPoint(ii)->AddECAmplitude(k,ecm,ecAmplitude);
-		    for(int iii=1;iii<=segment->GetPoint(ii)->NumSubPoints();iii++) {
+		    point->AddECAmplitude(k,ecm,ecAmplitude);
+		    for(EPointIterator subPoint=point->GetSubPoints().begin();
+			subPoint<point->GetSubPoints().end();subPoint++) {
 		      ecAmplitude=complex(0.0,0.0);
 		      in >> ecAmplitude;
-		      segment->GetPoint(ii)->GetSubPoint(iii)->AddECAmplitude(k,ecm,ecAmplitude);
+		      subPoint->AddECAmplitude(k,ecm,ecAmplitude);
 		    }
 		  }
-		  for(int iii=1;iii<=segment->GetPoint(ii)->NumLocalMappedPoints();iii++) {
-		    segment->GetPoint(ii)->GetLocalMappedPoint(iii)->
-		      AddECAmplitude(k,ecm,segment->GetPoint(ii)->GetECAmplitude(k,ecm));
-		    for(int iiii=1;iiii<=segment->GetPoint(ii)->NumSubPoints();iiii++) {
-		      segment->GetPoint(ii)->GetLocalMappedPoint(iii)->
-			GetSubPoint(iiii)->AddECAmplitude(k,ecm,segment->GetPoint(ii)->GetSubPoint(iiii)->GetECAmplitude(k,ecm));
+		  for(EPointMapIterator mappedPoint=point->GetMappedPoints().begin();
+		      mappedPoint<point->GetMappedPoints().begin();mappedPoint++) {
+		    (*mappedPoint)->AddECAmplitude(k,ecm,point->GetECAmplitude(k,ecm));
+		    for(int i=1;i<=point->NumSubPoints();i++) {
+		      (*mappedPoint)->GetSubPoint(i)->
+			AddECAmplitude(k,ecm,point->GetSubPoint(i)->GetECAmplitude(k,ecm));
 		    }
 		  }
 		}
@@ -659,22 +640,23 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
  */
 
 void EData::MapData() {
-  for(int i=this->NumSegments(); i>=1; i--) {
-    ESegment *segment=this->GetSegment(i);
-    for(int ii=segment->NumPoints();ii>=1;ii--) {
-      EPoint *point=segment->GetPoint(ii);
+  for(ESegmentIterator segment=GetSegments().end()-1; 
+      segment>=GetSegments().begin(); segment--) {
+    for(EPointIterator point=segment->GetPoints().end()-1;
+	point>=segment->GetPoints().begin();point--) {
       if(point->NumLocalMappedPoints()==0) {
-	for(int j=1;j<=this->NumSegments(); j++) {
-	  ESegment *testSegment=this->GetSegment(j);
+	for(ESegmentIterator testSegment=GetSegments().begin();
+	    testSegment<GetSegments().end(); testSegment++) {
 	  if(testSegment->GetEntranceKey()==segment->GetEntranceKey()&&
 	     testSegment->GetExitKey()==segment->GetExitKey()) {
-	    for(int jj=1;jj<=testSegment->NumPoints();jj++) {
-	      EPoint *testPoint=testSegment->GetPoint(jj);
+	    for(EPointIterator testPoint=testSegment->GetPoints().begin();
+		testPoint<testSegment->GetPoints().end();testPoint++) {
 	      if(testPoint->GetCMEnergy()==point->GetCMEnergy()
 		 &&!testPoint->IsMapped()&&point!=testPoint
 		 &&testPoint->GetTargetEffectNum()==point->GetTargetEffectNum()) {
-		point->SetMap(j,jj);
-		testPoint->AddLocalMappedPoint(point);
+		point->SetMap(GetSegments().begin()-testSegment+1,
+			      segment->GetPoints().begin()-testPoint+1);
+		testPoint->AddLocalMappedPoint(&*point);
 		break;
 	      }
 	    }
@@ -716,12 +698,10 @@ void EData::ReadTargetEffectsFile(std::string infile) {
       }
     }
   }
-  for(int i = 1;i<=this->NumSegments();i++) {
-    ESegment *segment=this->GetSegment(i);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     if(segment->IsTargetEffect()) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
-      for(int ii=1;ii<=segment->NumPoints();ii++) {
-	EPoint *point = segment->GetPoint(ii);
+      for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
 	double forwardDepth=0.0;
 	double backwardDepth=0.0;
@@ -739,10 +719,10 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	}
-	for(int iii=0;iii<targetEffect->NumSubPoints();iii++) {
+	for(int i=0;i<targetEffect->NumSubPoints();i++) {
 	  double subEnergy=point->GetCMEnergy()+forwardDepth
-	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*iii;
-	  EPoint subPoint(point->GetCMAngle(),subEnergy,segment);
+	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
+	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
 	  if(targetEffect->IsTargetIntegration()) {
 	  	double stoppingPower=targetEffect->
 	  	GetStoppingPowerEq()->Evaluate(subEnergy);
@@ -787,19 +767,14 @@ ESegment *EData::GetSegmentFromKey(int segmentKey) {
 EData *EData::Clone() const {
   EData *dataCopy = new EData(*this);
   
-  for(int i=1;i<=dataCopy->NumSegments();i++) {
-    for(int ii=1;ii<=dataCopy->GetSegment(i)->NumPoints();ii++) {
-      dataCopy->GetSegment(i)->GetPoint(ii)->SetParentData(dataCopy);
-      dataCopy->GetSegment(i)->GetPoint(ii)->ClearLocalMappedPoints();
-    }
+  for(EDataIterator data=dataCopy->begin();data!=dataCopy->end();data++) {
+    data.point()->SetParentData(dataCopy);
+    data.point()->ClearLocalMappedPoints();
   }
-  for(int i=1;i<=dataCopy->NumSegments();i++) {
-    for(int ii=1;ii<=dataCopy->GetSegment(i)->NumPoints();ii++) {
-      if(dataCopy->GetSegment(i)->GetPoint(ii)->IsMapped()) {
-	EPoint *mappedPoint = dataCopy->GetSegment(i)->GetPoint(ii);
-	EnergyMap pointMap = mappedPoint->GetMap();
-	dataCopy->GetSegment(pointMap.segment)->GetPoint(pointMap.point)->AddLocalMappedPoint(mappedPoint);
-      }
+  for(EDataIterator data=dataCopy->begin();data!=dataCopy->end();data++) {
+    if(data.point()->IsMapped()) {
+      EnergyMap pointMap = data.point()->GetMap();
+      dataCopy->GetSegment(pointMap.segment)->GetPoint(pointMap.point)->AddLocalMappedPoint(&*data.point());
     }
   }  
   return dataCopy;
@@ -815,4 +790,17 @@ TargetEffect *EData::GetTargetEffect(int effectNumber) {
     temp=&targetEffects_[effectNumber-1];
   else return temp=NULL;
   return temp;
+}
+
+EDataIterator EData::begin() {
+  return EDataIterator(&segments_);
+}
+
+EDataIterator EData::end() {
+  EDataIterator it(&segments_);
+  return it.SetEnd();
+}
+
+std::vector<ESegment>& EData::GetSegments() {
+  return segments_;
 }

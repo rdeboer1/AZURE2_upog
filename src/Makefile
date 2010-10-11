@@ -42,7 +42,8 @@ SRCS =  AZUREMain.cpp\
 	AZUREParams.cpp\
 	Equation.cpp\
 	TargetEffect.cpp\
-	CoulFunc.cpp
+	CoulFunc.cpp\
+	EDataIterator.cpp
 
 
 ../AZURE2 : AZURE2.cpp $(SRCS:.cpp=.o)

@@ -1101,3 +1101,11 @@ EPoint* EPoint::GetSubPoint(int subPoint) {
   else tempPoint= NULL;
   return tempPoint;
 }
+
+std::vector<EPoint>& EPoint::GetSubPoints() {
+  return integrationPoints_;
+}
+
+std::vector<EPoint*>& EPoint::GetMappedPoints() {
+  return local_mapped_points_;
+}

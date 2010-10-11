@@ -3,6 +3,7 @@
 
 #include "ESegment.h"
 #include "TargetEffect.h"
+#include "EDataIterator.h"
 
 class CNuc;
 
@@ -45,6 +46,9 @@ class EData {
   ESegment *GetSegmentFromKey(int);
   EData *Clone() const;
   TargetEffect *GetTargetEffect(int);
+  EDataIterator begin();
+  EDataIterator end();
+  std::vector<ESegment>& GetSegments();
  private:
   std::vector<TargetEffect> targetEffects_;
   std::vector<ESegment> segments_;
