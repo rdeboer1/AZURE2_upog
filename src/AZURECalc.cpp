@@ -36,8 +36,8 @@ double AZURECalc::operator()(const vector_r& p) const {
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
     double pointChiSquared=pow(chi,2.0);
     segmentChiSquared+=pointChiSquared;
-    if((data.segment()->GetPoints().end()-1==data.point())&&!isFit) {
-      data.segment()->SetSegmentChiSquared(segmentChiSquared);
+    if(data.segment()->GetPoints().end()-1==data.point()) {
+      if(!isFit) data.segment()->SetSegmentChiSquared(segmentChiSquared);
       chiSquared+=segmentChiSquared;
     }
   }
