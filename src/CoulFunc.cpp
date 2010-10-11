@@ -1,5 +1,6 @@
 #include "CoulFunc.h"
 #include "PPair.h"
+#include <iostream>
 
 #ifdef EXT_COUL
   #include "cwfcomp.H"
@@ -158,7 +159,8 @@ double CoulFunc::Penetrability(int l,double radius,double energy)  {
 double CoulFunc::PEShift(int l,double radius,double energy)  {
   struct CoulWaves coul=this->operator()(l,radius,energy);
   double rho=sqrt(2.*uconv)/hbarc*radius*sqrt(redmass()*energy);
-  return rho/(pow(coul.F,2.0)+pow(coul.G,2.0))*
+  if(pow(coul.F,2.0)==0.&&coul.F*coul.dF==0.) return rho*(coul.dG/coul.G);
+  else return rho/(pow(coul.F,2.0)+pow(coul.G,2.0))*
     (coul.F*coul.dF+coul.G*coul.dG);
 }
 
