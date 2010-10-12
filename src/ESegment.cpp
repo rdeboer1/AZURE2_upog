@@ -310,6 +310,10 @@ EPoint *ESegment::GetPoint(int pointNum) {
   return b;
 }
 
+/*!
+ * Returns a reference to the vector of EPoint objects.
+ */
+
 std::vector<EPoint>& ESegment::GetPoints() {
   return points_;
 }

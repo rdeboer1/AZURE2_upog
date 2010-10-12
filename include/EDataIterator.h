@@ -10,6 +10,13 @@ typedef std::vector<EPoint>::iterator EPointIterator;
 typedef std::vector<EPoint*>::iterator EPointMapIterator;
 typedef std::vector<ESegment>::iterator ESegmentIterator;
 
+///An iterator class for an EData object.
+
+/*!
+ * The EDataIterator class is used to loop through all data segments and points contained in an
+ * EData object.
+ */
+
 class EDataIterator {
  public:
   EDataIterator(std::vector<ESegment>*);

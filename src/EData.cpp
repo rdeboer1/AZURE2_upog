@@ -792,14 +792,26 @@ TargetEffect *EData::GetTargetEffect(int effectNumber) {
   return temp;
 }
 
+/*!
+ * Returns an EDataIterator referring to the first data point in the set.
+ */
+
 EDataIterator EData::begin() {
   return EDataIterator(&segments_);
 }
+
+/*!
+ * Returns an EDataIterator referring to one object past the last data point in the set.
+ */
 
 EDataIterator EData::end() {
   EDataIterator it(&segments_);
   return it.SetEnd();
 }
+
+/*!
+ * Returns a reference to the vector of ESegment objects.
+ */
 
 std::vector<ESegment>& EData::GetSegments() {
   return segments_;

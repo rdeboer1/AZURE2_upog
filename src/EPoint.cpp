@@ -1102,9 +1102,18 @@ EPoint* EPoint::GetSubPoint(int subPoint) {
   return tempPoint;
 }
 
+/*!
+ * Returns a reference to the vector of EPoint objects containing the subpoints used in target
+ * effect integration.
+ */
+
 std::vector<EPoint>& EPoint::GetSubPoints() {
   return integrationPoints_;
 }
+
+/*!
+ * Returns a reference to the vector of pointers to mapped EPoint objects.
+ */
 
 std::vector<EPoint*>& EPoint::GetMappedPoints() {
   return local_mapped_points_;
