@@ -48,8 +48,8 @@ int main(int argc,char *argv[]){
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << "| #### #### #  # ###  #### | Version 2.0                |" << std::endl
 	    << "| #  #    # #  # #  # #    | Object Oriented C++        |" << std::endl
-	    << "| ####   #  #  # ###  ##   |                            |" << std::endl
-	    << "| #  #  #   #  # # #  #    | Ethan Uberseder            |" << std::endl
+	    << "| ####   #  #  # ###  ##   | October 12, 2010           |" << std::endl
+	    << "| #  #  #   #  # # #  #    |                            |" << std::endl
 	    << "| #  # ####  ##  #  # #### | University of Notre Dame   |" << std::endl
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << std::endl;
