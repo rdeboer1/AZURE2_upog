@@ -69,7 +69,7 @@ void RMatrixFunc::ClearMatrices() {
  * This function creates the \f$ [1-RL] \f$ and \f$ R \f$ Matrices from the CNuc object.
  */
 
-void RMatrixFunc::FillMatrices (EPoint *point) {
+void RMatrixFunc::FillMatrices (EPoint *point, bool isBrune) {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {

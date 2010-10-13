@@ -28,6 +28,7 @@ class ALevel {
   double GetTransformGamma(int) const;
   double GetTransformE() const;
   double GetBigGamma(int) const;
+  double GetShiftFunction(int) const;
   complex GetExternalGamma(int) const;
   void AddGamma(struct NucLine);
   void AddGamma(double);
@@ -43,6 +44,7 @@ class ALevel {
   void SetBigGamma(int,double);
   void SetTransformIterations(int);
   void SetExternalGamma(int,complex);
+  void SetShiftFunction(int,double);
  private:
   bool isinrmatrix_;
   bool energyfixed_;
@@ -58,6 +60,7 @@ class ALevel {
   vector_r ec_conv_factors_;
   vector_r transform_gammas_;
   vector_r big_gammas_;
+  vector_r shifts_;
   vector_c external_gammas_;
 };
 

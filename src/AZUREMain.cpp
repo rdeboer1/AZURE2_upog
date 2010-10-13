@@ -124,7 +124,7 @@ int AZUREMain::operator()(){
   }
 
   std::cout << "Performing final parameter transformation..." << std::endl;
-  compound()->TransformOut(configure().isEC);
+  compound()->TransformOut(configure());
   compound()->PrintTransformParams(configure().outputdir);
 
   return 0;

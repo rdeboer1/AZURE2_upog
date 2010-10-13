@@ -881,7 +881,7 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
     if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc);
     else theMatrixFunc=new RMatrixFunc(theCNuc);
     theMatrixFunc->ClearMatrices();
-    theMatrixFunc->FillMatrices(this);
+    theMatrixFunc->FillMatrices(this,configure.isBrune);
     theMatrixFunc->InvertMatrices();
     theMatrixFunc->CalculateTMatrix(this);
     theMatrixFunc->CalculateCrossSection(this);

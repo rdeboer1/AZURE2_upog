@@ -23,6 +23,7 @@ double AZURECalc::operator()(const vector_r& p) const {
 
   //Fill Compound Nucleus From Minuit Parameters
   localCompound->FillCompoundFromParams(p);
+  if(configure().isBrune) localCompound->CalcShiftFunctions();
   
   //loop over segments and points
   double chiSquared=0.0;
@@ -48,7 +49,7 @@ double AZURECalc::operator()(const vector_r& p) const {
 				       << std::endl;
     if(thisIteration%1000==0) {
       localData->WriteOutputFiles(configure());
-      localCompound->TransformOut(configure().isEC);
+      localCompound->TransformOut(configure());
       localCompound->PrintTransformParams(configure().outputdir);
     }
   }

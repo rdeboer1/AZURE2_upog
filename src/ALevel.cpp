@@ -142,6 +142,14 @@ double ALevel::GetBigGamma(int channelNum) const {
 }
 
 /*!
+ * Returns the Shift function for the specified channel number calculated at the resonance energy.
+ */
+
+double ALevel::GetShiftFunction(int channelNum) const {
+  return shifts_[channelNum-1];
+}
+
+/*!
  * Returns the external portion of the reduced width amplitude for a given channel number.
  */
 
@@ -163,6 +171,7 @@ void ALevel::AddGamma(struct NucLine nucLine) {
   external_gammas_.push_back(complex(0.0,0.0));
   if(nucLine.channelFix==1) channelfixed_.push_back(true);
   else channelfixed_.push_back(false);
+  shifts_.push_back(0.0);
 }
 
 /*!
@@ -275,4 +284,12 @@ void ALevel::SetTransformIterations(int iterations) {
 
 void ALevel::SetExternalGamma(int channelNum, complex reducedWidth) {
   external_gammas_[channelNum-1]=reducedWidth;
+}
+
+/*!
+ * Sets the value of the shift function calculated at the resonance energy.
+ */
+
+void ALevel::SetShiftFunction(int channelNum, double shiftFunction) {
+  shifts_[channelNum-1]=shiftFunction;
 }

@@ -18,9 +18,9 @@ class AMatrixFunc : public GenMatrixFunc {
    * Returns a pointer to the compound nucleus object.
    */
   CNuc *compound() const {return compound_;};
-
+  
   void ClearMatrices();
-  void FillMatrices(EPoint*);
+  void FillMatrices(EPoint*,bool isBrune=false);
   void InvertMatrices();
   void CalculateTMatrix(EPoint*);
   /*!

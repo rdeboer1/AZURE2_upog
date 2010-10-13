@@ -27,6 +27,7 @@ int main(int argc,char *argv[]){
 
   bool useReadline=true;
   bool transformParams=true;
+  bool isBrune=false;
   Config configure;
 
   if(argc<2) {
@@ -38,6 +39,7 @@ int main(int argc,char *argv[]){
       std::string arg=argv[i];
       if(arg=="--no-readline") useReadline=false;
       else if(arg=="--no-transform") transformParams=false;
+      else if(arg=="--use-brune") isBrune=true;
       else std::cout << "Unknown option " << arg << '.' << std::endl;
     }
     configure.configfile=argv[argc-1];
@@ -63,6 +65,8 @@ int main(int argc,char *argv[]){
   else if(CheckForInputFiles(configure) == -1) return -1;
 #endif
   configure.transformParams=transformParams;
+  configure.isBrune=isBrune;
+  if(isBrune) configure.isAMatrix=true;
 
   int command=0;
 

@@ -277,7 +277,7 @@ void CNuc::Initialize(const struct Config &configure) {
   //Transform Input Parameters
   if(configure.transformParams) {
     std::cout << "Performing Input Parameter Transformation..." << std::endl;
-    this->TransformIn(configure.isEC);
+    this->TransformIn(configure);
   }
 
   //Sort reaction pathways
@@ -391,7 +391,7 @@ void CNuc::PrintNuc(const struct Config &configure) {
  * Performs the initial parameter transformations from physical to formal parameters.
  */
 
-void CNuc::TransformIn(bool isEC) {
+void CNuc::TransformIn(const struct Config& configure) {
   for(int j=1;j<=this->NumJGroups();j++) {
     JGroup *theJGroup=this->GetJGroup(j);
     if(theJGroup->IsInRMatrix()) {
@@ -513,7 +513,7 @@ void CNuc::TransformIn(bool isEC) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if(isEC) {
+	      if(configure.isEC) {
 		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
@@ -533,51 +533,57 @@ void CNuc::TransformIn(bool isEC) {
 	  }
 	}
       }	  
-      matrix_r nMatrix;
-      matrix_r mMatrix;      
-      for(int mu=0;mu<tempEnergies.size();mu++) {
-	vector_r tempLevelVector;
-	nMatrix.push_back(tempLevelVector);
-	mMatrix.push_back(tempLevelVector);
-	for(int la=0;la<tempEnergies.size();la++) {
-	  if(la==mu) {
-	    mMatrix[mu].push_back(1.0);
-	    double sum=tempEnergies[la];
-	    for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	      if(theJGroup->GetChannel(ch)->GetRadType()=='P')
-		sum+=(shifts[la][ch-1]-theJGroup->GetChannel(ch)->GetBoundaryCondition())*
-		  pow(tempGammas[la][ch-1],2.0);
-	    }
-	    nMatrix[mu].push_back(sum);
-	  } else {
-	    double mSum=0.0;
-	    double nSum=0.0;
-	    for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	      if(theJGroup->GetChannel(ch)->GetRadType()=='P') {
-		mSum+=(shifts[mu][ch-1]-shifts[la][ch-1])/(tempEnergies[mu]-tempEnergies[la])*
-		  tempGammas[la][ch-1]*tempGammas[mu][ch-1];
-		nSum+=((tempEnergies[mu]*shifts[la][ch-1]-tempEnergies[la]*shifts[mu][ch-1])/
-		       (tempEnergies[mu]-tempEnergies[la])-theJGroup->GetChannel(ch)->GetBoundaryCondition())
-		  *tempGammas[la][ch-1]*tempGammas[mu][ch-1];
+      if(!configure.isBrune) {
+	matrix_r nMatrix;
+	matrix_r mMatrix;      
+	for(int mu=0;mu<tempEnergies.size();mu++) {
+	  vector_r tempLevelVector;
+	  nMatrix.push_back(tempLevelVector);
+	  mMatrix.push_back(tempLevelVector);
+	  for(int la=0;la<tempEnergies.size();la++) {
+	    if(la==mu) {
+	      mMatrix[mu].push_back(1.0);
+	      double sum=tempEnergies[la];
+	      for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+		if(theJGroup->GetChannel(ch)->GetRadType()=='P')
+		  sum+=(shifts[la][ch-1]-theJGroup->GetChannel(ch)->GetBoundaryCondition())*
+		    pow(tempGammas[la][ch-1],2.0);
 	      }
+	      nMatrix[mu].push_back(sum);
+	    } else {
+	      double mSum=0.0;
+	      double nSum=0.0;
+	      for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+		if(theJGroup->GetChannel(ch)->GetRadType()=='P') {
+		  mSum+=(shifts[mu][ch-1]-shifts[la][ch-1])/(tempEnergies[mu]-tempEnergies[la])*
+		    tempGammas[la][ch-1]*tempGammas[mu][ch-1];
+		  nSum+=((tempEnergies[mu]*shifts[la][ch-1]-tempEnergies[la]*shifts[mu][ch-1])/
+			 (tempEnergies[mu]-tempEnergies[la])-theJGroup->GetChannel(ch)->GetBoundaryCondition())
+		    *tempGammas[la][ch-1]*tempGammas[mu][ch-1];
+		}
+	      }
+	      mMatrix[mu].push_back(-mSum);
+	      nMatrix[mu].push_back(nSum);
 	    }
-	    mMatrix[mu].push_back(-mSum);
-	    nMatrix[mu].push_back(nSum);
 	  }
 	}
-      }
-      //solve eigenvalue problem
-      struct EigenSolve result=Solve(nMatrix,mMatrix);
-      for(int la=0;la<tempEnergies.size();la++) {
-	theJGroup->GetLevel(levelKeys[la])->SetE(result.eigenvalues[la]);
-	for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	  double sum=0.0;
-	  for(int mu=0;mu<tempEnergies.size();mu++) {
-	    sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
+	//solve eigenvalue problem
+	struct EigenSolve result=Solve(nMatrix,mMatrix);
+	for(int la=0;la<tempEnergies.size();la++) {
+	  theJGroup->GetLevel(levelKeys[la])->SetE(result.eigenvalues[la]);
+	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+	    double sum=0.0;
+	    for(int mu=0;mu<tempEnergies.size();mu++) {
+	      sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
+	    }
+	    theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
 	  }
-	  theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
 	}
-      }
+      } else {
+	for(int la=0;la<tempEnergies.size();la++) 
+	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) 
+	    theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,tempGammas[la][ch-1]);
+      }  
     }
   }
 }
@@ -1149,124 +1155,136 @@ void CNuc::FillCompoundFromParams(const vector_r &p) {
  * Performs the final parameter transformations from formal to physical parameters.
  */
 
-void CNuc::TransformOut(bool isEC) {
-  int maxIterations=1000;
-  double energyTolerance=1e-6;
-  for(int j=1;j<=this->NumJGroups();j++) {
-    for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
-      ALevel *theLevel=this->GetJGroup(j)->GetLevel(la);
-      if(theLevel->IsInRMatrix()) {
-	int iteration=1;
-	int thisLevel=0;
-	bool done=false;
-	vector_r tempE;
-	vector_r tempBoundary;
-	matrix_r tempGamma;
-	for(int lap=1;lap<=this->GetJGroup(j)->NumLevels();lap++) {
-	  if(this->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) {
-	    tempE.push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitE());
-	    if(this->GetJGroup(j)->GetLevel(lap)==theLevel) thisLevel=tempE.size()-1;
-	    vector_r tempChanVector;
-	    tempGamma.push_back(tempChanVector);
-	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	      tempGamma[tempE.size()-1].push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitGamma(ch));
-	      if(tempE.size()==1) tempBoundary.push_back(this->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition());
-	    }
-	  }
-	}
-	while(iteration<=maxIterations&&!done) {
-	  vector_r boundaryDiff;
-	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	    double newBoundary=0.0;
-	    AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
-	    PPair *exitPair=this->GetPair(theChannel->GetPairNum());
-	    double localEnergy=tempE[thisLevel]-exitPair->GetSepE()-exitPair->GetExE();
-	    if(theChannel->GetRadType()=='P') {
-	      if(localEnergy<0.0) {
-		ShftFunc theShiftFunction(exitPair);
-		newBoundary=theShiftFunction(theChannel->GetL(),tempE[thisLevel]);
-	      }
-	      else {
-		CoulFunc theCoulombFunction(exitPair);
-		double radius=exitPair->GetChRad();
-		newBoundary=theCoulombFunction.PEShift(theChannel->GetL(),radius,localEnergy);
-	      }
-	      boundaryDiff.push_back(newBoundary-tempBoundary[ch-1]);
-	      tempBoundary[ch-1]=newBoundary;
-	    } else boundaryDiff.push_back(boundaryDiff[0]);
-	  }
-	  matrix_r cMatrix;
-	  for(int mu=0;mu<tempE.size();mu++) {
-	    vector_r tempRow;
-	    cMatrix.push_back(tempRow);
-	    for (int mup=0;mup<tempE.size();mup++) {
-	      double chanSum=0.0;
+void CNuc::TransformOut(const struct Config& configure) {
+  if(!configure.isBrune) {
+    int maxIterations=1000;
+    double energyTolerance=1e-6;
+    for(int j=1;j<=this->NumJGroups();j++) {
+      for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
+	ALevel *theLevel=this->GetJGroup(j)->GetLevel(la);
+	if(theLevel->IsInRMatrix()) {
+	  int iteration=1;
+	  int thisLevel=0;
+	  bool done=false;
+	  vector_r tempE;
+	  vector_r tempBoundary;
+	  matrix_r tempGamma;
+	  for(int lap=1;lap<=this->GetJGroup(j)->NumLevels();lap++) {
+	    if(this->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) {
+	      tempE.push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitE());
+	      if(this->GetJGroup(j)->GetLevel(lap)==theLevel) thisLevel=tempE.size()-1;
+	      vector_r tempChanVector;
+	      tempGamma.push_back(tempChanVector);
 	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P')
-		  chanSum+=boundaryDiff[ch-1]*tempGamma[mu][ch-1]*
-		    tempGamma[mup][ch-1];
+		tempGamma[tempE.size()-1].push_back(this->GetJGroup(j)->GetLevel(lap)->GetFitGamma(ch));
+		if(tempE.size()==1) tempBoundary.push_back(this->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition());
 	      }
-	      if(mu==mup) cMatrix[mu].push_back(tempE[mu]-chanSum);
-	      else cMatrix[mu].push_back(-chanSum);
 	    }
 	  }
-	  struct EigenSolve eigenResult=Diagonalize(cMatrix);	
-	  if(fabs(eigenResult.eigenvalues[thisLevel]-tempE[thisLevel])<=energyTolerance) 
-	    done=true;
-	  matrix_r newGamma;
-	  for(int mu=0;mu<tempE.size();mu++) {
-	    vector_r tempChanVector;
-	    newGamma.push_back(tempChanVector);
+	  while(iteration<=maxIterations&&!done) {
+	    vector_r boundaryDiff;
 	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	      double gammaSum=0.0;
-	      for(int mup=0;mup<tempE.size();mup++) {
-		gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
+	      double newBoundary=0.0;
+	      AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
+	      PPair *exitPair=this->GetPair(theChannel->GetPairNum());
+	      double localEnergy=tempE[thisLevel]-exitPair->GetSepE()-exitPair->GetExE();
+	      if(theChannel->GetRadType()=='P') {
+		if(localEnergy<0.0) {
+		  ShftFunc theShiftFunction(exitPair);
+		  newBoundary=theShiftFunction(theChannel->GetL(),tempE[thisLevel]);
+		}
+		else {
+		  CoulFunc theCoulombFunction(exitPair);
+		  double radius=exitPair->GetChRad();
+		  newBoundary=theCoulombFunction.PEShift(theChannel->GetL(),radius,localEnergy);
+		}
+		boundaryDiff.push_back(newBoundary-tempBoundary[ch-1]);
+		tempBoundary[ch-1]=newBoundary;
+	      } else boundaryDiff.push_back(boundaryDiff[0]);
+	    }
+	    matrix_r cMatrix;
+	    for(int mu=0;mu<tempE.size();mu++) {
+	      vector_r tempRow;
+	      cMatrix.push_back(tempRow);
+	      for (int mup=0;mup<tempE.size();mup++) {
+		double chanSum=0.0;
+		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+		  if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P')
+		    chanSum+=boundaryDiff[ch-1]*tempGamma[mu][ch-1]*
+		      tempGamma[mup][ch-1];
+		}
+		if(mu==mup) cMatrix[mu].push_back(tempE[mu]-chanSum);
+		else cMatrix[mu].push_back(-chanSum);
 	      }
-	      newGamma[mu].push_back(gammaSum);
+	    }
+	    struct EigenSolve eigenResult=Diagonalize(cMatrix);	
+	    if(fabs(eigenResult.eigenvalues[thisLevel]-tempE[thisLevel])<=energyTolerance) 
+	      done=true;
+	    matrix_r newGamma;
+	    for(int mu=0;mu<tempE.size();mu++) {
+	      vector_r tempChanVector;
+	      newGamma.push_back(tempChanVector);
+	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+		double gammaSum=0.0;
+		for(int mup=0;mup<tempE.size();mup++) {
+		  gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
+		}
+		newGamma[mu].push_back(gammaSum);
+	      }
+	    }
+	    for(int mu=0;mu<tempE.size();mu++) {
+	      tempE[mu]=eigenResult.eigenvalues[mu];
+	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+		tempGamma[mu][ch-1]=newGamma[mu][ch-1];
+	      }
+	    }
+	    if(!done) {
+	      if(iteration==maxIterations) {
+		std::cout << "**WARNING: Could Not Transform J = " 
+			  << this->GetJGroup(j)->GetJ();
+		if(this->GetJGroup(j)->GetPi()==-1) std::cout << '-';
+		else std::cout << '+';
+		std::cout << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
+		tempE[thisLevel]=theLevel->GetFitE();
+		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) 
+		  tempGamma[thisLevel][ch-1]=theLevel->GetFitGamma(ch);
+	      }
+	      iteration++;
 	    }
 	  }
-	  for(int mu=0;mu<tempE.size();mu++) {
-	    tempE[mu]=eigenResult.eigenvalues[mu];
-	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	      tempGamma[mu][ch-1]=newGamma[mu][ch-1];
-	    }
+	  
+	  theLevel->SetTransformE(tempE[thisLevel]);
+	  theLevel->SetTransformIterations(iteration);
+	  double nFSum=1.0;
+	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+	    AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
+	    theLevel->SetTransformGamma(ch,tempGamma[thisLevel][ch-1]);
+	    if(ch<=theLevel->NumNFIntegrals()) nFSum+=2.0*
+						 this->GetPair(theChannel->GetPairNum())->GetChRad()*
+						 this->GetPair(theChannel->GetPairNum())->GetRedMass()*
+						 uconv/pow(hbarc,2.0)*pow(tempGamma[thisLevel][ch-1],2.0)*
+						 theLevel->GetNFIntegral(ch);
 	  }
-	  if(!done) {
-	    if(iteration==maxIterations) {
-	      std::cout << "**WARNING: Could Not Transform J = " 
-			<< this->GetJGroup(j)->GetJ();
-	      if(this->GetJGroup(j)->GetPi()==-1) std::cout << '-';
-	      else std::cout << '+';
-	      std::cout << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
-	      tempE[thisLevel]=theLevel->GetFitE();
-	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) 
-		tempGamma[thisLevel][ch-1]=theLevel->GetFitGamma(ch);
-	    }
-	    iteration++;
-	  }
+	  theLevel->SetSqrtNFFactor(1.0/sqrt(nFSum));
+	} else {
+	  theLevel->SetTransformE(theLevel->GetFitE());
+	  theLevel->SetTransformIterations(0);
+	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++)
+	    theLevel->SetTransformGamma(ch,theLevel->GetFitGamma(ch));	
 	}
-	
-	theLevel->SetTransformE(tempE[thisLevel]);
-	theLevel->SetTransformIterations(iteration);
-	double nFSum=1.0;
-	for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	  AChannel *theChannel=this->GetJGroup(j)->GetChannel(ch);
-	  theLevel->SetTransformGamma(ch,tempGamma[thisLevel][ch-1]);
-	  if(ch<=theLevel->NumNFIntegrals()) nFSum+=2.0*
-	    this->GetPair(theChannel->GetPairNum())->GetChRad()*
-	    this->GetPair(theChannel->GetPairNum())->GetRedMass()*
-	    uconv/pow(hbarc,2.0)*pow(tempGamma[thisLevel][ch-1],2.0)*
-	    theLevel->GetNFIntegral(ch);
-	}
-	theLevel->SetSqrtNFFactor(1.0/sqrt(nFSum));
-      } else {
-	theLevel->SetTransformE(theLevel->GetFitE());
-	theLevel->SetTransformIterations(0);
+      } 
+    }
+  } else {
+    for(int j=1;j<=this->NumJGroups();j++) 
+      for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
+	this->GetJGroup(j)->GetLevel(la)->SetTransformIterations(0);
+	this->GetJGroup(j)->GetLevel(la)->SetTransformE(this->GetJGroup(j)->GetLevel(la)->GetFitE());
 	for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++)
-	  theLevel->SetTransformGamma(ch,theLevel->GetFitGamma(ch));	
+	  this->GetJGroup(j)->GetLevel(la)->
+	    SetTransformGamma(ch,this->GetJGroup(j)->GetLevel(la)->GetFitGamma(ch));	
       }
-    } 
   }
+    
   for(int j=1;j<=this->NumJGroups();j++) {
     JGroup *theJGroup=this->GetJGroup(j);
     for(int la=1;la<=this->GetJGroup(j)->NumLevels();la++) {
@@ -1318,7 +1336,7 @@ void CNuc::TransformOut(bool isEC) {
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P'&&
-	   theLevel->IsInRMatrix()&&isEC) 
+	   theLevel->IsInRMatrix()&&configure.isEC) 
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
@@ -1407,6 +1425,40 @@ void CNuc::PrintTransformParams(std::string outdir) {
 
 void CNuc::SetMaxLValue(int maxL) {
   maxLValue_=maxL;
+}
+
+void CNuc::CalcShiftFunctions() {
+  for(int j=1;j<=this->NumJGroups();j++) {
+    if(this->GetJGroup(j)->IsInRMatrix()) {
+      JGroup *theJGroup=this->GetJGroup(j);
+      for(int la=1;la<=theJGroup->NumLevels();la++) {
+	ALevel *theLevel=theJGroup->GetLevel(la);
+	if(theLevel->IsInRMatrix()) {
+	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+	    AChannel *theChannel=theJGroup->GetChannel(ch);
+	    PPair *thePair=this->GetPair(theChannel->GetPairNum());
+	    if(thePair->GetPType()==0) {
+	      int lValue=theChannel->GetL();
+	      double levelEnergy=theLevel->GetFitE();
+	      double resonanceEnergy=levelEnergy-(thePair->GetSepE()+thePair->GetExE());
+	      if(resonanceEnergy<0.0) {
+		ShftFunc theShiftFunction(thePair);
+		theLevel->SetShiftFunction(ch,theShiftFunction(lValue,levelEnergy));
+	      }
+	      else {
+		CoulFunc theCoulombFunction(thePair);
+		double radius=thePair->GetChRad();
+		theLevel->SetShiftFunction(ch,theCoulombFunction.PEShift(lValue,radius,resonanceEnergy));
+	      }
+	    }
+	    else {
+	      theLevel->SetShiftFunction(ch,theJGroup->GetLevel(1)->GetShiftFunction(1));
+	    }
+	  }
+	}
+      }
+    }
+  }
 }
 
 /*!

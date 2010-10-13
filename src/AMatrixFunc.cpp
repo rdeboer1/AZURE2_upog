@@ -10,7 +10,7 @@
  */
 
 AMatrixFunc::AMatrixFunc(CNuc* compound) :
-    compound_(compound) {}
+  compound_(compound) {}
 
 /*!
  * Returns an A-Matrix element specified by positions in the JGroup and ALevel vectors. 
@@ -44,7 +44,10 @@ void AMatrixFunc::ClearMatrices() {
  * This function creates the inverted A-Matrix from the parameters in the CNuc object.
  */
 
-void AMatrixFunc::FillMatrices (EPoint *point) {
+void AMatrixFunc::FillMatrices (EPoint *point, bool isBrune) {
+  double inEnergy=point->GetCMEnergy()+
+    compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetSepE()+
+    compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetExE();
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
@@ -59,17 +62,17 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 		double gammaChp=levelp->GetFitGamma(ch);
 		complex loElement=point->GetLoElement(j,ch);
 		sum+=gammaCh*gammaChp*loElement;
+		if(isBrune) {
+		  sum+=gammaCh*gammaChp*compound()->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition();
+		  if(la==lap) sum-=gammaCh*gammaChp*level->GetShiftFunction(ch);
+		  else sum-=gammaCh*gammaChp*
+			 (level->GetShiftFunction(ch)*(inEnergy-levelp->GetFitE())-levelp->GetShiftFunction(ch)*(inEnergy-level->GetFitE()))/
+			 (level->GetFitE()-levelp->GetFitE());				
+		}
 	      }
 	      if(la==lap) {
 		double resenergy=level->GetFitE();
-		double inenergy=point->GetCMEnergy()+
-		  compound()->
-		  GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		  GetSepE()+
-		  compound()->
-		  GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		  GetExE();
-		this->AddAInvMatrixElement(j,la,lap,resenergy-inenergy-sum);
+		this->AddAInvMatrixElement(j,la,lap,resenergy-inEnergy-sum);
 	      } else this->AddAInvMatrixElement(j,la,lap,-sum);
 	    }
 	  }

@@ -35,7 +35,7 @@ public:
   void AddPair(PPair);
   void AddJGroup(JGroup);
   void PrintNuc(const struct Config&);
-  void TransformIn(bool);
+  void TransformIn(const struct Config&);
   void SortPathways();
   void PrintPathways(const struct Config&);
   void CalcBoundaryConditions();
@@ -44,9 +44,10 @@ public:
   void PrintAngularDists(const struct Config&);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillCompoundFromParams(const vector_r &);
-  void TransformOut(bool);
+  void TransformOut(const struct Config&);
   void PrintTransformParams(std::string);
   void SetMaxLValue(int);
+  void CalcShiftFunctions();
   complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
   PPair *GetPair(int);
   JGroup *GetJGroup(int);

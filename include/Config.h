@@ -68,6 +68,8 @@ struct Config {
   bool calcRate;
   ///A boolean specifying if the input parameters are to be transformed (set to false by --no-transform)
   bool transformParams;
+  ///A boolean specifying if the Brune parametrization is to be used.
+  bool isBrune;
   ///If a reaction rate is calculated, value indicates the entrance pair key.
   int rateEntrancePair;
   ///If a reaction rate is calculated, value indicates the exit pair key.  
