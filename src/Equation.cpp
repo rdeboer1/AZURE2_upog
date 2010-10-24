@@ -83,6 +83,26 @@ void Equation::Initialize(std::string equation, int numParams) {
 }
 
 /*!
+ * This function is called from every constructor of the Equation class.  The syntax for a
+ * function call is mapped to the system default equation.  Any equations of the form 
+ * double function(double) can be added here with arbitrary syntax.
+ */
+
+void Equation::BuildFunctionList() {
+  functionList_["cos"]=GenericFunction(&std::cos);
+  functionList_["sin"]=GenericFunction(&std::sin);
+  functionList_["tan"]=GenericFunction(&std::tan);
+  functionList_["asin"]=GenericFunction(&std::asin);
+  functionList_["acos"]=GenericFunction(&std::acos);
+  functionList_["atan"]=GenericFunction(&std::atan); 
+  functionList_["exp"]=GenericFunction(&std::exp);
+  functionList_["e^"]=GenericFunction(&std::exp);
+  functionList_["ln"]=GenericFunction(&std::log);
+  functionList_["log"]=GenericFunction(&std::log10);
+  functionList_["sqrt"]=GenericFunction(&std::sqrt);
+}
+
+/*!
  * This equation is called from all constructors, with the exception of the
  * empty constructor, and the Equation::Initialize() function.  The purpose is 
  * to parse an infix equation string into a vector of tokens in RPN format.  
@@ -92,6 +112,7 @@ void Equation::Initialize(std::string equation, int numParams) {
  */
 
 void Equation::Parse() {
+  BuildFunctionList();
   try{
     unsigned int position=0;
     std::vector<TokenPair> stack;
@@ -208,6 +229,25 @@ bool Equation::IsDigit(char c) const {
 }
 
 /*!
+ * This function is called to scan for a function included in the internal function list.
+ * if the function is found, the lenth of the associated token is returned, otherwise the 
+ * function returns 0.
+ */
+
+unsigned int Equation::FindFunction(unsigned int &position) {
+  unsigned int length =  0;
+  for(std::map<std::string,GenericFunction>::iterator it = functionList_.begin();
+      it!=functionList_.end();it++) {
+    std::string searchKey = it->first+'(';
+    if(infixEquation_.substr(position,searchKey.length()) == searchKey) {
+      length = searchKey.length()-1;
+      break;
+    }
+  }
+  return length;
+}
+
+/*!
  * Reads the infix equation and returns the next token, advancing the 
  * position in the string. The return value is a token pair, which contains
  * the token itself as well as the type.
@@ -272,62 +312,24 @@ Equation::TokenPair Equation::GetToken(unsigned int &position) {
       tempString+=infixEquation_[position];
       position++;
     } 
-    //Functions (currently supports: exp, sin, cos, tan, ln, log)
-    else if(infixEquation_[position]=='e'&&
-	    (infixEquation_.substr(position,4)=="exp("||
-	     infixEquation_.substr(position,3)=="e^(")) { 
+    //Functions (currently supports whatever is linked in BuildFunctionList())
+    else if(FindFunction(position)) {
       tempType=FUNCTION;
-      if(infixEquation_.substr(position,4)=="exp(") position+=4;
-      else position+=3;
-      tempString="exp";
-    } else if(infixEquation_.substr(position,4)=="sin(") {
-      tempType=FUNCTION;
-      position+=4;
-      tempString="sin";
-    } else if(infixEquation_.substr(position,4)=="cos(") {
-      tempType=FUNCTION;
-      position+=4;
-      tempString="cos";
-    } else if(infixEquation_.substr(position,4)=="tan(") {
-      tempType=FUNCTION;
-      position+=4;
-      tempString="tan";
-    } else if(infixEquation_.substr(position,4)=="log(") {
-      tempType=FUNCTION;
-      position+=4;
-      tempString="log";
-    } else if(infixEquation_.substr(position,3)=="ln(") {
-      tempType=FUNCTION;
-      position+=3;
-      tempString="ln";
-    } else if(infixEquation_.substr(position,5)=="asin(") {
-      tempType=FUNCTION;
-      position+=5;
-      tempString="asin";
-    } else if(infixEquation_.substr(position,5)=="acos(") {
-      tempType=FUNCTION;
-      position+=5;
-      tempString="acos";
-    } else if(infixEquation_.substr(position,5)=="atan(") {
-      tempType=FUNCTION;
-      position+=5;
-      tempString="atan";
-    } else if(infixEquation_.substr(position,5)=="sqrt(") {
-      tempType=FUNCTION;
-      position+=5;
-      tempString="sqrt";
-    } 
+      unsigned int length = FindFunction(position);
+      tempString=infixEquation_.substr(position,length);
+      position+=(length+1);
+    }
     //Unrecognized Tokens
     else throw SyntaxError(infixEquation_,0,position);
     //Read subequation if token is function
     if(tempType==FUNCTION) {
       std::string subString;
-      //for negation, read until an operator, or unmatched right paranthesis, is found
+      //for negation, read until an operator (except ^), or unmatched right paranthesis, is found
       //  and create subequation
       if(tempString=="neg") {
 	int parenCount=0;
 	while(((infixEquation_[position]!=')'&&
-		!(IsOperator(infixEquation_[position])&&
+		!((IsOperator(infixEquation_[position])&&infixEquation_[position]!='^') &&
 		  !(infixEquation_[position-1]=='e'||infixEquation_[position-1]=='E')))||
 	       parenCount!=0)&&
 	      position<infixEquation_.length()) {
@@ -432,74 +434,26 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
  */
 
 double Equation::FunctionOperation(TokenPair token, double x) const {
-  double result;
-  if(token.second.substr(0,3)=="exp") {
-    unsigned int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(3));
-    stm>>subEquationIndex;
-    result=exp(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,3)=="sin") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(3));
-    stm>>subEquationIndex;
-    result=sin(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,3)=="cos") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(3));
-    stm>>subEquationIndex;
-    result=cos(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,3)=="tan") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(3));
-    stm>>subEquationIndex;
-    result=tan(subEquations_[subEquationIndex].Evaluate(x));
-  }  else if(token.second.substr(0,3)=="neg") {
+  double result=0.0;
+  if(token.second.substr(0,3)=="neg") {
     int subEquationIndex;
     std::istringstream stm;
     stm.str(token.second.substr(3));
     stm>>subEquationIndex;
     result=-1.*subEquations_[subEquationIndex].Evaluate(x);
-  } else if(token.second.substr(0,3)=="log") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(3));
-    stm>>subEquationIndex;
-    result=log10(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,2)=="ln") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(2));
-    stm>>subEquationIndex;
-    result=log(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,4)=="asin") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(4));
-    stm>>subEquationIndex;
-    result=asin(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,4)=="acos") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(4));
-    stm>>subEquationIndex;
-    result=acos(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,4)=="atan") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(4));
-    stm>>subEquationIndex;
-    result=atan(subEquations_[subEquationIndex].Evaluate(x));
-  } else if(token.second.substr(0,4)=="sqrt") {
-    int subEquationIndex;
-    std::istringstream stm;
-    stm.str(token.second.substr(4));
-    stm>>subEquationIndex;
-    result=sqrt(subEquations_[subEquationIndex].Evaluate(x));
-  } else result=0.0;
+  } else {
+    for(std::map<std::string,GenericFunction>::const_iterator it = functionList_.begin();
+	it!=functionList_.end();it++) {
+      if(it->first==token.second.substr(0,it->first.length())) {
+	int subEquationIndex;
+	std::istringstream stm;
+	stm.str(token.second.substr(it->first.length()));
+	stm>>subEquationIndex;
+	result=it->second.Evaluate(subEquations_[subEquationIndex].Evaluate(x));
+	break;
+      }
+    }
+  }
   return result;
 }
 

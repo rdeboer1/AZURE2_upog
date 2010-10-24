@@ -5,8 +5,26 @@
 #include <vector>
 #include <exception>
 #include <sstream>
+#include <map>
 
 ///A class for parsing algebraic expressions
+
+/*!
+ * The GenericFunction class is just a wrapper for a function pointer to a function
+ * of the form double function(double).
+ */
+
+class GenericFunction {
+ public:
+  GenericFunction() {};
+  GenericFunction(double (*function)(double)) :
+   function_(function) {};
+  double Evaluate(double value) const {
+    return (*function_)(value);
+  };
+ private:
+  double (*function_)(double);
+};
 
 /*!
  * The Equation class is used in AZURE to parametrize stopping cross sections
@@ -30,9 +48,11 @@ class Equation {
   enum TokenType {NUMBER=1,OPERATOR=2,VARIABLE=4,PARAMETER=8,LEFTPAR=16,RIGHTPAR=32,FUNCTION=64};
   enum OperatorType {ADD=0,SUBTRACT=0,MULT=1,DIVIDE=1,POWER=2,BADTYPE=10};
   typedef std::pair<TokenType,std::string> TokenPair;
+  void BuildFunctionList();
   void Parse();
   bool IsOperator(char) const;
   bool IsDigit(char) const;
+  unsigned int FindFunction(unsigned int &position);
   TokenPair GetToken(unsigned int &position);
   OperatorType GetOperatorType(char) const;
   Associativity GetOperatorAssociativity(char) const;
@@ -43,6 +63,7 @@ class Equation {
   std::vector<TokenPair> output_;
   std::vector<double> parameters_;
   std::vector<Equation> subEquations_;
+  std::map<std::string,GenericFunction> functionList_;
 };
 
 class SyntaxError : public std::exception {
