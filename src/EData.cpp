@@ -81,13 +81,16 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
   }
   std::string dummy;
   getline(in,dummy);
+  int numTotalSegments=0;
   while(!in.eof()) {
     ExtrapLine line=ReadExtrapLine(in);
     if(line.isActive==1) {
       if(!in.eof()) {
+	numTotalSegments++;
 	ESegment NewSegment(line);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
+	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
 	    ESegment *theSegment=this->GetSegment(this->NumSegments());
 	    theCNuc->GetPair(theCNuc->GetPairNumFromKey(theSegment->GetEntranceKey()))->SetEntrance();
