@@ -10,6 +10,15 @@
 
 struct SegPairs {int firstPair; int secondPair;};
 
+void printHelp() {
+  std::cout << "Syntax: AZURE2 options configfile" << std::endl << std::endl
+	    << "Options:" << std::endl
+            << std::setw(25) << std::left << "\t--no-readine:" << std::setw(0) << "Do not use readline package." <<  std::endl
+            << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
+            << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
+            << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl;
+}
+
 /*!
  * \mainpage AZURE R-Matrix Package
  * AZURE is created to be general A-/R- Matrix program for the analysis of
@@ -33,19 +42,27 @@ int main(int argc,char *argv[]){
 
   if(argc<2) {
     std::cout << "Too few arguments.  Configuration file must be specified." << std::endl
-	      << "\tSyntax: azure2 configfile" << std::endl;
+	      << "\tSyntax: AZURE2 configfile" << std::endl;
     return -1;
   } else if(argc>2) {
     for(int i=1; i<argc-1; i++) {
       std::string arg=argv[i];
-      if(arg=="--no-readline") useReadline=false;
+      if(arg=="--help") {
+	printHelp();
+  	return 0;
+      } else if(arg=="--no-readline") useReadline=false;
       else if(arg=="--no-transform") transformParams=false;
       else if(arg=="--use-brune") isBrune=true;
       else if(arg=="--ignore-externals") ignoreExternals=true;
       else std::cout << "Unknown option " << arg << '.' << std::endl;
     }
     configure.configfile=argv[argc-1];
-  } else configure.configfile=argv[1];
+  } else {
+    if(std::string(argv[1])=="--help") {
+	printHelp();
+  	return 0;
+    } else configure.configfile=argv[1];
+  }
 
   if(useReadline) read_history("./.azure_history");
   std::cout << std::endl
