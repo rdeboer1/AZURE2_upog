@@ -70,6 +70,8 @@ struct Config {
   bool transformParams;
   ///A boolean specifying if the Brune parametrization is to be used.
   bool isBrune;
+  ///A boolean specifying if the external components of a capture resonance should be ignored if the internal with is zero.
+  bool ignoreExternals;
   ///If a reaction rate is calculated, value indicates the entrance pair key.
   int rateEntrancePair;
   ///If a reaction rate is calculated, value indicates the exit pair key.  

@@ -1,5 +1,6 @@
 #include "AMatrixFunc.h"
 #include "CNuc.h"
+#include "Config.h"
 #include "EPoint.h"
 #include "MatInv.h"
 #include <assert.h>
@@ -9,8 +10,8 @@
  * The AMatrixFunc object is created with reference to a CNuc object.
  */
 
-AMatrixFunc::AMatrixFunc(CNuc* compound) :
-  compound_(compound) {}
+AMatrixFunc::AMatrixFunc(CNuc* compound, const struct Config &configure) :
+  compound_(compound), configure_(configure) {}
 
 /*!
  * Returns an A-Matrix element specified by positions in the JGroup and ALevel vectors. 
@@ -44,7 +45,7 @@ void AMatrixFunc::ClearMatrices() {
  * This function creates the inverted A-Matrix from the parameters in the CNuc object.
  */
 
-void AMatrixFunc::FillMatrices (EPoint *point, bool isBrune) {
+void AMatrixFunc::FillMatrices (EPoint *point) {
   double inEnergy=point->GetCMEnergy()+
     compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetSepE()+
     compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetExE();
@@ -62,7 +63,7 @@ void AMatrixFunc::FillMatrices (EPoint *point, bool isBrune) {
 		double gammaChp=levelp->GetFitGamma(ch);
 		complex loElement=point->GetLoElement(j,ch);
 		sum+=gammaCh*gammaChp*loElement;
-		if(isBrune) {
+		if(configure().isBrune) {
 		  sum+=gammaCh*gammaChp*compound()->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition();
 		  if(la==lap) sum-=gammaCh*gammaChp*level->GetShiftFunction(ch);
 		  else sum-=gammaCh*gammaChp*
@@ -148,6 +149,7 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
       complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);
       if(theECMGroup->IsChannelCapture()) {
+	int internalChannel=theECMGroup->GetIntChannelNum();
 	MGroup *chanMGroup=compound()->GetPair(aa)->GetDecay(theECMGroup->GetChanCapDecay())
 	  ->GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
 	AChannel *chanEntranceChannel=compound()->GetJGroup(chanMGroup->GetJNum())
@@ -158,9 +160,13 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	for(int la=1;la<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();la++) {
 	  if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la)->IsInRMatrix()) {
 	    ALevel *level=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la);
+	    if(internalChannel && configure().ignoreExternals)
+	      if(level->GetFitGamma(internalChannel)==0.) continue;
 	    for(int lap=1;lap<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();lap++) {
 	      if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap)->IsInRMatrix()) {
 		ALevel *levelp=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap);
+		if(internalChannel && configure().ignoreExternals)
+		  if(levelp->GetFitGamma(internalChannel)==0.) continue;
 		umatrix+=2.0*complex(0.0,1.0)*
 		  point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
 		  level->GetFitGamma(chanMGroup->GetChNum())*

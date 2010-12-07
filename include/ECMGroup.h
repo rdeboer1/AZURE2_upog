@@ -17,7 +17,7 @@
 class ECMGroup {
  public:
   ECMGroup(char, int, int, double, int, int);
-  ECMGroup(char, int, int, double, int, int, int, int, int);
+  ECMGroup(char, int, int, double, int, int, int, int, int, int);
   bool IsChannelCapture() const;
   char GetRadType() const;
   int GetMult() const;
@@ -27,6 +27,7 @@ class ECMGroup {
   int GetChanCapDecay() const;
   int GetChanCapKGroup() const;
   int GetChanCapMGroup() const;
+  int GetIntChannelNum() const;
   double GetJ() const;
   double GetStatSpinFactor() const;
   void SetStatSpinFactor(double);
@@ -41,6 +42,7 @@ class ECMGroup {
   int chdecay_;
   int chkgroup_;
   int chmgroup_;
+  int internalChannel_;
   double statspinfactor_;
   complex tmatrix_;
 };

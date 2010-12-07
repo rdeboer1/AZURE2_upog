@@ -878,10 +878,10 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
       this->GetLocalMappedPoint(i)->IntegrateTargetEffect();
   } else {
     GenMatrixFunc *theMatrixFunc;
-    if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc);
+    if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
     else theMatrixFunc=new RMatrixFunc(theCNuc);
     theMatrixFunc->ClearMatrices();
-    theMatrixFunc->FillMatrices(this,configure.isBrune);
+    theMatrixFunc->FillMatrices(this);
     theMatrixFunc->InvertMatrices();
     theMatrixFunc->CalculateTMatrix(this);
     theMatrixFunc->CalculateCrossSection(this);

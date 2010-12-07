@@ -7,7 +7,7 @@
  */
 ECMGroup::ECMGroup(char radType, int multipolarity, int lInitial, double jInitial, int finalChannelNum, int ecNum) :
     radtype_(radType), mult_(multipolarity), li_(lInitial), ji_(jInitial), chf_(finalChannelNum), ecnum_(ecNum), ischancap_(false),
-    chdecay_(0), chkgroup_(0), chmgroup_(0), statspinfactor_(0.0){
+    chdecay_(0), chkgroup_(0), chmgroup_(0), internalChannel_(0), statspinfactor_(0.0){
 }
 
 /*!
@@ -16,9 +16,9 @@ ECMGroup::ECMGroup(char radType, int multipolarity, int lInitial, double jInitia
  * which the external pathways will pass.
  */
 
-ECMGroup::ECMGroup(char radType, int multipolarity, int lInitial, double jInitial, int finalChannelNum, int ecNum, int decayNum, int kGroupNum, int mGroupNum) :
+ECMGroup::ECMGroup(char radType, int multipolarity, int lInitial, double jInitial, int finalChannelNum, int ecNum, int decayNum, int kGroupNum, int mGroupNum, int internalChannel) :
     radtype_(radType), mult_(multipolarity), li_(lInitial), ji_(jInitial), chf_(finalChannelNum), ecnum_(ecNum), ischancap_(true),
-    chdecay_(decayNum), chkgroup_(kGroupNum), chmgroup_(mGroupNum), statspinfactor_(0.0){
+    chdecay_(decayNum), chkgroup_(kGroupNum), chmgroup_(mGroupNum), internalChannel_(internalChannel), statspinfactor_(0.0){
 }
 
 /*!
@@ -94,6 +94,14 @@ int ECMGroup::GetChanCapMGroup() const {
 }
 
 /*!
+ * Returns the corresponding internal channel for an external channel pathway.
+ */
+
+int ECMGroup::GetIntChannelNum() const {
+  return internalChannel_;
+}
+
+/*!
  * Returns the initial spin value for the pathway.
  */
 
@@ -116,4 +124,3 @@ double ECMGroup::GetStatSpinFactor() const {
 void ECMGroup::SetStatSpinFactor(double a) {
   statspinfactor_=a;
 }
-

@@ -28,6 +28,7 @@ int main(int argc,char *argv[]){
   bool useReadline=true;
   bool transformParams=true;
   bool isBrune=false;
+  bool ignoreExternals=false;
   Config configure;
 
   if(argc<2) {
@@ -40,6 +41,7 @@ int main(int argc,char *argv[]){
       if(arg=="--no-readline") useReadline=false;
       else if(arg=="--no-transform") transformParams=false;
       else if(arg=="--use-brune") isBrune=true;
+      else if(arg=="--ignore-externals") ignoreExternals=true;
       else std::cout << "Unknown option " << arg << '.' << std::endl;
     }
     configure.configfile=argv[argc-1];
@@ -66,7 +68,8 @@ int main(int argc,char *argv[]){
 #endif
   configure.transformParams=transformParams;
   configure.isBrune=isBrune;
-  if(isBrune) configure.isAMatrix=true;
+  configure.ignoreExternals=ignoreExternals;
+  if(isBrune||ignoreExternals) configure.isAMatrix=true;
 
   int command=0;
 

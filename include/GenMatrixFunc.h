@@ -45,7 +45,7 @@ class GenMatrixFunc {
   /*!
    *This virtual function in instantiated in the child class.
    */
-  virtual void FillMatrices(EPoint*, bool isBrune=false)=0;
+  virtual void FillMatrices(EPoint*)=0;
   /*!
    *This virtual function in instantiated in the child class.
    */

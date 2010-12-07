@@ -513,7 +513,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if(configure.isEC) {
+	      if(configure.isEC && !(theLevel->GetGamma(ch)==0. && configure.ignoreExternals)) {
 		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
@@ -572,11 +572,15 @@ void CNuc::TransformIn(const struct Config& configure) {
 	for(int la=0;la<tempEnergies.size();la++) {
 	  theJGroup->GetLevel(levelKeys[la])->SetE(result.eigenvalues[la]);
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	    double sum=0.0;
-	    for(int mu=0;mu<tempEnergies.size();mu++) {
-	      sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
+	    if(theJGroup->GetChannel(ch)->GetRadType()=='P') {
+	      double sum=0.0;
+	      for(int mu=0;mu<tempEnergies.size();mu++) {
+		sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
+	      }
+	      theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
+	    } else {
+	      theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,tempGammas[la][ch-1]);
 	    }
-	    theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
 	  }
 	}
       } else {
@@ -745,7 +749,16 @@ void CNuc::SortPathways() {
 				       (fabs(chChannelp->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=chChannelp->GetS()+multL&&
 					fabs(chChannelp->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
 					theFinalJGroup->GetJ()<=chChannelp->GetL()+finalChannel->GetS()&&chChannelp->GetL()==finalChannel->GetL()&&radType=='M')) { //ensure entrance channel for dc can couple to final state		     				
-				      ECMGroup newECMGroup(radType,multL,l,j,chp,ec,chDecayNum,kp,mp);
+				      int internalChannel=0;
+				      for(int intCh=1;intCh<=this->GetJGroup(chMGroup->GetJNum())->NumChannels();intCh++) {
+					if(this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetRadType()==radType &&
+					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetL()==multL &&
+					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetPairNum()==ecLevel->GetPairNum()) {
+					  internalChannel=intCh;
+					  break;
+					}
+				      }
+				      ECMGroup newECMGroup(radType,multL,l,j,chp,ec,chDecayNum,kp,mp,internalChannel);
 				      theKGroup->AddECMGroup(newECMGroup);
 				    }
 				  }
@@ -835,6 +848,7 @@ void CNuc::PrintPathways(const struct Config &configure) {
 	<< std::setw(13) << "Ch. Decay #" 
 	<< std::setw(11) << "Ch. K #" 
 	<< std::setw(11) << "Ch. M #" 
+	<< std::setw(11) << "Int. Ch #" 
 	<< std::endl;
     for(int i=1;i<=this->NumPairs();i++) {
       PPair *thePair=this->GetPair(i);
@@ -858,7 +872,8 @@ void CNuc::PrintPathways(const struct Config &configure) {
 	    if(theECMGroup->IsChannelCapture()) out << std::setw(13) << "Channel"
 						    << std::setw(13) << theECMGroup->GetChanCapDecay()
 						    << std::setw(11) << theECMGroup->GetChanCapKGroup()
-						    << std::setw(11) << theECMGroup->GetChanCapMGroup() << std::endl;
+						    << std::setw(11) << theECMGroup->GetChanCapMGroup()
+						    << std::setw(11) << theECMGroup->GetIntChannelNum() << std::endl;
 	    else out << std::setw(15) << "Hard Sphere" << std::endl;
 	  }
 	}     
@@ -1225,11 +1240,13 @@ void CNuc::TransformOut(const struct Config& configure) {
 	      vector_r tempChanVector;
 	      newGamma.push_back(tempChanVector);
 	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		double gammaSum=0.0;
-		for(int mup=0;mup<tempE.size();mup++) {
-		  gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
-		}
-		newGamma[mu].push_back(gammaSum);
+		if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P') {
+		  double gammaSum=0.0;
+		  for(int mup=0;mup<tempE.size();mup++) {
+		    gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
+		  }
+		  newGamma[mu].push_back(gammaSum);
+		} else  newGamma[mu].push_back(tempGamma[mu][ch-1]);
 	      }
 	    }
 	    for(int mu=0;mu<tempE.size();mu++) {
@@ -1335,8 +1352,9 @@ void CNuc::TransformOut(const struct Config& configure) {
       }
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	complex externalWidth(0.0,0.0);
-	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P'&&
-	   theLevel->IsInRMatrix()&&configure.isEC) 
+	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
+	   theLevel->IsInRMatrix()&&configure.isEC &&
+	   !(theLevel->GetTransformGamma(ch)==0. && configure.ignoreExternals))
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;

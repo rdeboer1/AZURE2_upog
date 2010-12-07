@@ -20,7 +20,7 @@ class RMatrixFunc : public GenMatrixFunc {
   CNuc *compound() const {return compound_;};
 
   void ClearMatrices();
-  void FillMatrices(EPoint*,bool isBrune=false);
+  void FillMatrices(EPoint*);
   void InvertMatrices();
   void CalculateTMatrix(EPoint*);
   /*!
