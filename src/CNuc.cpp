@@ -572,15 +572,11 @@ void CNuc::TransformIn(const struct Config& configure) {
 	for(int la=0;la<tempEnergies.size();la++) {
 	  theJGroup->GetLevel(levelKeys[la])->SetE(result.eigenvalues[la]);
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	    if(theJGroup->GetChannel(ch)->GetRadType()=='P') {
-	      double sum=0.0;
-	      for(int mu=0;mu<tempEnergies.size();mu++) {
-		sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
-	      }
-	      theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
-	    } else {
-	      theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,tempGammas[la][ch-1]);
+	    double sum=0.0;
+	    for(int mu=0;mu<tempEnergies.size();mu++) {
+              sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
 	    }
+	    theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
 	  }
 	}
       } else {
@@ -1240,13 +1236,11 @@ void CNuc::TransformOut(const struct Config& configure) {
 	      vector_r tempChanVector;
 	      newGamma.push_back(tempChanVector);
 	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P') {
-		  double gammaSum=0.0;
-		  for(int mup=0;mup<tempE.size();mup++) {
-		    gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
-		  }
-		  newGamma[mu].push_back(gammaSum);
-		} else  newGamma[mu].push_back(tempGamma[mu][ch-1]);
+		double gammaSum=0.0;
+		for(int mup=0;mup<tempE.size();mup++) {
+		  gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
+		}
+		newGamma[mu].push_back(gammaSum);
 	      }
 	    }
 	    for(int mu=0;mu<tempE.size();mu++) {

@@ -63,7 +63,7 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 		double gammaChp=levelp->GetFitGamma(ch);
 		complex loElement=point->GetLoElement(j,ch);
 		sum+=gammaCh*gammaChp*loElement;
-		if(configure().isBrune) {
+		if(configure().isBrune && compound()->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P') {
 		  sum+=gammaCh*gammaChp*compound()->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition();
 		  if(la==lap) sum-=gammaCh*gammaChp*level->GetShiftFunction(ch);
 		  else sum-=gammaCh*gammaChp*
