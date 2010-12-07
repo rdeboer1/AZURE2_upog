@@ -13,7 +13,7 @@ struct SegPairs {int firstPair; int secondPair;};
 void printHelp() {
   std::cout << "Syntax: AZURE2 options configfile" << std::endl << std::endl
 	    << "Options:" << std::endl
-            << std::setw(25) << std::left << "\t--no-readine:" << std::setw(0) << "Do not use readline package." <<  std::endl
+            << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
             << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
             << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
             << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl;
