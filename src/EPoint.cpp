@@ -866,7 +866,17 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
 
 void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *parent, int subPointNum) {
 
-  if(!this->IsTargetEffect()) {
+  if(this->IsTargetEffect()&&subPointNum==0&&parent==NULL) {
+    for(int i = 1; i<=this->NumSubPoints();i++) {
+      EPoint *subPoint=this->GetSubPoint(i);
+      if(this->NumLocalMappedPoints()>0)
+	subPoint->Calculate(theCNuc,configure,this,i);
+      else subPoint->Calculate(theCNuc,configure);
+    }
+    this->IntegrateTargetEffect();
+    for(int i=1;i<=this->NumLocalMappedPoints();i++)
+      this->GetLocalMappedPoint(i)->IntegrateTargetEffect();
+  } else {
     GenMatrixFunc *theMatrixFunc;
     if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
     else theMatrixFunc=new RMatrixFunc(theCNuc);
@@ -875,7 +885,7 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
     theMatrixFunc->InvertMatrices();
     theMatrixFunc->CalculateTMatrix(this);
     theMatrixFunc->CalculateCrossSection(this);
-    if(subPointNum&&parent) {
+    if(subPointNum!=0&&parent!=NULL) {
       for(int i=1;i<=parent->NumLocalMappedPoints();i++) {
 	EPoint *mappedSubPoint = parent->GetLocalMappedPoint(i)->
 	  GetSubPoint(subPointNum);
@@ -888,16 +898,6 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
       }
     }
     delete theMatrixFunc;
-  } else {
-    for(int i = 1; i<=this->NumSubPoints();i++) {
-      EPoint *subPoint=this->GetSubPoint(i);
-      if(this->NumLocalMappedPoints()>0)
-	subPoint->Calculate(theCNuc,configure,this,i);
-      else subPoint->Calculate(theCNuc,configure);
-    }
-    this->IntegrateTargetEffect();
-    for(int i=1;i<=this->NumLocalMappedPoints();i++)
-      this->GetLocalMappedPoint(i)->IntegrateTargetEffect();
   }
 }
 
@@ -1013,6 +1013,10 @@ void EPoint::IntegrateTargetEffect() {
       double thisEnergy=this->GetSubPoint(i+1)->GetCMEnergy();
       double integrand=this->GetSubPoint(i+1)->GetFitCrossSection()
 	*targetEffect->GetConvolutionFactor(thisEnergy,centroid);
+      /*std::cout << thisEnergy << ' '
+		<< centroid << ' '
+		<< integrand << ' ' 
+		<< targetEffect->GetConvolutionFactor(thisEnergy,centroid) << std::endl;*/
       if(i==0) intFirst=integrand;
       else if(i%2==0) {
 	intEvenSum+=integrand;

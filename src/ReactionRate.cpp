@@ -25,17 +25,14 @@ double gsl_reactionrate_integrand(double x, void * p) {
   int exitKey=params->exitKey;
 
   double crossSection;
-  if(x<50.0&&x>0.0001) {
+  if(x<50.0&&x>0.001) {
     EPoint *point = new EPoint(55.0,x,entranceKey,exitKey,false,false,0.0,0);
     point->Initialize(compound,configure);
     point->Calculate(compound,configure);
     crossSection=point->GetFitCrossSection();
   } else crossSection=0.0;
-  
-  double integral=crossSection*x*exp(-x/temperature/boltzConst);
 
-  if(!isnan(integral)) return integral;
-  else return 0.0;
+  return crossSection*x*exp(-x/temperature/boltzConst);
 }
 
 double gsl_reactionrate_integration(double temperature,CNuc *compound,const Config& configure,
