@@ -94,7 +94,7 @@ int AZUREMain::operator()(){
     data()->SetErrorAnalysis(false);
     double chiSquared=theFunc(params.GetMinuitParams().Params());
     if(configure().withData) {
-      std::cout << std::endl;
+      std::cout << std::endl << std::endl;
       for(ESegmentIterator segment=data()->GetSegments().begin();
 	  segment<data()->GetSegments().end();segment++) 
 	std::cout << "Segment #"

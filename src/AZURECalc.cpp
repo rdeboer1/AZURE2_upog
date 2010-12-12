@@ -44,9 +44,9 @@ double AZURECalc::operator()(const vector_r& p) const {
   }
 
   if(!localData->IsErrorAnalysis()&&thisIteration!=0) {
-    if(thisIteration%100==0) std::cout << std::setw(15) << thisIteration
-				       << std::setw(15) << chiSquared  
-				       << std::endl;
+    if(thisIteration%100==0) std::cout << "\r\tIteration: " << std::setw(6) << thisIteration
+				       << " Chi-Squared: " << chiSquared;  std::cout.flush();
+
     if(thisIteration%1000==0) {
       localData->WriteOutputFiles(configure());
       localCompound->TransformOut(configure());
