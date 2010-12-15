@@ -513,7 +513,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if(configure.isEC && !(theLevel->GetGamma(ch)==0. && configure.ignoreExternals)) {
+	      if(configure.isEC && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && configure.ignoreExternals)) {
 		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
@@ -1348,7 +1348,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
 	   theLevel->IsInRMatrix()&&configure.isEC &&
-	   !(theLevel->GetTransformGamma(ch)==0. && configure.ignoreExternals))
+	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && configure.ignoreExternals))
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
