@@ -32,6 +32,9 @@ ESegment::ESegment(struct SegLine segLine) {
     l_=0;
   }
   datafile_=segLine.datafile;
+  dataNorm_=segLine.dataNorm;
+  if(segLine.varyNorm==1) varyNorm_=true;
+  else varyNorm_==false;
   targetEffectNum_=0;
   isTargetEffect_=false;
 }
@@ -64,6 +67,8 @@ ESegment::ESegment(struct ExtrapLine extrapLine) {
     l_=0;
   }
   datafile_="";
+  dataNorm_=1.;
+  varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
 }
@@ -108,6 +113,15 @@ bool ESegment::IsPhase() const {
 
 bool ESegment::IsTargetEffect() const {
   return isTargetEffect_;
+}
+
+/*!
+ * Returns true if the normalization parameter for the segment is to be fit, otherwise
+ * returns false.
+ */
+
+bool ESegment::IsVaryNorm() const {
+  return varyNorm_;
 }
 
 /*!
@@ -260,6 +274,14 @@ double ESegment::GetJ() const {
 }
 
 /*!
+ * Returns the normalization parameter for the data segment.
+ */
+
+double ESegment::GetNorm() const {
+  return dataNorm_;
+}
+
+/*!
  * Returns the name of the data file from which to read.
  */
 
@@ -299,6 +321,14 @@ void ESegment::SetTargetEffectNum(int targetEffectNum) {
 
 void ESegment::SetSegmentKey (int segmentKey) {
   segmentKey_=segmentKey;
+}
+
+/*! 
+ * Sets the normalization parameter for the segment.
+ */ 
+
+void ESegment::SetNorm(double norm) {
+  dataNorm_=norm;
 }
 
 /*!

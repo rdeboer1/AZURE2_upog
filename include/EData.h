@@ -6,6 +6,11 @@
 #include "EDataIterator.h"
 
 class CNuc;
+namespace ROOT {
+  namespace Minuit2 {
+    class MnUserParameters;
+  }
+}
 
 ///An AZURE data object
 
@@ -21,6 +26,7 @@ class EData {
   int MakePoints(const struct Config&,CNuc*);
   int Iterations() const;
   int NumTargetEffects() const;
+  int GetNormParamOffset() const;
   bool IsFit() const;
   bool IsErrorAnalysis() const;
   bool IsSegmentKey(int);
@@ -42,6 +48,9 @@ class EData {
   void MapData();
   void AddTargetEffect(TargetEffect);
   void ReadTargetEffectsFile(std::string);
+  void SetNormParamOffset(int);
+  void FillMnParams(ROOT::Minuit2::MnUserParameters&);
+  void FillNormsFromParams(const vector_r &);
   ESegment *GetSegment(int);
   ESegment *GetSegmentFromKey(int);
   EData *Clone() const;
@@ -53,6 +62,7 @@ class EData {
   std::vector<TargetEffect> targetEffects_;
   std::vector<ESegment> segments_;
   int iterations_;
+  int normParamOffset_;
   bool isFit_;
   bool isErrorAnalysis_;
 };

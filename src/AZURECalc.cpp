@@ -23,6 +23,7 @@ double AZURECalc::operator()(const vector_r& p) const {
 
   //Fill Compound Nucleus From Minuit Parameters
   localCompound->FillCompoundFromParams(p);
+  localData->FillNormsFromParams(p);
   if(configure().isBrune) localCompound->CalcShiftFunctions();
   
   //loop over segments and points
@@ -32,8 +33,9 @@ double AZURECalc::operator()(const vector_r& p) const {
     if(data.segment()->GetPoints().begin()==data.point()) segmentChiSquared=0.0;
     if(!data.point()->IsMapped()) data.point()->Calculate(localCompound,configure());
     double fitCrossSection=data.point()->GetFitCrossSection();
-    double CrossSection=data.point()->GetCMCrossSection();
-    double CrossSectionError=data.point()->GetCMCrossSectionError();
+    double dataNorm=data.segment()->GetNorm();
+    double CrossSection=data.point()->GetCMCrossSection()*dataNorm;
+    double CrossSectionError=data.point()->GetCMCrossSectionError()*dataNorm;
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
     double pointChiSquared=pow(chi,2.0);
     segmentChiSquared+=pointChiSquared;

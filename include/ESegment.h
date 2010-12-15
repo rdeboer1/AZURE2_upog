@@ -20,6 +20,7 @@ class ESegment {
   bool IsDifferential() const;
   bool IsPhase() const;
   bool IsTargetEffect() const;
+  bool IsVaryNorm() const;
   int NumPoints() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
@@ -35,17 +36,20 @@ class ESegment {
   double GetEStep() const;
   double GetAStep() const;
   double GetJ() const;
+  double GetNorm() const;
   std::string GetDataFile() const;
   void AddPoint(EPoint);
   void SetSegmentChiSquared(double);
   void SetTargetEffectNum(int);
   void SetSegmentKey(int);
+  void SetNorm(double);
   EPoint *GetPoint(int);
   std::vector<EPoint>& GetPoints();
  private:
   bool isdifferential_;
   bool isphase_;
   bool isTargetEffect_;
+  bool varyNorm_;
   int entrancekey_;
   int exitkey_;
   int l_;
@@ -59,6 +63,7 @@ class ESegment {
   double a_step_;
   double segment_chi_squared_;
   double j_;
+  double dataNorm_;
   std::string datafile_;
   std::vector<EPoint> points_;
 };

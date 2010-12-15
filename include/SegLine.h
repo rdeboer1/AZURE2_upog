@@ -14,6 +14,8 @@ struct SegLine {
   double max_a;
   int diff;
   std::string datafile;
+  double dataNorm;
+  int varyNorm;
   double j;
   int l;
 };
