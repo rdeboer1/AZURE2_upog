@@ -161,12 +161,12 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	  if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la)->IsInRMatrix()) {
 	    ALevel *level=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la);
 	    if(internalChannel && configure().ignoreExternals)
-	      if(level->GetFitGamma(internalChannel)==0.) continue;
+	      if(fabs(level->GetFitGamma(internalChannel))<1.0e-8) continue;
 	    for(int lap=1;lap<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();lap++) {
 	      if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap)->IsInRMatrix()) {
 		ALevel *levelp=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap);
 		if(internalChannel && configure().ignoreExternals)
-		  if(levelp->GetFitGamma(internalChannel)==0.) continue;
+		  if(fabs(levelp->GetFitGamma(internalChannel))<1.0e-8) continue;
 		umatrix+=2.0*complex(0.0,1.0)*
 		  point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
 		  level->GetFitGamma(chanMGroup->GetChNum())*
