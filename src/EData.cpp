@@ -4,6 +4,7 @@
 #include "EData.h"
 #include "ExtrapLine.h"
 #include "SegLine.h"
+#include "Minuit2/MnUserParameters.h"
 #include <iostream>
 #include <iomanip>
 
@@ -146,6 +147,13 @@ int EData::Iterations() const {
 
 int EData::NumTargetEffects() const {
   return targetEffects_.size();
+}
+
+/*!
+ * Returns the offset of the normalization paramters in the Minuit parameter vector.
+ */
+int EData::GetNormParamOffset() const {
+  return normParamOffset_;
 }
 
 /*!
@@ -516,8 +524,10 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 void EData::WriteOutputFiles(const struct Config &configure) {
   AZUREOutput output(configure.outputdir);
   if(!configure.withData) output.SetExtrap();
+  bool isVaryNorm=false;
   for(ESegmentIterator segment=GetSegments().begin();
       segment<GetSegments().end();segment++) {
+    if(segment->IsVaryNorm()) isVaryNorm=true;
     int aa=segment->GetEntranceKey();
     int ir=segment->GetExitKey();
     std::ostream out(output(aa,ir));
@@ -528,14 +538,29 @@ void EData::WriteOutputFiles(const struct Config &configure) {
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
       if(!output.IsExtrap()) {
-      out << std::setw(13) << std::scientific << point->GetCMCrossSection()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSection()*point->GetSFactorConversion()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*point->GetSFactorConversion()
+      double dataNorm=segment->GetNorm();
+      out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
+	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
+	  << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
+	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
 	  << std::endl;
       } else out << std::endl;
     }
     out<<std::endl<<std::endl;out.flush();
+  }
+  if(isVaryNorm) {
+    std::string outputfile=configure.outputdir+"normalizations.out";
+    std::ofstream out(outputfile.c_str());
+    if(out) {
+      out.precision(4);
+      out << std::fixed;
+      for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+	if(segment->IsVaryNorm()) out << std::setw(20) << "Segment Key #" << segment->GetSegmentKey()
+				      << std::setw(10) << segment->GetNorm() << std::endl;
+      }
+      out.flush();
+      out.close();
+    } else std::cout << "Could not write normalization file." << std::endl;
   }
 }
 
@@ -734,6 +759,44 @@ void EData::ReadTargetEffectsFile(std::string infile) {
 	  point->AddSubPoint(subPoint);
 	}
       }
+    }
+  }
+}
+
+/*!
+ * Sets the normalization parameter offset in the parameter vector.
+ */  
+
+void EData::SetNormParamOffset(int offset) {
+  normParamOffset_=offset;
+}
+
+/*!
+ * Fills the Minuit parameter array from initial values in the EData object.
+ */
+
+void EData::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
+  SetNormParamOffset(p.Params().size());
+  char varname[50];
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    if(segment->IsVaryNorm()) {
+      sprintf(varname,"segment_%d_norm",segment->GetSegmentKey());
+      p.Add(varname,segment->GetNorm(),segment->GetNorm()*0.05);
+    }
+  }
+}
+
+
+/*!
+ * Fills the Normalizations from the Minuit parameter array.
+ */
+
+void EData::FillNormsFromParams(const vector_r &p) {
+  int i=GetNormParamOffset();
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    if(segment->IsVaryNorm()) {
+      segment->SetNorm(p[i]); 
+      i++;
     }
   }
 }
