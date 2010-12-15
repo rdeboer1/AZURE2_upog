@@ -34,7 +34,7 @@ ESegment::ESegment(struct SegLine segLine) {
   datafile_=segLine.datafile;
   dataNorm_=segLine.dataNorm;
   if(segLine.varyNorm==1) varyNorm_=true;
-  else varyNorm_==false;
+  else varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
 }
