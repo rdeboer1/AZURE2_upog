@@ -4,6 +4,14 @@
 #include <string>
 #include <fstream>
 
+struct RateParams {
+  int entrancePair;
+  int exitPair;
+  double minTemp;
+  double maxTemp;
+  double tempStep;
+};
+
 /// A configuration structure for AZURE
 
 /*!
@@ -72,16 +80,8 @@ struct Config {
   bool isBrune;
   ///A boolean specifying if the external components of a capture resonance should be ignored if the internal with is zero.
   bool ignoreExternals;
-  ///If a reaction rate is calculated, value indicates the entrance pair key.
-  int rateEntrancePair;
-  ///If a reaction rate is calculated, value indicates the exit pair key.  
-  int rateExitPair;
-  ///If a reaction rate is calculated, value indicates the minimum temperature in GK.
-  double rateMinTemp;
-  ///If a reaction rate is calculated, value indicates the maximum temperature in GK.
-  double rateMaxTemp;
-  ///If a reaction rate is calculated, value indicates the temperature step in GK.
-  double rateTempStep;
+  ///Parameters for calculating reaction rate.
+  RateParams  rateParams;
   ///A constant indicating the maximum order of the Legendre polynomials to calculate.
   static const int maxLOrder=10;
 };

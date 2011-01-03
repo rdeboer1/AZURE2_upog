@@ -32,11 +32,12 @@ int AZUREMain::operator()(){
     } 
     if(configure().checkdata=="screen"||configure().checkdata=="file") data()->PrintData(configure());
   } else {
-    if(!compound()->IsPairKey(configure().rateEntrancePair)||!compound()->IsPairKey(configure().rateExitPair)) {
-      std::cout << "Reaction rate pairs do not exist in compound nucleus." << configure().rateEntrancePair << configure().rateExitPair << std::endl;
+    if(!compound()->IsPairKey(configure().rateParams.entrancePair)||!compound()->IsPairKey(configure().rateParams.exitPair)) {
+      std::cout << "Reaction rate pairs do not exist in compound nucleus." 
+		<< configure().rateParams.entrancePair << configure().rateParams.exitPair << std::endl;
       return -1;
     } else {
-      compound()->GetPair(compound()->GetPairNumFromKey(configure().rateEntrancePair))->SetEntrance();
+      compound()->GetPair(compound()->GetPairNumFromKey(configure().rateParams.entrancePair))->SetEntrance();
     }
   }
 
@@ -71,7 +72,8 @@ int AZUREMain::operator()(){
       ROOT::Minuit2::MnMigrad migrad(theFunc,params.GetMinuitParams());
       ROOT::Minuit2::FunctionMinimum min=migrad();
       if(configure().performError) {
-	std::cout << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
+	std::cout << std::endl 
+		  << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
 	data()->SetErrorAnalysis(true);
 	theFunc.SetErrorDef(configure().chiVariance);
 	ROOT::Minuit2::MnMinos minos(theFunc,min);
@@ -119,8 +121,8 @@ int AZUREMain::operator()(){
     // for good accuracy.
     std::cout << "Performing reaction rate calculation..." << std::endl;
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
-			      configure().rateEntrancePair,configure().rateExitPair);
-    reactionRate.CalculateRates(configure().rateMinTemp,configure().rateMaxTemp,configure().rateTempStep);
+			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
+    reactionRate.CalculateRates(configure().rateParams.minTemp,configure().rateParams.maxTemp,configure().rateParams.tempStep);
     reactionRate.WriteRates();
   }
 
