@@ -1,13 +1,13 @@
 # Setup the prefixes below. Running 'make install' will copy file to $(PREFIX)/bin/AZURE2.
 
-PREFIX = $(HOME)
+PREFIX = $(HOME)/local
 MINUIT_PREFIX = $(PREFIX)
 GSL_PREFIX = $(PREFIX)
 
 # Change the variable below for the compiler.  Compiler should have 
 #  dependency generation with -M, and macro setting with -D.  Ok for icc and g++.
 
-CXX = icc
+CXX = icpc
 
 # Change the following variable to 'no' if the system libraries do not include stat() command.
 #  This will turn off checking that input/output files/directories exist at start, 
@@ -28,7 +28,7 @@ ifneq ($(MINUIT_PREFIX),$(GSL_PREFIX))
    LFLAGS += -L$(GSL_PREFIX)/lib
 endif
 LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline
-ifeq ($(CXX),icc)
+ifeq ($(CXX),icpc)
    LIBS += -lglib-2.0 -lncurses -limf -liomp5 -lpthread
 else 
    LIBS += -lgomp -lpthread
