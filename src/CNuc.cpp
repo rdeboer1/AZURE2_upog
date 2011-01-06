@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "AngCoeff.h"
 #include "CNuc.h"
 #include "Config.h"
@@ -103,15 +104,26 @@ int CNuc::GetPairNumFromKey(int key) {
 int CNuc::Fill(const struct Config &configure) {
   int PairNum,LevelNum,ChannelNum,JGroupNum;
   int maxLValue=0;
-  std::ifstream in(configure.nucfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
-  while(!in.eof()) {
-    NucLine Line=ReadNucLine(in);
-    if(!in.eof()) {
+  std::ifstream in(configure.configfile.c_str());
+  if(!in) return -1;
+  std::string line = "";
+  while(line!="<levels>"&&!in.eof()) getline(in,line);
+  if(line!="<levels>") return -1;
+  line="";
+  while(!in.eof()&&line!="</levels>") {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(!in.eof()&&line!="</levels>") {
+      std::istringstream stm;
+      stm.str(line);
+      NucLine Line=ReadNucLine(stm);
+      if(!stm.good()) return -1;
       if(Line.l>maxLValue&&Line.PType==0) maxLValue=Line.l;
       if(Line.yn==1) {
 	PPair NewPair(Line);
@@ -145,10 +157,13 @@ int CNuc::Fill(const struct Config &configure) {
       }
     }
   }
+  
+  if(line!="</levels>") return -1;
+
   in.close();
   
   this->SetMaxLValue(maxLValue);
-  if(this->ReadECFile(configure.ecfile)==-1) return -1;
+  if(this->ReadECFile(configure.configfile)==-1) return -1;
   
   return 0;
 }
@@ -158,16 +173,27 @@ int CNuc::Fill(const struct Config &configure) {
  * exists from the nuclear file.  If not, the state is created.  
  */
 
-int CNuc::ReadECFile(std::string ecfile) {
-  std::ifstream in(ecfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
-  while(!in.eof()) {
-    ECLine newECLine=ReadECLine(in);
-    if(!in.eof()&&newECLine.isdc){
+int CNuc::ReadECFile(std::string configfile) {
+  std::ifstream in(configfile.c_str());
+  if(!in) return -1;
+  std::string line="";
+  while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
+  if(line!="<externalCapture>") return -1;
+  line="";
+  while(line!="</externalCapture>"&&!in.eof()) {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(line!="</externalCapture>"&&!in.eof()) {
+      std::istringstream stm;
+      stm.str(line);
+      ECLine newECLine=ReadECLine(stm);
+      if(!stm.good()) return -1;
       PPair *entrancePair=this->GetPair(this->GetPairNumFromKey(newECLine.entrancekey));
       PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitkey));
       if(exitPair->GetPType()==10) {
@@ -249,6 +275,9 @@ int CNuc::ReadECFile(std::string ecfile) {
       } else std::cout << "Final state is not a capture pair." << std::endl;
     }
   }
+
+  if(line!="</externalCapture>") return -1;
+
   in.close();
   return 0;
 }

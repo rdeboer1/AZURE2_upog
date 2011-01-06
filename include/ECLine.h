@@ -1,7 +1,7 @@
 #ifndef ECLINE_H
 #define ECLINE_H
 
-#include<fstream>
+#include<iostream>
 
 struct ECLine {
   int isdc;
@@ -14,6 +14,6 @@ struct ECLine {
   int maxmult;
 };
 
-ECLine ReadECLine(std::ifstream &stream);
+ECLine ReadECLine(std::istream &stream);
 
 #endif

@@ -34,19 +34,30 @@ int EData::NumSegments() const {
  */
 
 int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
-  std::ifstream in(configure.segfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
+  std::ifstream in(configure.configfile.c_str());
+  if(!in) return -1;
+  std::string line="";
+  while(line!="<segmentsData>"&&!in.eof()) getline(in,line);
+  if(line!="<segmentsData>") return -1;
+  line="";
   int numTotalSegments=0;
-  while(!in.eof()) {
-    SegLine line=ReadSegLine(in);
-    if(!in.eof()) {
+  while(!in.eof()&&line!="</segmentsData>") {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(!in.eof()&&line!="</segmentsData>") {
+      std::istringstream stm;
+      stm.str(line);
+      SegLine segment=ReadSegLine(stm);
+      if(!stm.good()) return -1;
       numTotalSegments++;
-      if(line.isActive==1) {
-	ESegment NewSegment(line);
+      if(segment.isActive==1) {
+	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
@@ -63,9 +74,13 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
       }
     }
   }
+
+  if(line!="</segmentsData>") return -1;
+
   in.close();
-  this->ReadTargetEffectsFile(configure.targeteffectsfile);
+  this->ReadTargetEffectsFile(configure.configfile);
   this->MapData();
+
   return 0; 
 }
 
@@ -76,19 +91,30 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
  */
 
 int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
-  std::ifstream in(configure.extrapfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
+  std::ifstream in(configure.configfile.c_str());
+  if(!in) return -1;
+  std::string line = "";
+  while(line!="<segmentsTest>"&&!in.eof()) getline(in,line);
+  if(line!="<segmentsTest>") return -1;
+  line="";
   int numTotalSegments=0;
-  while(!in.eof()) {
-    ExtrapLine line=ReadExtrapLine(in);
-    if(line.isActive==1) {
-      if(!in.eof()) {
+  while(!in.eof()&&line!="</segmentsTest>") {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(!in.eof()&&line!="</segmentsTest>") {
+      std::istringstream stm;
+      stm.str(line);
+      ExtrapLine segment=ReadExtrapLine(stm);
+      if(!stm.good()) return -1;
+      if(segment.isActive==1) {
 	numTotalSegments++;
-	ESegment NewSegment(line);
+	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
@@ -127,8 +153,11 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
       }
     }
   }  
+
+  if(line!="</segmentsTest>") return -1;
+  
   in.close();
-  this->ReadTargetEffectsFile(configure.targeteffectsfile);
+  this->ReadTargetEffectsFile(configure.configfile);
   this->MapData();
   return 0; 
 }

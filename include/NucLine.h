@@ -1,7 +1,7 @@
 #ifndef NUCLINE_H
 #define NUCLINE_H
 
-#include <fstream>
+#include <iostream>
 
 struct NucLine {
   double LevelJ;
@@ -36,6 +36,6 @@ struct NucLine {
   double g2;
 };
 
-NucLine ReadNucLine(std::ifstream &stream);
+NucLine ReadNucLine(std::istream &stream);
 
 #endif

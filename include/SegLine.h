@@ -1,7 +1,7 @@
 #ifndef SEGLINE_H
 #define SEGLINE_H
 
-#include <fstream>
+#include <iostream>
 #include <string>
 
 struct SegLine {
@@ -20,5 +20,5 @@ struct SegLine {
   int l;
 };
 
-SegLine ReadSegLine(std::ifstream &stream);
+SegLine ReadSegLine(std::istream &stream);
 #endif

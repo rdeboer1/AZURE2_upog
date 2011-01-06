@@ -28,16 +28,6 @@ struct Config {
   bool performError;
   ///If performError is true, sets the value of Up (the acceptable variance from the minimum chi-squared.
   double chiVariance;
-  ///The nuclear input file name.
-  std::string nucfile;
-  ///The external capture input file name.
-  std::string ecfile;
-  ///The data segments input file name.
-  std::string segfile;
-  ///The extrapolation segments input file name.
-  std::string extrapfile;
-  ///The target effects input file name.
-  std::string targeteffectsfile;
   ///The path of the output directory
   std::string outputdir;
   ///The name of the parameters file from which to read.
