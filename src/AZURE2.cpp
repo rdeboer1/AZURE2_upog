@@ -151,22 +151,51 @@ void getParameterFile(bool useReadline, Config& configure) {
 
 void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   std::ifstream in;
-  if(configure.withData) in.open(configure.segfile.c_str());
-  else in.open(configure.extrapfile.c_str());
+  std::string startTag,stopTag;
+  if(configure.withData) {
+    startTag="<segmentsData>";
+    stopTag="</segmentsData>";
+  } else {
+    startTag="<segmentsTest>";
+    stopTag="</segmentsTest>";    
+  }
+  in.open(configure.configfile.c_str());
   if(in) {
-    int isActive,firstPair,secondPair;
-    std::string dummy;
-    getline(in,dummy);
-    while(!in.eof()) {
-      in >> isActive >> firstPair >> secondPair;getline(in,dummy);
-      if(!in.eof()&&isActive==1) {
-	SegPairs tempSet={firstPair,secondPair};
-	segPairs.push_back(tempSet);
+    std::string line="";
+    while(line!=startTag&&!in.eof()) getline(in,line);
+    if(line==startTag) {
+      line="";
+      int isActive,firstPair,secondPair;
+      while(line!=stopTag&&!in.eof()) {
+	getline(in,line);
+	bool empty=true;
+	for(unsigned int i=0;i<line.size();++i) 
+	  if(line[i]!=' '&&line[i]!='\t') {
+	    empty=false;
+	    break;
+	  }
+	if(empty==true) continue;
+	if(line!=stopTag&&!in.eof()) {
+	  std::istringstream stm;
+	  stm.str(line);
+	  stm >> isActive >> firstPair >> secondPair;
+	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&isActive==1) {
+	    SegPairs tempSet={firstPair,secondPair};
+	    segPairs.push_back(tempSet);
+	  }
+	}
       }
+      if(line!=stopTag) {
+	std::cout << "Problem reading segments. Check configuration file." << std::endl;
+	std::exit(1);
+      }
+    } else {
+      std::cout << "Problem reading segments. Check configuration file." << std::endl;
+      std::exit(1);
     }
     in.close();
   } else {
-    std::cout << "Cannot read from segment file. Check configuration file." << std::endl;
+    std::cout << "Cannot read segments. Check configuration file." << std::endl;
     std::exit(1);
   }
   in.clear();
@@ -200,27 +229,48 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs) {
 void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
   configure.isEC=false;
   std::ifstream in;
-  in.open(configure.ecfile.c_str());
+  in.open(configure.configfile.c_str());
   if(in) {
-    std::string dummy;
-    getline(in,dummy);
-    while(!in.eof()&&!configure.isEC) {
-      ECLine tempECLine=ReadECLine(in);
-      if(!in.eof()) {
-	if(tempECLine.isdc!=0) {
-	  for(int i=0;i<segPairs.size();i++) {
-	    if(tempECLine.entrancekey==segPairs[i].firstPair&&
-	       tempECLine.exitkey==segPairs[i].secondPair) {
-	      configure.isEC=true;
-	      break;
+    std::string line="";
+    while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
+    if(line=="<externalCapture>") {
+      line="";
+      while(line!="</externalCapture>"&&!in.eof()&&!configure.isEC) {
+	getline(in,line);
+	bool empty=true;
+	for(unsigned int i=0;i<line.size();++i) 
+	  if(line[i]!=' '&&line[i]!='\t') {
+	    empty=false;
+	    break;
+	  }
+	if(empty==true) continue;
+	if(line!="</externalCapture>"&&!in.eof()) {
+	  std::istringstream stm;
+	  stm.str(line);
+	  ECLine tempECLine=ReadECLine(stm);
+	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
+	    if(tempECLine.isdc!=0) {
+	      for(int i=0;i<segPairs.size();i++) {
+		if(tempECLine.entrancekey==segPairs[i].firstPair&&
+		   tempECLine.exitkey==segPairs[i].secondPair) {
+		  configure.isEC=true;
+		  break;
+		}
+	      }
 	    }
+	  } else {
+	    std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+	    std::exit(1);
 	  }
 	}
       }
+    } else {
+      std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+      std::exit(1);
     }
     in.close();
   } else {
-    std::cout << "Cannot read from external capture file. Check configuration file." << std::endl;
+    std::cout << "Cannot read external capture. Check configuration file." << std::endl;
     std::exit(1);
   }
   in.clear();

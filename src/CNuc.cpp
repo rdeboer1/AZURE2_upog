@@ -123,7 +123,7 @@ int CNuc::Fill(const struct Config &configure) {
       std::istringstream stm;
       stm.str(line);
       NucLine Line=ReadNucLine(stm);
-      if(!stm.good()) return -1;
+      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       if(Line.l>maxLValue&&Line.PType==0) maxLValue=Line.l;
       if(Line.yn==1) {
 	PPair NewPair(Line);
@@ -193,7 +193,7 @@ int CNuc::ReadECFile(std::string configfile) {
       std::istringstream stm;
       stm.str(line);
       ECLine newECLine=ReadECLine(stm);
-      if(!stm.good()) return -1;
+      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       PPair *entrancePair=this->GetPair(this->GetPairNumFromKey(newECLine.entrancekey));
       PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitkey));
       if(exitPair->GetPType()==10) {

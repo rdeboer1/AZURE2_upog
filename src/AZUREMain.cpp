@@ -8,7 +8,7 @@ int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile
   std::cout << "Filling Compound Nucleus..." << std::endl;
   if(compound()->Fill(configure())==-1) {
-    std::cout << "Could not fill compound nucleus from nuclear and/or external capture files." 
+    std::cout << "Could not fill compound nucleus from file." 
 	      << std::endl;
     return -1;
   }
@@ -21,12 +21,12 @@ int AZUREMain::operator()(){
     std::cout << "Filling Data Structures..." << std::endl;
     if(configure().withData) {
       if(data()->Fill(configure(),compound())==-1) {
-	std::cout << "Could not fill data object from segments file." << std::endl;
+	std::cout << "Could not fill data object from file." << std::endl;
 	return -1;
       }
     } else {
       if(data()->MakePoints(configure(),compound())==-1) {
-	std::cout << "Could not fill data object from extrapolation file." << std::endl;
+	std::cout << "Could not fill data object from file." << std::endl;
 	return -1;
       }
     } 
