@@ -207,10 +207,10 @@ int EData::ReadTargetEffectsFile(std::string infile) {
       }
     if(empty==true) continue;
     if(line!="</targetInt>"&&!in.eof()){
-      in.putback('\n');
-      for(unsigned int i=line.size()-1;i!=0;--i)
-	in.putback(line[i]);      
-      TargetEffect targetEffect(in);
+      std::istringstream stm;
+      stm.str(line);
+      TargetEffect targetEffect(stm);
+      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       this->AddTargetEffect(targetEffect);
       TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
       std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();

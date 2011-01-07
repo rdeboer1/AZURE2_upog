@@ -18,7 +18,7 @@
 
 class TargetEffect {
  public:
-  TargetEffect(std::ifstream &);
+  TargetEffect(std::istream &);
   bool IsActive() const;
   bool IsConvolution() const;
   bool IsTargetIntegration() const;
