@@ -1,6 +1,6 @@
 #include "ECLine.h"
   
-ECLine ReadECLine(std::ifstream &stream)
+ECLine ReadECLine(std::istream &stream)
 {
   ECLine a;
   std::string dummy;

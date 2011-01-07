@@ -27,6 +27,7 @@ class EData {
   int Iterations() const;
   int NumTargetEffects() const;
   int GetNormParamOffset() const;
+  int ReadTargetEffectsFile(std::string);
   bool IsFit() const;
   bool IsErrorAnalysis() const;
   bool IsSegmentKey(int);
@@ -47,7 +48,6 @@ class EData {
   void CalculateECAmplitudes(CNuc*,const struct Config&);
   void MapData();
   void AddTargetEffect(TargetEffect);
-  void ReadTargetEffectsFile(std::string);
   void SetNormParamOffset(int);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillNormsFromParams(const vector_r &);

@@ -4,6 +4,14 @@
 #include <string>
 #include <fstream>
 
+struct RateParams {
+  int entrancePair;
+  int exitPair;
+  double minTemp;
+  double maxTemp;
+  double tempStep;
+};
+
 /// A configuration structure for AZURE
 
 /*!
@@ -20,16 +28,6 @@ struct Config {
   bool performError;
   ///If performError is true, sets the value of Up (the acceptable variance from the minimum chi-squared.
   double chiVariance;
-  ///The nuclear input file name.
-  std::string nucfile;
-  ///The external capture input file name.
-  std::string ecfile;
-  ///The data segments input file name.
-  std::string segfile;
-  ///The extrapolation segments input file name.
-  std::string extrapfile;
-  ///The target effects input file name.
-  std::string targeteffectsfile;
   ///The path of the output directory
   std::string outputdir;
   ///The name of the parameters file from which to read.
@@ -72,16 +70,8 @@ struct Config {
   bool isBrune;
   ///A boolean specifying if the external components of a capture resonance should be ignored if the internal with is zero.
   bool ignoreExternals;
-  ///If a reaction rate is calculated, value indicates the entrance pair key.
-  int rateEntrancePair;
-  ///If a reaction rate is calculated, value indicates the exit pair key.  
-  int rateExitPair;
-  ///If a reaction rate is calculated, value indicates the minimum temperature in GK.
-  double rateMinTemp;
-  ///If a reaction rate is calculated, value indicates the maximum temperature in GK.
-  double rateMaxTemp;
-  ///If a reaction rate is calculated, value indicates the temperature step in GK.
-  double rateTempStep;
+  ///Parameters for calculating reaction rate.
+  RateParams  rateParams;
   ///A constant indicating the maximum order of the Legendre polynomials to calculate.
   static const int maxLOrder=10;
 };

@@ -34,19 +34,30 @@ int EData::NumSegments() const {
  */
 
 int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
-  std::ifstream in(configure.segfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
+  std::ifstream in(configure.configfile.c_str());
+  if(!in) return -1;
+  std::string line="";
+  while(line!="<segmentsData>"&&!in.eof()) getline(in,line);
+  if(line!="<segmentsData>") return -1;
+  line="";
   int numTotalSegments=0;
-  while(!in.eof()) {
-    SegLine line=ReadSegLine(in);
-    if(!in.eof()) {
+  while(!in.eof()&&line!="</segmentsData>") {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(!in.eof()&&line!="</segmentsData>") {
+      std::istringstream stm;
+      stm.str(line);
+      SegLine segment=ReadSegLine(stm);
+      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       numTotalSegments++;
-      if(line.isActive==1) {
-	ESegment NewSegment(line);
+      if(segment.isActive==1) {
+	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
@@ -63,9 +74,13 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
       }
     }
   }
+
+  if(line!="</segmentsData>") return -1;
+
   in.close();
-  this->ReadTargetEffectsFile(configure.targeteffectsfile);
+  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
   this->MapData();
+
   return 0; 
 }
 
@@ -76,19 +91,30 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
  */
 
 int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
-  std::ifstream in(configure.extrapfile.c_str());
-  if(!in) {
-    return -1;
-  }
-  std::string dummy;
-  getline(in,dummy);
+  std::ifstream in(configure.configfile.c_str());
+  if(!in) return -1;
+  std::string line = "";
+  while(line!="<segmentsTest>"&&!in.eof()) getline(in,line);
+  if(line!="<segmentsTest>") return -1;
+  line="";
   int numTotalSegments=0;
-  while(!in.eof()) {
-    ExtrapLine line=ReadExtrapLine(in);
-    if(line.isActive==1) {
-      if(!in.eof()) {
+  while(!in.eof()&&line!="</segmentsTest>") {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(!in.eof()&&line!="</segmentsTest>") {
+      std::istringstream stm;
+      stm.str(line);
+      ExtrapLine segment=ReadExtrapLine(stm);
+      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
+      if(segment.isActive==1) {
 	numTotalSegments++;
-	ESegment NewSegment(line);
+	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
@@ -127,8 +153,11 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
       }
     }
   }  
+
+  if(line!="</segmentsTest>") return -1;
+  
   in.close();
-  this->ReadTargetEffectsFile(configure.targeteffectsfile);
+  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
   this->MapData();
   return 0; 
 }
@@ -154,6 +183,80 @@ int EData::NumTargetEffects() const {
  */
 int EData::GetNormParamOffset() const {
   return normParamOffset_;
+}
+
+/*!
+ * Reads the target effects input file and creates the TargetEffect objects 
+ * to be applied to the data.
+ */
+
+int EData::ReadTargetEffectsFile(std::string infile) {
+  std::ifstream in(infile.c_str());
+  if(!in) return -1;
+  std::string line="";
+  while(line!="<targetInt>"&&!in.eof()) getline(in,line);
+  if(line!="<targetInt>") return -1;
+  line="";
+  while(line!="</targetInt>"&&!in.eof()) {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(line!="</targetInt>"&&!in.eof()){
+      in.putback('\n');
+      for(unsigned int i=line.size()-1;i!=0;--i)
+	in.putback(line[i]);      
+      TargetEffect targetEffect(in);
+      this->AddTargetEffect(targetEffect);
+      TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
+      std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();
+      for(int i = 1;i<=segmentsList.size();i++) { 
+	if(this->IsSegmentKey(segmentsList[i-1]))
+	  this->GetSegmentFromKey(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
+      }
+    }
+  }
+  if(line!="</targetInt>") return -1;
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    if(segment->IsTargetEffect()) {
+      TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
+      for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
+	point->SetTargetEffectNum(segment->GetTargetEffectNum());
+	double forwardDepth=0.0;
+	double backwardDepth=0.0;
+	if(targetEffect->IsTargetIntegration()) {
+	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
+	  point->SetTargetThickness(targetThickness);
+	  if(targetEffect->IsConvolution()) {
+	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
+	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	  } else {
+	    backwardDepth=targetThickness;
+	    forwardDepth=0.0;
+	  }
+	} else if(targetEffect->IsConvolution()) {
+	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	}
+	for(int i=0;i<targetEffect->NumSubPoints();i++) {
+	  double subEnergy=point->GetCMEnergy()+forwardDepth
+	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
+	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
+	  if(targetEffect->IsTargetIntegration()) {
+	  	double stoppingPower=targetEffect->
+	  	GetStoppingPowerEq()->Evaluate(subEnergy);
+  	    subPoint.SetStoppingPower(stoppingPower);
+	  }
+	  point->AddSubPoint(subPoint);
+	}
+      }
+    }
+  }
+  return 0;
 }
 
 /*!
@@ -702,65 +805,6 @@ void EData::MapData() {
 
 void EData::AddTargetEffect(TargetEffect targetEffect) {
   targetEffects_.push_back(targetEffect);
-}
-
-/*!
- * Reads the target effects input file and creates the TargetEffect objects 
- * to be applied to the data.
- */
-
-void EData::ReadTargetEffectsFile(std::string infile) {
-  std::ifstream in(infile.c_str());
-  if(!in) std::cout << "Could not read target effects file." << std::endl;
-  else {
-    while(!in.eof()) {
-      TargetEffect targetEffect(in);
-      if(!in.eof()&&targetEffect.IsActive()) {
-	this->AddTargetEffect(targetEffect);
-	TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
-	std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();
-	for(int i = 1;i<=segmentsList.size();i++) { 
-	  if(this->IsSegmentKey(segmentsList[i-1]))
-	  this->GetSegmentFromKey(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
-	}
-      }
-    }
-  }
-  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
-    if(segment->IsTargetEffect()) {
-      TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
-      for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
-	point->SetTargetEffectNum(segment->GetTargetEffectNum());
-	double forwardDepth=0.0;
-	double backwardDepth=0.0;
-	if(targetEffect->IsTargetIntegration()) {
-	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
-	  point->SetTargetThickness(targetThickness);
-	  if(targetEffect->IsConvolution()) {
-	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
-	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  } else {
-	    backwardDepth=targetThickness;
-	    forwardDepth=0.0;
-	  }
-	} else if(targetEffect->IsConvolution()) {
-	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	}
-	for(int i=0;i<targetEffect->NumSubPoints();i++) {
-	  double subEnergy=point->GetCMEnergy()+forwardDepth
-	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
-	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
-	  if(targetEffect->IsTargetIntegration()) {
-	  	double stoppingPower=targetEffect->
-	  	GetStoppingPowerEq()->Evaluate(subEnergy);
-  	    subPoint.SetStoppingPower(stoppingPower);
-	  }
-	  point->AddSubPoint(subPoint);
-	}
-      }
-    }
-  }
 }
 
 /*!

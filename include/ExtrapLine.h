@@ -1,7 +1,7 @@
 #ifndef EXTRAPLINE_H
 #define EXTRAPLINE_H
 
-#include <fstream>
+#include <iostream>
 #include <string>
 
 struct ExtrapLine {
@@ -19,5 +19,5 @@ struct ExtrapLine {
   int l;
 };
 
-ExtrapLine ReadExtrapLine(std::ifstream &stream);
+ExtrapLine ReadExtrapLine(std::istream &stream);
 #endif

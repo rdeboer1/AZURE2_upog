@@ -1,6 +1,6 @@
 #include "NucLine.h"
   
-NucLine ReadNucLine(std::ifstream &stream)
+NucLine ReadNucLine(std::istream &stream)
 {
   NucLine a;
   stream >> a.LevelJ >> a.LevelPi >> a.LevelExE >> a.levelFix >> a.aa >> a.R 
