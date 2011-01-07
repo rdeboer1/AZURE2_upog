@@ -8,7 +8,7 @@
  * created.
  */
 
-TargetEffect::TargetEffect(std::ifstream &stream) {
+TargetEffect::TargetEffect(std::istream &stream) {
   int isActive;
   std::string segmentList;
   int numIntegrationPoints;
