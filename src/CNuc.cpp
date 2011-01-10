@@ -1470,6 +1470,11 @@ void CNuc::SetMaxLValue(int maxL) {
   maxLValue_=maxL;
 }
 
+/*!
+ * This function is called for each iteration to calculate the shift 
+ * functions at new level energies when the Brune parametrization is used. 
+ */
+
 void CNuc::CalcShiftFunctions() {
   for(int j=1;j<=this->NumJGroups();j++) {
     if(this->GetJGroup(j)->IsInRMatrix()) {
