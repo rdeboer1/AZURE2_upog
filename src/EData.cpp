@@ -211,12 +211,14 @@ int EData::ReadTargetEffectsFile(std::string infile) {
       stm.str(line);
       TargetEffect targetEffect(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      this->AddTargetEffect(targetEffect);
-      TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
-      std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();
-      for(int i = 1;i<=segmentsList.size();i++) { 
-	if(this->IsSegmentKey(segmentsList[i-1]))
-	  this->GetSegmentFromKey(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
+      if(targetEffect.IsActive()) {
+	this->AddTargetEffect(targetEffect);
+	TargetEffect *thisTargetEffect=this->GetTargetEffect(this->NumTargetEffects());
+	std::vector<int> segmentsList = thisTargetEffect->GetSegmentsList();
+	for(int i = 1;i<=segmentsList.size();i++) { 
+	  if(this->IsSegmentKey(segmentsList[i-1]))
+	    this->GetSegmentFromKey(segmentsList[i-1])->SetTargetEffectNum(this->NumTargetEffects());
+	}
       }
     }
   }
