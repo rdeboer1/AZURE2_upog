@@ -19,8 +19,8 @@ class ALevel {
   bool IsECLevel() const;
   int NumNFIntegrals() const;
   int GetTransformIterations() const;
-  int GetECMaxMult() const;
   int GetECPairNum() const;
+  unsigned char GetECMultMask() const;
   double GetE() const;
   double GetGamma(int) const;
   double GetFitGamma(int) const;
@@ -50,14 +50,14 @@ class ALevel {
   void SetTransformIterations(int);
   void SetExternalGamma(int,complex);
   void SetShiftFunction(int,double);
-  void SetECParams(int,double,double,int);
+  void SetECParams(int,double,double,unsigned char);
  private:
   bool isinrmatrix_;
   bool energyfixed_;
   bool isECLevel_;
   int transform_iter_;
-  int ecMaxMult_;
   int ecPairNum_;
+  unsigned char ecMultMask_;
   double level_e_;
   double fitlevel_e_;
   double sqrt_nf_factor_;

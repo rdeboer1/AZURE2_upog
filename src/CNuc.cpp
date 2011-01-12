@@ -216,7 +216,7 @@ int CNuc::ReadECFile(std::string configfile) {
 	      }
 	    }
 	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
-									newECLine.jimin,newECLine.jimax,newECLine.maxmult);
+									newECLine.jimin,newECLine.jimax,newECLine.multMask);
 	    for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
 	      PPair *theFinalPair=this->GetPair(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetPairNum());
 	      double nfIntegralValue=0.; 
@@ -240,7 +240,7 @@ int CNuc::ReadECFile(std::string configfile) {
 	    this->GetJGroup(jGroupNum)->AddLevel(newLevel);
 	    levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
 	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
-									newECLine.jimin,newECLine.jimax,newECLine.maxmult);
+									newECLine.jimin,newECLine.jimax,newECLine.multMask);
 	    for(int ir=1;ir<=this->NumPairs();ir++) {
 	      if(this->GetPair(ir)->GetPType()==0) {
 		double s1=this->GetPair(ir)->GetJ(1);
@@ -743,12 +743,14 @@ void CNuc::SortPathways() {
 			       this->GetJGroup(chMGroup->GetJNum())->GetJ()<=theFinalLevel->GetECMaxJ()) {
 			      AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
 			      AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
-			      for(int multL=1;multL<=theFinalLevel->GetECMaxMult();multL++) { //loop over all allowed gamma parities
+			      for(int multL=1;multL<=maxECMult;multL++) { //loop over all allowed gamma parities
 				char radType;
 				if(this->GetJGroup(chMGroup->GetJNum())->GetPi()*theFinalJGroup->GetPi()==
 				   (int)pow(-1,multL)) radType='E';
 				else radType='M'; //calculate radiation type
-				if(radType=='E'||(radType=='M'&&multL==1)){ //allow only m1 or eL
+				if(((radType=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) ||
+				   ((radType=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) ||
+				   ((radType=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) { //allow only m1,e1,e2
 				  if(fabs(this->GetJGroup(chMGroup->GetJNum())->GetJ()-multL)<=theFinalJGroup->GetJ()&&
 				     theFinalJGroup->GetJ()<=this->GetJGroup(chMGroup->GetJNum())->GetJ()+multL) { 
 				    if((abs(chChannelp->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=chChannelp->GetL()+multL&&
@@ -1527,7 +1529,9 @@ complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *t
 	if(!isInitial) theLevelEnergy=theLevel->GetTransformE();
 	else theLevelEnergy=theLevel->GetE();
 	int multL=theChannel->GetL();
-	if(multL<=theFinalLevel->GetECMaxMult()) {
+	if(((theChannel->GetRadType()=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) ||
+	   ((theChannel->GetRadType()=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) ||
+	   ((theChannel->GetRadType()=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) { //allow only m1,e1,e2
 	  double theFinalLevelEnergy;
 	  if(!isInitial) theFinalLevelEnergy=theFinalLevel->GetTransformE();
 	  else theFinalLevelEnergy=theFinalLevel->GetE();

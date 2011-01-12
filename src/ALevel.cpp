@@ -7,7 +7,7 @@
 
 ALevel::ALevel(struct NucLine nucLine) :
   level_e_(nucLine.LevelExE),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0), isECLevel_(false),
-  ecMaxMult_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {
+  ecMultMask_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {
   if(nucLine.levelFix==1) energyfixed_=true;
   else energyfixed_=false;
 }
@@ -18,7 +18,7 @@ ALevel::ALevel(struct NucLine nucLine) :
 
 ALevel::ALevel(double energy) :
   energyfixed_(true),level_e_(energy),fitlevel_e_(0.0), isinrmatrix_(false), sqrt_nf_factor_(1.0), isECLevel_(false),
-  ecMaxMult_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {};
+  ecMultMask_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {};
 
 /*!
  * Returns true if the level energy is to be fixed in the fitting process, otherwise returns false.
@@ -71,19 +71,19 @@ int ALevel::GetTransformIterations() const {
 }
 
 /*!
- * Returns the maximum multipolarity of external capture gammas to the level.
- */ 
-
-int ALevel::GetECMaxMult() const {
-  return ecMaxMult_;
-}
-
-/*!
  * Returns the position in the pairs vector corresponding the the external capture level.
  */
 
 int ALevel::GetECPairNum() const {
   return ecPairNum_;
+}
+
+/*!
+ * Returns the multipolarity mask of external capture gammas to the level.
+ */ 
+
+unsigned char ALevel::GetECMultMask() const {
+  return ecMultMask_;
 }
 
 /*!
@@ -340,10 +340,10 @@ void ALevel::SetShiftFunction(int channelNum, double shiftFunction) {
  * Sets the external capture parameters for the level.
  */ 
 
-void ALevel::SetECParams(int pairNum,double minJ, double maxJ, int maxMult) {
+void ALevel::SetECParams(int pairNum,double minJ, double maxJ, unsigned char multMask) {
   isECLevel_=true;
   ecPairNum_=pairNum;
   ecMinJ_=minJ;
   ecMaxJ_=maxJ;
-  ecMaxMult_=maxMult;
+  ecMultMask_=multMask;
 }

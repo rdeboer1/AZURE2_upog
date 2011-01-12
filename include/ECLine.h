@@ -5,13 +5,10 @@
 
 struct ECLine {
   int isdc;
-  int entrancekey;
   int exitkey;
   double jimin;
   double jimax;
-  int limin;
-  int limax;
-  int maxmult;
+  unsigned char multMask;
 };
 
 ECLine ReadECLine(std::istream &stream);
