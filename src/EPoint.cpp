@@ -713,63 +713,66 @@ void EPoint::SetCoulombAmplitude(complex amplitude) {
 
 void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
   int aa=theCNuc->GetPairNumFromKey(this->GetEntranceKey());
-  if(theCNuc->GetPair(aa)->IsECEntrance()) {
+  if(theCNuc->GetPair(aa)->IsEntrance()) {
     PPair *entrancePair=theCNuc->GetPair(aa);
-    for(int ec=1;ec<=entrancePair->NumECLevels();ec++) {
-      int ir=theCNuc->GetPairNumFromKey(this->GetExitKey());
-      if(entrancePair->GetECLevel(ec)->GetPairNum()==ir) {
-	double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
-	for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
-	  KGroup *theKGroup=entrancePair->GetDecay(ir)->GetKGroup(k);
-	  for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
-	    ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
-	    //entrance Phase Calculations;
-	    CoulFunc theCoulombFunction(entrancePair);
-	    struct CoulWaves 
-	      coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
-				      this->GetCMEnergy());		
-	    double eta=sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*entrancePair->GetZ(2)*
-	      sqrt(entrancePair->GetRedMass()/this->GetCMEnergy());
-	    complex expCP(1.0,0.0);
-	    for(int ll=1;ll<=theECMGroup->GetL();ll++) 
-	      expCP*=complex((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
-					  eta/sqrt(pow((double)ll,2.0)+pow(eta,2.0)));
-	    complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
-					-coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
-	    
-	    double levelEnergy=theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->
-	      GetLevel(entrancePair->GetECLevel(ec)->GetLevelNum())->GetE();
-	    double sqrtGammaPene=pow((inEnergy-levelEnergy)/hbarc,theECMGroup->GetMult()+0.5);
-	    
-	    //Initialize variables
-	    AChannel *theFinalChannel = theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->
-	      GetChannel(theECMGroup->GetFinalChannel());
-	    PPair *theFinalPair=theCNuc->GetPair(theFinalChannel->GetPairNum());		
-	    int theInitialLValue;
-	    double theInitialSValue;
-	    if(theECMGroup->IsChannelCapture()) {
-	      MGroup *theChanCapMGroup=entrancePair->GetDecay(theECMGroup->GetChanCapDecay())->
-		GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
-	      theInitialLValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
-		GetChannel(theChanCapMGroup->GetChpNum())->GetL();
-	      theInitialSValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
-		GetChannel(theChanCapMGroup->GetChpNum())->GetS();
-	    } else {
-	      theInitialLValue=theECMGroup->GetL();
-	      theInitialSValue=theKGroup->GetS();
-	    }	    
-	    
-	    ECIntegral theECIntegral(theFinalPair);
-	    complex integrals = theECIntegral(theInitialLValue, theFinalChannel->GetL(), 
-					      theInitialSValue, theFinalChannel->GetS(),
-					      theECMGroup->GetJ(), theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->GetJ(),
-					      theECMGroup->GetMult(), theECMGroup->GetRadType(),
-					      inEnergy, levelEnergy,
-					      theECMGroup->IsChannelCapture());
-
-	    //calculate the total radial integral
-	    complex ecAmplitude=expCP*expHSP*sqrtGammaPene*integrals;
-	    this->AddECAmplitude(k,ecm,ecAmplitude);
+    for(int j=1;j<=theCNuc->NumJGroups();j++) {
+      for(int la=1;la<=theCNuc->GetJGroup(j)->NumLevels();la++) {
+	if(theCNuc->GetJGroup(j)->GetLevel(la)->IsECLevel()) {
+	  ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
+	  int ir=theCNuc->GetPairNumFromKey(this->GetExitKey());
+	  if(ecLevel->GetECPairNum()==ir) {
+	    double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
+	    for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
+	      KGroup *theKGroup=entrancePair->GetDecay(ir)->GetKGroup(k);
+	      for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
+		ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
+		//entrance Phase Calculations;
+		CoulFunc theCoulombFunction(entrancePair);
+		struct CoulWaves 
+		  coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
+					  this->GetCMEnergy());		
+		double eta=sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*entrancePair->GetZ(2)*
+		  sqrt(entrancePair->GetRedMass()/this->GetCMEnergy());
+		complex expCP(1.0,0.0);
+		for(int ll=1;ll<=theECMGroup->GetL();ll++) 
+		  expCP*=complex((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
+				 eta/sqrt(pow((double)ll,2.0)+pow(eta,2.0)));
+		complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
+			       -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
+		
+		double levelEnergy=ecLevel->GetE();
+		double sqrtGammaPene=pow((inEnergy-levelEnergy)/hbarc,theECMGroup->GetMult()+0.5);
+		
+		//Initialize variables
+		AChannel *theFinalChannel = theCNuc->GetJGroup(j)->GetChannel(theECMGroup->GetFinalChannel());
+		PPair *theFinalPair=theCNuc->GetPair(theFinalChannel->GetPairNum());		
+		int theInitialLValue;
+		double theInitialSValue;
+		if(theECMGroup->IsChannelCapture()) {
+		  MGroup *theChanCapMGroup=entrancePair->GetDecay(theECMGroup->GetChanCapDecay())->
+		    GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
+		  theInitialLValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
+		    GetChannel(theChanCapMGroup->GetChpNum())->GetL();
+		  theInitialSValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
+		    GetChannel(theChanCapMGroup->GetChpNum())->GetS();
+		} else {
+		  theInitialLValue=theECMGroup->GetL();
+		  theInitialSValue=theKGroup->GetS();
+		}	    
+		
+		ECIntegral theECIntegral(theFinalPair);
+		complex integrals = theECIntegral(theInitialLValue, theFinalChannel->GetL(), 
+						  theInitialSValue, theFinalChannel->GetS(),
+						  theECMGroup->GetJ(), theCNuc->GetJGroup(j)->GetJ(),
+						  theECMGroup->GetMult(), theECMGroup->GetRadType(),
+						  inEnergy, levelEnergy,
+						  theECMGroup->IsChannelCapture());
+		
+		//calculate the total radial integral
+		complex ecAmplitude=expCP*expHSP*sqrtGammaPene*integrals;
+		this->AddECAmplitude(k,ecm,ecAmplitude);
+	      }
+	    }
 	  }
 	}
       }

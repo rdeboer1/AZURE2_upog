@@ -195,15 +195,8 @@ int CNuc::ReadECFile(std::string configfile) {
       ECLine newECLine=ReadECLine(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       if(newECLine.isdc) {
-	PPair *entrancePair=this->GetPair(this->GetPairNumFromKey(newECLine.entrancekey));
 	PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitkey));
 	if(exitPair->GetPType()==10) {
-	  //set EC parameters in entrance pair
-	  entrancePair->SetECEntrance();
-	  ECLevel newECLevel(newECLine);
-	  entrancePair->AddECLevel(newECLevel);
-	  entrancePair->GetECLevel(entrancePair->NumECLevels())->
-	    SetPairNum(this->GetPairNumFromKey(newECLine.exitkey));
 	  //create new level in compound nucleus for EC state, if it doesn't exist
 	  double jValue=exitPair->GetJ(2);
 	  int parity=exitPair->GetPi(2);
@@ -222,6 +215,8 @@ int CNuc::ReadECFile(std::string configfile) {
 		else this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.0);
 	      }
 	    }
+	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
+									newECLine.jimin,newECLine.jimax,newECLine.maxmult);
 	    for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
 	      PPair *theFinalPair=this->GetPair(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetPairNum());
 	      double nfIntegralValue=0.; 
@@ -244,6 +239,8 @@ int CNuc::ReadECFile(std::string configfile) {
 	    ALevel newLevel(exitPair->GetExE());
 	    this->GetJGroup(jGroupNum)->AddLevel(newLevel);
 	    levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
+	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
+									newECLine.jimin,newECLine.jimax,newECLine.maxmult);
 	    for(int ir=1;ir<=this->NumPairs();ir++) {
 	      if(this->GetPair(ir)->GetPType()==0) {
 		double s1=this->GetPair(ir)->GetJ(1);
@@ -271,8 +268,6 @@ int CNuc::ReadECFile(std::string configfile) {
 	      }
 	    }
 	  }
-	  entrancePair->GetECLevel(entrancePair->NumECLevels())->SetJGroupNum(jGroupNum);
-	  entrancePair->GetECLevel(entrancePair->NumECLevels())->SetLevelNum(levelNum);
 	} else std::cout << "Final state is not a capture pair." << std::endl;
       }
     }
@@ -724,68 +719,61 @@ void CNuc::SortPathways() {
     }
   }
   for(int aa=1;aa<=this->NumPairs();aa++) { //loop over all pairs
-    if(this->GetPair(aa)->IsECEntrance()) { //if pair is entrance for EC...
-      PPair *entrancePair=this->GetPair(aa);
-      for(int ec=1;ec<=entrancePair->NumECLevels();ec++) { //loop over all dc final states for entrance pair
-	ECLevel *ecLevel=entrancePair->GetECLevel(ec);
-	int decayNum=entrancePair->IsDecay(ecLevel->GetPairNum()); //store RESONANCE decay number to final state
-	if(decayNum) { //if this is a resonance decay...
-	  JGroup *theFinalJGroup=this->GetJGroup(ecLevel->GetJGroupNum());
-	  for(int k=1;k<=entrancePair->GetDecay(decayNum)->NumKGroups();k++) { //loop over all kgroups for decays to final state 
-	    KGroup *theKGroup=entrancePair->GetDecay(decayNum)->GetKGroup(k);
-	    double s=theKGroup->GetS(); //grab s value of decay
-	    for(int l=ecLevel->GetMinL();l<=ecLevel->GetMaxL();l++) { //loop over all allowed incoming l-value
-	      for(double j=fabs(s-l);j<=s+l;j+=1.) {  //couple s to l vectorally to form j
-		if(ecLevel->GetMinJ()<=j&&j<=ecLevel->GetMaxJ()){  //if j is an allowed incoming value
-		  int parityJ=entrancePair->GetPi(1)*entrancePair->GetPi(2)*(int)pow(-1,l);  //parity of incoming j
-		  for(int multL=1;multL<=ecLevel->GetMaxMult();multL++) { //loop over all allowed gamma parities
-		    if(fabs(j-multL)<=theFinalJGroup->GetJ()&&
-		       theFinalJGroup->GetJ()<=j+multL) { //be sure the incoming j and gamma mult can vectorally coulple to final j
-		      char radType;
-		      if(parityJ*theFinalJGroup->GetPi()==
-			 (int)pow(-1,multL)) radType='E';
-		      else radType='M'; //calculate radiation type
-		      if(radType=='E'||(radType=='M'&&multL==1)){ //allow only m1 or eL
-			for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) { //loop over all final configurations in the capture state
-			  AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
-			  if(this->GetPair(finalChannel->GetPairNum())->GetPType()==0) {  //ensure the configuration is a particle pair
-			    if(finalChannel->GetPairNum()==aa) { //if final configuration is the same as initial...
-			      if((abs(l-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=l+multL&&
-				  fabs(s-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
-				  theFinalJGroup->GetJ()<=s+finalChannel->GetL()&&s==finalChannel->GetS())||
-				 (fabs(s-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=s+multL&&
-				  fabs(l-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-				  theFinalJGroup->GetJ()<=l+finalChannel->GetS()&&l==finalChannel->GetL()&&radType=='M')) { //ensure entrance channel for dc can couple to final state
-				ECMGroup newECMGroup(radType,multL,l,j,chp,ec);
-				theKGroup->AddECMGroup(newECMGroup);
-			      }
-			    }
-			    int chDecayNum=entrancePair->IsDecay(finalChannel->GetPairNum()); //grab decays number for final channel from entrance pair
-			    if(chDecayNum) { //if it is actually a resonance decay...
-			      for(int kp=1;kp<=entrancePair->GetDecay(chDecayNum)->NumKGroups();kp++) { //loop over all reaction pathways from entrance to final configuration
-				for(int mp=1;mp<=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->NumMGroups();mp++) {
-				  MGroup *chMGroup=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetMGroup(mp);
-				  AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
-				  AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
-				  if(this->GetJGroup(chMGroup->GetJNum())->GetJ()==j&& //compare entrance channel for reaction pathway to entrance channel for external capture
-				     chChannel->GetL()==l&&
-				     chChannel->GetS()==s) {
+    PPair *entrancePair=this->GetPair(aa);
+    if(entrancePair->IsEntrance()) {
+      for(int j=1;j<=this->NumJGroups();j++) {
+	JGroup *theFinalJGroup=this->GetJGroup(j);
+	for(int la=1;la<=theFinalJGroup->NumLevels();la++) {
+	  ALevel *theFinalLevel=theFinalJGroup->GetLevel(la);
+	  if(theFinalLevel->IsECLevel()) {
+	    int decayNum=entrancePair->IsDecay(theFinalLevel->GetECPairNum()); //store RESONANCE decay number to final state
+	    if(decayNum) { //if this is a resonance decay...
+	      for(int k=1;k<=entrancePair->GetDecay(decayNum)->NumKGroups();k++) { //loop over all kgroups for decays to final state 
+		KGroup *theKGroup=entrancePair->GetDecay(decayNum)->GetKGroup(k);
+		for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) { //loop over all final configurations in the capture state
+		  AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
+		  if(this->GetPair(finalChannel->GetPairNum())->GetPType()==0) {  //ensure the configuration is a particle pair
+		    int chDecayNum=entrancePair->IsDecay(finalChannel->GetPairNum());
+		    if(chDecayNum) { //if it is actually a resonance decay...
+		      for(int kp=1;kp<=entrancePair->GetDecay(chDecayNum)->NumKGroups();kp++) { 
+			if(entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetS()==theKGroup->GetS()){
+			  for(int mp=1;mp<=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->NumMGroups();mp++) {
+			    MGroup *chMGroup=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetMGroup(mp);
+			    if(this->GetJGroup(chMGroup->GetJNum())->GetJ()>=theFinalLevel->GetECMinJ()&&
+			       this->GetJGroup(chMGroup->GetJNum())->GetJ()<=theFinalLevel->GetECMaxJ()) {
+			      AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
+			      AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
+			      for(int multL=1;multL<=theFinalLevel->GetECMaxMult();multL++) { //loop over all allowed gamma parities
+				char radType;
+				if(this->GetJGroup(chMGroup->GetJNum())->GetPi()*theFinalJGroup->GetPi()==
+				   (int)pow(-1,multL)) radType='E';
+				else radType='M'; //calculate radiation type
+				if(radType=='E'||(radType=='M'&&multL==1)){ //allow only m1 or eL
+				  if(fabs(this->GetJGroup(chMGroup->GetJNum())->GetJ()-multL)<=theFinalJGroup->GetJ()&&
+				     theFinalJGroup->GetJ()<=this->GetJGroup(chMGroup->GetJNum())->GetJ()+multL) { 
 				    if((abs(chChannelp->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=chChannelp->GetL()+multL&&
 					fabs(chChannelp->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
 					theFinalJGroup->GetJ()<=chChannelp->GetS()+finalChannel->GetL()&&chChannelp->GetS()==finalChannel->GetS())||
 				       (fabs(chChannelp->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=chChannelp->GetS()+multL&&
 					fabs(chChannelp->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-					theFinalJGroup->GetJ()<=chChannelp->GetL()+finalChannel->GetS()&&chChannelp->GetL()==finalChannel->GetL()&&radType=='M')) { //ensure entrance channel for dc can couple to final state		     				
+					theFinalJGroup->GetJ()<=chChannelp->GetL()+finalChannel->GetS()&&
+					chChannelp->GetL()==finalChannel->GetL()&&radType=='M')) { //ensure entrance channel for dc can couple to final state		     			
+				      if(chChannel==chChannelp) {
+					ECMGroup newECMGroup(radType,multL,chChannel->GetL(),
+							     this->GetJGroup(chMGroup->GetJNum())->GetJ(),chp,j,la);
+					theKGroup->AddECMGroup(newECMGroup);
+				      }
 				      int internalChannel=0;
 				      for(int intCh=1;intCh<=this->GetJGroup(chMGroup->GetJNum())->NumChannels();intCh++) {
 					if(this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetRadType()==radType &&
 					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetL()==multL &&
-					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetPairNum()==ecLevel->GetPairNum()) {
+					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetPairNum()==theFinalLevel->GetECPairNum()) {
 					  internalChannel=intCh;
 					  break;
 					}
 				      }
-				      ECMGroup newECMGroup(radType,multL,l,j,chp,ec,chDecayNum,kp,mp,internalChannel);
+				      ECMGroup newECMGroup(radType,multL,chChannel->GetL(),this->GetJGroup(chMGroup->GetJNum())->GetJ(),
+							   chp,j,la,chDecayNum,kp,mp,internalChannel);
 				      theKGroup->AddECMGroup(newECMGroup);
 				    }
 				  }
@@ -883,7 +871,7 @@ void CNuc::PrintPathways(const struct Config &configure) {
 	for(int iii=1;iii<=this->GetPair(i)->GetDecay(ii)->NumKGroups();iii++) {
 	  for(int iiii=1;iiii<=this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->NumECMGroups();iiii++) {	 
 	    ECMGroup *theECMGroup=this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetECMGroup(iiii);
-	    JGroup *theECJGroup=this->GetJGroup(thePair->GetECLevel(theECMGroup->GetECNum())->GetJGroupNum());
+	    JGroup *theECJGroup=this->GetJGroup(theECMGroup->GetJGroupNum());
 	    out << std::setw(17) << i
 		<< std::setw(9)  << ii
 		<< std::setw(14) << this->GetPair(i)->GetDecay(ii)->GetPairNum()
@@ -1515,69 +1503,68 @@ void CNuc::CalcShiftFunctions() {
 
 complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *theChannel,bool isInitial) {
   complex externalWidth(0.0,0.0);
-  if(theChannel->GetRadType()!='P') {
+  if(theChannel->GetRadType()=='E'||(theChannel->GetRadType()=='M'&&theChannel->GetL()==1)) {
     bool isExternal=false;
-    int aa=0;
-    int ec=0;
-    while(!isExternal&&aa<this->NumPairs()) {
-      aa++;
-      ec=0;
-      while(!isExternal&&ec<this->GetPair(aa)->NumECLevels()) {
-	ec++;
-	if(theChannel->GetPairNum()==this->GetPair(aa)->GetECLevel(ec)->GetPairNum()) 
-	  {
-	    isExternal=true;
-	  }
+    int j=0;
+    int la=0;
+    while(!isExternal&&j<this->NumJGroups()) {
+      j++;
+      la=0;
+      while(!isExternal&&la<this->GetJGroup(j)->NumLevels()) {
+	la++;
+	if(this->GetJGroup(j)->GetLevel(la)->IsECLevel()&&
+	   theChannel->GetPairNum()==this->GetJGroup(j)->GetLevel(la)->GetECPairNum()) {
+	  isExternal=true;
+	}
       }
     }
-    if(isExternal&&theJGroup->GetJ()>=this->GetPair(aa)->GetECLevel(ec)->GetMinJ()&&
-       theJGroup->GetJ()<=this->GetPair(aa)->GetECLevel(ec)->GetMaxJ()) {
-      double theLevelEnergy;
-      if(!isInitial) theLevelEnergy=theLevel->GetTransformE();
-      else theLevelEnergy=theLevel->GetE();
-      int multL=theChannel->GetL();
-      if(multL<=this->GetPair(aa)->GetECLevel(ec)->GetMaxMult()
-	 &&(theChannel->GetRadType()=='E'||multL==1)) {
-	JGroup *theFinalJGroup=this->GetJGroup(this->GetPair(aa)->GetECLevel(ec)->GetJGroupNum());
-	ALevel *theFinalLevel=theFinalJGroup->GetLevel(this->GetPair(aa)->GetECLevel(ec)->GetLevelNum());
-	double theFinalLevelEnergy;
-	if(!isInitial) theFinalLevelEnergy=theFinalLevel->GetTransformE();
-	else theFinalLevelEnergy=theFinalLevel->GetE();
-	for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	  double theInitialChannelGamma;
-	  if(!isInitial) theInitialChannelGamma=theLevel->GetTransformGamma(ch);
-	  else theInitialChannelGamma=theLevel->GetGamma(ch);
-	  AChannel *initialChannel=theJGroup->GetChannel(ch);
-	  if(initialChannel->GetRadType()=='P'&&
-	     initialChannel->GetL()>=this->GetPair(aa)->GetECLevel(ec)->GetMinL()&&
-	     initialChannel->GetL()<=this->GetPair(aa)->GetECLevel(ec)->GetMaxL()) {
-	    for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) {
-	      double theFinalChannelGamma;
-	      if(!isInitial) theFinalChannelGamma=theFinalLevel->GetTransformGamma(chp);
-	      else theFinalChannelGamma=theFinalLevel->GetGamma(chp);
-	      AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
-	      if(finalChannel->GetRadType()=='P') {
-		if(finalChannel->GetPairNum()==initialChannel->GetPairNum()) {
-		  if((abs(initialChannel->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=initialChannel->GetL()+multL&&
-		      fabs(initialChannel->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
-		      theFinalJGroup->GetJ()<=initialChannel->GetS()+finalChannel->GetL()&&initialChannel->GetS()==finalChannel->GetS())||
-		     (fabs(initialChannel->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=initialChannel->GetS()+multL&&
-		      fabs(initialChannel->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-		      theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&
-		      theChannel->GetRadType()=='M')) {
-		    PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
-
-		    ECIntegral theECIntegral(theFinalPair);
-		    complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
-						      initialChannel->GetS(),finalChannel->GetS(),
-						      theJGroup->GetJ(),theFinalJGroup->GetJ(),
-						      multL,theChannel->GetRadType(),
-						      theLevelEnergy,theFinalLevelEnergy,
-						      true);
-
-		    double ecNormParam=theFinalChannelGamma*
-		      theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
-		    externalWidth-=ecNormParam*theInitialChannelGamma*integrals;
+    if(isExternal) {
+      JGroup *theFinalJGroup=this->GetJGroup(j);
+      ALevel *theFinalLevel=theFinalJGroup->GetLevel(la);
+      if(theJGroup->GetJ()>=theFinalLevel->GetECMinJ()&&
+	 theJGroup->GetJ()<=theFinalLevel->GetECMaxJ()) {
+	double theLevelEnergy;
+	if(!isInitial) theLevelEnergy=theLevel->GetTransformE();
+	else theLevelEnergy=theLevel->GetE();
+	int multL=theChannel->GetL();
+	if(multL<=theFinalLevel->GetECMaxMult()) {
+	  double theFinalLevelEnergy;
+	  if(!isInitial) theFinalLevelEnergy=theFinalLevel->GetTransformE();
+	  else theFinalLevelEnergy=theFinalLevel->GetE();
+	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+	    double theInitialChannelGamma;
+	    if(!isInitial) theInitialChannelGamma=theLevel->GetTransformGamma(ch);
+	    else theInitialChannelGamma=theLevel->GetGamma(ch);
+	    AChannel *initialChannel=theJGroup->GetChannel(ch);
+	    if(initialChannel->GetRadType()=='P') {
+	      for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) {
+		double theFinalChannelGamma;
+		if(!isInitial) theFinalChannelGamma=theFinalLevel->GetTransformGamma(chp);
+		else theFinalChannelGamma=theFinalLevel->GetGamma(chp);
+		AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
+		if(finalChannel->GetRadType()=='P') {
+		  if(finalChannel->GetPairNum()==initialChannel->GetPairNum()) {
+		    if((abs(initialChannel->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=initialChannel->GetL()+multL&&
+			fabs(initialChannel->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
+			theFinalJGroup->GetJ()<=initialChannel->GetS()+finalChannel->GetL()&&initialChannel->GetS()==finalChannel->GetS())||
+		       (fabs(initialChannel->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=initialChannel->GetS()+multL&&
+			fabs(initialChannel->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
+			theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&
+			theChannel->GetRadType()=='M')) {
+		      PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
+		      
+		      ECIntegral theECIntegral(theFinalPair);
+		      complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
+							initialChannel->GetS(),finalChannel->GetS(),
+							theJGroup->GetJ(),theFinalJGroup->GetJ(),
+							multL,theChannel->GetRadType(),
+							theLevelEnergy,theFinalLevelEnergy,
+							true);
+		      
+		      double ecNormParam=theFinalChannelGamma*
+			theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
+		      externalWidth-=ecNormParam*theInitialChannelGamma*integrals;
+		    }
 		  }
 		}
 	      }

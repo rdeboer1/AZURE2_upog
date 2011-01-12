@@ -38,7 +38,6 @@ SRCS =  AZUREMain.cpp\
 	DoubleFactorial.cpp\
 	ExtrapLine.cpp\
 	ReactionRate.cpp\
-	ECLevel.cpp\
 	AZUREParams.cpp\
 	Equation.cpp\
 	TargetEffect.cpp\

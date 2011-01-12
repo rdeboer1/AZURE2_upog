@@ -2,21 +2,19 @@
 #define PPAIR_H
 
 #include "Decay.h"
-#include "ECLevel.h"
 
 ///An AZURE Particle Pair
 
 /*!
  * In R-Matrix theory, the configuration space in the external region is decomposed into combinations of particle
  * pairs, traditionally given by the symbol \f$ \alpha \f$.  In AZURE, these particle pair are represented by a PPair object.
- * PPair objects are containers for vectors of ECLevel and Decay objects.
+ * PPair objects are containers for vectors of Decay objects.
  */
 
 class PPair {
 public:
   PPair(struct NucLine);
   bool IsEntrance() const;
-  bool IsECEntrance() const;
   int GetZ(int) const;
   int GetPi(int) const;
   int GetPType() const;
@@ -24,7 +22,6 @@ public:
   int IsDecay(Decay);
   int IsDecay(int);
   int GetPairKey() const;
-  int NumECLevels() const;
   double GetM(int) const;
   double GetG(int) const;
   double GetJ(int) const;
@@ -35,10 +32,7 @@ public:
   double GetI1I2Factor() const;
   void AddDecay(Decay);
   void SetEntrance();
-  void SetECEntrance();
-  void AddECLevel(ECLevel);
   Decay *GetDecay(int);
-  ECLevel *GetECLevel(int);
 private:
   bool entrance_;
   bool ec_entrance_;
@@ -55,7 +49,6 @@ private:
   double red_mass_;
   double i1i2factor_;
   std::vector<Decay> decays_;
-  std::vector<ECLevel> ec_levels_;
 };
 
 #endif

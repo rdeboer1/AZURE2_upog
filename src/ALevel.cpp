@@ -6,7 +6,8 @@
  */
 
 ALevel::ALevel(struct NucLine nucLine) :
-  level_e_(nucLine.LevelExE),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0) {
+  level_e_(nucLine.LevelExE),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0), isECLevel_(false),
+  ecMaxMult_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {
   if(nucLine.levelFix==1) energyfixed_=true;
   else energyfixed_=false;
 }
@@ -16,7 +17,8 @@ ALevel::ALevel(struct NucLine nucLine) :
  */
 
 ALevel::ALevel(double energy) :
-  energyfixed_(true),level_e_(energy),fitlevel_e_(0.0), isinrmatrix_(false), sqrt_nf_factor_(1.0) {};
+  energyfixed_(true),level_e_(energy),fitlevel_e_(0.0), isinrmatrix_(false), sqrt_nf_factor_(1.0), isECLevel_(false),
+  ecMaxMult_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {};
 
 /*!
  * Returns true if the level energy is to be fixed in the fitting process, otherwise returns false.
@@ -44,6 +46,14 @@ bool ALevel::ChannelFixed(int channelNum) const {
   return channelfixed_[channelNum-1];
 }
 
+/*! 
+ * Returns true if the level is a final state for external capture, otherwise returns false.
+ */
+
+bool ALevel::IsECLevel() const {
+  return isECLevel_;
+}
+
 /*!
  * Returns non-zero only if the level is a final state for external capture.
  */
@@ -58,6 +68,22 @@ int ALevel::NumNFIntegrals() const {
 
 int ALevel::GetTransformIterations() const {
   return transform_iter_;
+}
+
+/*!
+ * Returns the maximum multipolarity of external capture gammas to the level.
+ */ 
+
+int ALevel::GetECMaxMult() const {
+  return ecMaxMult_;
+}
+
+/*!
+ * Returns the position in the pairs vector corresponding the the external capture level.
+ */
+
+int ALevel::GetECPairNum() const {
+  return ecPairNum_;
 }
 
 /*!
@@ -147,6 +173,22 @@ double ALevel::GetBigGamma(int channelNum) const {
 
 double ALevel::GetShiftFunction(int channelNum) const {
   return shifts_[channelNum-1];
+}
+
+/*!
+ * Returns the minimum allowed J value for external capture to the level.
+ */
+
+double ALevel::GetECMinJ() const {
+  return ecMinJ_;
+}
+
+/*!
+ * Returns the maximum allowed J value for external capture to the level.
+ */
+
+double ALevel::GetECMaxJ() const {
+  return ecMaxJ_;
 }
 
 /*!
@@ -292,4 +334,16 @@ void ALevel::SetExternalGamma(int channelNum, complex reducedWidth) {
 
 void ALevel::SetShiftFunction(int channelNum, double shiftFunction) {
   shifts_[channelNum-1]=shiftFunction;
+}
+
+/*!
+ * Sets the external capture parameters for the level.
+ */ 
+
+void ALevel::SetECParams(int pairNum,double minJ, double maxJ, int maxMult) {
+  isECLevel_=true;
+  ecPairNum_=pairNum;
+  ecMinJ_=minJ;
+  ecMaxJ_=maxJ;
+  ecMaxMult_=maxMult;
 }

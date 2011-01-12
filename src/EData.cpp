@@ -688,68 +688,73 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
   }
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     int aa=theCNuc->GetPairNumFromKey(segment->GetEntranceKey());
-    if(theCNuc->GetPair(aa)->IsECEntrance()) {
+    if(theCNuc->GetPair(aa)->IsEntrance()) {
       PPair *entrancePair=theCNuc->GetPair(aa);
-      for(int ec=1;ec<=entrancePair->NumECLevels();ec++) {
-	int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
-	if(entrancePair->GetECLevel(ec)->GetPairNum()==ir) {
-	  if(!configure.oldECFile) {
-	    std::cout << "\tSegment #" << segment->GetSegmentKey() << " [                         ] 0%";std::cout.flush();
-	    double percent=0.05;
-	    double dpercent=0.05;
-	    int numPoints=segment->NumPoints();
-	    EPointIterator firstPoint=segment->GetPoints().begin();
-	    for(EPointIterator point=firstPoint;point<segment->GetPoints().end();point++) {
-	      int pointIndex=point-firstPoint+1;
-	      if(pointIndex<=percent*numPoints&&pointIndex+1>percent*numPoints) {
-		std::string progress=" [";
-		for(int j = 1;j<=25;j++) {
-		  if(percent>=j*0.04) progress+='*';
-		  else progress+=' ';
-		} progress+="] ";
-		std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		percent+=dpercent;
-	      } else if(pointIndex>percent*numPoints) {
-		while(pointIndex>percent*numPoints&&percent<1.) percent+=dpercent;
-		std::string progress=" [";
-		for(int j = 1;j<=25;j++) {
-		  if(percent>=j*0.04) progress+='*';
-		  else progress+=' ';
-		} progress+="] ";
-		std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		percent+=dpercent;
-	      }
-	      if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
-	    }
-	    std::cout << std::endl;
-	  }
-	  for(EPointIterator point=segment->GetPoints().begin();
-	      point<segment->GetPoints().end();point++) {
-	    if(!(point->IsMapped())) {
-	      for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
-		for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
-		  if(!configure.oldECFile) {
-		    if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
-		    for(EPointIterator subPoint=point->GetSubPoints().begin();
-			subPoint<point->GetSubPoints().end();subPoint++)
-		      if(out.is_open()) out << subPoint->GetECAmplitude(k,ecm) << std::endl;
-		  } else {
-		    complex ecAmplitude(0.0,0.0);
-		    in >> ecAmplitude;
-		    point->AddECAmplitude(k,ecm,ecAmplitude);
-		    for(EPointIterator subPoint=point->GetSubPoints().begin();
-			subPoint<point->GetSubPoints().end();subPoint++) {
-		      ecAmplitude=complex(0.0,0.0);
-		      in >> ecAmplitude;
-		      subPoint->AddECAmplitude(k,ecm,ecAmplitude);
-		    }
+      for(int j=1;j<=theCNuc->NumJGroups();j++) {
+	for(int la=1;la<=theCNuc->GetJGroup(j)->NumLevels();la++) {
+	  if(theCNuc->GetJGroup(j)->GetLevel(la)->IsECLevel()) {
+	    ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
+	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
+	    if(ecLevel->GetECPairNum()==ir) {
+	      if(!configure.oldECFile) {
+		std::cout << "\tSegment #" << segment->GetSegmentKey() << " [                         ] 0%";std::cout.flush();
+		double percent=0.05;
+		double dpercent=0.05;
+		int numPoints=segment->NumPoints();
+		EPointIterator firstPoint=segment->GetPoints().begin();
+		for(EPointIterator point=firstPoint;point<segment->GetPoints().end();point++) {
+		  int pointIndex=point-firstPoint+1;
+		  if(pointIndex<=percent*numPoints&&pointIndex+1>percent*numPoints) {
+		    std::string progress=" [";
+		    for(int j = 1;j<=25;j++) {
+		      if(percent>=j*0.04) progress+='*';
+		      else progress+=' ';
+		    } progress+="] ";
+		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
+		    percent+=dpercent;
+		  } else if(pointIndex>percent*numPoints) {
+		    while(pointIndex>percent*numPoints&&percent<1.) percent+=dpercent;
+		    std::string progress=" [";
+		    for(int j = 1;j<=25;j++) {
+		      if(percent>=j*0.04) progress+='*';
+		      else progress+=' ';
+		    } progress+="] ";
+		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
+		    percent+=dpercent;
 		  }
-		  for(EPointMapIterator mappedPoint=point->GetMappedPoints().begin();
-		      mappedPoint<point->GetMappedPoints().begin();mappedPoint++) {
-		    (*mappedPoint)->AddECAmplitude(k,ecm,point->GetECAmplitude(k,ecm));
-		    for(int i=1;i<=point->NumSubPoints();i++) {
-		      (*mappedPoint)->GetSubPoint(i)->
-			AddECAmplitude(k,ecm,point->GetSubPoint(i)->GetECAmplitude(k,ecm));
+		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
+		}
+		std::cout << std::endl;
+	      }
+	      for(EPointIterator point=segment->GetPoints().begin();
+		  point<segment->GetPoints().end();point++) {
+		if(!(point->IsMapped())) {
+		  for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
+		    for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
+		      if(!configure.oldECFile) {
+			if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
+			for(EPointIterator subPoint=point->GetSubPoints().begin();
+			    subPoint<point->GetSubPoints().end();subPoint++)
+			  if(out.is_open()) out << subPoint->GetECAmplitude(k,ecm) << std::endl;
+		      } else {
+			complex ecAmplitude(0.0,0.0);
+			in >> ecAmplitude;
+			point->AddECAmplitude(k,ecm,ecAmplitude);
+			for(EPointIterator subPoint=point->GetSubPoints().begin();
+			    subPoint<point->GetSubPoints().end();subPoint++) {
+			  ecAmplitude=complex(0.0,0.0);
+			  in >> ecAmplitude;
+			  subPoint->AddECAmplitude(k,ecm,ecAmplitude);
+			}
+		      }
+		      for(EPointMapIterator mappedPoint=point->GetMappedPoints().begin();
+			  mappedPoint<point->GetMappedPoints().begin();mappedPoint++) {
+			(*mappedPoint)->AddECAmplitude(k,ecm,point->GetECAmplitude(k,ecm));
+			for(int i=1;i<=point->NumSubPoints();i++) {
+			  (*mappedPoint)->GetSubPoint(i)->
+			    AddECAmplitude(k,ecm,point->GetSubPoint(i)->GetECAmplitude(k,ecm));
+			}
+		      }
 		    }
 		  }
 		}

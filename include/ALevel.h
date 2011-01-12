@@ -16,8 +16,11 @@ class ALevel {
   bool IsInRMatrix() const;
   bool EnergyFixed() const;
   bool ChannelFixed(int) const;
+  bool IsECLevel() const;
   int NumNFIntegrals() const;
   int GetTransformIterations() const;
+  int GetECMaxMult() const;
+  int GetECPairNum() const;
   double GetE() const;
   double GetGamma(int) const;
   double GetFitGamma(int) const;
@@ -29,6 +32,8 @@ class ALevel {
   double GetTransformE() const;
   double GetBigGamma(int) const;
   double GetShiftFunction(int) const;
+  double GetECMinJ() const;
+  double GetECMaxJ() const;
   complex GetExternalGamma(int) const;
   void AddGamma(struct NucLine);
   void AddGamma(double);
@@ -45,14 +50,20 @@ class ALevel {
   void SetTransformIterations(int);
   void SetExternalGamma(int,complex);
   void SetShiftFunction(int,double);
+  void SetECParams(int,double,double,int);
  private:
   bool isinrmatrix_;
   bool energyfixed_;
+  bool isECLevel_;
   int transform_iter_;
+  int ecMaxMult_;
+  int ecPairNum_;
   double level_e_;
   double fitlevel_e_;
   double sqrt_nf_factor_;
   double transform_e_;
+  double ecMinJ_;
+  double ecMaxJ_;
   std::vector<bool> channelfixed_;
   vector_r gammas_;
   vector_r fitgammas_;

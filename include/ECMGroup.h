@@ -16,14 +16,15 @@
 
 class ECMGroup {
  public:
-  ECMGroup(char, int, int, double, int, int);
-  ECMGroup(char, int, int, double, int, int, int, int, int, int);
+  ECMGroup(char, int, int, double, int, int, int);
+  ECMGroup(char, int, int, double, int, int, int, int, int, int, int);
   bool IsChannelCapture() const;
   char GetRadType() const;
   int GetMult() const;
   int GetL() const;
   int GetFinalChannel() const;
-  int GetECNum() const;
+  int GetJGroupNum() const;
+  int GetLevelNum() const;
   int GetChanCapDecay() const;
   int GetChanCapKGroup() const;
   int GetChanCapMGroup() const;
@@ -35,14 +36,15 @@ class ECMGroup {
   char radtype_;
   int mult_;
   int li_;
-  double ji_;
   int chf_;
-  int ecnum_;
+  int jGroupNum_;
+  int levelNum_;
   bool ischancap_;
   int chdecay_;
   int chkgroup_;
   int chmgroup_;
   int internalChannel_;
+  double ji_;
   double statspinfactor_;
   complex tmatrix_;
 };
