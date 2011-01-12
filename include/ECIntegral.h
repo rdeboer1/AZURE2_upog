@@ -44,8 +44,7 @@ class ECIntegral {
   ECIntegral(PPair *pPair) {
     coulfunc_ = new CoulFunc(pPair);
     whitfunc_ = new WhitFunc(pPair);
-    chanrad_ = pPair->GetChRad();
-    total_sep_e_=pPair->GetSepE()+pPair->GetExE();
+    pair_ = pPair;
   };
   /*!
    * The CoulFunc and WhitFunc objects are destroyed with the object.
@@ -54,15 +53,7 @@ class ECIntegral {
     delete coulfunc_;
     delete whitfunc_;
   };
-  /*!
-   * Overloaded operator to make the class instance callable as a function.  The intial and final orbital
-   * angular momentum, the gamma multipolarity, and the incoming energy and final state energy in the 
-   * compound system are the dependent variables. The function returns an ECIntResult structure.
-   */  
-  ECIntResult operator()(int li, int lf, int multL, double inEnergy, double levelEnergy) const {
-    return gsl_ec_integral(coulfunction(),whitfunction(),li,lf,multL,
-			   inEnergy-TotalSepE(),fabs(levelEnergy-TotalSepE()),ChanRad());
-  };
+  complex operator()(int,int,double,double,double,double,int,char,double,double,bool) const;
   /*!
    * Returns a pointer to the Coulomb function.
    */
@@ -71,19 +62,14 @@ class ECIntegral {
    * Returns a pointer to the Whittaker function.
    */
   WhitFunc *whitfunction() const {return whitfunc_;};
-  /*! 
-   * Returns the channel radius for the particle pair.
+  /*!
+   * Returns the particle pair pointer.
    */
-  double ChanRad() const {return chanrad_;};
-  /*! 
-   * Returns the total seperation energy for the particle pair.
-   */
-  double TotalSepE() const {return total_sep_e_;};
+  PPair *pair() const {return pair_;};
  private:
   CoulFunc *coulfunc_;
   WhitFunc *whitfunc_;
-  double chanrad_;
-  double total_sep_e_ ;
+  PPair *pair_;
 };
 
 

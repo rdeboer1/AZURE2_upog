@@ -1563,70 +1563,21 @@ complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *t
 		      theFinalJGroup->GetJ()<=initialChannel->GetS()+finalChannel->GetL()&&initialChannel->GetS()==finalChannel->GetS())||
 		     (fabs(initialChannel->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=initialChannel->GetS()+multL&&
 		      fabs(initialChannel->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-		      theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&theChannel->GetRadType()=='M')) {
+		      theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&
+		      theChannel->GetRadType()=='M')) {
 		    PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
-		    PPair *theInitialPair=this->GetPair(initialChannel->GetPairNum());
-		    double localEnergy=theLevelEnergy-theInitialPair->GetSepE()-theInitialPair->GetExE();
-		    complex expHSP;
-		    double sqrtPene;
-		    if(localEnergy>0.0) {
-		      CoulFunc theCoulFunc(theInitialPair);
-		      struct CoulWaves coul=theCoulFunc(initialChannel->GetL(),theInitialPair->GetChRad(),localEnergy);
-		      expHSP=complex(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
-						  -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
-		      sqrtPene=sqrt(theCoulFunc.Penetrability(initialChannel->GetL(),theInitialPair->GetChRad(),localEnergy));
-		    } else {
-		      WhitFunc newWhitFunc(theInitialPair);
-		      double whit=newWhitFunc(initialChannel->GetL(),theInitialPair->GetChRad(),fabs(localEnergy));
-		      double rho=sqrt(2.*uconv)/hbarc*theInitialPair->GetChRad()*sqrt(theInitialPair->GetRedMass()*fabs(localEnergy));
-		      sqrtPene=sqrt(rho)/whit;
-		      expHSP=complex(1.0,0.0);
-		    }
+
+		    ECIntegral theECIntegral(theFinalPair);
+		    complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
+						      initialChannel->GetS(),finalChannel->GetS(),
+						      theJGroup->GetJ(),theFinalJGroup->GetJ(),
+						      multL,theChannel->GetRadType(),
+						      theLevelEnergy,theFinalLevelEnergy,
+						      true);
+
 		    double ecNormParam=theFinalChannelGamma*
 		      theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
-		    ECIntegral theECIntegral(theFinalPair);
-		    struct ECIntResult integrals;
-		    double effectiveCharge;
-		    complex ecAmplitude;
-		    if(theChannel->GetRadType()=='E') {
-		      integrals=theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
-					      multL,theLevelEnergy,theFinalLevelEnergy);
-		      double totalM=theFinalPair->GetM(1)+theFinalPair->GetM(2);
-		      effectiveCharge=sqrt(fstruc*hbarc)*(theFinalPair->GetZ(1)*pow(theFinalPair->GetM(2)/totalM,multL)+
-							  theFinalPair->GetZ(2)*pow(-theFinalPair->GetM(1)/totalM,multL));
-		      ecAmplitude=
-			effectiveCharge*sqrt((2.*(2.*multL+1.)*(multL+1.))/multL)/DoubleFactorial(2*multL+1)*
-			pow(complex(0.,1.0),initialChannel->GetL()+multL-finalChannel->GetL())*
-			pow(theFinalPair->GetRedMass()*uconv/2./fabs(localEnergy),0.25)/sqrt(hbarc)*
-			ClebGord(initialChannel->GetL(),multL,finalChannel->GetL(),0,0,0)*sqrt(2.*initialChannel->GetL()+1.)*sqrt(2.*theFinalJGroup->GetJ()+1.)*
-			Racah(multL,finalChannel->GetL(),theJGroup->GetJ(),initialChannel->GetS(),initialChannel->GetL(),theFinalJGroup->GetJ());
-		    } else {
-		      integrals=theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
-					      0,theLevelEnergy,theFinalLevelEnergy);
-		      effectiveCharge=theFinalPair->GetRedMass()*1.00727638*
-			(theFinalPair->GetZ(1)/pow(theFinalPair->GetM(1),2.)+
-			 theFinalPair->GetZ(2)/pow(theFinalPair->GetM(2),2.));
-		      complex orbitalTerm=effectiveCharge*
-			sqrt((2.*initialChannel->GetL()+1.)*(initialChannel->GetL()+1.)*initialChannel->GetL())*
-			Racah(1.,initialChannel->GetL(),theJGroup->GetJ(),initialChannel->GetS(),initialChannel->GetL(),theFinalJGroup->GetJ());
-		      complex tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
-			(pow(complex(-1.,0.),finalChannel->GetS())*
-			 sqrt(theFinalPair->GetJ(1)*(theFinalPair->GetJ(1)+1.)*(2.*theFinalPair->GetJ(1)+1.))*
-			 Racah(finalChannel->GetS(),theFinalPair->GetJ(1),initialChannel->GetS(),theFinalPair->GetJ(1),theFinalPair->GetJ(2),1.)*
-			 theFinalPair->GetG(1)+
-			 pow(complex(-1.,0.),initialChannel->GetS())*
-			 sqrt(theFinalPair->GetJ(2)*(theFinalPair->GetJ(2)+1.)*(2.*theFinalPair->GetJ(2)+1.))*
-			 Racah(finalChannel->GetS(),theFinalPair->GetJ(2),initialChannel->GetS(),theFinalPair->GetJ(2),theFinalPair->GetJ(1),1.)*
-			 theFinalPair->GetG(2));
-		      complex spinTerm=-sqrt((2.*initialChannel->GetS()+1.)*(2.*finalChannel->GetS()+1.))*
-			Racah(1,initialChannel->GetS(),theFinalJGroup->GetJ(),initialChannel->GetL(),finalChannel->GetS(),theJGroup->GetJ())*tau;
-		      ecAmplitude=-1.0*sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*
-			sqrt(4/3)*sqrt(2*theFinalJGroup->GetJ()+1.)*
-			pow(theFinalPair->GetRedMass()*uconv/2./fabs(localEnergy),0.25)/sqrt(hbarc)*
-			(orbitalTerm+spinTerm);
-		    }
-		    externalWidth+=sqrtPene*expHSP*ecNormParam*theInitialChannelGamma*
-		      (integrals.GW+complex(0.0,1.0)*integrals.FW)*ecAmplitude;
+		    externalWidth-=ecNormParam*theInitialChannelGamma*integrals;
 		  }
 		}
 	      }
