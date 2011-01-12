@@ -148,7 +148,7 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
     assert(isChannelCapture);
     double whit=whitfunction()->operator()(theInitialLValue,chanRad,fabs(outEnergy));
     overlapIntegral=complex(0.0,-0.5)*integrals.GW/whit*
-      sqrt(redMass*uconv*chanRad*uconv)/hbarc;
+      sqrt(redMass*uconv*chanRad)/hbarc;
   }
  
 
