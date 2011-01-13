@@ -251,8 +251,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
 	    if(tempECLine.isdc!=0) {
 	      for(int i=0;i<segPairs.size();i++) {
-		if(tempECLine.entrancekey==segPairs[i].firstPair&&
-		   tempECLine.exitkey==segPairs[i].secondPair) {
+		if(tempECLine.exitkey==segPairs[i].secondPair) {
 		  configure.isEC=true;
 		  break;
 		}

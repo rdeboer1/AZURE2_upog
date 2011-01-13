@@ -38,14 +38,6 @@ bool PPair::IsEntrance() const {
 }
 
 /*!
- * Returns true if the particle pair is an external entrance pair, otherwise returns false.
- */
-
-bool PPair::IsECEntrance() const {
-  return ec_entrance_;
-}
-
-/*!
  * Returns the atomic number of the specified particle (1 or 2).
  */
 
@@ -118,14 +110,6 @@ int PPair::IsDecay(int pairNum) {
 
 int PPair::GetPairKey() const {
   return pair_key_;
-}
-
-/*!
- * Returns the number of external capture components for the given entrance pair.
- */
-
-int PPair::NumECLevels() const {
-  return ec_levels_.size();
 }
 
 /*!
@@ -209,22 +193,6 @@ void PPair::SetEntrance() {
 }
 
 /*!
- * Sets the particle pair to be an external entrance pair.
- */
-
-void PPair::SetECEntrance() {
-  ec_entrance_=true;
-}
-
-/*!
- * Adds an external capture component to the ECLevel vector.
- */
-
-void PPair::AddECLevel(ECLevel ecLevel) {
-  ec_levels_.push_back(ecLevel);
-}
-
-/*!
  * Returns a pointer to the decay particle pair specified by a position in the Decay vector.
  */
 
@@ -233,11 +201,3 @@ Decay *PPair::GetDecay(int decayNum) {
   return b;
 }
 
-/*!
- * Returns a pointer to the external capture component specified by a position in the ECLevel vector.
- */
-
-ECLevel *PPair::GetECLevel(int ecLevel) {
-  ECLevel *b=&ec_levels_[ecLevel-1];
-  return b;
-}

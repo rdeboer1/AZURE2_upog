@@ -713,132 +713,66 @@ void EPoint::SetCoulombAmplitude(complex amplitude) {
 
 void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
   int aa=theCNuc->GetPairNumFromKey(this->GetEntranceKey());
-  if(theCNuc->GetPair(aa)->IsECEntrance()) {
+  if(theCNuc->GetPair(aa)->IsEntrance()) {
     PPair *entrancePair=theCNuc->GetPair(aa);
-    for(int ec=1;ec<=entrancePair->NumECLevels();ec++) {
-      int ir=theCNuc->GetPairNumFromKey(this->GetExitKey());
-      if(entrancePair->GetECLevel(ec)->GetPairNum()==ir) {
-	double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
-	for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
-	  KGroup *theKGroup=entrancePair->GetDecay(ir)->GetKGroup(k);
-	  for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
-	    ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
-	    //entrance Phase Calculations;
-	    CoulFunc theCoulombFunction(entrancePair);
-	    struct CoulWaves 
-	      coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
-				      this->GetCMEnergy());		
-	    double eta=sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*entrancePair->GetZ(2)*
-	      sqrt(entrancePair->GetRedMass()/this->GetCMEnergy());
-	    complex expCP(1.0,0.0);
-	    for(int ll=1;ll<=theECMGroup->GetL();ll++) 
-	      expCP*=complex((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
-					  eta/sqrt(pow((double)ll,2.0)+pow(eta,2.0)));
-	    complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
-					-coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
-	    
-	    double levelEnergy=theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->
-	      GetLevel(entrancePair->GetECLevel(ec)->GetLevelNum())->GetE();
-	    double sqrtGammaPene=pow((inEnergy-levelEnergy)/hbarc,theECMGroup->GetMult()+0.5);
-	    
-	    //Initialize variables
-	    AChannel *theFinalChannel = theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->
-	      GetChannel(theECMGroup->GetFinalChannel());
-	    PPair *theFinalPair=theCNuc->GetPair(theFinalChannel->GetPairNum());		
-	    int theInitialLValue;
-	    double theInitialSValue;
-	    if(theECMGroup->IsChannelCapture()) {
-	      MGroup *theChanCapMGroup=entrancePair->GetDecay(theECMGroup->GetChanCapDecay())->
-		GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
-	      theInitialLValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
-		GetChannel(theChanCapMGroup->GetChpNum())->GetL();
-	      theInitialSValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
-		GetChannel(theChanCapMGroup->GetChpNum())->GetS();
-	    } else {
-	      theInitialLValue=theECMGroup->GetL();
-	      theInitialSValue=theKGroup->GetS();
-	    }
-	    int theLMult=theECMGroup->GetMult();
-	    int theFinalLValue=theFinalChannel->GetL();
-	    double theFinalSValue=theFinalChannel->GetS();
-	    double theInitialJValue=theECMGroup->GetJ();
-	    double theFinalJValue=theCNuc->GetJGroup(entrancePair->GetECLevel(ec)->GetJGroupNum())->GetJ();
-	    
-	    double effectiveCharge;
-	    if(theECMGroup->GetRadType()=='E') {
-	      double totalM=theFinalPair->GetM(1)+theFinalPair->GetM(2);
-	      effectiveCharge=sqrt(fstruc*hbarc)*(theFinalPair->GetZ(1)*pow(theFinalPair->GetM(2)/totalM,theLMult)+
-						  theFinalPair->GetZ(2)*pow(-theFinalPair->GetM(1)/totalM,theLMult));
-	    } else {
-	      effectiveCharge=theFinalPair->GetRedMass()*1.00727638*
-		(theFinalPair->GetZ(1)/pow(theFinalPair->GetM(1),2.)+
-		 theFinalPair->GetZ(2)/pow(theFinalPair->GetM(2),2.));
-	    }
-	    
-	    //calculate the FW and GW integrals
-	    ECIntegral theECIntegral(theFinalPair);
-	    struct ECIntResult integrals;
-	    if(theECMGroup->GetRadType()=='E') integrals=theECIntegral(theInitialLValue,theFinalLValue,
-								       theLMult,inEnergy,levelEnergy);
-	    else integrals=theECIntegral(theInitialLValue,theFinalLValue,
-					 0,inEnergy,levelEnergy);
-	    
-	    //calculate the total radial integral
-	    complex overlapIntegral(0.,0.);
-	    double outEnergy=inEnergy-theFinalPair->GetSepE()-theFinalPair->GetExE();
-	    if(theECMGroup->IsChannelCapture()) {
-	      if(outEnergy>0.0) {
-		CoulFunc theChannelCoulombFunction(theFinalPair);
+    for(int j=1;j<=theCNuc->NumJGroups();j++) {
+      for(int la=1;la<=theCNuc->GetJGroup(j)->NumLevels();la++) {
+	if(theCNuc->GetJGroup(j)->GetLevel(la)->IsECLevel()) {
+	  ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
+	  int ir=theCNuc->GetPairNumFromKey(this->GetExitKey());
+	  if(ecLevel->GetECPairNum()==ir) {
+	    double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
+	    for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
+	      KGroup *theKGroup=entrancePair->GetDecay(ir)->GetKGroup(k);
+	      for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
+		ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
+		//entrance Phase Calculations;
+		CoulFunc theCoulombFunction(entrancePair);
 		struct CoulWaves 
-		  chanCoul=theChannelCoulombFunction(theInitialLValue,theFinalPair->GetChRad(),
-						     inEnergy-theFinalPair->GetSepE()-theFinalPair->GetExE());		
-		complex chanExpHSP(chanCoul.G/sqrt(pow(chanCoul.F,2.0)+pow(chanCoul.G,2.0)),
-						-chanCoul.F/sqrt(pow(chanCoul.F,2.0)+pow(chanCoul.G,2.0)));    
-		overlapIntegral=complex(0.0,-0.5)*
-		  sqrt(theChannelCoulombFunction.Penetrability(theInitialLValue,
-							       theFinalPair->GetChRad(),
-							       outEnergy))*
-		  pow(theFinalPair->GetRedMass()*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc)*
-		  chanExpHSP*(integrals.GW+complex(0.0,1.0)*integrals.FW);
-	      } else {
-		WhitFunc whitFunc(theFinalPair);
-		double whit=whitFunc(theInitialLValue,theFinalPair->GetChRad(),fabs(outEnergy));
-		overlapIntegral=complex(0.0,-0.5)*integrals.GW/whit*
-		  sqrt(theFinalPair->GetRedMass()*uconv*theFinalPair->GetChRad()*uconv)/hbarc;
+		  coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
+					  this->GetCMEnergy());		
+		double eta=sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*entrancePair->GetZ(2)*
+		  sqrt(entrancePair->GetRedMass()/this->GetCMEnergy());
+		complex expCP(1.0,0.0);
+		for(int ll=1;ll<=theECMGroup->GetL();ll++) 
+		  expCP*=complex((double)ll/sqrt(pow((double)ll,2.0)+pow(eta,2.0)),
+				 eta/sqrt(pow((double)ll,2.0)+pow(eta,2.0)));
+		complex expHSP(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)),
+			       -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0)));
+		
+		double levelEnergy=ecLevel->GetE();
+		double sqrtGammaPene=pow((inEnergy-levelEnergy)/hbarc,theECMGroup->GetMult()+0.5);
+		
+		//Initialize variables
+		AChannel *theFinalChannel = theCNuc->GetJGroup(j)->GetChannel(theECMGroup->GetFinalChannel());
+		PPair *theFinalPair=theCNuc->GetPair(theFinalChannel->GetPairNum());		
+		int theInitialLValue;
+		double theInitialSValue;
+		if(theECMGroup->IsChannelCapture()) {
+		  MGroup *theChanCapMGroup=entrancePair->GetDecay(theECMGroup->GetChanCapDecay())->
+		    GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
+		  theInitialLValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
+		    GetChannel(theChanCapMGroup->GetChpNum())->GetL();
+		  theInitialSValue=theCNuc->GetJGroup(theChanCapMGroup->GetJNum())->
+		    GetChannel(theChanCapMGroup->GetChpNum())->GetS();
+		} else {
+		  theInitialLValue=theECMGroup->GetL();
+		  theInitialSValue=theKGroup->GetS();
+		}	    
+		
+		ECIntegral theECIntegral(theFinalPair);
+		complex integrals = theECIntegral(theInitialLValue, theFinalChannel->GetL(), 
+						  theInitialSValue, theFinalChannel->GetS(),
+						  theECMGroup->GetJ(), theCNuc->GetJGroup(j)->GetJ(),
+						  theECMGroup->GetMult(), theECMGroup->GetRadType(),
+						  inEnergy, levelEnergy,
+						  theECMGroup->IsChannelCapture());
+		
+		//calculate the total radial integral
+		complex ecAmplitude=expCP*expHSP*sqrtGammaPene*integrals;
+		this->AddECAmplitude(k,ecm,ecAmplitude);
 	      }
-	    } else overlapIntegral=(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*integrals.FW
-				    -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*integrals.GW)*
-		pow(theFinalPair->GetRedMass()*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc);
-	    
-	    //calculate the total external capture amplitude for the pathway
-	    complex ecAmplitude(0.0,0.0);
-	    if(theECMGroup->GetRadType()=='E') {
-	      ecAmplitude=complex(0.0,-1.0)*
-		effectiveCharge*sqrt((8.*(2.*theLMult+1.)*(theLMult+1.))/theLMult)/DoubleFactorial(2*theLMult+1)*
-		pow(complex(0.,1.0),theInitialLValue+theLMult-theFinalLValue)*
-		ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
-		Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
-	    } else {
-	      complex orbitalTerm=effectiveCharge*
-		sqrt((2.*theInitialLValue+1.)*(theInitialLValue+1.)*theInitialLValue)*
-		Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
-	      complex tau=pow(std::complex<double>(-1.,0.),theFinalPair->GetJ(1)+theFinalPair->GetJ(2))*
-		(pow(complex(-1.,0.),theFinalSValue)*
-		 sqrt(theFinalPair->GetJ(1)*(theFinalPair->GetJ(1)+1.)*(2.*theFinalPair->GetJ(1)+1.))*
-		 Racah(theFinalSValue,theFinalPair->GetJ(1),theInitialSValue,theFinalPair->GetJ(1),theFinalPair->GetJ(2),1.)*
-		 theFinalPair->GetG(1)+
-		 pow(complex(-1.,0.),theInitialSValue)*
-		 sqrt(theFinalPair->GetJ(2)*(theFinalPair->GetJ(2)+1.)*(2.*theFinalPair->GetJ(2)+1.))*
-		 Racah(theFinalSValue,theFinalPair->GetJ(2),theInitialSValue,theFinalPair->GetJ(2),theFinalPair->GetJ(1),1.)*
-		 theFinalPair->GetG(2));
-	      complex spinTerm=-sqrt((2.*theInitialSValue+1.)*(2.*theFinalSValue+1.))*
-		Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
-	      ecAmplitude=complex(0.0,1.0)*
-		sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*sqrt(16/3)*sqrt(2*theFinalJValue+1.)*
-		(orbitalTerm+spinTerm);
 	    }
-	    ecAmplitude=ecAmplitude*expCP*expHSP*sqrtGammaPene*overlapIntegral;
-	    this->AddECAmplitude(k,ecm,ecAmplitude);
 	  }
 	}
       }

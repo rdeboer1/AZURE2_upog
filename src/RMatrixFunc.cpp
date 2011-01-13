@@ -160,9 +160,8 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
     }
     for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
       ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
-      int ecNum=theECMGroup->GetECNum();
-      ALevel *finalLevel=compound()->GetJGroup(compound()->GetPair(aa)->GetECLevel(ecNum)->GetJGroupNum())
-	->GetLevel(compound()->GetPair(aa)->GetECLevel(ecNum)->GetLevelNum());
+      ALevel *finalLevel=compound()->GetJGroup(theECMGroup->GetJGroupNum())
+	->GetLevel(theECMGroup->GetLevelNum());
       double ecNormParam=finalLevel->GetFitGamma(theECMGroup->GetFinalChannel())*
 	finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
       complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);

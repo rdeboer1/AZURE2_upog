@@ -7,7 +7,7 @@
 #include <sstream>
 #include <map>
 
-///A class for parsing algebraic expressions
+///A wrapper class for function pointers used by Equation class
 
 /*!
  * The GenericFunction class is just a wrapper for a function pointer to a function
@@ -25,6 +25,8 @@ class GenericFunction {
  private:
   double (*function_)(double);
 };
+
+///A class for parsing algebraic expressions
 
 /*!
  * The Equation class is used in AZURE to parametrize stopping cross sections

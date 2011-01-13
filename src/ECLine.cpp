@@ -5,8 +5,7 @@ ECLine ReadECLine(std::istream &stream)
   ECLine a;
   std::string dummy;
 
-  stream >> a.isdc >> a.entrancekey >> a.exitkey >> a.jimin >> a.jimax 
-	 >> a.limin >> a.limax >> a.maxmult;
+  stream >> a.isdc >> a.exitkey >> a.jimin >> a.jimax  >> a.multMask;
   getline(stream,dummy);
 
   a.jimin=a.jimin/2.;

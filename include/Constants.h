@@ -11,6 +11,10 @@ const double fstruc=1.00/137.0359996790;
 const double boltzConst=8.6171e-2;
 const double lightSpeedInCmPerS=29979245800.;
 const double avagadroNum=6.02214179e23;
+const unsigned char isE1 = 1 << 0;
+const unsigned char isM1 = 1 << 1;
+const unsigned char isE2 = 1 << 2;
+const int maxECMult=2;
 
 typedef std::complex<double> complex;
 typedef std::vector<double> vector_r;
