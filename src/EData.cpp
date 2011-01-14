@@ -225,6 +225,7 @@ int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
   if(line!="</targetInt>") return -1;
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     PPair *entrancePair = compound->GetPair(compound->GetPairNumFromKey(segment->GetEntranceKey()));
+    double cmConversion = entrancePair->GetM(2)/(entrancePair->GetM(1)+entrancePair->GetM(2));
     if(segment->IsTargetEffect()) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
@@ -233,7 +234,7 @@ int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
 	double backwardDepth=0.0;
 	if(targetEffect->IsTargetIntegration()) {
 	  double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
-	  double targetThickness = entrancePair->GetM(2)/totalM*targetEffect->TargetThickness(point->GetLabEnergy());
+	  double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy());
 	  point->SetTargetThickness(targetThickness);
 	  if(targetEffect->IsConvolution()) {
 	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
@@ -251,8 +252,8 @@ int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
 	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
 	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
 	  if(targetEffect->IsTargetIntegration()) {
-	  	double stoppingPower=targetEffect->
-	  	GetStoppingPowerEq()->Evaluate(subEnergy);
+	  	double stoppingPower=cmConversion*targetEffect->
+	  	GetStoppingPowerEq()->Evaluate(subEnergy/cmConversion);
   	    subPoint.SetStoppingPower(stoppingPower);
 	  }
 	  point->AddSubPoint(subPoint);
