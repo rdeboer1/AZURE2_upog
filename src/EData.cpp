@@ -78,7 +78,7 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsData>") return -1;
 
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
+  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
   this->MapData();
 
   return 0; 
@@ -157,7 +157,7 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsTest>") return -1;
   
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
+  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
   this->MapData();
   return 0; 
 }
@@ -190,7 +190,7 @@ int EData::GetNormParamOffset() const {
  * to be applied to the data.
  */
 
-int EData::ReadTargetEffectsFile(std::string infile) {
+int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
   std::ifstream in(infile.c_str());
   if(!in) return -1;
   std::string line="";
@@ -224,6 +224,7 @@ int EData::ReadTargetEffectsFile(std::string infile) {
   }
   if(line!="</targetInt>") return -1;
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    PPair *entrancePair = compound->GetPair(compound->GetPairNumFromKey(segment->GetEntranceKey()));
     if(segment->IsTargetEffect()) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
@@ -231,7 +232,8 @@ int EData::ReadTargetEffectsFile(std::string infile) {
 	double forwardDepth=0.0;
 	double backwardDepth=0.0;
 	if(targetEffect->IsTargetIntegration()) {
-	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
+	  double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
+	  double targetThickness = entrancePair->GetM(2)/totalM*targetEffect->TargetThickness(point->GetLabEnergy());
 	  point->SetTargetThickness(targetThickness);
 	  if(targetEffect->IsConvolution()) {
 	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();

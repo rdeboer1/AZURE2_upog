@@ -27,7 +27,7 @@ class EData {
   int Iterations() const;
   int NumTargetEffects() const;
   int GetNormParamOffset() const;
-  int ReadTargetEffectsFile(std::string);
+  int ReadTargetEffectsFile(std::string,CNuc*);
   bool IsFit() const;
   bool IsErrorAnalysis() const;
   bool IsSegmentKey(int);
