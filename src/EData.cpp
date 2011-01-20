@@ -344,7 +344,7 @@ void EData::ResetIterations(){
 void EData::Initialize(CNuc *compound,const struct Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
-  this->CalcEDependentValues(compound);
+  this->CalcEDependentValues(compound,configure);
   if(configure.checkpene=="screen"||
      configure.checkpene=="file") this->PrintEDependentValues(configure,compound);
 
@@ -512,9 +512,9 @@ void EData::PrintLegendreP(const struct Config &configure) {
  * Calls EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::CalcEDependentValues(CNuc *theCNuc) {
+void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
   for(EDataIterator it=this->begin(); it!=this->end(); it++) 
-    if(!(it.point()->IsMapped())) it.point()->CalcEDependentValues(theCNuc);
+    if(!(it.point()->IsMapped())) it.point()->CalcEDependentValues(theCNuc,configure);
 }
 
 /*!
@@ -641,8 +641,8 @@ void EData::WriteOutputFiles(const struct Config &configure) {
     std::ostream out(output(aa,ir));
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
-      out << std::setw(9)  << std::fixed      << point->GetCMEnergy()
-	  << std::setw(10) << std::fixed      << point->GetCMAngle()
+      out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	  << std::setw(13) << std::scientific << point->GetCMAngle()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
       if(!output.IsExtrap()) {

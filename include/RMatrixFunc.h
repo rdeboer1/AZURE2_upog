@@ -13,11 +13,12 @@
 
 class RMatrixFunc : public GenMatrixFunc {
  public:
-  RMatrixFunc(CNuc*);
+  RMatrixFunc(CNuc*,const struct Config&);
   /*!
    * Returns a pointer to the compound nucleus object.
    */
   CNuc *compound() const {return compound_;};
+  const struct Config &configure() const {return configure_;};
 
   void ClearMatrices();
   void FillMatrices(EPoint*);
@@ -28,18 +29,19 @@ class RMatrixFunc : public GenMatrixFunc {
    */
   void CalculateCrossSection();
 
-  double GetRMatrixElement(int,int,int) const;
+  complex GetRMatrixElement(int,int,int) const;
   complex GetRLMatrixElement(int,int,int) const;
   complex GetRLInvMatrixElement(int,int,int) const;
   complex GetRLInvRMatrixElement(int,int,int) const;
   matrix_c *GetJSpecRLMatrix(int);
-  void AddRMatrixElement(int,int,int,double);
+  void AddRMatrixElement(int,int,int,complex);
   void AddRLMatrixElement(int,int,int,complex);
   void AddRLInvMatrix(matrix_c);
   void AddRLInvRMatrixElement(int,int,int,complex);
  private:
   CNuc *compound_;
-  vector_matrix_r r_matrices_;
+  const struct Config& configure_;
+  vector_matrix_c r_matrices_;
   vector_matrix_c rl_matrices_;
   vector_matrix_c rl_inv_matrices_;
   vector_matrix_c rl_inv_r_matrices_;

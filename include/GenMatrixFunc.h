@@ -2,6 +2,7 @@
 #define GENMATRIXFUNC_H
 
 #include "Constants.h"
+#include "Config.h"
 
 class EPoint;
 class CNuc;
@@ -58,21 +59,22 @@ class GenMatrixFunc {
   void NewTempTMatrix(TempTMatrix);
   void AddToTempTMatrix(int,complex);
   void ClearTempTMatrices();
-  void AddTMatrixElement(int,int,complex);
+  void AddTMatrixElement(int,int,complex,int decayNum=1);
   void AddECTMatrixElement(int,int,complex);
   int IsTempTMatrix(double,int,int);
   int NumTempTMatrices() const;
   TempTMatrix *GetTempTMatrix(int);
-  complex GetTMatrixElement(int,int) const;
+  complex GetTMatrixElement(int,int,int decayNum=1) const;
   complex GetECTMatrixElement(int,int) const;
 
   /*!
    *This virtual function in instantiated in the child class.
    */
   virtual CNuc *compound() const = 0;
+  virtual const struct Config& configure() const = 0;
  protected:
   ///Vector of internal T-matrix elements accessable to child class.
-  matrix_c tmatrix_;
+  std::vector<matrix_c> tmatrix_;
   ///Vector of external T-matrix elements accessable to child class.
   matrix_c ec_tmatrix_;
  private:

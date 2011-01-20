@@ -163,7 +163,8 @@ int CNuc::Fill(const struct Config &configure) {
   in.close();
   
   this->SetMaxLValue(maxLValue);
-  if(this->ReadECFile(configure.configfile)==-1) return -1;
+  if(configure.isEC)
+    if(this->ReadECFile(configure.configfile)==-1) return -1;
   
   return 0;
 }
@@ -308,7 +309,7 @@ void CNuc::Initialize(const struct Config &configure) {
 
   //Sort reaction pathways
   std::cout << "Sorting Reaction Pathways..." << std::endl;
-  this->SortPathways();
+  this->SortPathways(configure);
   if(configure.checkpathways=="screen"|| 
      configure.checkpathways=="file") this->PrintPathways(configure);
   
@@ -483,7 +484,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		double tempPene=pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+		double tempPene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 		if(tempPene<1e-10) tempPene=1e-10;
 		penes.push_back(tempPene);
 	      }
@@ -618,7 +619,7 @@ void CNuc::TransformIn(const struct Config& configure) {
  * Calculates internal and external reaction pathways.
  */
 
-void CNuc::SortPathways() {
+void CNuc::SortPathways(const struct Config& configure) {
   int DecayNum, KGroupNum, MGroupNum;
   for(int aa=1;aa<=this->NumPairs();aa++) {
     if(this->GetPair(aa)->IsEntrance()) {
@@ -672,7 +673,7 @@ void CNuc::SortPathways() {
             }
           }
         }
-        else if(this->GetPair(ir)->GetPType()==10) {
+        else if(this->GetPair(ir)->GetPType()==10 && !configure.useRMC) {
           for(double s=fabs(this->GetPair(aa)->GetJ(1)
 			    -this->GetPair(aa)->GetJ(2));
               s<=(this->GetPair(aa)->GetJ(1)
@@ -796,6 +797,7 @@ void CNuc::SortPathways() {
     }
   }
 }
+
 
 /*!
  * Prints the internal and external reaction pathways.
@@ -1360,7 +1362,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	      pene=60.0*jValue*(2.*jValue-1.)/(jValue+1.)/(2.*jValue+3.);
 	    tempPene.push_back(pene);
 	  } else {
-	    double pene=pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+	    double pene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 	    tempPene.push_back(pene);
 	  }
 	}

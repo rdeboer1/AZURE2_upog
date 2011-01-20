@@ -73,7 +73,7 @@ class EPoint {
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
   void CalcLegendreP(int);
-  void CalcEDependentValues(CNuc*);
+  void CalcEDependentValues(CNuc*,const struct Config&);
   void AddLoElement(int,int,complex);
   void AddSqrtPenetrability(int,int,double);
   void AddExpCoulombPhase(int,int,complex);

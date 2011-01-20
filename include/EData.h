@@ -40,7 +40,7 @@ class EData {
   void PrintData(const struct Config&);
   void CalcLegendreP(int);
   void PrintLegendreP(const struct Config&);
-  void CalcEDependentValues(CNuc*);
+  void CalcEDependentValues(CNuc*,const struct Config&);
   void PrintEDependentValues(const struct Config&,CNuc*);
   void CalcCoulombAmplitude(CNuc*);
   void PrintCoulombAmplitude(const struct Config&,CNuc*); 

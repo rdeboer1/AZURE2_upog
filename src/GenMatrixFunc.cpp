@@ -12,129 +12,179 @@
 void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
   complex sum(0.,0.);
   int aa=compound()->GetPairNumFromKey(point->GetEntranceKey());
-  int ir=compound()->GetPairNumFromKey(point->GetExitKey());
+  int ir=0;
+  while(ir<compound()->GetPair(aa)->NumDecays()) {
+    ir++;
+    if(compound()->GetPair(aa)->GetDecay(ir)->GetPairNum()==compound()->GetPairNumFromKey(point->GetExitKey())) break;
+  }
   Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
-  if(!point->IsDifferential()) {
-    for(int k=1;k<=theDecay->NumKGroups();k++) {
-      this->ClearTempTMatrices();
-      for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
-	int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
-	int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
-	double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
-	int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
-	if(!tempTNum) {
-	  TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
-	  this->NewTempTMatrix(temptmatrix);
-	} else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
+  if(compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10 &&
+     configure().useRMC) {
+    int decayNum=0;
+    while(decayNum<compound()->GetPair(aa)->NumDecays()) {
+      decayNum++;
+      if(compound()->GetPair(aa)->GetDecay(decayNum)->GetPairNum()==aa) break;
+    }
+    for(int k=1;k<=compound()->GetPair(aa)->GetDecay(decayNum)->NumKGroups();k++) {
+      for(int m=1;m<=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->NumMGroups();m++) {
+	MGroup *theMGroup=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->GetMGroup(m);
+	if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
+	  int jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	  sum+=2.*point->GetGeometricalFactor()*
+	    (2.*jValue+1.)*compound()->GetPair(aa)->GetI1I2Factor()*    
+	    imag(this->GetTMatrixElement(k,m,decayNum));
+	}
       }
-      for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
-	ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
-	int lValue=theECMGroup->GetL();
-	int lpValue=theECMGroup->GetMult();
-	double jValue=theECMGroup->GetJ();
-	int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
-	if(!tempTNum) {
-	  TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetECTMatrixElement(k,m)};
-	  this->NewTempTMatrix(temptmatrix);
-	} else this->AddToTempTMatrix(tempTNum,this->GetECTMatrixElement(k,m));
-      }
-      for(int temp=1;temp<=this->NumTempTMatrices();temp++) {
-	sum+=point->GetGeometricalFactor()*
-	  (2.*this->GetTempTMatrix(temp)->jValue+1.)*
-	  compound()->GetPair(aa)->GetI1I2Factor()*
-	  (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
+    }
+    for(int dp=1;dp<=compound()->GetPair(aa)->NumDecays();dp++) {
+      if(compound()->GetPair(compound()->GetPair(aa)->GetDecay(dp)->GetPairNum())->GetPType()!=10) {
+	for(int k=1;k<=compound()->GetPair(aa)->GetDecay(dp)->NumKGroups();k++) {
+	  this->ClearTempTMatrices();
+	  for(int m=1;m<=compound()->GetPair(aa)->GetDecay(dp)->GetKGroup(k)->NumMGroups();m++) {
+	    MGroup *theMGroup=compound()->GetPair(aa)->GetDecay(dp)->GetKGroup(k)->GetMGroup(m);
+	    int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
+	    int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
+	    double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	    int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	    if(!tempTNum) {
+	      TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m,dp)};
+	      this->NewTempTMatrix(temptmatrix);
+	    } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m,dp));
+	  }
+	  for(int temp=1;temp<=this->NumTempTMatrices();temp++) {
+	    sum-=point->GetGeometricalFactor()*
+	      (2.*this->GetTempTMatrix(temp)->jValue+1.)*
+	      compound()->GetPair(aa)->GetI1I2Factor()*
+	      (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
+	  }
+	}
       }
     }
     point->SetFitCrossSection(real(sum)/100.);
   } else {
-    for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
-      for(int inter=1;inter<=theDecay->GetKLGroup(kL)
-	    ->NumInterferences();inter++) {
-	Interference *theInterference=theDecay->GetKLGroup(kL)
-	  ->GetInterference(inter);
-	complex T1(0.0,0.0),T2(0.0,0.0);
-	std::string interferenceType=theInterference->GetInterferenceType();
-	if(interferenceType=="RR") {
-	  T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	  T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	} else if(interferenceType=="ER") {
-	  T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	  T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	} else if(interferenceType=="RE") {
-	  T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	  T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	} else if(interferenceType=="EE") {
-	  T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	  T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+    if(!point->IsDifferential()) {
+      for(int k=1;k<=theDecay->NumKGroups();k++) {
+	this->ClearTempTMatrices();
+	for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
+	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
+	  int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
+	  int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
+	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	  if(!tempTNum) {
+	    TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
+	    this->NewTempTMatrix(temptmatrix);
+	  } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
 	}
-	sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
-	  point->GetLegendreP(theDecay->GetKLGroup(kL)->GetLOrder());
+	for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
+	  ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
+	  int lValue=theECMGroup->GetL();
+	  int lpValue=theECMGroup->GetMult();
+	  double jValue=theECMGroup->GetJ();
+	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	  if(!tempTNum) {
+	    TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetECTMatrixElement(k,m)};
+	    this->NewTempTMatrix(temptmatrix);
+	  } else this->AddToTempTMatrix(tempTNum,this->GetECTMatrixElement(k,m));
+	}
+	for(int temp=1;temp<=this->NumTempTMatrices();temp++) {
+	  sum+=point->GetGeometricalFactor()*
+	    (2.*this->GetTempTMatrix(temp)->jValue+1.)*
+	    compound()->GetPair(aa)->GetI1I2Factor()*
+	    (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
+	}
       }
-    }
-    complex RT=sum/pi*point->GetGeometricalFactor()*
-      compound()->GetPair(aa)->GetI1I2Factor();
-    
-    complex CT(0.,0.), IT(0.,0.);
-    if(aa==ir) {
-      complex coulombAmplitude=point->GetCoulombAmplitude();
-      CT=coulombAmplitude*conj(coulombAmplitude)*point->GetGeometricalFactor();
+      point->SetFitCrossSection(real(sum)/100.);
+    } else {
+      for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
+	for(int inter=1;inter<=theDecay->GetKLGroup(kL)
+	      ->NumInterferences();inter++) {
+	  Interference *theInterference=theDecay->GetKLGroup(kL)
+	  ->GetInterference(inter);
+	  complex T1(0.0,0.0),T2(0.0,0.0);
+	  std::string interferenceType=theInterference->GetInterferenceType();
+	  if(interferenceType=="RR") {
+	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	  } else if(interferenceType=="ER") {
+	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	  } else if(interferenceType=="RE") {
+	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	  } else if(interferenceType=="EE") {
+	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	  }
+	  sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
+	    point->GetLegendreP(theDecay->GetKLGroup(kL)->GetLOrder());
+	}
+      }
+      complex RT=sum/pi*point->GetGeometricalFactor()*
+	compound()->GetPair(aa)->GetI1I2Factor();
       
-      sum=complex(0.,0.);
+      complex CT(0.,0.), IT(0.,0.);
+      if(aa==ir) {
+	complex coulombAmplitude=point->GetCoulombAmplitude();
+	CT=coulombAmplitude*conj(coulombAmplitude)*point->GetGeometricalFactor();
+	
+	sum=complex(0.,0.);
+	for(int k=1;k<=theDecay->NumKGroups();k++) {
+	  for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
+	    MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);	
+	    AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
+	    AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
+	    if(entranceChannel==exitChannel) 
+	      sum+=theMGroup->GetStatSpinFactor()*
+		coulombAmplitude*conj(this->GetTMatrixElement(k,m))*
+		point->GetLegendreP(compound()->GetJGroup(theMGroup->GetJNum())->
+				    GetChannel(theMGroup->GetChNum())->GetL());
+	  }
+	}
+	IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
+      }
+      point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
+    }
+    if(point->IsPhase()&&aa==ir) {
+      double segmentJ=point->GetJ();
+      int segmentL=point->GetL();
+      this->ClearTempTMatrices();
       for(int k=1;k<=theDecay->NumKGroups();k++) {
 	for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);	
+	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
+	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	  AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
+	  int lValue=entranceChannel->GetL();	
 	  AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
-	  if(entranceChannel==exitChannel) 
-	    sum+=theMGroup->GetStatSpinFactor()*
-	      coulombAmplitude*conj(this->GetTMatrixElement(k,m))*
-	    point->GetLegendreP(compound()->GetJGroup(theMGroup->GetJNum())->
-				GetChannel(theMGroup->GetChNum())->GetL());
+	  if(jValue==segmentJ&&lValue==segmentL&&entranceChannel==exitChannel) {
+	    complex expCoulPhaseSquared=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	      point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
+	    complex theUMatrix=(expCoulPhaseSquared-this->GetTMatrixElement(k,m))/expCoulPhaseSquared;
+	    int tempTNum=this->IsTempTMatrix(jValue,lValue,lValue);
+	    if(!tempTNum) {
+	      TempTMatrix temptmatrix={jValue,lValue,lValue,theUMatrix};
+	      this->NewTempTMatrix(temptmatrix);
+	    } else this->AddToTempTMatrix(tempTNum,theUMatrix);
+	  }
 	}
       }
-      IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
+      assert(this->NumTempTMatrices()<=1);
+      double phase=0.0;
+      if(this->NumTempTMatrices()==1) phase = 180.0/pi/2.0*
+					atan2(imag(this->GetTempTMatrix(1)->TMatrix),real(this->GetTempTMatrix(1)->TMatrix)); 
+      if(segmentL%2!=0&&phase<0) phase+=180.0;
+      //    if(ii!=1) {
+      //  double lastPhase=data()->GetSegment(i)->GetPoint(ii-1)->GetFitCrossSection();
+      //  if(fabs(phase-lastPhase)>=95) {
+      //  	if(phase<lastPhase) phase+=180.;
+      //  	else if(phase>lastPhase) phase-=180.;
+      //  }
+      //}
+      point->SetFitCrossSection(phase);
     }
-    point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
-  }
-  if(point->IsPhase()&&aa==ir) {
-    double segmentJ=point->GetJ();
-    int segmentL=point->GetL();
-    this->ClearTempTMatrices();
-    for(int k=1;k<=theDecay->NumKGroups();k++) {
-      for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
-	double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
-	AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
-	int lValue=entranceChannel->GetL();	
-	AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
-	if(jValue==segmentJ&&lValue==segmentL&&entranceChannel==exitChannel) {
-	  complex expCoulPhaseSquared=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
-	    point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
-	  complex theUMatrix=(expCoulPhaseSquared-this->GetTMatrixElement(k,m))/expCoulPhaseSquared;
-	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lValue);
-	  if(!tempTNum) {
-	    TempTMatrix temptmatrix={jValue,lValue,lValue,theUMatrix};
-	    this->NewTempTMatrix(temptmatrix);
-	  } else this->AddToTempTMatrix(tempTNum,theUMatrix);
-	}
-      }
-    }
-    assert(this->NumTempTMatrices()<=1);
-    double phase=0.0;
-    if(this->NumTempTMatrices()==1) phase = 180.0/pi/2.0*
-      atan2(imag(this->GetTempTMatrix(1)->TMatrix),real(this->GetTempTMatrix(1)->TMatrix)); 
-    if(segmentL%2!=0&&phase<0) phase+=180.0;
-    //    if(ii!=1) {
-    //  double lastPhase=data()->GetSegment(i)->GetPoint(ii-1)->GetFitCrossSection();
-    //  if(fabs(phase-lastPhase)>=95) {
-    //  	if(phase<lastPhase) phase+=180.;
-    //  	else if(phase>lastPhase) phase-=180.;
-    //  }
-    //}
-    point->SetFitCrossSection(phase);
   }
 }
+
 
 /*!
  * Creates a new temporary T-Matrix element.
@@ -166,11 +216,14 @@ void GenMatrixFunc::ClearTempTMatrices() {
  * corresponding to a specified internal reaction pathway.
  */
 
-void GenMatrixFunc::AddTMatrixElement(int kGroupNum ,int mGroupNum,complex tMatrixElement) {
-  vector_c d;
-  while(kGroupNum>tmatrix_.size()) tmatrix_.push_back(d);
-  tmatrix_[kGroupNum-1].push_back(tMatrixElement);
-  assert(mGroupNum==tmatrix_[kGroupNum-1].size());
+ void GenMatrixFunc::AddTMatrixElement(int kGroupNum ,int mGroupNum,complex tMatrixElement, int decayNum) {
+  matrix_c d;
+  vector_c e;
+  while(decayNum>tmatrix_.size()) tmatrix_.push_back(d);
+  while(kGroupNum>tmatrix_[decayNum-1].size()) tmatrix_[decayNum-1].push_back(e);
+  tmatrix_[decayNum-1][kGroupNum-1].push_back(tMatrixElement);
+  assert(kGroupNum==tmatrix_[decayNum-1].size());
+  assert(mGroupNum==tmatrix_[decayNum-1][kGroupNum-1].size());
 }
 
 /*!
@@ -224,8 +277,8 @@ TempTMatrix *GenMatrixFunc::GetTempTMatrix(int tempTMatrixNum) {
  * Returns the value of the internal T-Matrix element specified by an internal reaction pathway.
  */
 
-complex GenMatrixFunc::GetTMatrixElement(int kGroupNum, int mGroupNum) const {
-  return tmatrix_[kGroupNum-1][mGroupNum-1];
+ complex GenMatrixFunc::GetTMatrixElement(int kGroupNum, int mGroupNum, int decayNum) const {
+  return tmatrix_[decayNum-1][kGroupNum-1][mGroupNum-1];
 }
 
 /*!

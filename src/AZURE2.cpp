@@ -33,7 +33,8 @@ void printHelp() {
             << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
             << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
             << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
-            << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl;
+            << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
+            << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl;
 }
 
 bool parseOptions(int argc, char *argv[], Config& configure) {
@@ -41,6 +42,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
   configure.transformParams=true;
   configure.isBrune=false;
   configure.ignoreExternals=false;
+  configure.useRMC=false;
   if(argc>2) {
     for(int i=1; i<argc-1; i++) {
       std::string arg=argv[i];
@@ -51,7 +53,8 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
       else if(arg=="--no-transform") configure.transformParams=false;
       else if(arg=="--use-brune") configure.isBrune=true;
       else if(arg=="--ignore-externals") configure.ignoreExternals=true;
-      else std::cout << "Unknown option " << arg << '.' << std::endl;
+      else if(arg=="--use-rmc") configure.useRMC=true;
+      else std::cout << "WARNING: Unknown option " << arg << '.' << std::endl;
     }
     configure.configfile=argv[argc-1];
   } else {
@@ -228,51 +231,53 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs) {
 
 void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
   configure.isEC=false;
-  std::ifstream in;
-  in.open(configure.configfile.c_str());
-  if(in) {
-    std::string line="";
-    while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
-    if(line=="<externalCapture>") {
-      line="";
-      while(line!="</externalCapture>"&&!in.eof()&&!configure.isEC) {
-	getline(in,line);
-	bool empty=true;
-	for(unsigned int i=0;i<line.size();++i) 
-	  if(line[i]!=' '&&line[i]!='\t') {
-	    empty=false;
-	    break;
-	  }
-	if(empty==true) continue;
-	if(line!="</externalCapture>"&&!in.eof()) {
-	  std::istringstream stm;
-	  stm.str(line);
-	  ECLine tempECLine=ReadECLine(stm);
-	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
-	    if(tempECLine.isdc!=0) {
-	      for(int i=0;i<segPairs.size();i++) {
-		if(tempECLine.exitkey==segPairs[i].secondPair) {
-		  configure.isEC=true;
-		  break;
+  if(!configure.useRMC) {
+    std::ifstream in;
+    in.open(configure.configfile.c_str());
+    if(in) {
+      std::string line="";
+      while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
+      if(line=="<externalCapture>") {
+	line="";
+	while(line!="</externalCapture>"&&!in.eof()&&!configure.isEC) {
+	  getline(in,line);
+	  bool empty=true;
+	  for(unsigned int i=0;i<line.size();++i) 
+	    if(line[i]!=' '&&line[i]!='\t') {
+	      empty=false;
+	      break;
+	    }
+	  if(empty==true) continue;
+	  if(line!="</externalCapture>"&&!in.eof()) {
+	    std::istringstream stm;
+	    stm.str(line);
+	    ECLine tempECLine=ReadECLine(stm);
+	    if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
+	      if(tempECLine.isdc!=0) {
+		for(int i=0;i<segPairs.size();i++) {
+		  if(tempECLine.exitkey==segPairs[i].secondPair) {
+		    configure.isEC=true;
+		    break;
+		  }
 		}
 	      }
+	    } else {
+	      std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+	      std::exit(1);
 	    }
-	  } else {
-	    std::cout << "Problem reading external capture. Check configuration file." << std::endl;
-	    std::exit(1);
 	  }
 	}
+      } else {
+	std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+	std::exit(1);
       }
+      in.close();
     } else {
-      std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+      std::cout << "Cannot read external capture. Check configuration file." << std::endl;
       std::exit(1);
     }
-    in.close();
-  } else {
-    std::cout << "Cannot read external capture. Check configuration file." << std::endl;
-    std::exit(1);
+    in.clear();
   }
-  in.clear();
 }
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
@@ -358,6 +363,10 @@ int main(int argc,char *argv[]){
 #ifndef NO_STAT
   else if(CheckForInputFiles(configure) == -1) return -1;
 #endif
+  if(configure.useRMC && configure.isBrune) {
+    std::cout << "WARNING: --is-brune is incompatible with --use-rmc." << std::endl;
+    configure.isBrune=false;
+  }
   if(configure.isBrune||configure.ignoreExternals) configure.isAMatrix=true;
 
   //Print welcome message
