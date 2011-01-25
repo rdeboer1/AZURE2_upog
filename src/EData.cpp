@@ -7,6 +7,8 @@
 #include "Minuit2/MnUserParameters.h"
 #include <iostream>
 #include <iomanip>
+#include <omp.h>
+#include <time.h>
 
 /*!
  * The EData object has a private attribute containing the number of iterations needed to find the best fit parameters.
@@ -513,8 +515,12 @@ void EData::PrintLegendreP(const struct Config &configure) {
  */
 
 void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
-  for(EDataIterator it=this->begin(); it!=this->end(); it++) 
-    if(!(it.point()->IsMapped())) it.point()->CalcEDependentValues(theCNuc,configure);
+  for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) 
+#pragma omp parallel for
+  	for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint *point = segment->GetPoint(i);
+      if(!(point->IsMapped())) point->CalcEDependentValues(theCNuc,configure);
+    }
 }
 
 /*!
@@ -700,34 +706,32 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
 	      if(!configure.oldECFile) {
-		std::cout << "\tSegment #" << segment->GetSegmentKey() << " [                         ] 0%";std::cout.flush();
-		double percent=0.05;
-		double dpercent=0.05;
+		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
 		int numPoints=segment->NumPoints();
-		EPointIterator firstPoint=segment->GetPoints().begin();
-		for(EPointIterator point=firstPoint;point<segment->GetPoints().end();point++) {
-		  int pointIndex=point-firstPoint+1;
-		  if(pointIndex<=percent*numPoints&&pointIndex+1>percent*numPoints) {
-		    std::string progress=" [";
-		    for(int j = 1;j<=25;j++) {
-		      if(percent>=j*0.04) progress+='*';
-		      else progress+=' ';
-		    } progress+="] ";
-		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		    percent+=dpercent;
-		  } else if(pointIndex>percent*numPoints) {
-		    while(pointIndex>percent*numPoints&&percent<1.) percent+=dpercent;
-		    std::string progress=" [";
-		    for(int j = 1;j<=25;j++) {
-		      if(percent>=j*0.04) progress+='*';
-		      else progress+=' ';
-		    } progress+="] ";
-		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		    percent+=dpercent;
-		  }
+		int pointIndex=0;
+		time_t startTime = time(NULL);
+#pragma omp parallel for
+		for(int i=1;i<=numPoints;i++) {
+		  EPoint *point = segment->GetPoint(i);
 		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
+		  ++pointIndex;
+		  if(difftime(time(NULL),startTime)>0.25) {
+		  	  startTime=time(NULL);
+		      std::string progress=" [";
+		  	  double percent=0.;
+		      for(int j = 1;j<=25;j++) {
+			    if(pointIndex>=percent*numPoints&&percent<1.) {
+			    	percent+=0.04;
+			    	progress+='*';
+			    } else progress+=' ';
+		      } progress+="] ";
+		      std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		      	        << std::setw(0) << progress << percent*100 << '%';std::cout.flush();
+		  }
 		}
-		std::cout << std::endl;
+	    std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+	              << std::setw(0) << " [*************************] 100%" << std::endl;
 	      }
 	      for(EPointIterator point=segment->GetPoints().begin();
 		  point<segment->GetPoints().end();point++) {
