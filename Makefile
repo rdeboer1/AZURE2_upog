@@ -32,7 +32,7 @@ ifeq ($(CXX),icpc)
    CPPFLAGS += -openmp
    LIBS += -lglib-2.0 -lncurses -limf -liomp5 -lpthread
 else 
-   CPPFLAGS += fopenmp
+   CPPFLAGS += -fopenmp
    LIBS += -lgomp -lpthread
 endif
 
