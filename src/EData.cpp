@@ -467,8 +467,13 @@ void EData::PrintData(const struct Config &configure) {
  */
 
 void EData::CalcLegendreP(int maxL) {
-for(EDataIterator it=this->begin(); it!=this->end(); it++)
-  it.point()->CalcLegendreP(maxL);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+#pragma omp parallel for 
+    for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint* point=segment->GetPoint(i);
+      point->CalcLegendreP(maxL);    
+    }
+  }
 }
 
 /*!
@@ -515,12 +520,13 @@ void EData::PrintLegendreP(const struct Config &configure) {
  */
 
 void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
-  for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) 
+  for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
 #pragma omp parallel for
   	for(int i=1;i<=segment->NumPoints();i++) {
       EPoint *point = segment->GetPoint(i);
       if(!(point->IsMapped())) point->CalcEDependentValues(theCNuc,configure);
     }
+  }
 }
 
 /*!
@@ -582,8 +588,13 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
  */
 
 void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
-  for(EDataIterator it=this->begin(); it!=this->end(); it++)
-    it.point()->CalcCoulombAmplitude(theCNuc);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+#pragma omp parallel for
+    for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint* point = segment->GetPoint(i);
+      point->CalcCoulombAmplitude(theCNuc);
+    }
+  }
 }
 
 /*!
