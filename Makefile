@@ -1,6 +1,6 @@
 # Setup the prefixes below. Running 'make install' will copy file to $(PREFIX)/bin/AZURE2.
 
-PREFIX = $(HOME)/local
+PREFIX = $(HOME)
 MINUIT_PREFIX = $(PREFIX)
 GSL_PREFIX = $(PREFIX)
 
