@@ -646,10 +646,16 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(const struct Config &configure) {
+void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
+  std::ofstream chiOut;
+  if(!isFit&configure.withData) {
+    std::string chiOutFile = configure.outputdir+"chiSquared.out";
+    chiOut.open(chiOutFile.c_str());
+  }
   if(!configure.withData) output.SetExtrap();
   bool isVaryNorm=false;
+  double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
       segment<GetSegments().end();segment++) {
     if(segment->IsVaryNorm()) isVaryNorm=true;
@@ -671,8 +677,21 @@ void EData::WriteOutputFiles(const struct Config &configure) {
 	  << std::endl;
       } else out << std::endl;
     }
+    if(!isFit&configure.withData) {
+      totalChiSquared+=segment->GetSegmentChiSquared();
+      chiOut << "Segment #"
+	     << segment->GetSegmentKey() 
+	     << " Chi-Squared/N: "
+	     << segment->GetSegmentChiSquared()/segment->NumPoints()
+	     << std::endl;
+    }
     out<<std::endl<<std::endl;out.flush();
   }
+  if(!isFit&configure.withData) {
+    chiOut << "Total Chi-Squared: " 
+	      << totalChiSquared << std::endl << std::endl;
+    chiOut.flush();chiOut.close();
+  }  
   if(isVaryNorm) {
     std::string outputfile=configure.outputdir+"normalizations.out";
     std::ofstream out(outputfile.c_str());
