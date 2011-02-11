@@ -44,7 +44,7 @@ class EData {
   void PrintEDependentValues(const struct Config&,CNuc*);
   void CalcCoulombAmplitude(CNuc*);
   void PrintCoulombAmplitude(const struct Config&,CNuc*); 
-  void WriteOutputFiles(const struct Config&);
+  void WriteOutputFiles(const struct Config&,bool=false);
   void CalculateECAmplitudes(CNuc*,const struct Config&);
   void MapData();
   void AddTargetEffect(TargetEffect);
