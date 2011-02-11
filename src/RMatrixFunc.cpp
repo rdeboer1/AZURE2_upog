@@ -8,14 +8,14 @@
  * The RMatrixFunc object is created with reference to a CNuc object.
  */
 
-RMatrixFunc::RMatrixFunc(CNuc* compound) :
-  compound_(compound) {}	
+RMatrixFunc::RMatrixFunc(CNuc* compound, const struct Config &configure) :
+  compound_(compound), configure_(configure) {}	
 
 /*!
  * Returns an R-Matrix element specified by positions in the JGroup and AChannel vectors. 
  */
 
-double RMatrixFunc::GetRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
+complex RMatrixFunc::GetRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum) const {
   return r_matrices_[jGroupNum-1][channelNum-1][channelPrimeNum-1];
 }
 
@@ -74,7 +74,7 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
 	for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
-	  double sum=0.0;
+	  complex sum(0.0,0.0);
 	  for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
 	    if(compound()->GetJGroup(j)->GetLevel(la)->IsInRMatrix()) {
 	      ALevel *level=compound()->GetJGroup(j)->GetLevel(la);
@@ -88,7 +88,12 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 		compound()->
 		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
 		GetExE();
-	      sum+=gammaCh*gammaChp/(resenergy-inenergy);
+	      double gammaSum=0.;
+	      if(configure().useRMC) 
+		for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
+		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()!='P')
+		    gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
+	      sum+=gammaCh*gammaChp/(resenergy-inenergy-complex(0.0,1.0)*gammaSum);
 	    }
 	  }
 	  this->AddRMatrixElement(j,ch,chp,sum);
@@ -132,54 +137,75 @@ void RMatrixFunc::InvertMatrices() {
 
 void RMatrixFunc::CalculateTMatrix(EPoint *point) {
   int aa=compound()->GetPairNumFromKey(point->GetEntranceKey());
-  int ir=compound()->GetPairNumFromKey(point->GetExitKey());
-  Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
-  for(int k=1;k<=theDecay->NumKGroups();k++) {
-    for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-      MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
-      JGroup *theJGroup=compound()->GetJGroup(theMGroup->GetJNum());
-      AChannel *entranceChannel=theJGroup->GetChannel(theMGroup->GetChNum());
-      AChannel *exitChannel=theJGroup->GetChannel(theMGroup->GetChpNum());
-      complex uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
-	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
-	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChpNum())*
-	point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChpNum());
-      complex umatrix=2.0*std::complex<double>(0.0,1.0)*
-	point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChNum())*
-	point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChpNum())*
-	this->GetRLInvRMatrixElement(theMGroup->GetJNum(),
-				    theMGroup->GetChpNum(),
-				    theMGroup->GetChNum());
-      complex tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
-	point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
-      complex tmatrix;
-      if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
-	tmatrix=tphase-uphase*(1.0+umatrix);
-      } else tmatrix=-uphase*umatrix;
-      this->AddTMatrixElement(k,m,tmatrix);
+  int irEnd;
+  int irStart;
+  bool isRMC=false;
+  if(configure().useRMC && 
+     compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10) {
+    irStart=1;
+    irEnd=compound()->GetPair(aa)->NumDecays();
+    isRMC=true;
+  } else {
+    irStart=0;
+    while(irStart<compound()->GetPair(aa)->NumDecays()) {
+      irStart++;
+      if(compound()->GetPair(aa)->GetDecay(irStart)->GetPairNum()==
+	 compound()->GetPairNumFromKey(point->GetExitKey())) break;
     }
-    for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
-      ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
-      ALevel *finalLevel=compound()->GetJGroup(theECMGroup->GetJGroupNum())
-	->GetLevel(theECMGroup->GetLevelNum());
-      double ecNormParam=finalLevel->GetFitGamma(theECMGroup->GetFinalChannel())*
-	finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
-      complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);
-      if(theECMGroup->IsChannelCapture()) {
-	MGroup *chanMGroup=compound()->GetPair(aa)->GetDecay(theECMGroup->GetChanCapDecay())
-	  ->GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
-	AChannel *chanEntranceChannel=compound()->GetJGroup(chanMGroup->GetJNum())
-	  ->GetChannel(chanMGroup->GetChNum());
-	AChannel *chanExitChannel=compound()->GetJGroup(chanMGroup->GetJNum())
-	  ->GetChannel(chanMGroup->GetChpNum());
+    irEnd=irStart;
+  }
+  for(int ir=irStart;ir<=irEnd;ir++) {
+    Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
+    for(int k=1;k<=theDecay->NumKGroups();k++) {
+      for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
+	MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
+	JGroup *theJGroup=compound()->GetJGroup(theMGroup->GetJNum());
+	AChannel *entranceChannel=theJGroup->GetChannel(theMGroup->GetChNum());
+	AChannel *exitChannel=theJGroup->GetChannel(theMGroup->GetChpNum());
+	complex uphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	  point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	  point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChpNum())*
+	  point->GetExpHardSpherePhase(theMGroup->GetJNum(),theMGroup->GetChpNum());
 	complex umatrix=2.0*std::complex<double>(0.0,1.0)*
-	  point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
-	  this->GetRLInvRMatrixElement(chanMGroup->GetJNum(),
-				       chanMGroup->GetChpNum(),
-				       chanMGroup->GetChNum());
-	tmatrix=tmatrix*umatrix;
-      } 
-      this->AddECTMatrixElement(k,m,tmatrix);
+	  point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	  point->GetSqrtPenetrability(theMGroup->GetJNum(),theMGroup->GetChpNum())*
+	  this->GetRLInvRMatrixElement(theMGroup->GetJNum(),
+				       theMGroup->GetChpNum(),
+				       theMGroup->GetChNum());
+	complex tphase=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
+	  point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
+	complex tmatrix;
+	if(isRMC) this->AddTMatrixElement(k,m,complex(0.0,-1.0)*umatrix,ir);
+	else {
+	  if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
+	    tmatrix=tphase-uphase*(1.0+umatrix);
+	  } else tmatrix=-uphase*umatrix;
+	  this->AddTMatrixElement(k,m,tmatrix);
+	}
+      }
+      for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
+	ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
+	ALevel *finalLevel=compound()->GetJGroup(theECMGroup->GetJGroupNum())
+	  ->GetLevel(theECMGroup->GetLevelNum());
+	double ecNormParam=finalLevel->GetFitGamma(theECMGroup->GetFinalChannel())*
+	  finalLevel->GetSqrtNFFactor()*finalLevel->GetECConversionFactor(theECMGroup->GetFinalChannel());
+	complex tmatrix=ecNormParam*point->GetECAmplitude(k,m);
+	if(theECMGroup->IsChannelCapture()) {
+	  MGroup *chanMGroup=compound()->GetPair(aa)->GetDecay(theECMGroup->GetChanCapDecay())
+	    ->GetKGroup(theECMGroup->GetChanCapKGroup())->GetMGroup(theECMGroup->GetChanCapMGroup());
+	  AChannel *chanEntranceChannel=compound()->GetJGroup(chanMGroup->GetJNum())
+	    ->GetChannel(chanMGroup->GetChNum());
+	  AChannel *chanExitChannel=compound()->GetJGroup(chanMGroup->GetJNum())
+	    ->GetChannel(chanMGroup->GetChpNum());
+	  complex umatrix=2.0*std::complex<double>(0.0,1.0)*
+	    point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*
+	    this->GetRLInvRMatrixElement(chanMGroup->GetJNum(),
+					 chanMGroup->GetChpNum(),
+					 chanMGroup->GetChNum());
+	  tmatrix=tmatrix*umatrix;
+	} 
+	this->AddECTMatrixElement(k,m,tmatrix);
+      }
     }
   }
 }
@@ -188,9 +214,9 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
  * This function adds an R-Matrix element specified by positions in the JGroup and AChannel vectors.
  */
 
-void RMatrixFunc::AddRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, double matrixElement) {
-  matrix_r e;
-  vector_r f;
+void RMatrixFunc::AddRMatrixElement(int jGroupNum, int channelNum, int channelPrimeNum, complex matrixElement) {
+  matrix_c e;
+  vector_c f;
   while(jGroupNum>r_matrices_.size()) r_matrices_.push_back(e);
   while(channelNum>r_matrices_[jGroupNum-1].size()) r_matrices_[jGroupNum-1].push_back(f);
   r_matrices_[jGroupNum-1][channelNum-1].push_back(matrixElement);

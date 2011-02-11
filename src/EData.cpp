@@ -7,6 +7,8 @@
 #include "Minuit2/MnUserParameters.h"
 #include <iostream>
 #include <iomanip>
+#include <omp.h>
+#include <time.h>
 
 /*!
  * The EData object has a private attribute containing the number of iterations needed to find the best fit parameters.
@@ -78,7 +80,7 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsData>") return -1;
 
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
+  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
   this->MapData();
 
   return 0; 
@@ -157,7 +159,7 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsTest>") return -1;
   
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile)==-1) return -1;
+  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
   this->MapData();
   return 0; 
 }
@@ -190,7 +192,7 @@ int EData::GetNormParamOffset() const {
  * to be applied to the data.
  */
 
-int EData::ReadTargetEffectsFile(std::string infile) {
+int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
   std::ifstream in(infile.c_str());
   if(!in) return -1;
   std::string line="";
@@ -224,6 +226,8 @@ int EData::ReadTargetEffectsFile(std::string infile) {
   }
   if(line!="</targetInt>") return -1;
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    PPair *entrancePair = compound->GetPair(compound->GetPairNumFromKey(segment->GetEntranceKey()));
+    double cmConversion = entrancePair->GetM(2)/(entrancePair->GetM(1)+entrancePair->GetM(2));
     if(segment->IsTargetEffect()) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
@@ -231,7 +235,8 @@ int EData::ReadTargetEffectsFile(std::string infile) {
 	double forwardDepth=0.0;
 	double backwardDepth=0.0;
 	if(targetEffect->IsTargetIntegration()) {
-	  double targetThickness = targetEffect->TargetThickness(point->GetCMEnergy());
+	  double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
+	  double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy());
 	  point->SetTargetThickness(targetThickness);
 	  if(targetEffect->IsConvolution()) {
 	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
@@ -249,8 +254,8 @@ int EData::ReadTargetEffectsFile(std::string infile) {
 	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
 	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
 	  if(targetEffect->IsTargetIntegration()) {
-	  	double stoppingPower=targetEffect->
-	  	GetStoppingPowerEq()->Evaluate(subEnergy);
+	  	double stoppingPower=cmConversion*targetEffect->
+	  	GetStoppingPowerEq()->Evaluate(subEnergy/cmConversion);
   	    subPoint.SetStoppingPower(stoppingPower);
 	  }
 	  point->AddSubPoint(subPoint);
@@ -341,7 +346,7 @@ void EData::ResetIterations(){
 void EData::Initialize(CNuc *compound,const struct Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
-  this->CalcEDependentValues(compound);
+  this->CalcEDependentValues(compound,configure);
   if(configure.checkpene=="screen"||
      configure.checkpene=="file") this->PrintEDependentValues(configure,compound);
 
@@ -462,8 +467,13 @@ void EData::PrintData(const struct Config &configure) {
  */
 
 void EData::CalcLegendreP(int maxL) {
-for(EDataIterator it=this->begin(); it!=this->end(); it++)
-  it.point()->CalcLegendreP(maxL);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+#pragma omp parallel for 
+    for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint* point=segment->GetPoint(i);
+      point->CalcLegendreP(maxL);    
+    }
+  }
 }
 
 /*!
@@ -509,9 +519,14 @@ void EData::PrintLegendreP(const struct Config &configure) {
  * Calls EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::CalcEDependentValues(CNuc *theCNuc) {
-  for(EDataIterator it=this->begin(); it!=this->end(); it++) 
-    if(!(it.point()->IsMapped())) it.point()->CalcEDependentValues(theCNuc);
+void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
+  for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
+#pragma omp parallel for
+  	for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint *point = segment->GetPoint(i);
+      if(!(point->IsMapped())) point->CalcEDependentValues(theCNuc,configure);
+    }
+  }
 }
 
 /*!
@@ -573,8 +588,13 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
  */
 
 void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
-  for(EDataIterator it=this->begin(); it!=this->end(); it++)
-    it.point()->CalcCoulombAmplitude(theCNuc);
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+#pragma omp parallel for
+    for(int i=1;i<=segment->NumPoints();i++) {
+      EPoint* point = segment->GetPoint(i);
+      point->CalcCoulombAmplitude(theCNuc);
+    }
+  }
 }
 
 /*!
@@ -638,8 +658,8 @@ void EData::WriteOutputFiles(const struct Config &configure) {
     std::ostream out(output(aa,ir));
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
-      out << std::setw(9)  << std::fixed      << point->GetCMEnergy()
-	  << std::setw(10) << std::fixed      << point->GetCMAngle()
+      out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	  << std::setw(13) << std::scientific << point->GetCMAngle()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
 	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
       if(!output.IsExtrap()) {
@@ -697,34 +717,32 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
 	      if(!configure.oldECFile) {
-		std::cout << "\tSegment #" << segment->GetSegmentKey() << " [                         ] 0%";std::cout.flush();
-		double percent=0.05;
-		double dpercent=0.05;
+		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
 		int numPoints=segment->NumPoints();
-		EPointIterator firstPoint=segment->GetPoints().begin();
-		for(EPointIterator point=firstPoint;point<segment->GetPoints().end();point++) {
-		  int pointIndex=point-firstPoint+1;
-		  if(pointIndex<=percent*numPoints&&pointIndex+1>percent*numPoints) {
-		    std::string progress=" [";
-		    for(int j = 1;j<=25;j++) {
-		      if(percent>=j*0.04) progress+='*';
-		      else progress+=' ';
-		    } progress+="] ";
-		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		    percent+=dpercent;
-		  } else if(pointIndex>percent*numPoints) {
-		    while(pointIndex>percent*numPoints&&percent<1.) percent+=dpercent;
-		    std::string progress=" [";
-		    for(int j = 1;j<=25;j++) {
-		      if(percent>=j*0.04) progress+='*';
-		      else progress+=' ';
-		    } progress+="] ";
-		    std::cout << "\r\tSegment #" << segment->GetSegmentKey() << progress << percent*100 << '%';std::cout.flush();
-		    percent+=dpercent;
-		  }
+		int pointIndex=0;
+		time_t startTime = time(NULL);
+#pragma omp parallel for
+		for(int i=1;i<=numPoints;i++) {
+		  EPoint *point = segment->GetPoint(i);
 		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
+		  ++pointIndex;
+		  if(difftime(time(NULL),startTime)>0.25) {
+		  	  startTime=time(NULL);
+		      std::string progress=" [";
+		  	  double percent=0.;
+		      for(int j = 1;j<=25;j++) {
+			    if(pointIndex>=percent*numPoints&&percent<1.) {
+			    	percent+=0.04;
+			    	progress+='*';
+			    } else progress+=' ';
+		      } progress+="] ";
+		      std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		      	        << std::setw(0) << progress << percent*100 << '%';std::cout.flush();
+		  }
 		}
-		std::cout << std::endl;
+	    std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+	              << std::setw(0) << " [*************************] 100%" << std::endl;
 	      }
 	      for(EPointIterator point=segment->GetPoints().begin();
 		  point<segment->GetPoints().end();point++) {

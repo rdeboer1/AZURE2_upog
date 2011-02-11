@@ -401,7 +401,7 @@ EnergyMap EPoint::GetMap() const {
  */
 
 void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
-  this->CalcEDependentValues(compound);
+  this->CalcEDependentValues(compound,configure);
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder);
   this->CalcCoulombAmplitude(compound);
@@ -542,7 +542,7 @@ void EPoint::CalcLegendreP(int maxL) {
  * and hard sphere phase shfits.
  */
 
-void EPoint::CalcEDependentValues(CNuc *theCNuc) {
+void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure) {
   PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
   double geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
   this->SetGeometricalFactor(geofactor);
@@ -593,9 +593,10 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
 	    this->AddExpHardSpherePhase(j,ch,expHSP);
 	  }
 	} else if(thePair->GetPType()==10){
-	  complex loElement(0.0,0.0);
+	  complex loElement = complex(0.0,0.0);
 	  this->AddLoElement(j,ch,loElement);
-	  this->AddSqrtPenetrability(j,ch,pow(localEnergy/hbarc, (double) lValue+0.5));
+	  double sqrtPene = configure.useRMC ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
+	  this->AddSqrtPenetrability(j,ch,sqrtPene);
 	  this->AddExpCoulombPhase(j,ch,1.0);
 	  this->AddExpHardSpherePhase(j,ch,1.0);
 	}
@@ -603,7 +604,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalcEDependentValues(theCNuc);
+    this->GetSubPoint(i)->CalcEDependentValues(theCNuc,configure);
   }
   for(int i=1;i<=this->NumLocalMappedPoints();i++) {
     EPoint *mappedPoint=this->GetLocalMappedPoint(i);
@@ -803,7 +804,7 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
   if(!this->IsTargetEffect()) {
     GenMatrixFunc *theMatrixFunc;
     if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
-    else theMatrixFunc=new RMatrixFunc(theCNuc);
+    else theMatrixFunc=new RMatrixFunc(theCNuc,configure);
     theMatrixFunc->ClearMatrices();
     theMatrixFunc->FillMatrices(this);
     theMatrixFunc->InvertMatrices();

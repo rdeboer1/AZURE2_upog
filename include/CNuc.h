@@ -36,7 +36,7 @@ public:
   void AddJGroup(JGroup);
   void PrintNuc(const struct Config&);
   void TransformIn(const struct Config&);
-  void SortPathways();
+  void SortPathways(const struct Config&);
   void PrintPathways(const struct Config&);
   void CalcBoundaryConditions();
   void PrintBoundaryConditions(const struct Config&);

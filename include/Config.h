@@ -70,6 +70,8 @@ struct Config {
   bool isBrune;
   ///A boolean specifying if the external components of a capture resonance should be ignored if the internal with is zero.
   bool ignoreExternals;
+  ///A boolean indicating if RMC should be used
+  bool useRMC;
   ///Parameters for calculating reaction rate.
   RateParams  rateParams;
   ///A constant indicating the maximum order of the Legendre polynomials to calculate.
