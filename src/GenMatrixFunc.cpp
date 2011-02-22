@@ -172,14 +172,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
       double phase=0.0;
       if(this->NumTempTMatrices()==1) phase = 180.0/pi/2.0*
 					atan2(imag(this->GetTempTMatrix(1)->TMatrix),real(this->GetTempTMatrix(1)->TMatrix)); 
-      if(segmentL%2!=0&&phase<0) phase+=180.0;
-      //    if(ii!=1) {
-      //  double lastPhase=data()->GetSegment(i)->GetPoint(ii-1)->GetFitCrossSection();
-      //  if(fabs(phase-lastPhase)>=95) {
-      //  	if(phase<lastPhase) phase+=180.;
-      //  	else if(phase>lastPhase) phase-=180.;
-      //  }
-      //}
+      //if(segmentL%2!=0&&phase<0) phase+=180.0;
       point->SetFitCrossSection(phase);
     }
   }
