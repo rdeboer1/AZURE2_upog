@@ -460,7 +460,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		penes.push_back(tempPene);
 		}
 	    } else {
-	      if(theLevel->GetE()==this->GetPair(theChannel->GetPairNum())->GetExE()&&
+	      if(fabs(theLevel->GetE()-this->GetPair(theChannel->GetPairNum())->GetExE())<1.e-3&&
 		 theJGroup->GetJ()==this->GetPair(theChannel->GetPairNum())->GetJ(2)&&
 		 theJGroup->GetPi()==this->GetPair(theChannel->GetPairNum())->GetPi(2)) {
 		int tempSign;
@@ -1351,7 +1351,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    tempPene.push_back(pene);
 	  }
 	} else {
-	  if(theLevel->GetE()==this->GetPair(theChannel->GetPairNum())->GetExE()&&
+	  if(fabs(theLevel->GetE()-this->GetPair(theChannel->GetPairNum())->GetExE())<1.e-3&&
 	     theJGroup->GetJ()==this->GetPair(theChannel->GetPairNum())->GetJ(2)&&
 	     theJGroup->GetPi()==this->GetPair(theChannel->GetPairNum())->GetPi(2)) {
 	    double jValue=theJGroup->GetJ();
@@ -1360,6 +1360,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	      pene=3.0*jValue/4.0/(jValue+1.);
 	    else if(theChannel->GetRadType()=='E'&&theChannel->GetL()==2)
 	      pene=60.0*jValue*(2.*jValue-1.)/(jValue+1.)/(2.*jValue+3.);
+	    if((int)(2*jValue)%2!=0) pene*=-1.;
 	    tempPene.push_back(pene);
 	  } else {
 	    double pene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
@@ -1375,7 +1376,8 @@ void CNuc::TransformOut(const struct Config& configure) {
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
-	double bigGamma=2.0*real(totalWidth*conj(totalWidth))*tempPene[ch-1]/
+	int tempSign = (real(totalWidth)<0.) ? (-1) : (1);
+	double bigGamma=tempSign*2.0*real(totalWidth*conj(totalWidth))*tempPene[ch-1]/
 	  (1.0+normSum);
 	theLevel->SetBigGamma(ch,bigGamma);
       } 
@@ -1418,29 +1420,31 @@ void CNuc::PrintTransformParams(std::string outdir) {
 	  out << "  s = " << std::setw(4) << theChannel->GetS();
 	  out.precision(6);
 	  if(localEnergy<0.0&&theChannel->GetRadType()=='P') {
-	    out << "  C  = " << std::setw(12) << sqrt(theLevel->GetBigGamma(ch)) 
+	    out << "  C  = " << std::setw(12) << sqrt(fabs(theLevel->GetBigGamma(ch))) 
 		<< " fm^(-1/2)";
-	  } else if(theLevel->GetE()==this->GetPair(theChannel->GetPairNum())->GetExE()&&
+	  } else if(fabs(theLevel->GetE()-this->GetPair(theChannel->GetPairNum())->GetExE())<1.e-3&&
 	     theJGroup->GetJ()==this->GetPair(theChannel->GetPairNum())->GetJ(2)&&
 	     theJGroup->GetPi()==this->GetPair(theChannel->GetPairNum())->GetPi(2)&&
 		    theChannel->GetRadType()=='M'&&theChannel->GetL()==1) {
-	    out << "  mu = " << std::setw(12) << sqrt(theLevel->GetBigGamma(ch)) 
+	    int tempSign = (theLevel->GetBigGamma(ch)<0) ? (-1) : (1);
+	    out << "  mu = " << std::setw(12) << tempSign*sqrt(fabs(theLevel->GetBigGamma(ch))) 
 		<< " nm       ";
-	  } else if(theLevel->GetE()==this->GetPair(theChannel->GetPairNum())->GetExE()&&
+	  } else if(fabs(theLevel->GetE()-this->GetPair(theChannel->GetPairNum())->GetExE())<1.e-3&&
 	     theJGroup->GetJ()==this->GetPair(theChannel->GetPairNum())->GetJ(2)&&
 	     theJGroup->GetPi()==this->GetPair(theChannel->GetPairNum())->GetPi(2)&&
 		    theChannel->GetRadType()=='E'&&theChannel->GetL()==2) {
-	    out << "  Q  = " << std::setw(12) << sqrt(theLevel->GetBigGamma(ch))/100.0/sqrt(fstruc*hbarc) 
+	    int tempSign = (theLevel->GetBigGamma(ch)<0) ? (-1) : (1);
+	    out << "  Q  = " << std::setw(12) << tempSign*sqrt(fabs(theLevel->GetBigGamma(ch)))/100.0/sqrt(fstruc*hbarc) 
 		<< " b        ";
 	  } else {
-	    if(theLevel->GetBigGamma(ch)>=1e-3)
-	      out << "  G  = " << std::setw(12) << theLevel->GetBigGamma(ch)*1e3 
+	    if(fabs(theLevel->GetBigGamma(ch))>=1e-3)
+	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e3 
 		  << " keV      ";
-	    else if(theLevel->GetBigGamma(ch)>=1e-6)
-	      out << "  G  = " << std::setw(12) << theLevel->GetBigGamma(ch)*1e6 
+	    else if(fabs(theLevel->GetBigGamma(ch))>=1e-6)
+	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e6 
 		  << " eV       ";
 	    else
-	      out << "  G  = " << std::setw(12) << theLevel->GetBigGamma(ch)*1e9 
+	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e9 
 		  << " meV      ";
 	  } 
 	  out << "  g_int = " << std::setw(12) << theLevel->GetTransformGamma(ch) 
