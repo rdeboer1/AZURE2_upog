@@ -72,7 +72,7 @@ class EPoint {
   void SetGeometricalFactor(double);
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
-  void CalcLegendreP(int);
+  void CalcLegendreP(int,std::vector<double>*);
   void CalcEDependentValues(CNuc*,const struct Config&);
   void AddLoElement(int,int,complex);
   void AddSqrtPenetrability(int,int,double);
