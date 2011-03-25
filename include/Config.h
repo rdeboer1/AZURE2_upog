@@ -4,11 +4,22 @@
 #include <string>
 #include <fstream>
 
+/// A structure holding the reaction rate calculation configuration
+
+/*!
+ * The RateParams structure holds the configuration information for a reaction rate calculation.
+ */
+
 struct RateParams {
+  ///The entrance pair number for the rate calculation
   int entrancePair;
+  ///The exit pair number for the rate calculation
   int exitPair;
+  ///The minimum temperature for the rate calculation
   double minTemp;
+  ///The maximum temperature for the rate calculation
   double maxTemp;
+  ///The temperature step for the rate calculation
   double tempStep;
 };
 

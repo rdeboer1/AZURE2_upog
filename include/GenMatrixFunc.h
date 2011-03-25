@@ -40,19 +40,19 @@ class GenMatrixFunc {
   GenMatrixFunc() {};
   virtual ~GenMatrixFunc(){};
   /*!
-   *This virtual function in instantiated in the child class.
+   *This virtual function in implemented in the child class.
    */
   virtual void ClearMatrices()=0;
   /*!
-   *This virtual function in instantiated in the child class.
+   *This virtual function in implemented in the child class.
    */
   virtual void FillMatrices(EPoint*)=0;
   /*!
-   *This virtual function in instantiated in the child class.
+   *This virtual function in implemented in the child class.
    */
   virtual void InvertMatrices()=0;
   /*!
-   *This virtual function in instantiated in the child class.
+   *This virtual function in implemented in the child class.
    */
   virtual void CalculateTMatrix(EPoint*)=0;
   void CalculateCrossSection(EPoint*);
@@ -68,9 +68,12 @@ class GenMatrixFunc {
   complex GetECTMatrixElement(int,int) const;
 
   /*!
-   *This virtual function in instantiated in the child class.
+   *This virtual function in implemented in the child class.
    */
   virtual CNuc *compound() const = 0;
+  /*!
+   *This virtual function in implemented in the child class.
+   */
   virtual const struct Config& configure() const = 0;
  protected:
   ///Vector of internal T-matrix elements accessable to child class.

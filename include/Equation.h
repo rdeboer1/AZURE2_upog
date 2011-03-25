@@ -16,9 +16,18 @@
 
 class GenericFunction {
  public:
+  /*! 
+   * The default constructor for the class.
+   */
   GenericFunction() {};
+  /*!
+   * Constructs the object from a function pointer.
+   */
   GenericFunction(double (*function)(double)) :
    function_(function) {};
+   /*!
+    * Evaluates the function object with a given double.
+    */
   double Evaluate(double value) const {
     return (*function_)(value);
   };
@@ -68,8 +77,19 @@ class Equation {
   std::map<std::string,GenericFunction> functionList_;
 };
 
+///An exception class thrown by the Equation class
+
+/*!
+ * The SyntaxError class is an exception class thrown by the Equation class.
+ * It should not be used directly.
+ */
+
 class SyntaxError : public std::exception {
  public:
+  /*!
+   * Constructs the SyntaxError with the message type, equation string, 
+   * and position in the string.
+   */
   SyntaxError(std::string equation, int type, int position=-1) {
     std::string typeMessage = GetTypeMessage(type);
     std::ostringstream stm;
@@ -83,6 +103,9 @@ class SyntaxError : public std::exception {
   ~SyntaxError() throw() {
     delete[] message_;
   };
+  /*!
+   * Returns the message of the thrown SyntaxError.
+   */
   virtual const char* what() const throw() {
     return message_;
   };
