@@ -224,6 +224,6 @@ void AMatrixFunc::AddAInvMatrixElement(int jGroupNum, int lambdaNum, int muNum, 
  * This function adds an entire A-Matrix to a vector.
  */
 
-void AMatrixFunc::AddAMatrix(std::vector<std::vector <complex > > aMatrix) {
+void AMatrixFunc::AddAMatrix(matrix_c aMatrix) {
   a_matrices_.push_back(aMatrix);
 }

@@ -338,11 +338,11 @@ void startMessage(const Config& configure) {
  * data relevant to nuclear astrophysics.  This release of AZURE has been 
  * completely rewritten in object-oriented C++.  The documentation contained 
  * within these pages should serve as an introduction to the object structure of
- * AZURE Version 2.0.
- * Most mathematical functions in AZURE utilized the GNU Scientific Libraries (GSL),
- * while the minimization routines are handled by Minuit2 (C++ version of Minuit). Minuit2
- * uses OpenMP to parallel the fitting process, therefore the performance boost of AZURE
- * will be significant when used on multicore multiprocessor machines.
+ * AZURE Version 2.0 (AZURE2).
+ * Most mathematical functions in AZURE2 utilize the GNU Scientific Libraries (GSL),
+ * while the minimization routines are handled by Minuit2 (C++ version of Minuit). AZURE2
+ * uses OpenMP to parallel many calculations and fitting, therefore the performance boost 
+ * of AZURE2 will be significant when used on multicore multiprocessor machines.
  */
 
 int main(int argc,char *argv[]){

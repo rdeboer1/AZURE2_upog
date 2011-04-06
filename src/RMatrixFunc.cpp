@@ -253,6 +253,6 @@ void RMatrixFunc::AddRLInvRMatrixElement(int jGroupNum, int channelNum, int chan
  * This function adds an entire \f$ [1-RL]^{-1} \f$ matrix to a vector.
  */
 
-void RMatrixFunc::AddRLInvMatrix(std::vector<std::vector <complex > > matrix) {
+void RMatrixFunc::AddRLInvMatrix(matrix_c matrix) {
   rl_inv_matrices_.push_back(matrix);
 }

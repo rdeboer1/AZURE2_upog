@@ -467,11 +467,23 @@ void EData::PrintData(const struct Config &configure) {
  */
 
 void EData::CalcLegendreP(int maxL) {
-  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+
+  std::map<int,std::vector<double> > qCoeffs;
+  //std::vector<double> segQCoeffs;
+  //Insert segment QCoeffs IN ORDER here with: segQCoeffs.push_back(qValue);
+  // segQCoeffs.push_back(1.0);  //first L=0
+  // segQCoeffs.push_back(1.0);  //then  L=1, etc.
+  //Then insert segQCoeff into qCoeffs with: qCoeffs[segmentKey]=segQCoeffs;
+  // qCoeffs[1]=segQCoeffs;  
+  //clear segQCoeffs with segQCoeffs.clear() and repeat for another segment
+  
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) { 
+    std::map<int,std::vector<double> >::iterator qCoeffsItr = qCoeffs.find(segment->GetSegmentKey());
+    std::vector<double>* qCoeffsPtr = (qCoeffsItr!=qCoeffs.end()) ? &qCoeffsItr->second : NULL;
 #pragma omp parallel for 
     for(int i=1;i<=segment->NumPoints();i++) {
       EPoint* point=segment->GetPoint(i);
-      point->CalcLegendreP(maxL);    
+      point->CalcLegendreP(maxL,qCoeffsPtr);    
     }
   }
 }
@@ -646,10 +658,16 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(const struct Config &configure) {
+void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
+  std::ofstream chiOut;
+  if(!isFit&configure.withData) {
+    std::string chiOutFile = configure.outputdir+"chiSquared.out";
+    chiOut.open(chiOutFile.c_str());
+  }
   if(!configure.withData) output.SetExtrap();
   bool isVaryNorm=false;
+  double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
       segment<GetSegments().end();segment++) {
     if(segment->IsVaryNorm()) isVaryNorm=true;
@@ -671,8 +689,21 @@ void EData::WriteOutputFiles(const struct Config &configure) {
 	  << std::endl;
       } else out << std::endl;
     }
+    if(!isFit&configure.withData) {
+      totalChiSquared+=segment->GetSegmentChiSquared();
+      chiOut << "Segment #"
+	     << segment->GetSegmentKey() 
+	     << " Chi-Squared/N: "
+	     << segment->GetSegmentChiSquared()/segment->NumPoints()
+	     << std::endl;
+    }
     out<<std::endl<<std::endl;out.flush();
   }
+  if(!isFit&configure.withData) {
+    chiOut << "Total Chi-Squared: " 
+	      << totalChiSquared << std::endl << std::endl;
+    chiOut.flush();chiOut.close();
+  }  
   if(isVaryNorm) {
     std::string outputfile=configure.outputdir+"normalizations.out";
     std::ofstream out(outputfile.c_str());

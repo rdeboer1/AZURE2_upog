@@ -30,6 +30,7 @@ class TargetEffect {
   void SetNumSubPoints(int);
   std::vector<int> GetSegmentsList() const;
   Equation *GetStoppingPowerEq();
+  ///The multiple of sigma above and below centroid energy to use as integration range
   static const double convolutionRange=3.;
  private:
   bool isConvolution_;

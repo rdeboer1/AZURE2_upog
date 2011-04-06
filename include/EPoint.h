@@ -5,8 +5,15 @@
 
 ///A container structure for a reference to a data point.
 
+/*!
+ * If a point is mapped back to another in the calculation, this structure
+ * hold the relevant indices of the map point.
+ */
+
 struct EnergyMap {
+  ///The segment index for the map
   int segment;
+  ///The point index for the map
   int point;
 };
 
@@ -72,7 +79,7 @@ class EPoint {
   void SetGeometricalFactor(double);
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
-  void CalcLegendreP(int);
+  void CalcLegendreP(int,std::vector<double>*);
   void CalcEDependentValues(CNuc*,const struct Config&);
   void AddLoElement(int,int,complex);
   void AddSqrtPenetrability(int,int,double);
