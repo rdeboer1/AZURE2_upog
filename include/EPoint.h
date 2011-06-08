@@ -22,6 +22,7 @@ class EData;
 class CNuc;
 class PPair;
 class TargetEffect;
+class DataLine;
 
 
 ///An AZURE data point
@@ -34,7 +35,7 @@ class TargetEffect;
 
 class EPoint {
  public:
-  EPoint(struct DataLine, ESegment*);
+  EPoint(DataLine, ESegment*);
   EPoint(double, double, ESegment*);
   EPoint(double, double, int, int, bool, bool, double, int);
   bool IsDifferential() const;

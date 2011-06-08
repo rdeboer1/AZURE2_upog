@@ -7,9 +7,11 @@
  * An R-Matrix channel for a given \f$J^\pi\f$ group represents a specfic combination of \f$ \alpha,s,l \f$ couplings.
  */
 
+class NucLine;
+
 class AChannel {
  public:
-  AChannel(struct NucLine, int);
+  AChannel(NucLine, int);
   AChannel(int, double, int, char);
   int GetPairNum() const;
   int GetL() const;

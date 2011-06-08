@@ -9,9 +9,11 @@
  * An R-matrix level  represents a specific eigenstate of the compound nucleus.
  */
 
+class NucLine;
+
 class ALevel {
  public:
-  ALevel(struct NucLine);
+  ALevel(NucLine);
   ALevel(double);
   bool IsInRMatrix() const;
   bool EnergyFixed() const;
@@ -35,7 +37,7 @@ class ALevel {
   double GetECMinJ() const;
   double GetECMaxJ() const;
   complex GetExternalGamma(int) const;
-  void AddGamma(struct NucLine);
+  void AddGamma( NucLine);
   void AddGamma(double);
   void SetGamma(int,double);
   void SetE(double);

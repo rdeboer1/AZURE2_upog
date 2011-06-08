@@ -250,11 +250,11 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	if(line!="</externalCapture>"&&!in.eof()) {
 	  std::istringstream stm;
 	  stm.str(line);
-	  ECLine tempECLine=ReadECLine(stm);
+	  ECLine tempECLine(stm);
 	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
-	    if(tempECLine.isdc!=0) {
+	    if(tempECLine.isEC()!=0) {
 	      for(int i=0;i<segPairs.size();i++) {
-		if(tempECLine.exitkey==segPairs[i].secondPair) {
+		if(tempECLine.exitKey()==segPairs[i].secondPair) {
 		  configure.isEC=true;
 		  break;
 		}

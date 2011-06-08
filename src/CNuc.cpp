@@ -122,10 +122,10 @@ int CNuc::Fill(const struct Config &configure) {
     if(!in.eof()&&line!="</levels>") {
       std::istringstream stm;
       stm.str(line);
-      NucLine Line=ReadNucLine(stm);
+      NucLine Line(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(Line.l>maxLValue&&Line.PType==0) maxLValue=Line.l;
-      if(Line.yn==1) {
+      if(Line.l()>maxLValue&&Line.pType()==0) maxLValue=Line.l();
+      if(Line.isActive()==1) {
 	PPair NewPair(Line);
 	PairNum=this->IsPair(NewPair);
 	if(!PairNum) {
@@ -193,10 +193,10 @@ int CNuc::ReadECFile(std::string configfile) {
     if(line!="</externalCapture>"&&!in.eof()) {
       std::istringstream stm;
       stm.str(line);
-      ECLine newECLine=ReadECLine(stm);
+      ECLine newECLine(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(newECLine.isdc) {
-	PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitkey));
+      if(newECLine.isEC()) {
+	PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitKey()));
 	if(exitPair->GetPType()==10) {
 	  //create new level in compound nucleus for EC state, if it doesn't exist
 	  double jValue=exitPair->GetJ(2);
@@ -216,8 +216,8 @@ int CNuc::ReadECFile(std::string configfile) {
 		else this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.0);
 	      }
 	    }
-	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
-									newECLine.jimin,newECLine.jimax,newECLine.multMask);
+	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitKey()),
+									newECLine.jiMin(),newECLine.jiMax(),newECLine.multMask());
 	    for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
 	      PPair *theFinalPair=this->GetPair(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetPairNum());
 	      double nfIntegralValue=0.; 
@@ -240,8 +240,8 @@ int CNuc::ReadECFile(std::string configfile) {
 	    ALevel newLevel(exitPair->GetExE());
 	    this->GetJGroup(jGroupNum)->AddLevel(newLevel);
 	    levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
-	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitkey),
-									newECLine.jimin,newECLine.jimax,newECLine.multMask);
+	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitKey()),
+									newECLine.jiMin(),newECLine.jiMax(),newECLine.multMask());
 	    for(int ir=1;ir<=this->NumPairs();ir++) {
 	      if(this->GetPair(ir)->GetPType()==0) {
 		double s1=this->GetPair(ir)->GetJ(1);

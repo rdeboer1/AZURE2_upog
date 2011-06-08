@@ -19,17 +19,17 @@
  * the EPoint object.
  */
 
-EPoint::EPoint(struct DataLine dataLine, ESegment *parent) {
+EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   entrance_key_=parent->GetEntranceKey();
   exit_key_=parent->GetExitKey();
-  cm_angle_=dataLine.angle;
-  lab_angle_=dataLine.angle;
-  cm_energy_=dataLine.energy;
-  lab_energy_=dataLine.energy;
-  cm_crosssection_=dataLine.cross;
-  cm_dcrosssection_=dataLine.error;
-  lab_crosssection_=dataLine.cross;
-  lab_dcrosssection_=dataLine.error;
+  cm_angle_=dataLine.angle();
+  lab_angle_=dataLine.angle();
+  cm_energy_=dataLine.energy();
+  lab_energy_=dataLine.energy();
+  cm_crosssection_=dataLine.crossSection();
+  cm_dcrosssection_=dataLine.error();
+  lab_crosssection_=dataLine.crossSection();
+  lab_dcrosssection_=dataLine.error();
   geofactor_=0.;
   fitcrosssection_=0.;
   sfactorconv_=0.;

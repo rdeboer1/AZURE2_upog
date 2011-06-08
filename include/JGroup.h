@@ -12,9 +12,11 @@
  * and thus one T-Matrix, for each \f$ J^\pi \f$ group. A JGroup object holds vectors of ALevel and AChannel objects.
  */
 
+class NucLine;
+
 class JGroup {
  public:
-  JGroup(struct NucLine);
+  JGroup(NucLine);
   JGroup(double,int);
   bool IsInRMatrix() const;
   int IsLevel(ALevel);

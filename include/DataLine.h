@@ -3,13 +3,20 @@
 
 #include <fstream>
 
-struct DataLine {
-  double angle;
-  double energy;
-  double cross;
-  double error;
+class DataLine {
+ public:
+  DataLine(std::ifstream &stream) {
+    stream >> energy_ >> angle_ >> crossSection_ >> error_;
+  };
+  double angle() const {return angle_;};
+  double energy() const {return energy_;};
+  double crossSection() const {return crossSection_;};
+  double error() const {return error_;};
+ private:
+  double angle_;
+  double energy_;
+  double crossSection_;
+  double error_;
 };
-
-DataLine ReadDataLine(std::ifstream &stream);
 
 #endif

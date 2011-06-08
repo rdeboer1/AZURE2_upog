@@ -11,9 +11,11 @@
  * PPair objects are containers for vectors of Decay objects.
  */
 
+class NucLine;
+
 class PPair {
 public:
-  PPair(struct NucLine);
+  PPair(NucLine);
   bool IsEntrance() const;
   int GetZ(int) const;
   int GetPi(int) const;

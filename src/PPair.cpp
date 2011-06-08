@@ -6,25 +6,25 @@
  * A particle pair object is created from and entry in the nuclear input file.
  */
 
-PPair::PPair(struct NucLine nucLine) 
+PPair::PPair(NucLine nucLine) 
 {
-  pair_z_[0]=nucLine.Z1;
-  pair_z_[1]=nucLine.Z2;
-  pair_m_[0]=nucLine.M1;
-  pair_m_[1]=nucLine.M2;
-  pair_pi_[0]=nucLine.Pi1;
-  pair_pi_[1]=nucLine.Pi2;
-  pair_g_[0]=nucLine.g1;
-  pair_g_[1]=nucLine.g2;
-  pair_j_[0]=nucLine.J1;
-  pair_j_[1]=nucLine.J2;
-  pair_ex_e_=nucLine.ExE;
-  pair_sep_e_=nucLine.SepE;
-  pair_ch_rad_=nucLine.ChRad;
-  pair_ptype_=nucLine.PType;
-  pair_key_=nucLine.R;
-  red_mass_=nucLine.M1*nucLine.M2/(nucLine.M1+nucLine.M2);
-  i1i2factor_=1.0/(2.*nucLine.J1+1.0)/(2.*nucLine.J2+1.0);
+  pair_z_[0]=nucLine.z1();
+  pair_z_[1]=nucLine.z2();
+  pair_m_[0]=nucLine.m1();
+  pair_m_[1]=nucLine.m2();
+  pair_pi_[0]=nucLine.pi1();
+  pair_pi_[1]=nucLine.pi2();
+  pair_g_[0]=nucLine.g1();
+  pair_g_[1]=nucLine.g2();
+  pair_j_[0]=nucLine.j1();
+  pair_j_[1]=nucLine.j2();
+  pair_ex_e_=nucLine.e2();
+  pair_sep_e_=nucLine.sepE();
+  pair_ch_rad_=nucLine.chRad();
+  pair_ptype_=nucLine.pType();
+  pair_key_=nucLine.ir();
+  red_mass_=nucLine.m1()*nucLine.m2()/(nucLine.m1()+nucLine.m2());
+  i1i2factor_=1.0/(2.*nucLine.j1()+1.0)/(2.*nucLine.j2()+1.0);
   entrance_=false;
   ec_entrance_=false;
 }

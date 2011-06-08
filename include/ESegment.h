@@ -4,6 +4,8 @@
 #include "EPoint.h"
 
 class EData;
+class ExtrapLine;
+class SegLine;
 
 ///An AZURE data segment
 
@@ -14,8 +16,8 @@ class EData;
 
 class ESegment {
  public:
-  ESegment(struct SegLine); 
-  ESegment(struct ExtrapLine); 
+  ESegment(SegLine); 
+  ESegment(ExtrapLine); 
   bool IsInSegment(EPoint);
   bool IsDifferential() const;
   bool IsPhase() const;
