@@ -1,13 +1,13 @@
 #ifndef ACHANNEL_H
 #define ACHANNEL_H
 
+class NucLine;
+
 ///An AZURE channel object.
 
 /*!
  * An R-Matrix channel for a given \f$J^\pi\f$ group represents a specfic combination of \f$ \alpha,s,l \f$ couplings.
  */
-
-class NucLine;
 
 class AChannel {
  public:

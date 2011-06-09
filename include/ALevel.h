@@ -3,13 +3,13 @@
 
 #include "Constants.h"
 
+class NucLine;
+
 ///An AZURE level object.
 
 /*!
  * An R-matrix level  represents a specific eigenstate of the compound nucleus.
  */
-
-class NucLine;
 
 class ALevel {
  public:

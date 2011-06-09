@@ -195,7 +195,7 @@ int CNuc::ReadECFile(std::string configfile) {
       stm.str(line);
       ECLine newECLine(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(newECLine.isEC()) {
+      if(newECLine.isActive()) {
 	PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitKey()));
 	if(exitPair->GetPType()==10) {
 	  //create new level in compound nucleus for EC state, if it doesn't exist

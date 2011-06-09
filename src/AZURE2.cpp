@@ -252,7 +252,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	  stm.str(line);
 	  ECLine tempECLine(stm);
 	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
-	    if(tempECLine.isEC()!=0) {
+	    if(tempECLine.isActive()!=0) {
 	      for(int i=0;i<segPairs.size();i++) {
 		if(tempECLine.exitKey()==segPairs[i].secondPair) {
 		  configure.isEC=true;
@@ -333,12 +333,13 @@ void startMessage(const Config& configure) {
 }
 
 /*!
- * \mainpage AZURE R-Matrix Package
- * AZURE is created to be general A-/R- Matrix program for the analysis of
- * data relevant to nuclear astrophysics.  This release of AZURE has been 
- * completely rewritten in object-oriented C++.  The documentation contained 
+ * \mainpage AZURE2 R-Matrix Package
+ * AZURE2 is created to be general A-/R- Matrix program for the analysis of
+ * data relevant to nuclear astrophysics.  This release, AZURE2, has been 
+ * completely rewritten in object-oriented C++ and upgraded to be significantly more
+ * feature-rich than the original Fortran AZURE.  The documentation contained 
  * within these pages should serve as an introduction to the object structure of
- * AZURE Version 2.0 (AZURE2).
+ * AZURE2.
  * Most mathematical functions in AZURE2 utilize the GNU Scientific Libraries (GSL),
  * while the minimization routines are handled by Minuit2 (C++ version of Minuit). AZURE2
  * uses OpenMP to parallel many calculations and fitting, therefore the performance boost 

@@ -5,14 +5,14 @@
 #include "ALevel.h"
 #include "AChannel.h"
 
+class NucLine;
+
 /// An AZURE \f$ J^\pi \f$ group.
 
 /*!
  * In R-Matrix theory, levels are grouped according to their \f$ J^\pi \f$ values.  There is one R-/A-Matrix,
  * and thus one T-Matrix, for each \f$ J^\pi \f$ group. A JGroup object holds vectors of ALevel and AChannel objects.
  */
-
-class NucLine;
 
 class JGroup {
  public:

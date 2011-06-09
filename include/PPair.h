@@ -3,6 +3,8 @@
 
 #include "Decay.h"
 
+class NucLine;
+
 ///An AZURE Particle Pair
 
 /*!
@@ -10,8 +12,6 @@
  * pairs, traditionally given by the symbol \f$ \alpha \f$.  In AZURE, these particle pair are represented by a PPair object.
  * PPair objects are containers for vectors of Decay objects.
  */
-
-class NucLine;
 
 class PPair {
 public:
