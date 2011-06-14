@@ -11,6 +11,10 @@
  */
 
 struct RateParams {
+  ///False for looped temperatures, true for temperatures from file.
+  bool useFile;
+  ///String containing filename with temperatures to use
+  std::string temperatureFile;
   ///The entrance pair number for the rate calculation
   int entrancePair;
   ///The exit pair number for the rate calculation
