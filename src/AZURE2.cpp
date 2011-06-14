@@ -204,7 +204,38 @@ void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   in.clear();
 }
 
-void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs) {
+void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
+  bool validInfile=false;
+  if(!useReadline) std::cout << std::setw(38) << "Temperature File Name: ";
+  while(!validInfile) {
+    std::string inFile;
+    if(!useReadline) getline(std::cin,inFile);
+    else {
+      char *line = readline("               Temperature File Name: ");
+      inFile=line;
+      size_t endpos = inFile.find_last_not_of(" \t");
+      if( std::string::npos != endpos ) inFile = inFile.substr( 0, endpos+1 );
+      if(line && *line) add_history(line);
+      free(line);
+    }
+    if(!inFile.empty()) {
+      std::ifstream in;
+      in.open(inFile.c_str());
+      if(in) {
+	validInfile=true;
+	temperatureFile=inFile;
+	in.close();
+      }
+      in.clear();
+    }
+    if(!validInfile) {
+      std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+      if(!useReadline) std::cout << "               Temperature File Name: ";
+    }
+  }
+}
+
+void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool useReadline) {
   rateParams.entrancePair=0;
   rateParams.exitPair=0;
   rateParams.minTemp=0.;
@@ -212,21 +243,48 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs) {
   rateParams.tempStep=0.;
   while(rateParams.entrancePair==rateParams.exitPair){
     std::cout << std::endl;
-    std::cout << std::setw(30) << "Reaction Rate Entrance Pair: ";
-    std::cin >> rateParams.entrancePair;
-    std::cout << std::setw(30) << "Reaction Rate Exit Pair: ";
-    std::cin >> rateParams.exitPair;
+    std::cout << std::setw(38) << "Reaction Rate Entrance Pair: ";
+    std::string inString;
+    getline(std::cin,inString);
+    std::istringstream stm;
+    stm.str(inString);
+    stm >> rateParams.entrancePair;
+    stm.clear();inString="";
+    std::cout << std::setw(38) << "Reaction Rate Exit Pair: ";
+    getline(std::cin,inString);
+    stm.str(inString);
+    stm >> rateParams.exitPair;
     if(rateParams.entrancePair==rateParams.exitPair) 
       std::cout << "Cannot calculate rate for elastic scattering." << std::endl;
   }
   SegPairs tempSet={rateParams.entrancePair,rateParams.exitPair};
   segPairs.push_back(tempSet);
-  std::cout << std::setw(30) << "Reaction Rate Min Temp [GK]: ";
-  std::cin >> rateParams.minTemp;
-  std::cout << std::setw(30) << "Reaction Rate Max Temp [GK]: ";
-  std::cin >> rateParams.maxTemp;
-  std::cout << std::setw(30) << "Reaction Rate Temp Step [GK]: ";
-  std::cin >> rateParams.tempStep;
+  std::cout << std::setw(38) << "Use temperatures from file (yes/no): ";
+  bool goodAnswer = false;
+  std::string fileAnswer="";
+  while(!goodAnswer) {   
+    getline(std::cin,fileAnswer);
+    std::string trimmedAnswer;
+    for(int i =0;i<fileAnswer.length();i++)
+      if(fileAnswer[i]!=' '&&fileAnswer[i]!='\t'&&fileAnswer[i]!='\n')
+	trimmedAnswer+=fileAnswer[i];
+    if(trimmedAnswer!="yes"&&trimmedAnswer!="no") 
+     std::cout << "Please type 'yes' or 'no'." <<std::endl;
+    else {
+      goodAnswer = true;
+      fileAnswer=trimmedAnswer;
+    }
+  }
+  rateParams.useFile = (fileAnswer=="yes") ? (true) : (false); 
+  if(rateParams.useFile) getTemperatureFile(useReadline,rateParams.temperatureFile);
+  else {
+    std::cout << std::setw(38) << "Reaction Rate Min Temp [GK]: ";
+    std::cin >> rateParams.minTemp;
+    std::cout << std::setw(38) << "Reaction Rate Max Temp [GK]: ";
+    std::cin >> rateParams.maxTemp;
+    std::cout << std::setw(38) << "Reaction Rate Temp Step [GK]: ";
+    std::cin >> rateParams.tempStep;
+  }
 }
 
 void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
@@ -388,7 +446,7 @@ int main(int argc,char *argv[]){
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
   if(!configure.calcRate) readSegmentFile(configure,segPairs);
-  else getRateParams(configure.rateParams,segPairs);
+  else getRateParams(configure.rateParams,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file
   // If so, external capture will be needed

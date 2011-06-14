@@ -122,7 +122,10 @@ int AZUREMain::operator()(){
     std::cout << "Performing reaction rate calculation..." << std::endl;
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
-    reactionRate.CalculateRates(configure().rateParams.minTemp,configure().rateParams.maxTemp,configure().rateParams.tempStep);
+    if(configure().rateParams.useFile)
+      reactionRate.CalculateFileRates(configure().rateParams.temperatureFile);
+    else 
+      reactionRate.CalculateRates(configure().rateParams.minTemp,configure().rateParams.maxTemp,configure().rateParams.tempStep);
     reactionRate.WriteRates();
   }
 

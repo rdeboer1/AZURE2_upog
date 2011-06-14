@@ -51,6 +51,7 @@ class ReactionRate {
    */
   int exitKey() const {return exit_key_;};
   void CalculateRates(double,double,double);
+  void CalculateFileRates(std::string);
   /*!
    * Writes the rates to an output file.
    */
