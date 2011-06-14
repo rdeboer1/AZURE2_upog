@@ -7,7 +7,6 @@ SRCS =  AZUREMain.cpp\
 	ALevel.cpp\
 	CNuc.cpp\
 	Config.cpp\
-	DataLine.cpp\
 	Decay.cpp\
 	EData.cpp\
 	EPoint.cpp\
@@ -20,23 +19,19 @@ SRCS =  AZUREMain.cpp\
 	KGroup.cpp\
 	KLGroup.cpp\
 	MGroup.cpp\
-	NucLine.cpp\
 	PPair.cpp\
-	SegLine.cpp\
 	AZURECalc.cpp\
 	GenMatrixFunc.cpp\
 	RMatrixFunc.cpp\
 	GSL_MatInv.cpp\
 	AZUREOutput.cpp\
 	AMatrixFunc.cpp\
-	ECLine.cpp\
 	ECMGroup.cpp\
 	ECIntegral.cpp\
 	NFIntegral.cpp\
 	GSL_Diagonalize.cpp\
 	GSL_PEshift_dE.cpp\
 	DoubleFactorial.cpp\
-	ExtrapLine.cpp\
 	ReactionRate.cpp\
 	AZUREParams.cpp\
 	Equation.cpp\

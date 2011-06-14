@@ -3,6 +3,8 @@
 
 #include "Decay.h"
 
+class NucLine;
+
 ///An AZURE Particle Pair
 
 /*!
@@ -13,7 +15,7 @@
 
 class PPair {
 public:
-  PPair(struct NucLine);
+  PPair(NucLine);
   bool IsEntrance() const;
   int GetZ(int) const;
   int GetPi(int) const;

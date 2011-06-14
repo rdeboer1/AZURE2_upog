@@ -5,6 +5,8 @@
 #include "ALevel.h"
 #include "AChannel.h"
 
+class NucLine;
+
 /// An AZURE \f$ J^\pi \f$ group.
 
 /*!
@@ -14,7 +16,7 @@
 
 class JGroup {
  public:
-  JGroup(struct NucLine);
+  JGroup(NucLine);
   JGroup(double,int);
   bool IsInRMatrix() const;
   int IsLevel(ALevel);

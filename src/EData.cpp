@@ -55,10 +55,10 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
     if(!in.eof()&&line!="</segmentsData>") {
       std::istringstream stm;
       stm.str(line);
-      SegLine segment=ReadSegLine(stm);
+      SegLine segment(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       numTotalSegments++;
-      if(segment.isActive==1) {
+      if(segment.isActive()==1) {
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
@@ -112,9 +112,9 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
     if(!in.eof()&&line!="</segmentsTest>") {
       std::istringstream stm;
       stm.str(line);
-      ExtrapLine segment=ReadExtrapLine(stm);
+      ExtrapLine segment(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(segment.isActive==1) {
+      if(segment.isActive()==1) {
 	numTotalSegments++;
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
@@ -467,11 +467,23 @@ void EData::PrintData(const struct Config &configure) {
  */
 
 void EData::CalcLegendreP(int maxL) {
-  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+
+  std::map<int,std::vector<double> > qCoeffs;
+  //std::vector<double> segQCoeffs;
+  //Insert segment QCoeffs IN ORDER here with: segQCoeffs.push_back(qValue);
+  // segQCoeffs.push_back(1.0);  //first L=0
+  // segQCoeffs.push_back(1.0);  //then  L=1, etc.
+  //Then insert segQCoeff into qCoeffs with: qCoeffs[segmentKey]=segQCoeffs;
+  // qCoeffs[1]=segQCoeffs;  
+  //clear segQCoeffs with segQCoeffs.clear() and repeat for another segment
+  
+  for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) { 
+    std::map<int,std::vector<double> >::iterator qCoeffsItr = qCoeffs.find(segment->GetSegmentKey());
+    std::vector<double>* qCoeffsPtr = (qCoeffsItr!=qCoeffs.end()) ? &qCoeffsItr->second : NULL;
 #pragma omp parallel for 
     for(int i=1;i<=segment->NumPoints();i++) {
       EPoint* point=segment->GetPoint(i);
-      point->CalcLegendreP(maxL);    
+      point->CalcLegendreP(maxL,qCoeffsPtr);    
     }
   }
 }

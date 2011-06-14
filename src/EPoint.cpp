@@ -19,17 +19,17 @@
  * the EPoint object.
  */
 
-EPoint::EPoint(struct DataLine dataLine, ESegment *parent) {
+EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   entrance_key_=parent->GetEntranceKey();
   exit_key_=parent->GetExitKey();
-  cm_angle_=dataLine.angle;
-  lab_angle_=dataLine.angle;
-  cm_energy_=dataLine.energy;
-  lab_energy_=dataLine.energy;
-  cm_crosssection_=dataLine.cross;
-  cm_dcrosssection_=dataLine.error;
-  lab_crosssection_=dataLine.cross;
-  lab_dcrosssection_=dataLine.error;
+  cm_angle_=dataLine.angle();
+  lab_angle_=dataLine.angle();
+  cm_energy_=dataLine.energy();
+  lab_energy_=dataLine.energy();
+  cm_crosssection_=dataLine.crossSection();
+  cm_dcrosssection_=dataLine.error();
+  lab_crosssection_=dataLine.crossSection();
+  lab_dcrosssection_=dataLine.error();
   geofactor_=0.;
   fitcrosssection_=0.;
   sfactorconv_=0.;
@@ -403,7 +403,7 @@ EnergyMap EPoint::GetMap() const {
 void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
   this->CalcEDependentValues(compound,configure);
   if(this->IsDifferential()) 
-    this->CalcLegendreP(configure.maxLOrder);
+    this->CalcLegendreP(configure.maxLOrder,NULL);
   this->CalcCoulombAmplitude(compound);
   if(configure.isEC) this->CalculateECAmplitudes(compound);
 }
@@ -511,19 +511,25 @@ void EPoint::SetSFactorConversion(double conversion) {
  * Calculates Legendre polynomials up to a maximum order.  The polynomials are added, in order, to a vector.
  */
 
-void EPoint::CalcLegendreP(int maxL) {
+void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
   double x=cos(this->GetCMAngle()*pi/180.0);
   if(maxL>=0) {
-    this->AddLegendreP(1.0);
+    if(qValuePtr && qValuePtr->size()>0)
+      this->AddLegendreP(qValuePtr->operator[](0));
+    else this->AddLegendreP(1.0);
     double polyMinusTwo=1.0;
     if(maxL>=1) {
-      this->AddLegendreP(x);
+      if(qValuePtr && qValuePtr->size()>1)
+	this->AddLegendreP(x*qValuePtr->operator[](1));
+      else this->AddLegendreP(x);
       double polyMinusOne=x;
       if(maxL>=2) {
 	for(int lOrder=2;lOrder<=maxL;lOrder++) {
 	  double poly=(2.0*lOrder-1.0)/lOrder*x*polyMinusOne-
 	    (lOrder-1.0)/lOrder*polyMinusTwo;
-	  this->AddLegendreP(poly);
+	  if(qValuePtr && qValuePtr->size()>lOrder)
+	    this->AddLegendreP(poly*qValuePtr->operator[](lOrder));
+	  else this->AddLegendreP(poly);
 	  polyMinusTwo=polyMinusOne;
 	  polyMinusOne=poly;
 	}
@@ -531,7 +537,7 @@ void EPoint::CalcLegendreP(int maxL) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalcLegendreP(maxL);
+    this->GetSubPoint(i)->CalcLegendreP(maxL,qValuePtr);
   }
 }
 

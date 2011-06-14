@@ -8,14 +8,14 @@
  * This constructor can be used if a channel is to be created from a specific line of the nuclear input file.
  */
 
-AChannel::AChannel(struct NucLine nucLine, int pairNum) {
-  l_=nucLine.l;
-  s_=nucLine.s;
+AChannel::AChannel(NucLine nucLine, int pairNum) {
+  l_=nucLine.l();
+  s_=nucLine.s();
   pair_=pairNum;
-  if(nucLine.PType==0) {
+  if(nucLine.pType()==0) {
     radtype_='P';
-  } else if(nucLine.PType==10) {
-    if(nucLine.LevelPi*nucLine.Pi2==pow(-1,nucLine.l)) radtype_='E';
+  } else if(nucLine.pType()==10) {
+    if(nucLine.levelPi()*nucLine.pi2()==pow(-1,nucLine.l())) radtype_='E';
     else radtype_='M';
   }
 }

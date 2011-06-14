@@ -10,30 +10,30 @@
  * is created with reference to an entry in the segments data file.
  */
 
-ESegment::ESegment(struct SegLine segLine) {
-  entrancekey_=segLine.entrancekey;
-  exitkey_=segLine.exitkey;
-  min_e_=segLine.min_e;
-  max_e_=segLine.max_e;
-  min_a_=segLine.min_a; 
-  max_a_=segLine.max_a;
+ESegment::ESegment(SegLine segLine) {
+  entrancekey_=segLine.entranceKey();
+  exitkey_=segLine.exitKey();
+  min_e_=segLine.minE();
+  max_e_=segLine.maxE();
+  min_a_=segLine.minA(); 
+  max_a_=segLine.maxA();
   e_step_=0.0;
   a_step_=0.0;
   segment_chi_squared_=0.0;
-  if(segLine.diff==1) isdifferential_=true;
+  if(segLine.isDiff()==1) isdifferential_=true;
   else isdifferential_=false;
-  if(segLine.diff==2) {
+  if(segLine.isDiff()==2) {
     isphase_=true;
-    j_=segLine.j;
-    l_=segLine.l;
+    j_=segLine.phaseJ();
+    l_=segLine.phaseL();
   } else {
     isphase_=false;
     j_=0.0;
     l_=0;
   }
-  datafile_=segLine.datafile;
-  dataNorm_=segLine.dataNorm;
-  if(segLine.varyNorm==1) varyNorm_=true;
+  datafile_=segLine.dataFile();
+  dataNorm_=segLine.dataNorm();
+  if(segLine.varyNorm()==1) varyNorm_=true;
   else varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
@@ -45,22 +45,22 @@ ESegment::ESegment(struct SegLine segLine) {
  * extrapolation file.
  */
 
-ESegment::ESegment(struct ExtrapLine extrapLine) {
-  entrancekey_=extrapLine.entrancekey;
-  exitkey_=extrapLine.exitkey;
-  min_e_=extrapLine.min_e;
-  max_e_=extrapLine.max_e;
-  min_a_=extrapLine.min_a; 
-  max_a_=extrapLine.max_a;
-  e_step_=extrapLine.e_step;
-  a_step_=extrapLine.a_step;
+ESegment::ESegment(ExtrapLine extrapLine) {
+  entrancekey_=extrapLine.entranceKey();
+  exitkey_=extrapLine.exitKey();
+  min_e_=extrapLine.minE();
+  max_e_=extrapLine.maxE();
+  min_a_=extrapLine.minA(); 
+  max_a_=extrapLine.maxA();
+  e_step_=extrapLine.eStep();
+  a_step_=extrapLine.aStep();
   segment_chi_squared_=0.0;
-  if(extrapLine.diff==1) isdifferential_=true;
+  if(extrapLine.isDiff()==1) isdifferential_=true;
   else isdifferential_=false;
-  if(extrapLine.diff==2) {
+  if(extrapLine.isDiff()==2) {
     isphase_=true;
-    j_=extrapLine.j;
-    l_=extrapLine.l;
+    j_=extrapLine.phaseJ();
+    l_=extrapLine.phaseL();
   } else {
     isphase_=false;
     j_=0.0;
@@ -159,7 +159,7 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData) {
   std::ifstream in(infile.c_str());
   if(!in) return -1;
   while(!in.eof()) {
-    DataLine line=ReadDataLine(in);
+    DataLine line(in);
     if(!in.eof()) {
       EPoint NewEPoint(line,this);
       if(this->IsInSegment(NewEPoint)) {
