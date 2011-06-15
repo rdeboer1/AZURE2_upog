@@ -1,3 +1,15 @@
+/* 
+ * AZURE2.cpp
+ * Ethan Uberseder, University of Notre Dame, 2011
+ * 
+ * This file contains the main() function, as well as other C functions used to 
+ * initialize the program.  The functions defined here are (mostly) proceedural
+ * C, and used to initialize the AZUREMain object from command line input.  All
+ * actual calculations are managed by the AZUREMain object, and (almost) all 
+ * subsequent routines/classes follow object-oriented C++ programming conventions.
+ */
+
+
 #include "AZUREMain.h"
 #include "Config.h"
 #include "ECLine.h"
@@ -9,6 +21,10 @@
 #include <readline/history.h>
 
 struct SegPairs {int firstPair; int secondPair;};
+
+/*!
+ * This function displays the welcome banner.
+ */
 
 void welcomeMessage() {
   std::cout << std::endl
@@ -22,13 +38,22 @@ void welcomeMessage() {
 	    << std::endl;
 }
 
+/*!
+ * This function prints a message upon successful termination of the program.
+ */
+
 void exitMessage() {
   std::cout << std::endl
 	    << "Thanks for using AZURE." << std::endl;
 }
 
+/*!
+ * This function prints the response to the --help command which consists of
+ * available runtime options.
+ */
+
 void printHelp() {
-  std::cout << "Syntax: AZURE2 options configfile" << std::endl << std::endl
+  std::cout << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
 	    << "Options:" << std::endl
             << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
             << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
@@ -37,37 +62,29 @@ void printHelp() {
             << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl;
 }
 
+/*!
+ * This function parses the command line options given, and sets the appropriate variables in the Config
+ * structure.  It also reads and parses the configuration file if the appropriate environment
+ * variable is set.
+ */
+
 bool parseOptions(int argc, char *argv[], Config& configure) {
   bool useReadline=true;
   configure.transformParams=true;
   configure.isBrune=false;
   configure.ignoreExternals=false;
   configure.useRMC=false;
-  if(argc>2) {
-    for(int i=1; i<argc-1; i++) {
-      std::string arg=argv[i];
-      if(arg=="--help") {
-	printHelp();
-	std::exit(0);
-      } else if(arg=="--no-readline") useReadline=false;
-      else if(arg=="--no-transform") configure.transformParams=false;
-      else if(arg=="--use-brune") configure.isBrune=true;
-      else if(arg=="--ignore-externals") configure.ignoreExternals=true;
-      else if(arg=="--use-rmc") configure.useRMC=true;
-      else std::cout << "WARNING: Unknown option " << arg << '.' << std::endl;
-    }
-    configure.configfile=argv[argc-1];
-  } else {
-    if(std::string(argv[1])=="--help") {
-	printHelp();
-	std::exit(0);
-    } else configure.configfile=argv[1];
+  configure.configfile="";
+  std::vector<std::string> options;
+  for(int i=1;i<argc;i++) {
+    std::string arg=argv[i];
+    if(!arg.empty()&&arg.substr(0,2)=="--") options.push_back(arg);
+    else configure.configfile=arg;
   }
   char* optionsFile = getenv("AZURE_OPTIONS_FILE");
   if(optionsFile) {
     std::ifstream in(optionsFile);
     if(in) {
-      std::vector<std::string> fileOptions;
       while(!in.eof()) {
 	std::string newOption;
 	getline(in,newOption);
@@ -76,25 +93,30 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
 	  for(std::string::iterator it = newOption.begin();it<newOption.end();it++) 
 	    if(*it!=' '&&*it!='\t'&&*it!='\n')
 	      trimmedOption+=*it;
-	  if(!trimmedOption.empty()) fileOptions.push_back(trimmedOption);
+	  if(!trimmedOption.empty()&&trimmedOption.substr(0,2)=="--") options.push_back(trimmedOption);
 	}
       }
       in.close();
-      for(std::vector<std::string>::iterator it = fileOptions.begin();it<fileOptions.end();it++) {
-	if(*it=="--help") {
-	  printHelp();
-	  std::exit(0);
-	} else if(*it=="--no-readline") useReadline=false;
-	else if(*it=="--no-transform") configure.transformParams=false;
-	else if(*it=="--use-brune") configure.isBrune=true;
-	else if(*it=="--ignore-externals") configure.ignoreExternals=true;
-	else if(*it=="--use-rmc") configure.useRMC=true;
-	else std::cout << "WARNING: Unknown option " << *it << '.' << std::endl;
-      }
     } else std::cout << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
+  }
+  for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
+    if(*it=="--help") {
+      printHelp();
+      std::exit(0);
+    } else if(*it=="--no-readline") useReadline=false;
+    else if(*it=="--no-transform") configure.transformParams=false;
+    else if(*it=="--use-brune") configure.isBrune=true;
+    else if(*it=="--ignore-externals") configure.ignoreExternals=true;
+    else if(*it=="--use-rmc") configure.useRMC=true;
+    else std::cout << "WARNING: Unknown option " << *it << '.' << std::endl;
   }
   return useReadline;
 }
+
+/*!
+ * This function handles the command shell in AZURE2.  The function will not terminate until the user
+ * enters a valid integer option.  Upon successful entry, the integer option is returned.
+ */
 
 int commandShell() {
   int command=0;
@@ -120,9 +142,13 @@ int commandShell() {
       std::cout << "Invalid option.  Please try again."
 		<< std::endl;
   } 
-
   return command;
 }
+
+/*!
+ * This function takes the returned option from the commandShell function and
+ * sets the appropriate flags in the Config structure.
+ */
 
 void processCommand(int command, Config& configure) {
   configure.chiVariance=1.0;
@@ -147,6 +173,11 @@ void processCommand(int command, Config& configure) {
     std::exit(0);
   }
 }
+
+/*!
+ * This function prompts for a parameter file and sets the corresponding configure
+ * flags and variables based on the user response.
+ */
 
 void getParameterFile(bool useReadline, Config& configure) {
   configure.oldParameters=false;
@@ -181,6 +212,12 @@ void getParameterFile(bool useReadline, Config& configure) {
     }
   }
 }
+
+/*!
+ * This function reads the segment file, and stores the active entrance and exit pair keys
+ * for cross reference with the External capture file.  Only if an active external capture segment
+ * is required is the user prompted for an external integrals file.
+ */
 
 void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   std::ifstream in;
@@ -234,6 +271,11 @@ void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   in.clear();
 }
 
+/*!
+ * If reaction rate is desired, the user may specify a file containing temperatures for the calculation.
+ * This function prompts for that file name, checks for access, and stores path.
+ */
+
 void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
   bool validInfile=false;
   if(!useReadline) std::cout << std::setw(38) << "Temperature File Name: ";
@@ -264,6 +306,11 @@ void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
     }
   }
 }
+
+/*!
+ * This function  prompts the user for the required parameters if reaction rate is 
+ * to be calculated.
+ */
 
 void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool useReadline) {
   rateParams.entrancePair=0;
@@ -316,6 +363,12 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool 
     std::cin >> rateParams.tempStep;
   }
 }
+
+/*!
+ * This function checks the external capture file against a vector of segment key 
+ * pairs. Only if the calculation includes external capture segments is the user
+ * prompted for an integrals file.  The appropriate configure flag is set here.
+ */
 
 void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
   configure.isEC=false;
@@ -371,6 +424,11 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
   }
 }
 
+/*!
+ * This function promps the user for an external capture integrals file, checks for it's validity, 
+ * and stores the path. 
+ */
+
 void getExternalCaptureFile(bool useReadline, Config& configure) {
   configure.oldECFile=false;
   if(configure.isEC&&!configure.calcRate) {
@@ -407,6 +465,10 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
   } 
 }
 
+/*!
+ * This function prints a brief start message describing the type of calculation that will be performed.
+ */
+
 void startMessage(const Config& configure) {
   if(configure.performError) std::cout << std::endl
 				       << "Calling AZURE in error analysis mode..." << std::endl;
@@ -420,19 +482,22 @@ void startMessage(const Config& configure) {
 		  << "Calling AZURE in calculate mode..." << std::endl;
 }
 
+/*!
+ * This is the main function. All the above initialization functions are called from here.
+ * The AZUREMain oject is created and called.
+ */
+
 int main(int argc,char *argv[]){
-
-  if(argc<2) {
-    std::cout << "Too few arguments.  Configuration file must be specified." << std::endl
-	      << "\tSyntax: AZURE2 configfile" << std::endl;
-    return -1;
-  } 
-
   //Create new configuration structure, and parse the command line parameters
   Config configure;
   bool useReadline = parseOptions(argc,argv,configure);
 
   //Read the parameters from the runtime configuration file
+  if(configure.configfile.empty()) {
+    std::cout << "A valid configuration file must be specified." << std::endl
+	      << "\tSyntax: AZURE2 <options> configfile" << std::endl;
+    return -1;
+  }
   if(ReadConfigFile(configure)==-1) {
     std::cout << "Could not open " << configure.configfile << ".  Check that file exists." 
 	      << std::endl;
