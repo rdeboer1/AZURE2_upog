@@ -7,8 +7,8 @@ COUL_SRCS=complex_functions.cpp\
 	  ode_int.cpp
 
 ../../lib/libcoul.a : $(COUL_SRCS:.cpp=.o) | ../../lib
-	ar cr $@ $(COUL_SRCS:.cpp=.o)
-	ranlib $@
+	$(AR) cr $@ $(COUL_SRCS:.cpp=.o)
+	$(RANLIB) $@
 
 %.o : %.cpp | $(COUL_depsdir)
 	@$(MAKEDEPEND)
