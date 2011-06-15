@@ -52,6 +52,9 @@ else
    LFLAGS += -fopenmp
    LIBS += -lgomp -lpthread
 endif
+ifeq ($(CROSS),yes)
+   LIBS += -lpdcurses
+endif
 
 srcdir = src
 coul_srcdir = coul/src
