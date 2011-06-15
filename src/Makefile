@@ -37,11 +37,11 @@ SRCS =  AZUREMain.cpp\
 	Equation.cpp\
 	TargetEffect.cpp\
 	CoulFunc.cpp\
-	EDataIterator.cpp
+	EDataIterator.cpp\
+        AZURE2.cpp
 
-
-../AZURE2 : AZURE2.cpp $(SRCS:.cpp=.o)
-	$(CXX) $(CPPFLAGS) $(LFLAGS) -o $@ AZURE2.cpp $(SRCS:.cpp=.o) $(LIBS) 
+../AZURE2 : $(SRCS:.cpp=.o)
+	$(LD) $(LFLAGS) -o $@ $(SRCS:.cpp=.o) $(LIBS) 
 
 %.o : %.cpp | $(depsdir)
 	@$(MAKEDEPEND)
