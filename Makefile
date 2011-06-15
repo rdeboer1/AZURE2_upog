@@ -45,9 +45,12 @@ endif
 LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline
 ifeq ($(CXX),icpc)
    CPPFLAGS += -openmp
+   LFLAGS += -openmp
    LIBS += -lglib-2.0 -lncurses -limf -liomp5 -lpthread
 else 
+   CPPFLAGS += -fopenmp
    LFLAGS += -fopenmp
+   LIBS += -lgomp -lpthread
 endif
 
 srcdir = src
