@@ -63,6 +63,36 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
 	std::exit(0);
     } else configure.configfile=argv[1];
   }
+  char* optionsFile = getenv("AZURE_OPTIONS_FILE");
+  if(optionsFile) {
+    std::ifstream in(optionsFile);
+    if(in) {
+      std::vector<std::string> fileOptions;
+      while(!in.eof()) {
+	std::string newOption;
+	getline(in,newOption);
+	if(!in.eof()) {
+	  std::string trimmedOption="";
+	  for(std::string::iterator it = newOption.begin();it<newOption.end();it++) 
+	    if(*it!=' '&&*it!='\t'&&*it!='\n')
+	      trimmedOption+=*it;
+	  if(!trimmedOption.empty()) fileOptions.push_back(trimmedOption);
+	}
+      }
+      in.close();
+      for(std::vector<std::string>::iterator it = fileOptions.begin();it<fileOptions.end();it++) {
+	if(*it=="--help") {
+	  printHelp();
+	  std::exit(0);
+	} else if(*it=="--no-readline") useReadline=false;
+	else if(*it=="--no-transform") configure.transformParams=false;
+	else if(*it=="--use-brune") configure.isBrune=true;
+	else if(*it=="--ignore-externals") configure.ignoreExternals=true;
+	else if(*it=="--use-rmc") configure.useRMC=true;
+	else std::cout << "WARNING: Unknown option " << *it << '.' << std::endl;
+      }
+    } else std::cout << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
+  }
   return useReadline;
 }
 

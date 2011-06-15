@@ -108,6 +108,7 @@ void ReactionRate::CalculateFileRates(std::string temperatureFile) {
 	}
       }
     }
+    inFile.close();
     std::cout << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
     for(std::vector<RateData>::iterator rateIterator = rates_.begin(); rateIterator < rates_.end(); rateIterator++) {
       rateIterator->rate=gsl_reactionrate_integration(rateIterator->temperature,compound(),configure(),entranceKey(),exitKey());
