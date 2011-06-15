@@ -5,10 +5,10 @@
  * This constructor is used when a level object is created from an entry in the nuclear file.
  */
 
-ALevel::ALevel(struct NucLine nucLine) :
-  level_e_(nucLine.LevelExE),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0), isECLevel_(false),
+ALevel::ALevel(NucLine nucLine) :
+  level_e_(nucLine.levelE()),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0), isECLevel_(false),
   ecMultMask_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {
-  if(nucLine.levelFix==1) energyfixed_=true;
+  if(nucLine.levelFix()==1) energyfixed_=true;
   else energyfixed_=false;
 }
 
@@ -204,14 +204,14 @@ complex ALevel::GetExternalGamma(int channelNum) const {
  * The initial reduced width amplitude is set from an entry in the nuclear input file.
  */
 
-void ALevel::AddGamma(struct NucLine nucLine) {
-  double b=nucLine.Gam;
+void ALevel::AddGamma(NucLine nucLine) {
+  double b=nucLine.gamma();
   gammas_.push_back(b);
   fitgammas_.push_back(0.0);
   transform_gammas_.push_back(0.0);
   big_gammas_.push_back(0.0);
   external_gammas_.push_back(complex(0.0,0.0));
-  if(nucLine.channelFix==1) channelfixed_.push_back(true);
+  if(nucLine.channelFix()==1) channelfixed_.push_back(true);
   else channelfixed_.push_back(false);
   shifts_.push_back(0.0);
 }

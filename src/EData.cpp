@@ -55,10 +55,10 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
     if(!in.eof()&&line!="</segmentsData>") {
       std::istringstream stm;
       stm.str(line);
-      SegLine segment=ReadSegLine(stm);
+      SegLine segment(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       numTotalSegments++;
-      if(segment.isActive==1) {
+      if(segment.isActive()==1) {
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
@@ -112,9 +112,9 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
     if(!in.eof()&&line!="</segmentsTest>") {
       std::istringstream stm;
       stm.str(line);
-      ExtrapLine segment=ReadExtrapLine(stm);
+      ExtrapLine segment(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(segment.isActive==1) {
+      if(segment.isActive()==1) {
 	numTotalSegments++;
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {

@@ -89,6 +89,33 @@ void ReactionRate::CalculateRates(double minTemp, double maxTemp, double tempSte
   }
 }
 
+/*!
+ * Calculates the astrophysical reaction rates at temperatures from file.
+ */
+
+void ReactionRate::CalculateFileRates(std::string temperatureFile) {
+  std::ifstream inFile(temperatureFile.c_str());
+  if(inFile) {
+    while(!inFile.eof()) {
+      std::string line;
+      getline(inFile,line);
+      if(!inFile.eof()) {
+	RateData newRate = {0.,0.};
+	std::istringstream stm;
+	stm.str(line);
+	if(stm >> newRate.temperature) {
+	  rates_.push_back(newRate);
+	}
+      }
+    }
+    std::cout << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
+    for(std::vector<RateData>::iterator rateIterator = rates_.begin(); rateIterator < rates_.end(); rateIterator++) {
+      rateIterator->rate=gsl_reactionrate_integration(rateIterator->temperature,compound(),configure(),entranceKey(),exitKey());
+      std::cout << std::setw(20) << rateIterator->temperature << std::setw(20) << rateIterator->rate << std::endl;
+    }
+  } else std::cout << "Couldn't open temperature file." << std::endl;
+}
+
 void ReactionRate::WriteRates() {
   std::string outputfile=configure().outputdir+"reactionrates.dat";
   std::ofstream out;

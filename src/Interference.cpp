@@ -2,7 +2,7 @@
 
 /*!
  * The pathways combination is created specifically using references to two positions
- * in the Croup and ECMGroup vectors under the corresponding KGroup object.  Additionally,
+ * in the MGroup and ECMGroup vectors under the corresponding KGroup object.  Additionally,
  * the \f$ Z_1 Z_2 \f$ coefficients are passed along with the interference type.
  * The interference type is either RR, ER, RE,or EE, indicating which vector, the MGroup or ECMGroup, the 
  * stored indices refer to.

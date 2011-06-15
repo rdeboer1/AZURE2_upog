@@ -1,6 +1,8 @@
 #ifndef ACHANNEL_H
 #define ACHANNEL_H
 
+class NucLine;
+
 ///An AZURE channel object.
 
 /*!
@@ -9,7 +11,7 @@
 
 class AChannel {
  public:
-  AChannel(struct NucLine, int);
+  AChannel(NucLine, int);
   AChannel(int, double, int, char);
   int GetPairNum() const;
   int GetL() const;
