@@ -23,7 +23,7 @@ class CNuc;
 class PPair;
 class TargetEffect;
 class DataLine;
-
+class Config;
 
 ///An AZURE data point
 
@@ -71,7 +71,7 @@ class EPoint {
   complex GetCoulombAmplitude() const;
   complex GetECAmplitude(int,int) const;
   EnergyMap GetMap() const;
-  void Initialize(CNuc*,const struct Config&);
+  void Initialize(CNuc*,const Config&);
   void ConvertLabEnergy(PPair*);
   void ConvertLabAngle(PPair*);
   void ConvertLabAngle(PPair*,PPair*);
@@ -81,7 +81,7 @@ class EPoint {
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
   void CalcLegendreP(int,std::vector<double>*);
-  void CalcEDependentValues(CNuc*,const struct Config&);
+  void CalcEDependentValues(CNuc*,const Config&);
   void AddLoElement(int,int,complex);
   void AddSqrtPenetrability(int,int,double);
   void AddExpCoulombPhase(int,int,complex);
@@ -90,7 +90,7 @@ class EPoint {
   void SetCoulombAmplitude(complex);
   void CalculateECAmplitudes(CNuc*);
   void AddECAmplitude(int,int,complex);
-  void Calculate(CNuc*,const struct Config &configure,EPoint* parent=NULL, int subPointNum=0);
+  void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
   void ClearLocalMappedPoints();

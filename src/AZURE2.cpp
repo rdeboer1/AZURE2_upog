@@ -368,7 +368,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
     while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
     if(line=="<externalCapture>") {
       line="";
-      while(line!="</externalCapture>"&&!in.eof()&&(configure.paramMask ^ Config::USE_EXTERNAL_CAPTURE)) {
+      while(line!="</externalCapture>"&&!in.eof()&&!(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)) {
 	getline(in,line);
 	bool empty=true;
 	for(unsigned int i=0;i<line.size();++i) 
@@ -420,7 +420,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
  */
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
-  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&(configure.paramMask ^ Config::CALCULATE_REACTION_RATE)) {
+  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
     std::cout << std::endl;
     if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
     bool validInfile=false;
@@ -465,7 +465,7 @@ void startMessage(const Config& configure) {
   else if(configure.paramMask & Config::CALCULATE_REACTION_RATE) 
     std::cout << std::endl
 	      << "Calling AZURE in reaction rate mode..." << std::endl;  
-  else if(configure.paramMask ^ Config::CALCULATE_WITH_DATA) 
+  else if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) 
     std::cout << std::endl
 	      << "Calling AZURE in extrapolate mode..." << std::endl; 
   else if(configure.paramMask & Config::PERFORM_FIT) 
@@ -503,7 +503,12 @@ int main(int argc,char *argv[]){
     std::cout << "WARNING: --use-brune is incompatible with --use-rmc. Ignoring --use-brune." << std::endl;
     configure.paramMask &= ~Config::USE_BRUNE_FORMALISM;
   }
-  if((configure.paramMask & Config::USE_BRUNE_FORMALISM)||(configure.paramMask & Config::IGNORE_ZERO_WIDTHS)) configure.paramMask |= Config::USE_AMATRIX;
+  if((configure.paramMask & Config::USE_BRUNE_FORMALISM)||(configure.paramMask & Config::IGNORE_ZERO_WIDTHS)) {
+    if(!(configure.paramMask & Config::USE_AMATRIX)) 
+      std::cout << "WARNING: R-Matrix specified but --ignore-externals and --use-brune options require A-Matrix.  A-Matrix will be used."
+		<< std::endl;
+    configure.paramMask |= Config::USE_AMATRIX;
+  }
 
   //Print welcome message
   welcomeMessage();
@@ -519,7 +524,7 @@ int main(int argc,char *argv[]){
   
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
-  if(configure.paramMask ^ Config::CALCULATE_REACTION_RATE) readSegmentFile(configure,segPairs);
+  if(!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) readSegmentFile(configure,segPairs);
   else getRateParams(configure.rateParams,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file

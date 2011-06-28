@@ -22,8 +22,8 @@ class EData {
  public:
   EData();
   int NumSegments() const;
-  int Fill(const struct Config&,CNuc*);
-  int MakePoints(const struct Config&,CNuc*);
+  int Fill(const Config&,CNuc*);
+  int MakePoints(const Config&,CNuc*);
   int Iterations() const;
   int NumTargetEffects() const;
   int GetNormParamOffset() const;
@@ -35,17 +35,17 @@ class EData {
   void SetErrorAnalysis(bool);
   void Iterate();
   void ResetIterations();
-  void Initialize(CNuc*,const struct Config&);
+  void Initialize(CNuc*,const Config&);
   void AddSegment(ESegment);
-  void PrintData(const struct Config&);
+  void PrintData(const Config&);
   void CalcLegendreP(int);
-  void PrintLegendreP(const struct Config&);
-  void CalcEDependentValues(CNuc*,const struct Config&);
-  void PrintEDependentValues(const struct Config&,CNuc*);
+  void PrintLegendreP(const Config&);
+  void CalcEDependentValues(CNuc*,const Config&);
+  void PrintEDependentValues(const Config&,CNuc*);
   void CalcCoulombAmplitude(CNuc*);
-  void PrintCoulombAmplitude(const struct Config&,CNuc*); 
-  void WriteOutputFiles(const struct Config&,bool=false);
-  void CalculateECAmplitudes(CNuc*,const struct Config&);
+  void PrintCoulombAmplitude(const Config&,CNuc*); 
+  void WriteOutputFiles(const Config&,bool=false);
+  void CalculateECAmplitudes(CNuc*,const Config&);
   void MapData();
   void AddTargetEffect(TargetEffect);
   void SetNormParamOffset(int);

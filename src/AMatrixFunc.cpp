@@ -10,7 +10,7 @@
  * The AMatrixFunc object is created with reference to a CNuc object.
  */
 
-AMatrixFunc::AMatrixFunc(CNuc* compound, const struct Config &configure) :
+AMatrixFunc::AMatrixFunc(CNuc* compound, const Config &configure) :
   compound_(compound), configure_(configure) {}
 
 /*!

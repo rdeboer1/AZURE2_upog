@@ -400,7 +400,7 @@ EnergyMap EPoint::GetMap() const {
  * to calculate all energy dependent quantities that do no rely on the R-Matrix fit parameters.
  */
 
-void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
+void EPoint::Initialize(CNuc *compound,const Config &configure) {
   this->CalcEDependentValues(compound,configure);
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder,NULL);
@@ -548,7 +548,7 @@ void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
  * and hard sphere phase shfits.
  */
 
-void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure) {
+void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
   PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
   double geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
   this->SetGeometricalFactor(geofactor);
@@ -805,7 +805,7 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
  * Calculates the cross section for a data point based on the fit parameters in the compound nucleus.
  */
 
-void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *parent, int subPointNum) {
+void EPoint::Calculate(CNuc* theCNuc,const Config &configure, EPoint *parent, int subPointNum) {
 
   if(!this->IsTargetEffect()) {
     GenMatrixFunc *theMatrixFunc;

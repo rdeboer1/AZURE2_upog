@@ -101,7 +101,7 @@ int CNuc::GetPairNumFromKey(int key) {
  * input files.  Returns -1 if the files could not be read, and 0 if the files were read successfully.
  */
 
-int CNuc::Fill(const struct Config &configure) {
+int CNuc::Fill(const Config &configure) {
   int PairNum,LevelNum,ChannelNum,JGroupNum;
   int maxLValue=0;
   std::ifstream in(configure.configfile.c_str());
@@ -294,7 +294,7 @@ int CNuc::GetMaxLValue() const {
  * contributions and coefficients.  A CNuc object can only be initialized for use AFTER it is filled.
  */
 
-void CNuc::Initialize(const struct Config &configure) {
+void CNuc::Initialize(const Config &configure) {
   //Calculate Boundary Conditions
   std::cout << "Calculating Boundary Conditions..." << std::endl;
   this->CalcBoundaryConditions();
@@ -342,7 +342,7 @@ void CNuc::AddJGroup(JGroup jGroup) {
  * This includes all particle pairs, \f$ J^\pi \f$ groups, levels and channels.
  */
 
-void CNuc::PrintNuc(const struct Config &configure) {
+void CNuc::PrintNuc(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) {
@@ -421,7 +421,7 @@ void CNuc::PrintNuc(const struct Config &configure) {
  * Performs the initial parameter transformations from physical to formal parameters.
  */
 
-void CNuc::TransformIn(const struct Config& configure) {
+void CNuc::TransformIn(const Config& configure) {
   for(int j=1;j<=this->NumJGroups();j++) {
     JGroup *theJGroup=this->GetJGroup(j);
     if(theJGroup->IsInRMatrix()) {
@@ -563,7 +563,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 	  }
 	}
       }	  
-      if(configure.paramMask ^ Config::USE_BRUNE_FORMALISM) {
+      if(!(configure.paramMask & Config::USE_BRUNE_FORMALISM)) {
 	matrix_r nMatrix;
 	matrix_r mMatrix;      
 	for(int mu=0;mu<tempEnergies.size();mu++) {
@@ -622,7 +622,7 @@ void CNuc::TransformIn(const struct Config& configure) {
  * Calculates internal and external reaction pathways.
  */
 
-void CNuc::SortPathways(const struct Config& configure) {
+void CNuc::SortPathways(const Config& configure) {
   int DecayNum, KGroupNum, MGroupNum;
   for(int aa=1;aa<=this->NumPairs();aa++) {
     if(this->GetPair(aa)->IsEntrance()) {
@@ -676,7 +676,7 @@ void CNuc::SortPathways(const struct Config& configure) {
             }
           }
         }
-        else if(this->GetPair(ir)->GetPType()==10 && (configure.paramMask ^ Config::USE_RMC_FORMALISM)) {
+        else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
           for(double s=fabs(this->GetPair(aa)->GetJ(1)
 			    -this->GetPair(aa)->GetJ(2));
               s<=(this->GetPair(aa)->GetJ(1)
@@ -806,7 +806,7 @@ void CNuc::SortPathways(const struct Config& configure) {
  * Prints the internal and external reaction pathways.
  */
   
-void CNuc::PrintPathways(const struct Config &configure) {
+void CNuc::PrintPathways(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_PATHWAYS) {
@@ -951,7 +951,7 @@ void CNuc::CalcBoundaryConditions(){
  * Prints the boundary conditions.
  */
 
-void CNuc::PrintBoundaryConditions(const struct Config &configure) {
+void CNuc::PrintBoundaryConditions(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) {
@@ -1090,7 +1090,7 @@ void CNuc::CalcAngularDists(int maxL) {
  * Prints the KLGroup and Interference object structure as well as the calculated coefficients.
  */
 
-void CNuc::PrintAngularDists(const struct Config &configure) {
+void CNuc::PrintAngularDists(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS) {
@@ -1195,8 +1195,8 @@ void CNuc::FillCompoundFromParams(const vector_r &p) {
  * Performs the final parameter transformations from formal to physical parameters.
  */
 
-void CNuc::TransformOut(const struct Config& configure) {
-  if(configure.paramMask ^ Config::USE_BRUNE_FORMALISM) {
+void CNuc::TransformOut(const Config& configure) {
+  if(!(configure.paramMask & Config::USE_BRUNE_FORMALISM)) {
     int maxIterations=1000;
     double energyTolerance=1e-6;
     for(int j=1;j<=this->NumJGroups();j++) {

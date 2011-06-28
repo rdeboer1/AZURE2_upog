@@ -35,7 +35,7 @@ int EData::NumSegments() const {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
+int EData::Fill(const Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line="";
@@ -92,7 +92,7 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
+int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line = "";
@@ -343,7 +343,7 @@ void EData::ResetIterations(){
  * and entire EData object instead of a single EPoint object.
  */
 
-void EData::Initialize(CNuc *compound,const struct Config &configure) {
+void EData::Initialize(CNuc *compound,const Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
   this->CalcEDependentValues(compound,configure);
@@ -382,7 +382,7 @@ void EData::AddSegment(ESegment segment) {
  * Prints the data point after the object is filled or points are created.
  */
 
-void EData::PrintData(const struct Config &configure) {
+void EData::PrintData(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_DATA) {
@@ -493,7 +493,7 @@ void EData::CalcLegendreP(int maxL) {
  * Prints the Legendre polynomials for each point in the EData object.
  */ 
 
-void EData::PrintLegendreP(const struct Config &configure) {
+void EData::PrintLegendreP(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_LEGENDRE) {
@@ -533,7 +533,7 @@ void EData::PrintLegendreP(const struct Config &configure) {
  * Calls EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
+void EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
   for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
 #pragma omp parallel for
   	for(int i=1;i<=segment->NumPoints();i++) {
@@ -547,7 +547,7 @@ void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
  * Prints the values calculated by EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) {
+void EData::PrintEDependentValues(const Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_ENERGY_DEP) {
@@ -616,7 +616,7 @@ void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
  * Prints the values calculated by EPoint::CalcCoulombAmplitude for each point in the entire EData object.
  */
 
-void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) {
+void EData::PrintCoulombAmplitude(const Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
   if(configure.fileCheckMask & Config::CHECK_COUL_AMPLITUDES) {
@@ -662,14 +662,14 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
+void EData::WriteOutputFiles(const Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
   std::ofstream chiOut;
   if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     std::string chiOutFile = configure.outputdir+"chiSquared.out";
     chiOut.open(chiOutFile.c_str());
   }
-  if(configure.paramMask ^ Config::CALCULATE_WITH_DATA) output.SetExtrap();
+  if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
@@ -730,7 +730,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
  * Otherwise, the amplitudes are read from the specified file.
  */
 
-void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) {
+void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
@@ -751,7 +751,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
-	      if(configure.paramMask ^ Config::USE_PREVIOUS_INTEGRALS) {
+	      if(!(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS)) {
 		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
 		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
 		int numPoints=segment->NumPoints();
@@ -784,7 +784,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 		if(!(point->IsMapped())) {
 		  for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
 		    for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
-		      if(configure.paramMask ^ Config::USE_PREVIOUS_INTEGRALS) {
+		      if(!(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS)) {
 			if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
 			for(EPointIterator subPoint=point->GetSubPoints().begin();
 			    subPoint<point->GetSubPoints().end();subPoint++)

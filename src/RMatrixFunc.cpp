@@ -8,7 +8,7 @@
  * The RMatrixFunc object is created with reference to a CNuc object.
  */
 
-RMatrixFunc::RMatrixFunc(CNuc* compound, const struct Config &configure) :
+RMatrixFunc::RMatrixFunc(CNuc* compound, const Config &configure) :
   compound_(compound), configure_(configure) {}	
 
 /*!

@@ -24,7 +24,7 @@ class AZUREMain {
    * The AZUREMain function class is created using a Config structure.  New CNuc and EData objects are created at initialization 
    * of an AZUREMain object.
    */
-  AZUREMain(const struct Config &configure) : configure_(configure) {
+  AZUREMain(const Config &configure) : configure_(configure) {
     compound_ = new CNuc;
     data_ = new EData;
   };
@@ -43,7 +43,7 @@ class AZUREMain {
   /*!
    * Returns a reference to the Config structure.
    */
-  const struct Config &configure() const {return configure_;};
+  const Config &configure() const {return configure_;};
   /*!
    * Returns a pointer to the CNuc object.
    */
@@ -53,7 +53,7 @@ class AZUREMain {
    */
   EData *data() const {return data_;};
  private:
-  const struct Config &configure_;
+  const Config &configure_;
   CNuc *compound_;
   EData *data_;
 };

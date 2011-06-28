@@ -15,7 +15,7 @@ int AZUREMain::operator()(){
   if((configure().screenCheckMask|configure().fileCheckMask) & 
      Config::CHECK_COMPOUND_NUCLEUS) compound()->PrintNuc(configure());
 
-  if(configure().paramMask ^ Config::CALCULATE_REACTION_RATE) {
+  if(!(configure().paramMask & Config::CALCULATE_REACTION_RATE)) {
     //Fill the data object from the segments and data file
     //  Compound object is passed to the function for pair key verification and
     //  center of mass conversions, s-factor conversions, etc.
@@ -50,7 +50,7 @@ int AZUREMain::operator()(){
   AZUREParams params;
   compound()->FillMnParams(params.GetMinuitParams());
   data()->FillMnParams(params.GetMinuitParams());
-  if(configure().paramMask ^ Config::USE_PREVIOUS_PARAMETERS) {
+  if(!(configure().paramMask & Config::USE_PREVIOUS_PARAMETERS)) {
     std::cout << "Creating New param.par File..." << std::endl;
     params.WriteUserParameters(configure().outputdir,false);
   } else {
@@ -58,7 +58,7 @@ int AZUREMain::operator()(){
     params.ReadUserParameters(configure().paramfile);
   }
 
-  if(configure().paramMask ^ Config::CALCULATE_REACTION_RATE) {
+  if(!(configure().paramMask & Config::CALCULATE_REACTION_RATE)) {
     //Initialize data object
     data()->Initialize(compound(),configure());
   

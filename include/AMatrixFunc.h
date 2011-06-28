@@ -13,7 +13,7 @@
 
 class AMatrixFunc : public GenMatrixFunc {
  public:
-  AMatrixFunc(CNuc*, const struct Config &configure);
+  AMatrixFunc(CNuc*, const Config &configure);
   /*!
    * Returns a pointer to the compound nucleus object.
    */
@@ -21,7 +21,7 @@ class AMatrixFunc : public GenMatrixFunc {
   /*!
    * Returns a reference to the Config structure.
    */
-  const struct Config &configure() const {return configure_;};
+  const Config &configure() const {return configure_;};
   
   void ClearMatrices();
   void FillMatrices(EPoint*);
@@ -37,7 +37,7 @@ class AMatrixFunc : public GenMatrixFunc {
   void AddAInvMatrixElement(int,int,int,complex);
   void AddAMatrix(matrix_c);
  private:
-  const struct Config &configure_;
+  const Config &configure_;
   CNuc *compound_;
   vector_matrix_c a_inv_matrices_;
   vector_matrix_c a_matrices_;
