@@ -18,6 +18,10 @@ LD = icpc
 
 USE_STAT=yes
 
+# Change this variable to specify certain flags needed for linking on Windows systems (at least under MSYS).
+
+WINDOWS=no
+
 # Used for cross compiling.  The average user shouldn't need these variables.
 
 CROSS=no
@@ -38,6 +42,9 @@ ifneq ($(USE_STAT),yes)
    CPPFLAGS += -DNO_STAT
 endif
 LFLAGS = -L$(MINUIT_PREFIX)/lib
+ifneq ($(WINDOWS),no)
+   LFLAGS += -Wl,--enable-auto-import
+endif
 ifneq ($(MINUIT_PREFIX),$(GSL_PREFIX))
    CPPFLAGS += -I$(GSL_PREFIX)/include
    LFLAGS += -L$(GSL_PREFIX)/lib

@@ -122,6 +122,7 @@ int AZUREMain::operator()(){
     std::cout << "Performing reaction rate calculation..." << std::endl;
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
+    if(configure().isBrune) compound()->CalcShiftFunctions();
     if(configure().rateParams.useFile)
       reactionRate.CalculateFileRates(configure().rateParams.temperatureFile);
     else 
