@@ -5,6 +5,7 @@
 #include <iostream>
 
 Config::Config() {
+  chiVariance=1.0;
   screenCheckMask=0;
   fileCheckMask=0;
   paramMask=0;

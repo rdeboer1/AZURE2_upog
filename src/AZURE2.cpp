@@ -147,13 +147,20 @@ int commandShell() {
  */
 
 void processCommand(int command, Config& configure) {
-  configure.chiVariance=1.0;
   if(command==1) configure.paramMask |= Config::PERFORM_FIT;
   else if(command==3) configure.paramMask &= ~Config::CALCULATE_WITH_DATA;
   else if(command==4) {
-    std::cout << std::endl
-	      << std::setw(30) << "Allowed Chi-Squared Variance: ";
-    std::cin >> configure.chiVariance;
+    bool goodAnswer=false;
+    while (!goodAnswer) {
+      std::cout << std::setw(30) << "Allowed Chi-Squared Variance: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm>>configure.chiVariance) || configure.chiVariance<0.) 
+	std::cout << "Please enter a positive number." << std::endl;
+      else goodAnswer=true;
+    }
     configure.paramMask |= Config::PERFORM_FIT;
     configure.paramMask |= Config::PERFORM_ERROR_ANALYSIS;
   } else if(command==5) {
@@ -291,7 +298,8 @@ void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
       in.clear();
     }
     if(!validInfile) {
-      std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+      if(inFile.empty()) std::cout << "Please enter a file name." << std::endl;
+      else std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
       if(!useReadline) std::cout << "               Temperature File Name: ";
     }
   }
@@ -305,31 +313,39 @@ void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
 void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool useReadline) {
   rateParams.entrancePair=0;
   rateParams.exitPair=0;
-  rateParams.minTemp=0.;
-  rateParams.maxTemp=0.;
-  rateParams.tempStep=0.;
+  rateParams.minTemp=-1.;
+  rateParams.maxTemp=-1.;
+  rateParams.tempStep=-1.;
   while(rateParams.entrancePair==rateParams.exitPair){
-    std::cout << std::endl;
-    std::cout << std::setw(38) << "Reaction Rate Entrance Pair: ";
-    std::string inString;
-    getline(std::cin,inString);
-    std::istringstream stm;
-    stm.str(inString);
-    stm >> rateParams.entrancePair;
-    stm.clear();inString="";
-    std::cout << std::setw(38) << "Reaction Rate Exit Pair: ";
-    getline(std::cin,inString);
-    stm.str(inString);
-    stm >> rateParams.exitPair;
-    if(rateParams.entrancePair==rateParams.exitPair) 
+    while(!rateParams.entrancePair) {
+      std::cout << std::setw(38) << "Reaction Rate Entrance Pair: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm >> rateParams.entrancePair) || rateParams.entrancePair==0) 
+	std::cout << "Please enter an integer greater than zero." << std::endl ;
+    }
+    while(!rateParams.exitPair) {
+      std::cout << std::setw(38) << "Reaction Rate Exit Pair: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm >> rateParams.exitPair) || rateParams.exitPair==0) 
+	std::cout << "Please enter an integer greater than zero." << std::endl;
+    }
+    if(rateParams.entrancePair==rateParams.exitPair) {
       std::cout << "Cannot calculate rate for elastic scattering." << std::endl;
+      rateParams.entrancePair=0;rateParams.exitPair=0;
+    }
   }
   SegPairs tempSet={rateParams.entrancePair,rateParams.exitPair};
   segPairs.push_back(tempSet);
-  std::cout << std::setw(38) << "Use temperatures from file (yes/no): ";
   bool goodAnswer = false;
   std::string fileAnswer="";
   while(!goodAnswer) {   
+    std::cout << std::setw(38) << "Use temperatures from file (yes/no): ";
     getline(std::cin,fileAnswer);
     std::string trimmedAnswer;
     for(int i =0;i<fileAnswer.length();i++)
@@ -345,12 +361,33 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool 
   rateParams.useFile = (fileAnswer=="yes") ? (true) : (false); 
   if(rateParams.useFile) getTemperatureFile(useReadline,rateParams.temperatureFile);
   else {
-    std::cout << std::setw(38) << "Reaction Rate Min Temp [GK]: ";
-    std::cin >> rateParams.minTemp;
-    std::cout << std::setw(38) << "Reaction Rate Max Temp [GK]: ";
-    std::cin >> rateParams.maxTemp;
-    std::cout << std::setw(38) << "Reaction Rate Temp Step [GK]: ";
-    std::cin >> rateParams.tempStep;
+    while(rateParams.minTemp<0.) {
+      std::cout << std::setw(38) << "Reaction Rate Min Temp [GK]: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm >> rateParams.minTemp) || rateParams.minTemp<0.) 
+	std::cout << "Please enter a positive number." << std::endl;
+    }
+    while(rateParams.maxTemp<0.) {
+      std::cout << std::setw(38) << "Reaction Rate Max Temp [GK]: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm >> rateParams.maxTemp) || rateParams.maxTemp<0.) 
+	std::cout << "Please enter a positive number." << std::endl;
+    }
+    while(rateParams.tempStep<0.) {
+      std::cout << std::setw(38) << "Reaction Rate Temp Step [GK]: ";
+      std::string inString;
+      getline(std::cin,inString);
+      std::istringstream stm;
+      stm.str(inString);
+      if(!(stm >> rateParams.tempStep) || rateParams.tempStep<0.) 
+	std::cout << "Please enter a positive number." << std::endl;
+    }
   }
 }
 
@@ -368,7 +405,8 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
     while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
     if(line=="<externalCapture>") {
       line="";
-      while(line!="</externalCapture>"&&!in.eof()&&!(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)) {
+      while(line!="</externalCapture>"&&!in.eof()&&
+	    !(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)) {
 	getline(in,line);
 	bool empty=true;
 	for(unsigned int i=0;i<line.size();++i) 
