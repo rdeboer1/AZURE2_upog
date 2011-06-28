@@ -3,6 +3,7 @@
 #include "AZUREParams.h"
 #include "Config.h"
 #include "ReactionRate.h"
+#include "Minuit2/MnPrint.h"
 
 int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile
@@ -85,6 +86,16 @@ int AZUREMain::operator()(){
 	    errors.push_back(error);
 	  } else errors.push_back(std::pair< double, double > (0.,0.));
 	}
+	std::cout << min.UserCovariance();
+
+        std::ofstream out;
+        out.open("covariance_matrix.out");
+        if(out) {
+            out << min.UserCovariance();
+          out.flush();
+          out.close();
+        } else std::cout << "Could not save covariance_matrix.out file." << std::endl;
+        
 	params.WriteParameterErrors(errors,configure().outputdir);
       }
       params.GetMinuitParams()=min.UserParameters();
