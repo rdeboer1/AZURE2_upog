@@ -163,7 +163,7 @@ int CNuc::Fill(const struct Config &configure) {
   in.close();
   
   this->SetMaxLValue(maxLValue);
-  if(configure.mask & USE_EXTERNAL_CAPTURE)
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)
     if(this->ReadECFile(configure.configfile)==-1) return -1;
   
   return 0;
@@ -298,11 +298,11 @@ void CNuc::Initialize(const struct Config &configure) {
   //Calculate Boundary Conditions
   std::cout << "Calculating Boundary Conditions..." << std::endl;
   this->CalcBoundaryConditions();
-  if(configure.checkboundcon=="screen"||
-     configure.checkboundcon=="file") this->PrintBoundaryConditions(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_BOUNDARY_CONDITIONS)
+    this->PrintBoundaryConditions(configure);
 
   //Transform Input Parameters
-  if(configure.mask & TRANSFORM_PARAMETERS) {
+  if(configure.paramMask & Config::TRANSFORM_PARAMETERS) {
     std::cout << "Performing Input Parameter Transformation..." << std::endl;
     this->TransformIn(configure);
   }
@@ -310,14 +310,14 @@ void CNuc::Initialize(const struct Config &configure) {
   //Sort reaction pathways
   std::cout << "Sorting Reaction Pathways..." << std::endl;
   this->SortPathways(configure);
-  if(configure.checkpathways=="screen"|| 
-     configure.checkpathways=="file") this->PrintPathways(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_PATHWAYS) 
+    this->PrintPathways(configure);
   
   //Calculate Angular Distribution Coefficients
   std::cout << "Calculating Angular Distribution Coefficients..." << std::endl;
   this->CalcAngularDists(configure.maxLOrder);
-  if(configure.checkangdists=="screen"|| 
-     configure.checkangdists=="file") this->PrintAngularDists(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ANGULAR_DISTS) 
+    this->PrintAngularDists(configure);
   
 }
 
@@ -345,13 +345,16 @@ void CNuc::AddJGroup(JGroup jGroup) {
 void CNuc::PrintNuc(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checknucleus=="file") {
+  if(configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) {
     std::string outfile=configure.checkdir+"compoundnucleus.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checknucleus=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) 
+    sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checknucleus=="file"&&fbuffer.is_open())||configure.checknucleus=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS)&&
+      fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*          Particle Pairs          *" << std::endl
@@ -484,7 +487,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		double tempPene = (configure.mask & USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+		double tempPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 		if(tempPene<1e-10) tempPene=1e-10;
 		penes.push_back(tempPene);
 	      }
@@ -540,7 +543,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if((configure.mask & USE_EXTERNAL_CAPTURE) && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && (configure.mask & IGNORE_ZERO_WIDTHS))) {
+	      if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS))) {
 		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
@@ -560,7 +563,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 	  }
 	}
       }	  
-      if(configure.mask ^ USE_BRUNE_FORMALISM) {
+      if(configure.paramMask ^ Config::USE_BRUNE_FORMALISM) {
 	matrix_r nMatrix;
 	matrix_r mMatrix;      
 	for(int mu=0;mu<tempEnergies.size();mu++) {
@@ -673,7 +676,7 @@ void CNuc::SortPathways(const struct Config& configure) {
             }
           }
         }
-        else if(this->GetPair(ir)->GetPType()==10 && (configure.mask ^ USE_RMC_FORMALISM)) {
+        else if(this->GetPair(ir)->GetPType()==10 && (configure.paramMask ^ Config::USE_RMC_FORMALISM)) {
           for(double s=fabs(this->GetPair(aa)->GetJ(1)
 			    -this->GetPair(aa)->GetJ(2));
               s<=(this->GetPair(aa)->GetJ(1)
@@ -806,13 +809,14 @@ void CNuc::SortPathways(const struct Config& configure) {
 void CNuc::PrintPathways(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkpathways=="file") {
+  if(configure.fileCheckMask & Config::CHECK_PATHWAYS) {
     std::string outfile=configure.checkdir+"pathways.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkpathways=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_PATHWAYS) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkpathways=="file"&&fbuffer.is_open())||configure.checkpathways=="screen") {   
+  if(((configure.fileCheckMask & Config::CHECK_PATHWAYS)&&fbuffer.is_open())
+     ||(configure.screenCheckMask & Config::CHECK_PATHWAYS)) {   
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*    Internal Reaction Pathways    *" << std::endl
@@ -950,13 +954,14 @@ void CNuc::CalcBoundaryConditions(){
 void CNuc::PrintBoundaryConditions(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkboundcon=="file") {
+  if(configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) {
     std::string outfile=configure.checkdir+"boundaryconditions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkboundcon=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkboundcon=="file"&&fbuffer.is_open())||configure.checkboundcon=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)) {
     out << std::endl
         << "************************************" << std::endl
         << "*        Boundary Conditions       *" << std::endl
@@ -1088,13 +1093,14 @@ void CNuc::CalcAngularDists(int maxL) {
 void CNuc::PrintAngularDists(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkangdists=="file") {
+  if(configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS) {
     std::string outfile=configure.checkdir+"angulardistributions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkangdists=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkangdists=="file"&&fbuffer.is_open())||configure.checkangdists=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS)) {
     out << std::endl
         << "************************************" << std::endl
         << "*       Angular Distributions       *" << std::endl
@@ -1190,7 +1196,7 @@ void CNuc::FillCompoundFromParams(const vector_r &p) {
  */
 
 void CNuc::TransformOut(const struct Config& configure) {
-  if(configure.mask ^ USE_BRUNE_FORMALISM) {
+  if(configure.paramMask ^ Config::USE_BRUNE_FORMALISM) {
     int maxIterations=1000;
     double energyTolerance=1e-6;
     for(int j=1;j<=this->NumJGroups();j++) {
@@ -1363,7 +1369,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    if((int)(2*jValue)%2!=0) pene*=-1.;
 	    tempPene.push_back(pene);
 	  } else {
-	    double pene = (configure.mask & USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+	    double pene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 	    tempPene.push_back(pene);
 	  }
 	}
@@ -1371,8 +1377,8 @@ void CNuc::TransformOut(const struct Config& configure) {
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
-	   theLevel->IsInRMatrix()&&(configure.mask & USE_EXTERNAL_CAPTURE) &&
-	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && (configure.mask & IGNORE_ZERO_WIDTHS)))
+	   theLevel->IsInRMatrix()&&(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
+	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS)))
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;

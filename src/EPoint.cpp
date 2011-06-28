@@ -405,7 +405,7 @@ void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder,NULL);
   this->CalcCoulombAmplitude(compound);
-  if(configure.mask & USE_EXTERNAL_CAPTURE) this->CalculateECAmplitudes(compound);
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) this->CalculateECAmplitudes(compound);
 }
 
 /*!
@@ -601,7 +601,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure)
 	} else if(thePair->GetPType()==10){
 	  complex loElement = complex(0.0,0.0);
 	  this->AddLoElement(j,ch,loElement);
-	  double sqrtPene = (configure.mask & USE_RMC_FORMALISM) ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
+	  double sqrtPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
 	  this->AddSqrtPenetrability(j,ch,sqrtPene);
 	  this->AddExpCoulombPhase(j,ch,1.0);
 	  this->AddExpHardSpherePhase(j,ch,1.0);
@@ -809,7 +809,7 @@ void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *par
 
   if(!this->IsTargetEffect()) {
     GenMatrixFunc *theMatrixFunc;
-    if(configure.mask & USE_AMATRIX) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
+    if(configure.paramMask & Config::USE_AMATRIX) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
     else theMatrixFunc=new RMatrixFunc(theCNuc,configure);
     theMatrixFunc->ClearMatrices();
     theMatrixFunc->FillMatrices(this);

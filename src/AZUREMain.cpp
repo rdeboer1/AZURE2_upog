@@ -12,14 +12,15 @@ int AZUREMain::operator()(){
 	      << std::endl;
     return -1;
   }
-  if(configure().checknucleus=="screen"|| configure().checknucleus=="file") compound()->PrintNuc(configure());
+  if((configure().screenCheckMask|configure().fileCheckMask) & 
+     Config::CHECK_COMPOUND_NUCLEUS) compound()->PrintNuc(configure());
 
-  if(configure().mask ^ CALCULATE_REACTION_RATE) {
+  if(configure().paramMask ^ Config::CALCULATE_REACTION_RATE) {
     //Fill the data object from the segments and data file
     //  Compound object is passed to the function for pair key verification and
     //  center of mass conversions, s-factor conversions, etc.
     std::cout << "Filling Data Structures..." << std::endl;
-    if(configure().mask & CALCULATE_WITH_DATA) {
+    if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
       if(data()->Fill(configure(),compound())==-1) {
 	std::cout << "Could not fill data object from file." << std::endl;
 	return -1;
@@ -30,7 +31,8 @@ int AZUREMain::operator()(){
 	return -1;
       }
     } 
-    if(configure().checkdata=="screen"||configure().checkdata=="file") data()->PrintData(configure());
+    if((configure().fileCheckMask|configure().screenCheckMask) & Config::CHECK_DATA)
+      data()->PrintData(configure());
   } else {
     if(!compound()->IsPairKey(configure().rateParams.entrancePair)||!compound()->IsPairKey(configure().rateParams.exitPair)) {
       std::cout << "Reaction rate pairs do not exist in compound nucleus." 
@@ -48,7 +50,7 @@ int AZUREMain::operator()(){
   AZUREParams params;
   compound()->FillMnParams(params.GetMinuitParams());
   data()->FillMnParams(params.GetMinuitParams());
-  if(configure().mask ^ USE_PREVIOUS_PARAMETERS) {
+  if(configure().paramMask ^ Config::USE_PREVIOUS_PARAMETERS) {
     std::cout << "Creating New param.par File..." << std::endl;
     params.WriteUserParameters(configure().outputdir,false);
   } else {
@@ -56,7 +58,7 @@ int AZUREMain::operator()(){
     params.ReadUserParameters(configure().paramfile);
   }
 
-  if(configure().mask ^ CALCULATE_REACTION_RATE) {
+  if(configure().paramMask ^ Config::CALCULATE_REACTION_RATE) {
     //Initialize data object
     data()->Initialize(compound(),configure());
   
@@ -64,14 +66,14 @@ int AZUREMain::operator()(){
     AZURECalc theFunc(data(),compound(),configure());
     theFunc.SetErrorDef(1.0);
     
-    if(configure().mask & PERFORM_FIT) {
+    if(configure().paramMask & Config::PERFORM_FIT) {
       //Call Minuit for function minimization, write minimized parameters to params
-      if(configure().mask & USE_AMATRIX) std::cout << "Performing A-Matrix Fit..." << std::endl; 
+      if(configure().paramMask & Config::USE_AMATRIX) std::cout << "Performing A-Matrix Fit..." << std::endl; 
       else std::cout << "Performing R-Matrix Fit..." << std::endl;
       data()->SetFit(true);
       ROOT::Minuit2::MnMigrad migrad(theFunc,params.GetMinuitParams());
       ROOT::Minuit2::FunctionMinimum min=migrad();
-      if(configure().mask & PERFORM_ERROR_ANALYSIS) {
+      if(configure().paramMask & Config::PERFORM_ERROR_ANALYSIS) {
 	std::cout << std::endl 
 		  << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
 	data()->SetErrorAnalysis(true);
@@ -90,13 +92,13 @@ int AZUREMain::operator()(){
       params.GetMinuitParams()=min.UserParameters();
       params.WriteUserParameters(configure().outputdir,true);
     } else {
-      if(configure().mask & USE_AMATRIX) std::cout << "Performing A-Matrix Calculation..." << std::endl; 
+      if(configure().paramMask & Config::USE_AMATRIX) std::cout << "Performing A-Matrix Calculation..." << std::endl; 
       else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
     }
     data()->SetFit(false);
     data()->SetErrorAnalysis(false);
     double chiSquared=theFunc(params.GetMinuitParams().Params());
-    if(configure().mask & CALCULATE_WITH_DATA) {
+    if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
       std::cout << std::endl << std::endl;
       for(ESegmentIterator segment=data()->GetSegments().begin();
 	  segment<data()->GetSegments().end();segment++) 
@@ -122,7 +124,8 @@ int AZUREMain::operator()(){
     std::cout << "Performing reaction rate calculation..." << std::endl;
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
-    if(configure().mask & USE_BRUNE_FORMALISM) compound()->CalcShiftFunctions();
+    if(configure().paramMask & Config::USE_BRUNE_FORMALISM) 
+      compound()->CalcShiftFunctions();
     if(configure().rateParams.useFile)
       reactionRate.CalculateFileRates(configure().rateParams.temperatureFile);
     else 

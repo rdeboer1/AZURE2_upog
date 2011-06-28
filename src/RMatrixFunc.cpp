@@ -89,7 +89,7 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
 		GetExE();
 	      double gammaSum=0.;
-	      if(configure().mask & USE_RMC_FORMALISM) 
+	      if(configure().paramMask & Config::USE_RMC_FORMALISM) 
 		for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
 		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()!='P')
 		    gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
@@ -140,7 +140,7 @@ void RMatrixFunc::CalculateTMatrix(EPoint *point) {
   int irEnd;
   int irStart;
   bool isRMC=false;
-  if((configure().mask & USE_RMC_FORMALISM) && 
+  if((configure().paramMask & Config::USE_RMC_FORMALISM) && 
      compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10) {
     irStart=1;
     irEnd=compound()->GetPair(aa)->NumDecays();

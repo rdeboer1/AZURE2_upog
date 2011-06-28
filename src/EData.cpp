@@ -347,24 +347,24 @@ void EData::Initialize(CNuc *compound,const struct Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
   this->CalcEDependentValues(compound,configure);
-  if(configure.checkpene=="screen"||
-     configure.checkpene=="file") this->PrintEDependentValues(configure,compound);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ENERGY_DEP) 
+    this->PrintEDependentValues(configure,compound);
 
   //Calculate legendre polynomials for each data point
   std::cout << "Calculating Legendre Polynomials..." << std::endl;
   this->CalcLegendreP(configure.maxLOrder);
-  if(configure.checklegpoly=="screen"||
-     configure.checklegpoly=="file") this->PrintLegendreP(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_LEGENDRE) 
+    this->PrintLegendreP(configure);
 
   //Calculate Coulomb Amplitudes
   std::cout << "Calculating Coulomb Amplitudes..." << std::endl;
   this->CalcCoulombAmplitude(compound);
-  if(configure.checkcoulamp=="screen"|| configure.checkcoulamp=="file") {
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_COUL_AMPLITUDES) {
     this->PrintCoulombAmplitude(configure,compound);
   }
 
   //Calculate new ec amplitudes
-  if(configure.mask & USE_EXTERNAL_CAPTURE) {
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) {
     std::cout << "Calculating External Capture Amplitudes..." << std::endl;
     this->CalculateECAmplitudes(compound,configure);
   }
@@ -385,13 +385,14 @@ void EData::AddSegment(ESegment segment) {
 void EData::PrintData(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkdata=="file") {
+  if(configure.fileCheckMask & Config::CHECK_DATA) {
     std::string outfile=configure.checkdir+"data.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkdata=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_DATA) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkdata=="file"&&fbuffer.is_open())||configure.checkdata=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_DATA)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_DATA)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*            Segments              *" << std::endl
@@ -495,13 +496,14 @@ void EData::CalcLegendreP(int maxL) {
 void EData::PrintLegendreP(const struct Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checklegpoly=="file") {
+  if(configure.fileCheckMask & Config::CHECK_LEGENDRE) {
     std::string outfile=configure.checkdir+"legendre.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checklegpoly=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_LEGENDRE) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checklegpoly=="file"&&fbuffer.is_open())||configure.checklegpoly=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_LEGENDRE)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_LEGENDRE)) {
     out << std::endl
     << "************************************" << std::endl
     << "*       Legendre Polynomials       *" << std::endl
@@ -548,13 +550,14 @@ void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
 void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkpene=="file") {
+  if(configure.fileCheckMask & Config::CHECK_ENERGY_DEP) {
     std::string outfile=configure.checkdir+"lomatrixandpene.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkpene=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_ENERGY_DEP) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkpene=="file"&&fbuffer.is_open())||configure.checkpene=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_ENERGY_DEP)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_ENERGY_DEP)) {
     out << std::endl
     << "************************************" << std::endl
     << "*  Lo Matrix and Penetrabilities   *" << std::endl
@@ -616,13 +619,14 @@ void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
 void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkcoulamp=="file") {
+  if(configure.fileCheckMask & Config::CHECK_COUL_AMPLITUDES) {
     std::string outfile=configure.checkdir+"coulombamplitudes.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkcoulamp=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_COUL_AMPLITUDES) sbuffer = std::cout.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkcoulamp=="file"&&fbuffer.is_open())||configure.checkcoulamp=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_COUL_AMPLITUDES)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_COUL_AMPLITUDES)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*        Coulomb Amplitudes        *" << std::endl
@@ -661,11 +665,11 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
   std::ofstream chiOut;
-  if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
+  if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     std::string chiOutFile = configure.outputdir+"chiSquared.out";
     chiOut.open(chiOutFile.c_str());
   }
-  if(configure.mask ^ CALCULATE_WITH_DATA) output.SetExtrap();
+  if(configure.paramMask ^ Config::CALCULATE_WITH_DATA) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
@@ -689,7 +693,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
 	  << std::endl;
       } else out << std::endl;
     }
-    if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
+    if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
       totalChiSquared+=segment->GetSegmentChiSquared();
       chiOut << "Segment #"
 	     << segment->GetSegmentKey() 
@@ -699,7 +703,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
     }
     out<<std::endl<<std::endl;out.flush();
   }
-  if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
+  if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     chiOut << "Total Chi-Squared: " 
 	      << totalChiSquared << std::endl << std::endl;
     chiOut.flush();chiOut.close();
@@ -730,9 +734,9 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
-  if(configure.mask & CALCULATE_WITH_DATA) outputfile=configure.outputdir+"intEC.dat";
+  if(configure.paramMask & Config::CALCULATE_WITH_DATA) outputfile=configure.outputdir+"intEC.dat";
   else outputfile=configure.outputdir+"intEC.extrap";
-  if(configure.mask & USE_PREVIOUS_INTEGRALS) in.open(configure.integralsfile.c_str());
+  if(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS) in.open(configure.integralsfile.c_str());
   else {
     out.open(outputfile.c_str());
     if(!out) std::cout << "Could not write to EC Amplitude File." << std::endl;
@@ -747,7 +751,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
-	      if(configure.mask ^ USE_PREVIOUS_INTEGRALS) {
+	      if(configure.paramMask ^ Config::USE_PREVIOUS_INTEGRALS) {
 		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
 		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
 		int numPoints=segment->NumPoints();
@@ -780,7 +784,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 		if(!(point->IsMapped())) {
 		  for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
 		    for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
-		      if(configure.mask ^ USE_PREVIOUS_INTEGRALS) {
+		      if(configure.paramMask ^ Config::USE_PREVIOUS_INTEGRALS) {
 			if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
 			for(EPointIterator subPoint=point->GetSubPoints().begin();
 			    subPoint<point->GetSubPoints().end();subPoint++)

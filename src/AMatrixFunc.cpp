@@ -65,9 +65,9 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 		sum+=gammaCh*gammaChp*loElement;
 		if(compound()->GetJGroup(j)->GetChannel(ch)->GetRadType() != 'P' && 
 		   la==lap &&
-		   (configure().mask & USE_RMC_FORMALISM)) 
+		   (configure().paramMask & Config::USE_RMC_FORMALISM)) 
 		  sum+=complex(0.0,1.0)*gammaCh*gammaChp;
-		if((configure().mask & USE_BRUNE_FORMALISM) && compound()->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P') {
+		if((configure().paramMask & Config::USE_BRUNE_FORMALISM) && compound()->GetJGroup(j)->GetChannel(ch)->GetRadType()=='P') {
 		  sum+=gammaCh*gammaChp*compound()->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition();
 		  if(la==lap) sum-=gammaCh*gammaChp*level->GetShiftFunction(ch);
 		  else sum-=gammaCh*gammaChp*
@@ -110,7 +110,7 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
   int irEnd;
   int irStart;
   bool isRMC=false;
-  if((configure().mask & USE_RMC_FORMALISM) && 
+  if((configure().paramMask & Config::USE_RMC_FORMALISM) && 
      compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10) {
     irStart=1;
     irEnd=compound()->GetPair(aa)->NumDecays();
@@ -183,12 +183,12 @@ void AMatrixFunc::CalculateTMatrix(EPoint *point) {
 	  for(int la=1;la<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();la++) {
 	    if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la)->IsInRMatrix()) {
 	      ALevel *level=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(la);
-	      if(internalChannel && (configure().mask & IGNORE_ZERO_WIDTHS))
+	      if(internalChannel && (configure().paramMask & Config::IGNORE_ZERO_WIDTHS))
 		if(fabs(level->GetFitGamma(internalChannel))<1.0e-8) continue;
 	      for(int lap=1;lap<=compound()->GetJGroup(chanMGroup->GetJNum())->NumLevels();lap++) {
 		if(compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap)->IsInRMatrix()) {
 		  ALevel *levelp=compound()->GetJGroup(chanMGroup->GetJNum())->GetLevel(lap);
-		  if(internalChannel && (configure().mask & IGNORE_ZERO_WIDTHS))
+		  if(internalChannel && (configure().paramMask & Config::IGNORE_ZERO_WIDTHS))
 		    if(fabs(levelp->GetFitGamma(internalChannel))<1.0e-8) continue;
 		  umatrix+=2.0*complex(0.0,1.0)*
 		    point->GetSqrtPenetrability(chanMGroup->GetJNum(),chanMGroup->GetChNum())*

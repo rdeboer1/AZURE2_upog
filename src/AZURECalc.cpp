@@ -24,7 +24,7 @@ double AZURECalc::operator()(const vector_r& p) const {
   //Fill Compound Nucleus From Minuit Parameters
   localCompound->FillCompoundFromParams(p);
   localData->FillNormsFromParams(p);
-  if(configure().mask & USE_BRUNE_FORMALISM) localCompound->CalcShiftFunctions();
+  if(configure().paramMask & Config::USE_BRUNE_FORMALISM) localCompound->CalcShiftFunctions();
   
   //loop over segments and points
   double chiSquared=0.0;
