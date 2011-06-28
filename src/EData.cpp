@@ -364,7 +364,7 @@ void EData::Initialize(CNuc *compound,const struct Config &configure) {
   }
 
   //Calculate new ec amplitudes
-  if(configure.isEC) {
+  if(configure.mask & USE_EXTERNAL_CAPTURE) {
     std::cout << "Calculating External Capture Amplitudes..." << std::endl;
     this->CalculateECAmplitudes(compound,configure);
   }
@@ -661,11 +661,11 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
   std::ofstream chiOut;
-  if(!isFit&configure.withData) {
+  if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
     std::string chiOutFile = configure.outputdir+"chiSquared.out";
     chiOut.open(chiOutFile.c_str());
   }
-  if(!configure.withData) output.SetExtrap();
+  if(configure.mask ^ CALCULATE_WITH_DATA) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
@@ -689,7 +689,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
 	  << std::endl;
       } else out << std::endl;
     }
-    if(!isFit&configure.withData) {
+    if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
       totalChiSquared+=segment->GetSegmentChiSquared();
       chiOut << "Segment #"
 	     << segment->GetSegmentKey() 
@@ -699,7 +699,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
     }
     out<<std::endl<<std::endl;out.flush();
   }
-  if(!isFit&configure.withData) {
+  if(!isFit&&(configure.mask & CALCULATE_WITH_DATA)) {
     chiOut << "Total Chi-Squared: " 
 	      << totalChiSquared << std::endl << std::endl;
     chiOut.flush();chiOut.close();
@@ -730,9 +730,9 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
-  if(configure.withData) outputfile=configure.outputdir+"intEC.dat";
+  if(configure.mask & CALCULATE_WITH_DATA) outputfile=configure.outputdir+"intEC.dat";
   else outputfile=configure.outputdir+"intEC.extrap";
-  if(configure.oldECFile) in.open(configure.integralsfile.c_str());
+  if(configure.mask & USE_PREVIOUS_INTEGRALS) in.open(configure.integralsfile.c_str());
   else {
     out.open(outputfile.c_str());
     if(!out) std::cout << "Could not write to EC Amplitude File." << std::endl;
@@ -747,7 +747,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
-	      if(!configure.oldECFile) {
+	      if(configure.mask ^ USE_PREVIOUS_INTEGRALS) {
 		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
 		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
 		int numPoints=segment->NumPoints();
@@ -780,7 +780,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 		if(!(point->IsMapped())) {
 		  for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
 		    for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
-		      if(!configure.oldECFile) {
+		      if(configure.mask ^ USE_PREVIOUS_INTEGRALS) {
 			if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
 			for(EPointIterator subPoint=point->GetSubPoints().begin();
 			    subPoint<point->GetSubPoints().end();subPoint++)

@@ -70,10 +70,10 @@ void printHelp() {
 
 bool parseOptions(int argc, char *argv[], Config& configure) {
   bool useReadline=true;
-  configure.transformParams=true;
-  configure.isBrune=false;
-  configure.ignoreExternals=false;
-  configure.useRMC=false;
+  configure.mask |= TRANSFORM_PARAMETERS;
+  configure.mask &= ~USE_BRUNE_FORMALISM;
+  configure.mask &= ~IGNORE_ZERO_WIDTHS;
+  configure.mask &= ~USE_RMC_FORMALISM;
   configure.configfile="";
   std::vector<std::string> options;
   for(int i=1;i<argc;i++) {
@@ -104,10 +104,10 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
       printHelp();
       std::exit(0);
     } else if(*it=="--no-readline") useReadline=false;
-    else if(*it=="--no-transform") configure.transformParams=false;
-    else if(*it=="--use-brune") configure.isBrune=true;
-    else if(*it=="--ignore-externals") configure.ignoreExternals=true;
-    else if(*it=="--use-rmc") configure.useRMC=true;
+    else if(*it=="--no-transform") configure.mask &= ~TRANSFORM_PARAMETERS;
+    else if(*it=="--use-brune") configure.mask |= USE_BRUNE_FORMALISM;
+    else if(*it=="--ignore-externals") configure.mask |= IGNORE_ZERO_WIDTHS;
+    else if(*it=="--use-rmc") configure.mask |= USE_RMC_FORMALISM;
     else std::cout << "WARNING: Unknown option " << *it << '.' << std::endl;
   }
   return useReadline;
@@ -152,22 +152,22 @@ int commandShell() {
 
 void processCommand(int command, Config& configure) {
   configure.chiVariance=1.0;
-  configure.performFit=false;
-  configure.performError=false;
-  configure.withData=true;
-  configure.calcRate=false;
+  configure.mask &= ~PERFORM_FIT;
+  configure.mask &= ~PERFORM_ERROR_ANALYSIS;
+  configure.mask |= CALCULATE_WITH_DATA;
+  configure.mask &= ~CALCULATE_REACTION_RATE;
 
-  if(command==1) configure.performFit=true;
-  else if(command==3) configure.withData=false;
+  if(command==1) configure.mask |= PERFORM_FIT;
+  else if(command==3) configure.mask &= ~CALCULATE_WITH_DATA;
   else if(command==4) {
     std::cout << std::endl
 	      << std::setw(30) << "Allowed Chi-Squared Variance: ";
     std::cin >> configure.chiVariance;
-    configure.performFit=true;
-    configure.performError=true;
+    configure.mask |= PERFORM_FIT;
+    configure.mask |= PERFORM_ERROR_ANALYSIS;
   } else if(command==5) {
-    configure.withData=false;
-    configure.calcRate=true;
+    configure.mask &= ~CALCULATE_WITH_DATA;
+    configure.mask |= CALCULATE_REACTION_RATE;
   } else if(command==6) {
     exitMessage();
     std::exit(0);
@@ -180,7 +180,7 @@ void processCommand(int command, Config& configure) {
  */
 
 void getParameterFile(bool useReadline, Config& configure) {
-  configure.oldParameters=false;
+  configure.mask &= ~USE_PREVIOUS_PARAMETERS;
   bool validInfile=false;
   std::cout << std::endl;
   if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
@@ -200,7 +200,7 @@ void getParameterFile(bool useReadline, Config& configure) {
       in.open(inFile.c_str());
       if(in) {
 	validInfile=true;
-	configure.oldParameters=true;
+	configure.mask |= USE_PREVIOUS_PARAMETERS;
 	configure.paramfile=inFile;
 	in.close();
       }
@@ -222,7 +222,7 @@ void getParameterFile(bool useReadline, Config& configure) {
 void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   std::ifstream in;
   std::string startTag,stopTag;
-  if(configure.withData) {
+  if(configure.mask & CALCULATE_WITH_DATA) {
     startTag="<segmentsData>";
     stopTag="</segmentsData>";
   } else {
@@ -371,7 +371,7 @@ void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool 
  */
 
 void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
-  configure.isEC=false;
+  configure.mask &= ~USE_EXTERNAL_CAPTURE;
   std::ifstream in;
   in.open(configure.configfile.c_str());
   if(in) {
@@ -379,7 +379,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
     while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
     if(line=="<externalCapture>") {
       line="";
-      while(line!="</externalCapture>"&&!in.eof()&&!configure.isEC) {
+      while(line!="</externalCapture>"&&!in.eof()&&(configure.mask ^ USE_EXTERNAL_CAPTURE)) {
 	getline(in,line);
 	bool empty=true;
 	for(unsigned int i=0;i<line.size();++i) 
@@ -396,7 +396,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	    if(tempECLine.isActive()!=0) {
 	      for(int i=0;i<segPairs.size();i++) {
 		if(tempECLine.exitKey()==segPairs[i].secondPair) {
-		  configure.isEC=true;
+		  configure.mask |= USE_EXTERNAL_CAPTURE;
 		  break;
 		}
 	      }
@@ -417,10 +417,10 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
     std::exit(1);
   }
   in.clear();
-  if(configure.isEC&&configure.useRMC) {
+  if((configure.mask & USE_EXTERNAL_CAPTURE)&&(configure.mask & USE_RMC_FORMALISM)) {
     std:: cout << "WARNING: External capture is not compatible with Reich-Moore.  Ignoring external capture." 
 	       << std::endl;
-    configure.isEC=false;
+    configure.mask &= ~USE_EXTERNAL_CAPTURE;
   }
 }
 
@@ -430,8 +430,8 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
  */
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
-  configure.oldECFile=false;
-  if(configure.isEC&&!configure.calcRate) {
+  configure.mask &= ~USE_PREVIOUS_INTEGRALS;
+  if((configure.mask & USE_EXTERNAL_CAPTURE)&&(configure.mask ^ CALCULATE_REACTION_RATE)) {
     std::cout << std::endl;
     if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
     bool validInfile=false;
@@ -451,7 +451,7 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
 	in.open(inFile.c_str());
 	if(in) {
 	  validInfile=true;
-	  configure.oldECFile=true;
+	  configure.mask |= USE_PREVIOUS_INTEGRALS;
 	  configure.integralsfile=inFile;
 	  in.close();
 	}
@@ -470,13 +470,13 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
  */
 
 void startMessage(const Config& configure) {
-  if(configure.performError) std::cout << std::endl
+  if(configure.mask & PERFORM_ERROR_ANALYSIS) std::cout << std::endl
 				       << "Calling AZURE in error analysis mode..." << std::endl;
-  else if(configure.calcRate) std::cout << std::endl
+  else if(configure.mask & CALCULATE_REACTION_RATE) std::cout << std::endl
 					<< "Calling AZURE in reaction rate mode..." << std::endl;  
-  else if(!configure.withData) std::cout << std::endl
+  else if(configure.mask ^ CALCULATE_WITH_DATA) std::cout << std::endl
 					 << "Calling AZURE in extrapolate mode..." << std::endl; 
-  else if(configure.performFit) std::cout << std::endl
+  else if(configure.mask & PERFORM_FIT) std::cout << std::endl
 					  << "Calling AZURE in fit mode..." << std::endl;
   else  std::cout << std::endl
 		  << "Calling AZURE in calculate mode..." << std::endl;
@@ -506,11 +506,11 @@ int main(int argc,char *argv[]){
 #ifndef NO_STAT
   else if(CheckForInputFiles(configure) == -1) return -1;
 #endif
-  if(configure.useRMC && configure.isBrune) {
+  if((configure.mask & USE_RMC_FORMALISM) && (configure.mask & USE_BRUNE_FORMALISM)) {
     std::cout << "WARNING: --use-brune is incompatible with --use-rmc. Ignoring --use-brune." << std::endl;
-    configure.isBrune=false;
+    configure.mask &= ~USE_BRUNE_FORMALISM;
   }
-  if(configure.isBrune||configure.ignoreExternals) configure.isAMatrix=true;
+  if((configure.mask & USE_BRUNE_FORMALISM)||(configure.mask & IGNORE_ZERO_WIDTHS)) configure.mask |= USE_AMATRIX;
 
   //Print welcome message
   welcomeMessage();
@@ -526,7 +526,7 @@ int main(int argc,char *argv[]){
   
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
-  if(!configure.calcRate) readSegmentFile(configure,segPairs);
+  if(configure.mask ^ CALCULATE_REACTION_RATE) readSegmentFile(configure,segPairs);
   else getRateParams(configure.rateParams,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file

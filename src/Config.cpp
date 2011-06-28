@@ -12,8 +12,8 @@ int ReadConfigFile(Config &configure) {
   while(line!="<config>"&&!in.eof()) getline(in,line);
   if(line!="<config>") return -1;
   in >> temp;getline(in,dummy);
-  if(temp=="true") configure.isAMatrix=true;
-  else configure.isAMatrix=false;
+  if(temp=="true") configure.mask |= USE_AMATRIX;
+  else configure.mask &= ~USE_AMATRIX;
   in >> configure.outputdir;getline(in,dummy);
   in >> configure.checkdir;getline(in,dummy);
   in >> configure.checknucleus;getline(in,dummy);

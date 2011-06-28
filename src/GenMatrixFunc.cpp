@@ -19,7 +19,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
   }
   Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
   if(compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10 &&
-     configure().useRMC) {
+     (configure().mask & USE_RMC_FORMALISM)) {
     int decayNum=0;
     while(decayNum<compound()->GetPair(aa)->NumDecays()) {
       decayNum++;

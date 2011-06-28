@@ -163,7 +163,7 @@ int CNuc::Fill(const struct Config &configure) {
   in.close();
   
   this->SetMaxLValue(maxLValue);
-  if(configure.isEC)
+  if(configure.mask & USE_EXTERNAL_CAPTURE)
     if(this->ReadECFile(configure.configfile)==-1) return -1;
   
   return 0;
@@ -302,7 +302,7 @@ void CNuc::Initialize(const struct Config &configure) {
      configure.checkboundcon=="file") this->PrintBoundaryConditions(configure);
 
   //Transform Input Parameters
-  if(configure.transformParams) {
+  if(configure.mask & TRANSFORM_PARAMETERS) {
     std::cout << "Performing Input Parameter Transformation..." << std::endl;
     this->TransformIn(configure);
   }
@@ -484,7 +484,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		double tempPene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+		double tempPene = (configure.mask & USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 		if(tempPene<1e-10) tempPene=1e-10;
 		penes.push_back(tempPene);
 	      }
@@ -540,7 +540,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if(configure.isEC && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && configure.ignoreExternals)) {
+	      if((configure.mask & USE_EXTERNAL_CAPTURE) && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && (configure.mask & IGNORE_ZERO_WIDTHS))) {
 		complex externalWidth = 
 		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
@@ -560,7 +560,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 	  }
 	}
       }	  
-      if(!configure.isBrune) {
+      if(configure.mask ^ USE_BRUNE_FORMALISM) {
 	matrix_r nMatrix;
 	matrix_r mMatrix;      
 	for(int mu=0;mu<tempEnergies.size();mu++) {
@@ -673,7 +673,7 @@ void CNuc::SortPathways(const struct Config& configure) {
             }
           }
         }
-        else if(this->GetPair(ir)->GetPType()==10 && !configure.useRMC) {
+        else if(this->GetPair(ir)->GetPType()==10 && (configure.mask ^ USE_RMC_FORMALISM)) {
           for(double s=fabs(this->GetPair(aa)->GetJ(1)
 			    -this->GetPair(aa)->GetJ(2));
               s<=(this->GetPair(aa)->GetJ(1)
@@ -1190,7 +1190,7 @@ void CNuc::FillCompoundFromParams(const vector_r &p) {
  */
 
 void CNuc::TransformOut(const struct Config& configure) {
-  if(!configure.isBrune) {
+  if(configure.mask ^ USE_BRUNE_FORMALISM) {
     int maxIterations=1000;
     double energyTolerance=1e-6;
     for(int j=1;j<=this->NumJGroups();j++) {
@@ -1363,7 +1363,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    if((int)(2*jValue)%2!=0) pene*=-1.;
 	    tempPene.push_back(pene);
 	  } else {
-	    double pene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+	    double pene = (configure.mask & USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 	    tempPene.push_back(pene);
 	  }
 	}
@@ -1371,8 +1371,8 @@ void CNuc::TransformOut(const struct Config& configure) {
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
-	   theLevel->IsInRMatrix()&&configure.isEC &&
-	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && configure.ignoreExternals))
+	   theLevel->IsInRMatrix()&&(configure.mask & USE_EXTERNAL_CAPTURE) &&
+	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && (configure.mask & IGNORE_ZERO_WIDTHS)))
 	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;

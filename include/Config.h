@@ -4,6 +4,19 @@
 #include <string>
 #include <fstream>
 
+#define USE_AMATRIX              (1<<0)
+#define PERFORM_ERROR_ANALYSIS   (1<<1)
+#define PERFORM_FIT              (1<<2)
+#define CALCULATE_WITH_DATA      (1<<3)
+#define USE_PREVIOUS_PARAMETERS  (1<<4)
+#define USE_EXTERNAL_CAPTURE     (1<<5)
+#define USE_PREVIOUS_INTEGRALS   (1<<6)
+#define CALCULATE_REACTION_RATE  (1<<7)
+#define TRANSFORM_PARAMETERS     (1<<8)
+#define USE_BRUNE_FORMALISM      (1<<9)
+#define IGNORE_ZERO_WIDTHS       (1<<10)
+#define USE_RMC_FORMALISM        (1<<11)
+
 /// A structure holding the reaction rate calculation configuration
 
 /*!
@@ -34,13 +47,12 @@ struct RateParams {
  * AZURE executable, as well as the options specified in the command shell prompt.
  */
 
-struct Config {
+class Config {
+ public:
   ///The runtime configuration file name.
   std::string configfile;
-  ///A boolean specifying if the calculation should use the A-Matrix.
-  bool isAMatrix;
-  ///A boolean specifying if error analysis via Minos should be performed.
-  bool performError;
+  ///A bitmask for the encoding of configuration flags
+  unsigned int mask;
   ///If performError is true, sets the value of Up (the acceptable variance from the minimum chi-squared.
   double chiVariance;
   ///The path of the output directory
@@ -67,26 +79,6 @@ struct Config {
   std::string checkangdists;
   ///The specifier for the Coulomb amplitudes check output (none, screen, or file)
   std::string checkcoulamp;
-  ///A boolean specifying if a fit should be performed.
-  bool performFit;
-  ///A boolean specifying if AZURE will be executed in data driven mode.
-  bool withData;
-  ///A boolean specifying if initial parameters should be read from an external file.
-  bool oldParameters;
-  ///A boolean specifying if external capture will be included.
-  bool isEC;
-  ///A boolean specifying if the external capture amplitudes will be read from and external file.
-  bool oldECFile;
-  ///A boolean specifying if the reaction rate should be calculated.
-  bool calcRate;
-  ///A boolean specifying if the input parameters are to be transformed (set to false by --no-transform)
-  bool transformParams;
-  ///A boolean specifying if the Brune parametrization is to be used.
-  bool isBrune;
-  ///A boolean specifying if the external components of a capture resonance should be ignored if the internal with is zero.
-  bool ignoreExternals;
-  ///A boolean indicating if RMC should be used
-  bool useRMC;
   ///Parameters for calculating reaction rate.
   RateParams  rateParams;
   ///A constant indicating the maximum order of the Legendre polynomials to calculate.
