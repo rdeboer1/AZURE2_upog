@@ -36,7 +36,7 @@ struct RateParams {
 
 class Config {
  public:
-  Config();
+  Config(std::ostream& stream);
   enum ParameterFlags {
     USE_AMATRIX             =(1<<0),
     PERFORM_ERROR_ANALYSIS  =(1<<1),
@@ -61,6 +61,8 @@ class Config {
     CHECK_ANGULAR_DISTS       =(1<<6),
     CHECK_COUL_AMPLITUDES     =(1<<7)
   };
+  /// Output stream
+  std::ostream &outStream;
   ///The runtime configuration file name.
   std::string configfile;
   ///A bitmask for the encoding of configuration flags

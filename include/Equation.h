@@ -7,6 +7,8 @@
 #include <sstream>
 #include <map>
 
+class Config;
+
 ///A wrapper class for function pointers used by Equation class
 
 /*!
@@ -47,29 +49,29 @@ class GenericFunction {
 class Equation {
  public:
   Equation();
-  Equation(std::string equation, int numParams);
-  Equation(std::string equation,std::vector<double> parameters);
-  Equation(std::string equation,double parameters[],size_t arraySize);
-  void Initialize(std::string equation, int numParams);
-  void SetParameter(unsigned int index, double value);
+  Equation(std::string equation, int numParams,const Config&);
+  Equation(std::string equation,std::vector<double> parameters,const Config&);
+  Equation(std::string equation,double parameters[],size_t arraySize,const Config&);
+  void Initialize(std::string equation, int numParams, const Config &);
+  void SetParameter(unsigned int index, double value, const Config&);
   std::vector<double> GetParameters() const;
-  double Evaluate(double x=0.0) const;
+  double Evaluate(const Config&, double x=0.0) const;
  private:
   enum Associativity {LEFT,RIGHT};
   enum TokenType {NUMBER=1,OPERATOR=2,VARIABLE=4,PARAMETER=8,LEFTPAR=16,RIGHTPAR=32,FUNCTION=64};
   enum OperatorType {ADD=0,SUBTRACT=0,MULT=1,DIVIDE=1,POWER=2,BADTYPE=10};
   typedef std::pair<TokenType,std::string> TokenPair;
   void BuildFunctionList();
-  void Parse();
+  void Parse(const Config&);
   bool IsOperator(char) const;
   bool IsDigit(char) const;
   unsigned int FindFunction(unsigned int &position);
-  TokenPair GetToken(unsigned int &position);
+  TokenPair GetToken(unsigned int &position, const Config&);
   OperatorType GetOperatorType(char) const;
   Associativity GetOperatorAssociativity(char) const;
-  std::string BinaryOperation(double left, double right, char op) const;
-  double FunctionOperation(TokenPair token, double x) const;
-  double GetTokenValue(TokenPair token, double x) const;
+  std::string BinaryOperation(double left, double right, char op, const Config&) const;
+  double FunctionOperation(TokenPair token, double x, const Config&) const;
+  double GetTokenValue(TokenPair token, double x,const Config&) const;
   std::string infixEquation_;
   std::vector<TokenPair> output_;
   std::vector<double> parameters_;

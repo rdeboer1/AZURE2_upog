@@ -164,7 +164,7 @@ int CNuc::Fill(const Config &configure) {
   
   this->SetMaxLValue(maxLValue);
   if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)
-    if(this->ReadECFile(configure.configfile)==-1) return -1;
+    if(this->ReadECFile(configure)==-1) return -1;
   
   return 0;
 }
@@ -174,8 +174,8 @@ int CNuc::Fill(const Config &configure) {
  * exists from the nuclear file.  If not, the state is created.  
  */
 
-int CNuc::ReadECFile(std::string configfile) {
-  std::ifstream in(configfile.c_str());
+int CNuc::ReadECFile(const Config& configure) {
+  std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line="";
   while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
@@ -269,7 +269,7 @@ int CNuc::ReadECFile(std::string configfile) {
 	      }
 	    }
 	  }
-	} else std::cout << "Final state is not a capture pair." << std::endl;
+	} else configure.outStream << "Final state is not a capture pair." << std::endl;
       }
     }
   }
@@ -296,25 +296,25 @@ int CNuc::GetMaxLValue() const {
 
 void CNuc::Initialize(const Config &configure) {
   //Calculate Boundary Conditions
-  std::cout << "Calculating Boundary Conditions..." << std::endl;
+  configure.outStream << "Calculating Boundary Conditions..." << std::endl;
   this->CalcBoundaryConditions();
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_BOUNDARY_CONDITIONS)
     this->PrintBoundaryConditions(configure);
 
   //Transform Input Parameters
   if(configure.paramMask & Config::TRANSFORM_PARAMETERS) {
-    std::cout << "Performing Input Parameter Transformation..." << std::endl;
+    configure.outStream << "Performing Input Parameter Transformation..." << std::endl;
     this->TransformIn(configure);
   }
 
   //Sort reaction pathways
-  std::cout << "Sorting Reaction Pathways..." << std::endl;
+  configure.outStream << "Sorting Reaction Pathways..." << std::endl;
   this->SortPathways(configure);
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_PATHWAYS) 
     this->PrintPathways(configure);
   
   //Calculate Angular Distribution Coefficients
-  std::cout << "Calculating Angular Distribution Coefficients..." << std::endl;
+  configure.outStream << "Calculating Angular Distribution Coefficients..." << std::endl;
   this->CalcAngularDists(configure.maxLOrder);
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ANGULAR_DISTS) 
     this->PrintAngularDists(configure);
@@ -350,7 +350,7 @@ void CNuc::PrintNuc(const Config &configure) {
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
   } else if(configure.screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) 
-    sbuffer = std::cout.rdbuf();
+    sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
   if(((configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS)&&
       fbuffer.is_open())||
@@ -412,7 +412,7 @@ void CNuc::PrintNuc(const Config &configure) {
       }
       out << std::endl;
     }
-  } else std::cout << "Could not write compound nucleus check file." << std::endl;
+  } else configure.outStream << "Could not write compound nucleus check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -553,7 +553,7 @@ void CNuc::TransformIn(const Config& configure) {
 		  else tempGammas[levelKeys.size()-1][ch-1]=sqrt(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)-
 								 pow(imag(externalWidth),2.0))-real(externalWidth);
 		} else {
-		  std::cout << "**WARNING: Imaginary portion of external width \n\tfor j=" << j << " la=" 
+		  configure.outStream << "**WARNING: Imaginary portion of external width \n\tfor j=" << j << " la=" 
 			    << la << " ch=" << ch << " is greater than total width." << std::endl;
 		  tempGammas[levelKeys.size()-1][ch-1]=-real(externalWidth);
 		}
@@ -813,7 +813,7 @@ void CNuc::PrintPathways(const Config &configure) {
     std::string outfile=configure.checkdir+"pathways.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.screenCheckMask & Config::CHECK_PATHWAYS) sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_PATHWAYS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
   if(((configure.fileCheckMask & Config::CHECK_PATHWAYS)&&fbuffer.is_open())
      ||(configure.screenCheckMask & Config::CHECK_PATHWAYS)) {   
@@ -903,7 +903,7 @@ void CNuc::PrintPathways(const Config &configure) {
 	out << std::endl;
       }
     }
-  } else std::cout << "Could not write pathways check file." << std::endl;
+  } else configure.outStream << "Could not write pathways check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -958,7 +958,7 @@ void CNuc::PrintBoundaryConditions(const Config &configure) {
     std::string outfile=configure.checkdir+"boundaryconditions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
   if(((configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)&&fbuffer.is_open())||
      (configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)) {
@@ -982,7 +982,7 @@ void CNuc::PrintBoundaryConditions(const Config &configure) {
 	}
       }
     }
-  } else std::cout << "Could not write boundary conditions check file." << std::endl;
+  } else configure.outStream << "Could not write boundary conditions check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -1097,7 +1097,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
     std::string outfile=configure.checkdir+"angulardistributions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS) sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
   if(((configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS)&&fbuffer.is_open())||
      (configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS)) {
@@ -1133,7 +1133,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
 	} 
       }
     }
-  }  else std::cout << "Could not write angular distributions check file." << std::endl;
+  }  else configure.outStream << "Could not write angular distributions check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -1280,11 +1280,11 @@ void CNuc::TransformOut(const Config& configure) {
 	    }
 	    if(!done) {
 	      if(iteration==maxIterations) {
-		std::cout << "**WARNING: Could Not Transform J = " 
+		configure.outStream << "**WARNING: Could Not Transform J = " 
 			  << this->GetJGroup(j)->GetJ();
-		if(this->GetJGroup(j)->GetPi()==-1) std::cout << '-';
-		else std::cout << '+';
-		std::cout << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
+		if(this->GetJGroup(j)->GetPi()==-1) configure.outStream << '-';
+		else configure.outStream << '+';
+		configure.outStream << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
 		tempE[thisLevel]=theLevel->GetFitE();
 		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) 
 		  tempGamma[thisLevel][ch-1]=theLevel->GetFitGamma(ch);
@@ -1395,9 +1395,9 @@ void CNuc::TransformOut(const Config& configure) {
  * Writes the final transformed parameters to "parameters.out" file. 
  */
 
-void CNuc::PrintTransformParams(std::string outdir) {
+void CNuc::PrintTransformParams(const Config& configure) {
   char filename[256];;
-  sprintf(filename,"%sparameters.out",outdir.c_str());
+  sprintf(filename,"%sparameters.out",configure.outputdir.c_str());
   std::ofstream out;
   out.open(filename);
   if(out) {
@@ -1461,7 +1461,7 @@ void CNuc::PrintTransformParams(std::string outdir) {
 	out << std::endl;
       }
     }
-  } else std::cout << "Could not save parameters.out file." << std::endl;
+  } else configure.outStream << "Could not save parameters.out file." << std::endl;
 }
 
 /*!

@@ -1,4 +1,5 @@
 #include "Equation.h"
+#include "Config.h"
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
@@ -16,15 +17,15 @@ Equation::Equation() {
  * initialized, and must be set with the Equation::SetParameter() function.
  */
 
-Equation::Equation(std::string equation, int numParams) : infixEquation_(equation) {
+Equation::Equation(std::string equation, int numParams, const Config &configure) : infixEquation_(equation) {
   if(equation.size()!=0){
     for(int i=0;i<numParams;i++) {
       double tempDouble=0.0;
       parameters_.push_back(tempDouble);
     }
-    Parse();
+    Parse(configure);
   } else {
-    std::cout << "Error: empty equation." << std::endl;
+    configure.outStream << "Error: empty equation." << std::endl;
     std::exit(-1);
   }
 }
@@ -36,12 +37,12 @@ Equation::Equation(std::string equation, int numParams) : infixEquation_(equatio
  * string.
  */
 
-Equation::Equation(std::string equation,std::vector<double> parameters) : 
+Equation::Equation(std::string equation,std::vector<double> parameters, const Config &configure) : 
   infixEquation_(equation), parameters_(parameters) {
   if(equation.size()!=0){
-    Parse();
+    Parse(configure);
   } else {
-    std::cout << "Error: empty equation." << std::endl;
+    configure.outStream << "Error: empty equation." << std::endl;
     std::exit(-1);
   }
 }
@@ -52,12 +53,13 @@ Equation::Equation(std::string equation,std::vector<double> parameters) :
  * to the number of parameters in the equation string.  
  */
 
-Equation::Equation(std::string equation,double parameters[], size_t arraySize) : infixEquation_(equation) {
+Equation::Equation(std::string equation,double parameters[], size_t arraySize, const Config &configure) : 
+  infixEquation_(equation) {
   if(equation.size()!=0){
     parameters_=std::vector<double>(parameters,parameters+arraySize/sizeof(double));
-    Parse();
+    Parse(configure);
   } else {
-    std::cout << "Error: empty equation." << std::endl;
+    configure.outStream << "Error: empty equation." << std::endl;
     std::exit(-1);
   }
 }
@@ -68,16 +70,16 @@ Equation::Equation(std::string equation,double parameters[], size_t arraySize) :
  * array.  The parameters must be set manually.
  */
 
-void Equation::Initialize(std::string equation, int numParams) {
+void Equation::Initialize(std::string equation, int numParams, const Config &configure) {
   if(equation.size()!=0){
     infixEquation_=equation;
     for(int i=0;i<numParams;i++) {
       double tempDouble=0.0;
       parameters_.push_back(tempDouble);
     }
-    Parse();
+    Parse(configure);
   } else {
-    std::cout << "Error: empty equation." << std::endl;
+    configure.outStream << "Error: empty equation." << std::endl;
     std::exit(-1);
   }
 }
@@ -111,7 +113,7 @@ void Equation::BuildFunctionList() {
  * algorithm.
  */
 
-void Equation::Parse() {
+void Equation::Parse(const Config &configure) {
   BuildFunctionList();
   try{
     unsigned int position=0;
@@ -120,7 +122,7 @@ void Equation::Parse() {
     unsigned char expecting = FUNCTION|NUMBER|PARAMETER|VARIABLE|LEFTPAR;
     while(position<infixEquation_.length()) {
       //Retrieve token
-      TokenPair tempPair=GetToken(position);
+      TokenPair tempPair=GetToken(position,configure);
       //If last token, enforce additional expectations.
       if(position>=infixEquation_.length()) 
 	expecting&=FUNCTION|NUMBER|PARAMETER|VARIABLE|RIGHTPAR;
@@ -187,7 +189,7 @@ void Equation::Parse() {
       stack.pop_back();
     }
   } catch (SyntaxError e) {
-    std::cout << e.what() << std::endl;
+    configure.outStream << e.what() << std::endl;
     std::exit(-1);
   }
 }
@@ -203,11 +205,11 @@ std::vector<double> Equation::GetParameters() const {
  * Sets the specified parameter.
  */
 
-void Equation::SetParameter(unsigned int index, double value) {
+void Equation::SetParameter(unsigned int index, double value,const Config& configure) {
   if(index<parameters_.size()) {
     parameters_[index]=value;
-    for(unsigned int i = 0; i<subEquations_.size(); i++) subEquations_[i].SetParameter(index,value);
-  } else std::cout << "Error: Parameter index " << index << " greater than vector size." << std::endl;
+    for(unsigned int i = 0; i<subEquations_.size(); i++) subEquations_[i].SetParameter(index,value,configure);
+  } else configure.outStream << "Error: Parameter index " << index << " greater than vector size." << std::endl;
 }
 
 /*!
@@ -253,7 +255,7 @@ unsigned int Equation::FindFunction(unsigned int &position) {
  * the token itself as well as the type.
  */
 
-Equation::TokenPair Equation::GetToken(unsigned int &position) {
+Equation::TokenPair Equation::GetToken(unsigned int &position,const Config& configure) {
   try {
     TokenType tempType;
     std::string tempString;
@@ -351,7 +353,7 @@ Equation::TokenPair Equation::GetToken(unsigned int &position) {
 	}
 	if(parenCount>0&&position>=infixEquation_.length()) throw SyntaxError(infixEquation_,2);
       }
-      Equation subEquation(subString,parameters_);
+      Equation subEquation(subString,parameters_,configure);
       subEquations_.push_back(subEquation);
       int subIndex=subEquations_.size()-1;
       std::ostringstream stm;
@@ -360,7 +362,7 @@ Equation::TokenPair Equation::GetToken(unsigned int &position) {
     }
     return TokenPair(tempType,tempString);
   } catch (SyntaxError e) {
-    std::cout << e.what() << std::endl;
+    configure.outStream << e.what() << std::endl;
     std::exit(-1);
   } 
 }
@@ -399,7 +401,7 @@ Equation::Associativity Equation::GetOperatorAssociativity(char c) const {
  * Evaluates an operator for two specified numbers.  Returns the result in a string.
  */
 
-std::string Equation::BinaryOperation(double left, double right, char op) const {
+std::string Equation::BinaryOperation(double left, double right, char op, const Config& configure) const {
   std::ostringstream stm;
   stm.precision(15);
   double result;
@@ -418,7 +420,7 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
       break;
     case '^': 
       if(left<0.0&&fabs(int(right)-right)>0.0) {
-	std::cout << "Warning: Exponent results in unsupported imaginary number." << std::endl;
+	configure.outStream << "Warning: Exponent results in unsupported imaginary number." << std::endl;
 	result=0.0;
       }	else result=pow(left,right);
       break;
@@ -433,14 +435,14 @@ std::string Equation::BinaryOperation(double left, double right, char op) const 
  * Evaluates a function token with a specified dependent variable.
  */
 
-double Equation::FunctionOperation(TokenPair token, double x) const {
+double Equation::FunctionOperation(TokenPair token, double x, const Config& configure) const {
   double result=0.0;
   if(token.second.substr(0,3)=="neg") {
     int subEquationIndex;
     std::istringstream stm;
     stm.str(token.second.substr(3));
     stm>>subEquationIndex;
-    result=-1.*subEquations_[subEquationIndex].Evaluate(x);
+    result=-1.*subEquations_[subEquationIndex].Evaluate(configure,x);
   } else {
     for(std::map<std::string,GenericFunction>::const_iterator it = functionList_.begin();
 	it!=functionList_.end();it++) {
@@ -449,7 +451,7 @@ double Equation::FunctionOperation(TokenPair token, double x) const {
 	std::istringstream stm;
 	stm.str(token.second.substr(it->first.length()));
 	stm>>subEquationIndex;
-	result=it->second.Evaluate(subEquations_[subEquationIndex].Evaluate(x));
+	result=it->second.Evaluate(subEquations_[subEquationIndex].Evaluate(configure,x));
 	break;
       }
     }
@@ -461,7 +463,7 @@ double Equation::FunctionOperation(TokenPair token, double x) const {
  * Returns the value of a token as a double.
  */
 
-double Equation::GetTokenValue(TokenPair token, double x) const {
+double Equation::GetTokenValue(TokenPair token, double x, const Config& configure) const {
   double value;
   std::istringstream stm;
   if(token.first==NUMBER) {
@@ -477,7 +479,7 @@ double Equation::GetTokenValue(TokenPair token, double x) const {
     stm >> paramNumber;
     value=parameters_[paramNumber];
   } else if(token.first==FUNCTION)
-    value=FunctionOperation(token,x);
+    value=FunctionOperation(token,x,configure);
   else value=0.0;
   return value;
 }
@@ -486,22 +488,22 @@ double Equation::GetTokenValue(TokenPair token, double x) const {
  * Evaluates the Equation object for a specified dependent variable.
  */
 
-double Equation::Evaluate(double x) const {
+double Equation::Evaluate(const Config& configure,double x) const {
   std::vector<TokenPair> localOutput=output_;
   std::istringstream stm;
   double result=0.0;
   int i=0;
   if(localOutput.size()==1) {
-    result=GetTokenValue(localOutput[0],x);
+    result=GetTokenValue(localOutput[0],x,configure);
   } else {
     while(localOutput.size()!=1) {
       if(localOutput[i].first==OPERATOR) {
 	char op=localOutput[i].second[0];
-	double left=GetTokenValue(localOutput[i-2],x);
-	double right=GetTokenValue(localOutput[i-1],x);
+	double left=GetTokenValue(localOutput[i-2],x,configure);
+	double right=GetTokenValue(localOutput[i-1],x,configure);
 	localOutput.erase(localOutput.begin()+i-2,localOutput.begin()+i+1);
 	localOutput.insert(localOutput.begin()+i-2,
-			   TokenPair(NUMBER,BinaryOperation(left,right,op)));
+			   TokenPair(NUMBER,BinaryOperation(left,right,op,configure)));
 	i--;
       }
       else i++;

@@ -26,7 +26,7 @@ class ESegment {
   int NumPoints() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
-  int Fill(CNuc*,EData*);
+  int Fill(CNuc*,EData*,const Config&);
   int GetL() const;
   int GetTargetEffectNum() const;
   int GetSegmentKey() const;

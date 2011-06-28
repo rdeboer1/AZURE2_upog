@@ -7,6 +7,8 @@
 #include <iomanip>
 #include "Constants.h"
 
+class Config;
+
 ///A container class to hold Minuit parameters in AZURE
 
 /*!
@@ -18,9 +20,9 @@
 class AZUREParams {
  public:
   ROOT::Minuit2::MnUserParameters &GetMinuitParams();
-  void ReadUserParameters(std::string);
-  void WriteUserParameters(std::string,bool);
-  void WriteParameterErrors(const std::vector<std::pair<double,double> >&,std::string);
+  void ReadUserParameters(const Config&);
+  void WriteUserParameters(const Config&,bool);
+  void WriteParameterErrors(const std::vector<std::pair<double,double> >&,const Config&);
  private:
   ROOT::Minuit2::MnUserParameters params_;
 };

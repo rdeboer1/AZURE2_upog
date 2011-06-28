@@ -6,9 +6,9 @@
 
 int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile
-  std::cout << "Filling Compound Nucleus..." << std::endl;
+  configure().outStream << "Filling Compound Nucleus..." << std::endl;
   if(compound()->Fill(configure())==-1) {
-    std::cout << "Could not fill compound nucleus from file." 
+    configure().outStream << "Could not fill compound nucleus from file." 
 	      << std::endl;
     return -1;
   }
@@ -19,15 +19,15 @@ int AZUREMain::operator()(){
     //Fill the data object from the segments and data file
     //  Compound object is passed to the function for pair key verification and
     //  center of mass conversions, s-factor conversions, etc.
-    std::cout << "Filling Data Structures..." << std::endl;
+    configure().outStream << "Filling Data Structures..." << std::endl;
     if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
       if(data()->Fill(configure(),compound())==-1) {
-	std::cout << "Could not fill data object from file." << std::endl;
+	configure().outStream << "Could not fill data object from file." << std::endl;
 	return -1;
       }
     } else {
       if(data()->MakePoints(configure(),compound())==-1) {
-	std::cout << "Could not fill data object from file." << std::endl;
+	configure().outStream << "Could not fill data object from file." << std::endl;
 	return -1;
       }
     } 
@@ -35,7 +35,7 @@ int AZUREMain::operator()(){
       data()->PrintData(configure());
   } else {
     if(!compound()->IsPairKey(configure().rateParams.entrancePair)||!compound()->IsPairKey(configure().rateParams.exitPair)) {
-      std::cout << "Reaction rate pairs do not exist in compound nucleus." 
+      configure().outStream << "Reaction rate pairs do not exist in compound nucleus." 
 		<< configure().rateParams.entrancePair << configure().rateParams.exitPair << std::endl;
       return -1;
     } else {
@@ -51,11 +51,11 @@ int AZUREMain::operator()(){
   compound()->FillMnParams(params.GetMinuitParams());
   data()->FillMnParams(params.GetMinuitParams());
   if(!(configure().paramMask & Config::USE_PREVIOUS_PARAMETERS)) {
-    std::cout << "Creating New param.par File..." << std::endl;
-    params.WriteUserParameters(configure().outputdir,false);
+    configure().outStream << "Creating New param.par File..." << std::endl;
+    params.WriteUserParameters(configure(),false);
   } else {
-    std::cout << "Reading User Parameter File..." << std::endl;
-    params.ReadUserParameters(configure().paramfile);
+    configure().outStream << "Reading User Parameter File..." << std::endl;
+    params.ReadUserParameters(configure());
   }
 
   if(!(configure().paramMask & Config::CALCULATE_REACTION_RATE)) {
@@ -68,51 +68,51 @@ int AZUREMain::operator()(){
     
     if(configure().paramMask & Config::PERFORM_FIT) {
       //Call Minuit for function minimization, write minimized parameters to params
-      if(configure().paramMask & Config::USE_AMATRIX) std::cout << "Performing A-Matrix Fit..." << std::endl; 
-      else std::cout << "Performing R-Matrix Fit..." << std::endl;
+      if(configure().paramMask & Config::USE_AMATRIX) configure().outStream << "Performing A-Matrix Fit..." << std::endl; 
+      else configure().outStream << "Performing R-Matrix Fit..." << std::endl;
       data()->SetFit(true);
       ROOT::Minuit2::MnMigrad migrad(theFunc,params.GetMinuitParams());
       ROOT::Minuit2::FunctionMinimum min=migrad();
       if(configure().paramMask & Config::PERFORM_ERROR_ANALYSIS) {
-	std::cout << std::endl 
+	configure().outStream << std::endl 
 		  << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;
 	data()->SetErrorAnalysis(true);
 	theFunc.SetErrorDef(configure().chiVariance);
 	ROOT::Minuit2::MnMinos minos(theFunc,min);
 	std::vector<std::pair<double,double> > errors;
 	for(int i = 0; i<params.GetMinuitParams().Params().size(); i++) { 
-	  std::cout << "\tParameter " << i+1 << "..." << std::endl;
+	  configure().outStream << "\tParameter " << i+1 << "..." << std::endl;
 	  if(!params.GetMinuitParams().Parameter(i).IsFixed()) {
 	    std::pair< double, double > error=minos(i);
 	    errors.push_back(error);
 	  } else errors.push_back(std::pair< double, double > (0.,0.));
 	}
-	params.WriteParameterErrors(errors,configure().outputdir);
+	params.WriteParameterErrors(errors,configure());
       }
       params.GetMinuitParams()=min.UserParameters();
-      params.WriteUserParameters(configure().outputdir,true);
+      params.WriteUserParameters(configure(),true);
     } else {
-      if(configure().paramMask & Config::USE_AMATRIX) std::cout << "Performing A-Matrix Calculation..." << std::endl; 
-      else std::cout << "Performing R-Matrix Calculation..." << std::endl; 
+      if(configure().paramMask & Config::USE_AMATRIX) configure().outStream << "Performing A-Matrix Calculation..." << std::endl; 
+      else configure().outStream << "Performing R-Matrix Calculation..." << std::endl; 
     }
     data()->SetFit(false);
     data()->SetErrorAnalysis(false);
     double chiSquared=theFunc(params.GetMinuitParams().Params());
     if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
-      std::cout << std::endl << std::endl;
+      configure().outStream << std::endl << std::endl;
       for(ESegmentIterator segment=data()->GetSegments().begin();
 	  segment<data()->GetSegments().end();segment++) 
-	std::cout << "Segment #"
+	configure().outStream << "Segment #"
 		  << segment->GetSegmentKey() 
 		  << " Chi-Squared/N: "
 		  << segment->GetSegmentChiSquared()/segment->NumPoints()
 		  << std::endl;
-      std::cout << "Total Chi-Squared: " 
+      configure().outStream << "Total Chi-Squared: " 
 		<< chiSquared << std::endl << std::endl;
     }
 
     //Write Output Files
-    std::cout << "Writing output files..." << std::endl;
+    configure().outStream << "Writing output files..." << std::endl;
     data()->WriteOutputFiles(configure());
   } else {
     //Calculate Reaction Rate
@@ -121,21 +121,21 @@ int AZUREMain::operator()(){
     // an energy dependent function.  As every data point must be reinitialized (new energy 
     // dependent terms calculated) the routine is slow.  This should be a tradeoff 
     // for good accuracy.
-    std::cout << "Performing reaction rate calculation..." << std::endl;
+    configure().outStream << "Performing reaction rate calculation..." << std::endl;
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
     if(configure().paramMask & Config::USE_BRUNE_FORMALISM) 
       compound()->CalcShiftFunctions();
     if(configure().rateParams.useFile)
-      reactionRate.CalculateFileRates(configure().rateParams.temperatureFile);
+      reactionRate.CalculateFileRates();
     else 
-      reactionRate.CalculateRates(configure().rateParams.minTemp,configure().rateParams.maxTemp,configure().rateParams.tempStep);
+      reactionRate.CalculateRates();
     reactionRate.WriteRates();
   }
 
-  std::cout << "Performing final parameter transformation..." << std::endl;
+  configure().outStream << "Performing final parameter transformation..." << std::endl;
   compound()->TransformOut(configure());
-  compound()->PrintTransformParams(configure().outputdir);
+  compound()->PrintTransformParams(configure());
 
   return 0;
 }

@@ -50,8 +50,8 @@ class ReactionRate {
    * Returns the exit pair key.
    */
   int exitKey() const {return exit_key_;};
-  void CalculateRates(double,double,double);
-  void CalculateFileRates(std::string);
+  void CalculateRates();
+  void CalculateFileRates();
   /*!
    * Writes the rates to an output file.
    */

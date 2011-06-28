@@ -26,8 +26,8 @@ struct SegPairs {int firstPair; int secondPair;};
  * This function displays the welcome banner.
  */
 
-void welcomeMessage() {
-  std::cout << std::endl
+void welcomeMessage(const Config& configure) {
+  configure.outStream << std::endl
 	    << "O--------------------------O----------------------------O" << std::endl
 	    << "| #### #### #  # ###  #### | Version 2.0                |" << std::endl
 	    << "| #  #    # #  # #  # #    | Object Oriented C++        |" << std::endl
@@ -42,8 +42,8 @@ void welcomeMessage() {
  * This function prints a message upon successful termination of the program.
  */
 
-void exitMessage() {
-  std::cout << std::endl
+void exitMessage(const Config& configure) {
+  configure.outStream << std::endl
 	    << "Thanks for using AZURE." << std::endl;
 }
 
@@ -52,8 +52,8 @@ void exitMessage() {
  * available runtime options.
  */
 
-void printHelp() {
-  std::cout << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
+void printHelp(const Config& configure) {
+  configure.outStream << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
 	    << "Options:" << std::endl
             << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
             << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
@@ -93,18 +93,18 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
 	}
       }
       in.close();
-    } else std::cout << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
+    } else configure.outStream << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
   }
   for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
     if(*it=="--help") {
-      printHelp();
+      printHelp(configure);
       std::exit(0);
     } else if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
     else if(*it=="--ignore-externals") configure.paramMask |= Config::IGNORE_ZERO_WIDTHS;
     else if(*it=="--use-rmc") configure.paramMask |= Config::USE_RMC_FORMALISM;
-    else std::cout << "WARNING: Unknown option " << *it << '.' << std::endl;
+    else configure.outStream << "WARNING: Unknown option " << *it << '.' << std::endl;
   }
   return useReadline;
 }
@@ -114,10 +114,10 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
  * enters a valid integer option.  Upon successful entry, the integer option is returned.
  */
 
-int commandShell() {
+int commandShell(const Config& configure) {
   int command=0;
 
-  std::cout << "Please select from the following options: " << std::endl
+  configure.outStream << "Please select from the following options: " << std::endl
 	    << "\t1. Data Fit" << std::endl
 	    << "\t2. Data Calculate" << std::endl
 	    << "\t3. Extrapolate (no data)" << std::endl
@@ -126,16 +126,16 @@ int commandShell() {
 	    << "\t6. Exit" << std::endl;
 
   while(command<1||command>6) {
-    std::cout << "azure2: ";
+    configure.outStream << "azure2: ";
     std::string inString;
     getline(std::cin,inString);
     if(inString.empty()) continue;
     std::istringstream in;
     in.str(inString);
     if(!(in>>command)) 
-      std::cout << "Please enter an integer." << std::endl;
+      configure.outStream << "Please enter an integer." << std::endl;
     else if(command<1||command>6) 
-      std::cout << "Invalid option.  Please try again."
+      configure.outStream << "Invalid option.  Please try again."
 		<< std::endl;
   } 
   return command;
@@ -152,13 +152,13 @@ void processCommand(int command, Config& configure) {
   else if(command==4) {
     bool goodAnswer=false;
     while (!goodAnswer) {
-      std::cout << std::setw(30) << "Allowed Chi-Squared Variance: ";
+      configure.outStream << std::setw(30) << "Allowed Chi-Squared Variance: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
       if(!(stm>>configure.chiVariance) || configure.chiVariance<0.) 
-	std::cout << "Please enter a positive number." << std::endl;
+	configure.outStream << "Please enter a positive number." << std::endl;
       else goodAnswer=true;
     }
     configure.paramMask |= Config::PERFORM_FIT;
@@ -167,7 +167,7 @@ void processCommand(int command, Config& configure) {
     configure.paramMask &= ~Config::CALCULATE_WITH_DATA;
     configure.paramMask |= Config::CALCULATE_REACTION_RATE;
   } else if(command==6) {
-    exitMessage();
+    exitMessage(configure);
     std::exit(0);
   }
 }
@@ -179,8 +179,8 @@ void processCommand(int command, Config& configure) {
 
 void getParameterFile(bool useReadline, Config& configure) {
   bool validInfile=false;
-  std::cout << std::endl;
-  if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
+  configure.outStream << std::endl;
+  if(!useReadline) configure.outStream << "External Parameter File (leave blank for new file): ";
   while(!validInfile) {
     std::string inFile;
     if(!useReadline) getline(std::cin,inFile);
@@ -204,8 +204,8 @@ void getParameterFile(bool useReadline, Config& configure) {
       in.clear();
     } else validInfile=true;
     if(!validInfile) {
-      std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
-      if(!useReadline) std::cout << "External Parameter File (leave blank for new file): ";
+      configure.outStream << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+      if(!useReadline) configure.outStream << "External Parameter File (leave blank for new file): ";
     }
   }
 }
@@ -253,16 +253,16 @@ void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
 	}
       }
       if(line!=stopTag) {
-	std::cout << "Problem reading segments. Check configuration file." << std::endl;
+	configure.outStream << "Problem reading segments. Check configuration file." << std::endl;
 	std::exit(1);
       }
     } else {
-      std::cout << "Problem reading segments. Check configuration file." << std::endl;
+      configure.outStream << "Problem reading segments. Check configuration file." << std::endl;
       std::exit(1);
     }
     in.close();
   } else {
-    std::cout << "Cannot read segments. Check configuration file." << std::endl;
+    configure.outStream << "Cannot read segments. Check configuration file." << std::endl;
     std::exit(1);
   }
   in.clear();
@@ -273,9 +273,9 @@ void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
  * This function prompts for that file name, checks for access, and stores path.
  */
 
-void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
+void getTemperatureFile(bool useReadline, Config& configure) {
   bool validInfile=false;
-  if(!useReadline) std::cout << std::setw(38) << "Temperature File Name: ";
+  if(!useReadline) configure.outStream << std::setw(38) << "Temperature File Name: ";
   while(!validInfile) {
     std::string inFile;
     if(!useReadline) getline(std::cin,inFile);
@@ -292,15 +292,15 @@ void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
       in.open(inFile.c_str());
       if(in) {
 	validInfile=true;
-	temperatureFile=inFile;
+	configure.rateParams.temperatureFile=inFile;
 	in.close();
       }
       in.clear();
     }
     if(!validInfile) {
-      if(inFile.empty()) std::cout << "Please enter a file name." << std::endl;
-      else std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
-      if(!useReadline) std::cout << "               Temperature File Name: ";
+      if(inFile.empty()) configure.outStream << "Please enter a file name." << std::endl;
+      else configure.outStream << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+      if(!useReadline) configure.outStream << "               Temperature File Name: ";
     }
   }
 }
@@ -310,83 +310,83 @@ void getTemperatureFile(bool useReadline, std::string& temperatureFile) {
  * to be calculated.
  */
 
-void getRateParams(RateParams& rateParams, std::vector<SegPairs>& segPairs,bool useReadline) {
-  rateParams.entrancePair=0;
-  rateParams.exitPair=0;
-  rateParams.minTemp=-1.;
-  rateParams.maxTemp=-1.;
-  rateParams.tempStep=-1.;
-  while(rateParams.entrancePair==rateParams.exitPair){
-    while(!rateParams.entrancePair) {
-      std::cout << std::setw(38) << "Reaction Rate Entrance Pair: ";
+void getRateParams(Config& configure, std::vector<SegPairs>& segPairs,bool useReadline) {
+  configure.rateParams.entrancePair=0;
+  configure.rateParams.exitPair=0;
+  configure.rateParams.minTemp=-1.;
+  configure.rateParams.maxTemp=-1.;
+  configure.rateParams.tempStep=-1.;
+  while(configure.rateParams.entrancePair==configure.rateParams.exitPair){
+    while(!configure.rateParams.entrancePair) {
+      configure.outStream << std::setw(38) << "Reaction Rate Entrance Pair: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
-      if(!(stm >> rateParams.entrancePair) || rateParams.entrancePair==0) 
-	std::cout << "Please enter an integer greater than zero." << std::endl ;
+      if(!(stm >> configure.rateParams.entrancePair) || configure.rateParams.entrancePair==0) 
+	configure.outStream << "Please enter an integer greater than zero." << std::endl ;
     }
-    while(!rateParams.exitPair) {
-      std::cout << std::setw(38) << "Reaction Rate Exit Pair: ";
+    while(!configure.rateParams.exitPair) {
+      configure.outStream << std::setw(38) << "Reaction Rate Exit Pair: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
-      if(!(stm >> rateParams.exitPair) || rateParams.exitPair==0) 
-	std::cout << "Please enter an integer greater than zero." << std::endl;
+      if(!(stm >> configure.rateParams.exitPair) || configure.rateParams.exitPair==0) 
+	configure.outStream << "Please enter an integer greater than zero." << std::endl;
     }
-    if(rateParams.entrancePair==rateParams.exitPair) {
-      std::cout << "Cannot calculate rate for elastic scattering." << std::endl;
-      rateParams.entrancePair=0;rateParams.exitPair=0;
+    if(configure.rateParams.entrancePair==configure.rateParams.exitPair) {
+      configure.outStream << "Cannot calculate rate for elastic scattering." << std::endl;
+      configure.rateParams.entrancePair=0;configure.rateParams.exitPair=0;
     }
   }
-  SegPairs tempSet={rateParams.entrancePair,rateParams.exitPair};
+  SegPairs tempSet={configure.rateParams.entrancePair,configure.rateParams.exitPair};
   segPairs.push_back(tempSet);
   bool goodAnswer = false;
   std::string fileAnswer="";
   while(!goodAnswer) {   
-    std::cout << std::setw(38) << "Use temperatures from file (yes/no): ";
+    configure.outStream << std::setw(38) << "Use temperatures from file (yes/no): ";
     getline(std::cin,fileAnswer);
     std::string trimmedAnswer;
     for(int i =0;i<fileAnswer.length();i++)
       if(fileAnswer[i]!=' '&&fileAnswer[i]!='\t'&&fileAnswer[i]!='\n')
 	trimmedAnswer+=fileAnswer[i];
     if(trimmedAnswer!="yes"&&trimmedAnswer!="no") 
-     std::cout << "Please type 'yes' or 'no'." <<std::endl;
+     configure.outStream << "Please type 'yes' or 'no'." <<std::endl;
     else {
       goodAnswer = true;
       fileAnswer=trimmedAnswer;
     }
   }
-  rateParams.useFile = (fileAnswer=="yes") ? (true) : (false); 
-  if(rateParams.useFile) getTemperatureFile(useReadline,rateParams.temperatureFile);
+  configure.rateParams.useFile = (fileAnswer=="yes") ? (true) : (false); 
+  if(configure.rateParams.useFile) getTemperatureFile(useReadline,configure);
   else {
-    while(rateParams.minTemp<0.) {
-      std::cout << std::setw(38) << "Reaction Rate Min Temp [GK]: ";
+    while(configure.rateParams.minTemp<0.) {
+      configure.outStream << std::setw(38) << "Reaction Rate Min Temp [GK]: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
-      if(!(stm >> rateParams.minTemp) || rateParams.minTemp<0.) 
-	std::cout << "Please enter a positive number." << std::endl;
+      if(!(stm >> configure.rateParams.minTemp) || configure.rateParams.minTemp<0.) 
+	configure.outStream << "Please enter a positive number." << std::endl;
     }
-    while(rateParams.maxTemp<0.) {
-      std::cout << std::setw(38) << "Reaction Rate Max Temp [GK]: ";
+    while(configure.rateParams.maxTemp<0.) {
+      configure.outStream << std::setw(38) << "Reaction Rate Max Temp [GK]: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
-      if(!(stm >> rateParams.maxTemp) || rateParams.maxTemp<0.) 
-	std::cout << "Please enter a positive number." << std::endl;
+      if(!(stm >> configure.rateParams.maxTemp) || configure.rateParams.maxTemp<0.) 
+	configure.outStream << "Please enter a positive number." << std::endl;
     }
-    while(rateParams.tempStep<0.) {
-      std::cout << std::setw(38) << "Reaction Rate Temp Step [GK]: ";
+    while(configure.rateParams.tempStep<0.) {
+      configure.outStream << std::setw(38) << "Reaction Rate Temp Step [GK]: ";
       std::string inString;
       getline(std::cin,inString);
       std::istringstream stm;
       stm.str(inString);
-      if(!(stm >> rateParams.tempStep) || rateParams.tempStep<0.) 
-	std::cout << "Please enter a positive number." << std::endl;
+      if(!(stm >> configure.rateParams.tempStep) || configure.rateParams.tempStep<0.) 
+	configure.outStream << "Please enter a positive number." << std::endl;
     }
   }
 }
@@ -429,18 +429,18 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	      }
 	    }
 	  } else {
-	    std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+	    configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
 	    std::exit(1);
 	  }
 	}
       }
     } else {
-      std::cout << "Problem reading external capture. Check configuration file." << std::endl;
+      configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
       std::exit(1);
     }
     in.close();
   } else {
-    std::cout << "Cannot read external capture. Check configuration file." << std::endl;
+    configure.outStream << "Cannot read external capture. Check configuration file." << std::endl;
     std::exit(1);
   }
   in.clear();
@@ -459,8 +459,8 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
   if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
-    std::cout << std::endl;
-    if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
+    configure.outStream << std::endl;
+    if(!useReadline) configure.outStream << "External Capture Amplitude File (leave blank for new file): ";
     bool validInfile=false;
     while(!validInfile) {
       std::string inFile;
@@ -485,8 +485,8 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
 	in.clear();
       } else validInfile=true;
       if(!validInfile) {
-	std::cout << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
-	if(!useReadline) std::cout << "External Capture Amplitude File (leave blank for new file): ";
+	configure.outStream << "Cannot Read From " << inFile << ". Please reenter file." << std::endl;
+	if(!useReadline) configure.outStream << "External Capture Amplitude File (leave blank for new file): ";
       }
     }
   } 
@@ -498,18 +498,18 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
 
 void startMessage(const Config& configure) {
   if(configure.paramMask & Config::PERFORM_ERROR_ANALYSIS) 
-    std::cout << std::endl
+    configure.outStream << std::endl
 	      << "Calling AZURE in error analysis mode..." << std::endl;
   else if(configure.paramMask & Config::CALCULATE_REACTION_RATE) 
-    std::cout << std::endl
+    configure.outStream << std::endl
 	      << "Calling AZURE in reaction rate mode..." << std::endl;  
   else if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) 
-    std::cout << std::endl
+    configure.outStream << std::endl
 	      << "Calling AZURE in extrapolate mode..." << std::endl; 
   else if(configure.paramMask & Config::PERFORM_FIT) 
-    std::cout << std::endl
+    configure.outStream << std::endl
 	      << "Calling AZURE in fit mode..." << std::endl;
-  else  std::cout << std::endl
+  else  configure.outStream << std::endl
 		  << "Calling AZURE in calculate mode..." << std::endl;
 }
 
@@ -520,17 +520,17 @@ void startMessage(const Config& configure) {
 
 int main(int argc,char *argv[]){
   //Create new configuration structure, and parse the command line parameters
-  Config configure;
+  Config configure(std::cout);
   bool useReadline = parseOptions(argc,argv,configure);
 
   //Read the parameters from the runtime configuration file
   if(configure.configfile.empty()) {
-    std::cout << "A valid configuration file must be specified." << std::endl
+    configure.outStream << "A valid configuration file must be specified." << std::endl
 	      << "\tSyntax: AZURE2 <options> configfile" << std::endl;
     return -1;
   }
   if(configure.ReadConfigFile()==-1) {
-    std::cout << "Could not open " << configure.configfile << ".  Check that file exists." 
+    configure.outStream << "Could not open " << configure.configfile << ".  Check that file exists." 
 	      << std::endl;
     return -1;
   }
@@ -538,21 +538,21 @@ int main(int argc,char *argv[]){
   else if(configure.CheckForInputFiles() == -1) return -1;
 #endif
   if((configure.paramMask & Config::USE_RMC_FORMALISM) && (configure.paramMask & Config::USE_BRUNE_FORMALISM)) {
-    std::cout << "WARNING: --use-brune is incompatible with --use-rmc. Ignoring --use-brune." << std::endl;
+    configure.outStream << "WARNING: --use-brune is incompatible with --use-rmc. Ignoring --use-brune." << std::endl;
     configure.paramMask &= ~Config::USE_BRUNE_FORMALISM;
   }
   if((configure.paramMask & Config::USE_BRUNE_FORMALISM)||(configure.paramMask & Config::IGNORE_ZERO_WIDTHS)) {
     if(!(configure.paramMask & Config::USE_AMATRIX)) 
-      std::cout << "WARNING: R-Matrix specified but --ignore-externals and --use-brune options require A-Matrix.  A-Matrix will be used."
+      configure.outStream << "WARNING: R-Matrix specified but --ignore-externals and --use-brune options require A-Matrix.  A-Matrix will be used."
 		<< std::endl;
     configure.paramMask |= Config::USE_AMATRIX;
   }
 
   //Print welcome message
-  welcomeMessage();
+  welcomeMessage(configure);
 
   //Read and process command, setting appropriate configuration flags
-  processCommand(commandShell(),configure);
+  processCommand(commandShell(configure),configure);
   
   //Open history file for readline
   if(useReadline) read_history("./.azure_history");
@@ -563,7 +563,7 @@ int main(int argc,char *argv[]){
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
   if(!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) readSegmentFile(configure,segPairs);
-  else getRateParams(configure.rateParams,segPairs,useReadline);
+  else getRateParams(configure,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file
   // If so, external capture will be needed
@@ -579,7 +579,7 @@ int main(int argc,char *argv[]){
   azureMain();
   
   //Print exit message
-  exitMessage();
+  exitMessage(configure);
 
   //Write readline history file
   if(useReadline) write_history("./.azure_history");

@@ -30,7 +30,7 @@ public:
   int IsJGroup(JGroup);
   int GetPairNumFromKey(int);
   int Fill(const Config&);
-  int ReadECFile(std::string);
+  int ReadECFile(const Config&);
   int GetMaxLValue() const;
   void Initialize(const Config&);
   void AddPair(PPair);
@@ -46,7 +46,7 @@ public:
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillCompoundFromParams(const vector_r &);
   void TransformOut(const Config&);
-  void PrintTransformParams(std::string);
+  void PrintTransformParams(const Config&);
   void SetMaxLValue(int);
   void CalcShiftFunctions();
   complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);

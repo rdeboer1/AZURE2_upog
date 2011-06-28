@@ -4,7 +4,7 @@
 #endif
 #include <iostream>
 
-Config::Config() {
+Config::Config(std::ostream& stream) : outStream(stream) {
   chiVariance=1.0;
   screenCheckMask=0;
   fileCheckMask=0;
@@ -58,11 +58,11 @@ int Config::ReadConfigFile() {
 int Config::CheckForInputFiles() {
   struct stat buffer;
   if(stat(outputdir.c_str(),&buffer) != 0) {
-    std::cout << "Could not find output directory: " << outputdir << ". Check that it exists." << std::endl;
+    outStream << "Could not find output directory: " << outputdir << ". Check that it exists." << std::endl;
     return -1;
   }
   if(stat(checkdir.c_str(),&buffer) != 0) {
-    std::cout << "Could not find checks directory: " << checkdir << ". Check that it exists." << std::endl;
+    outStream << "Could not find checks directory: " << checkdir << ". Check that it exists." << std::endl;
     return -1;
   }
   return 0;

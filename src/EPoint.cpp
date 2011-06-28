@@ -438,7 +438,7 @@ void EPoint::ConvertLabAngle(PPair *pPair) {
  * overloaded function is for non-elastic particle channels.
  */
 
-void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
+void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config& configure) {
   double qValue=entrancePair->GetSepE()+entrancePair->GetExE()-exitPair->GetSepE()-exitPair->GetExE();
   double a13=(entrancePair->GetM(1)*exitPair->GetM(1))*this->GetLabEnergy()/(this->GetLabEnergy()+qValue)/
     (entrancePair->GetM(1)+entrancePair->GetM(2))/(exitPair->GetM(1)+exitPair->GetM(2));
@@ -447,7 +447,7 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
 
   if(a13>a24) {
     double thetaMax=asin(sqrt(a24/a13))*180./pi;
-    if(thetaMax<this->GetLabAngle()) std::cout << std::endl << "Lab Angle (" << this->GetLabAngle() 
+    if(thetaMax<this->GetLabAngle()) configure.outStream << std::endl << "Lab Angle (" << this->GetLabAngle() 
 					       << " degrees) is not kinematically possible.  Maximum angle is " 
 					       << thetaMax << " degrees." << std::endl;
     assert(thetaMax>=this->GetLabAngle());

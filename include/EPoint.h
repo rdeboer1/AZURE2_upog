@@ -74,7 +74,7 @@ class EPoint {
   void Initialize(CNuc*,const Config&);
   void ConvertLabEnergy(PPair*);
   void ConvertLabAngle(PPair*);
-  void ConvertLabAngle(PPair*,PPair*);
+  void ConvertLabAngle(PPair*,PPair*,const Config&);
   void ConvertCrossSection();
   void AddLegendreP(double);
   void SetGeometricalFactor(double);

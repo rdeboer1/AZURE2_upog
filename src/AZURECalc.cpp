@@ -46,13 +46,13 @@ double AZURECalc::operator()(const vector_r& p) const {
   }
 
   if(!localData->IsErrorAnalysis()&&thisIteration!=0) {
-    if(thisIteration%100==0) std::cout << "\r\tIteration: " << std::setw(6) << thisIteration
-				       << " Chi-Squared: " << chiSquared;  std::cout.flush();
+    if(thisIteration%100==0) configure().outStream << "\r\tIteration: " << std::setw(6) << thisIteration
+				       << " Chi-Squared: " << chiSquared;  configure().outStream.flush();
 
     if(thisIteration%1000==0) {
       localData->WriteOutputFiles(configure(),isFit);
       localCompound->TransformOut(configure());
-      localCompound->PrintTransformParams(configure().outputdir);
+      localCompound->PrintTransformParams(configure());
     }
   }
   if(isFit) {

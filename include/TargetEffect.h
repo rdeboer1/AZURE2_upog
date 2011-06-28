@@ -18,14 +18,14 @@
 
 class TargetEffect {
  public:
-  TargetEffect(std::istream &);
+  TargetEffect(std::istream &, const Config&);
   bool IsActive() const;
   bool IsConvolution() const;
   bool IsTargetIntegration() const;
   int NumSubPoints() const;
   double GetSigma() const;
   double GetDensity() const;
-  double TargetThickness(double);
+  double TargetThickness(double,const Config&);
   double GetConvolutionFactor(double, double) const;
   void SetNumSubPoints(int);
   std::vector<int> GetSegmentsList() const;

@@ -154,7 +154,7 @@ int ESegment::GetExitKey() const {
  * in the lab frame, and conversions are performed to the center of mass frame.
  */
 
-int ESegment::Fill(CNuc *theCNuc, EData *theData) {
+int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
   std::string infile=this->GetDataFile();
   std::ifstream in(infile.c_str());
   if(!in) return -1;
@@ -172,7 +172,7 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData) {
 	  if(this->GetEntranceKey()==this->GetExitKey()) {
 	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair);
 	  } else {
-	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair,exitPair);
+	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair,exitPair,configure);
 	  }
 	  this->GetPoint(this->NumPoints())->ConvertCrossSection();
 	}

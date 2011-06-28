@@ -8,7 +8,7 @@
  * created.
  */
 
-TargetEffect::TargetEffect(std::istream &stream) {
+TargetEffect::TargetEffect(std::istream &stream,const Config& configure) {
   int isActive;
   std::string segmentList;
   int numIntegrationPoints;
@@ -49,9 +49,9 @@ TargetEffect::TargetEffect(std::istream &stream) {
     else isTargetIntegration_=false;
     density_=density;
     if(isTargetIntegration_) {
-      stoppingPowerEq_.Initialize(stoppingPowerEq,numParameters);
+      stoppingPowerEq_.Initialize(stoppingPowerEq,numParameters,configure);
       for(int i=0;i<numParameters;i++) {
-	stoppingPowerEq_.SetParameter(i,parameters[i]);
+	stoppingPowerEq_.SetParameter(i,parameters[i],configure);
       }
     }
   }
@@ -115,8 +115,8 @@ double TargetEffect::GetDensity() const {
  * the target density as a function of energy.
  */
 
-double TargetEffect::TargetThickness(double energy)  {
-  return this->GetStoppingPowerEq()->Evaluate(energy)*this->GetDensity();
+double TargetEffect::TargetThickness(double energy, const Config& configure)  {
+  return this->GetStoppingPowerEq()->Evaluate(configure,energy)*this->GetDensity();
 }
 
 /*!

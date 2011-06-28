@@ -77,15 +77,15 @@ ReactionRate::ReactionRate(CNuc *compound, const vector_r &params,
  * Calculates the astrophysical reaction rates over a range of stellar temperatures.  
  */
 
-void ReactionRate::CalculateRates(double minTemp, double maxTemp, double tempStep) {
-  std::cout << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
-  for(double temp=minTemp;temp<=maxTemp;temp+=tempStep) {
+void ReactionRate::CalculateRates() {
+  configure().outStream << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
+  for(double temp=configure().rateParams.minTemp;temp<=configure().rateParams.maxTemp;temp+=configure().rateParams.tempStep) {
     RateData newRate;
     newRate.temperature=temp;
     newRate.rate=gsl_reactionrate_integration(temp,compound(),configure(),entranceKey(),exitKey());
     rates_.push_back(newRate);
-    std::cout << std::setw(20) << newRate.temperature << std::setw(20) << newRate.rate << std::endl;
-    if(tempStep==0.0) break;
+    configure().outStream << std::setw(20) << newRate.temperature << std::setw(20) << newRate.rate << std::endl;
+    if(configure().rateParams.tempStep==0.0) break;
   }
 }
 
@@ -93,8 +93,8 @@ void ReactionRate::CalculateRates(double minTemp, double maxTemp, double tempSte
  * Calculates the astrophysical reaction rates at temperatures from file.
  */
 
-void ReactionRate::CalculateFileRates(std::string temperatureFile) {
-  std::ifstream inFile(temperatureFile.c_str());
+void ReactionRate::CalculateFileRates() {
+  std::ifstream inFile(configure().rateParams.temperatureFile.c_str());
   if(inFile) {
     while(!inFile.eof()) {
       std::string line;
@@ -109,12 +109,12 @@ void ReactionRate::CalculateFileRates(std::string temperatureFile) {
       }
     }
     inFile.close();
-    std::cout << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
+    configure().outStream << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
     for(std::vector<RateData>::iterator rateIterator = rates_.begin(); rateIterator < rates_.end(); rateIterator++) {
       rateIterator->rate=gsl_reactionrate_integration(rateIterator->temperature,compound(),configure(),entranceKey(),exitKey());
-      std::cout << std::setw(20) << rateIterator->temperature << std::setw(20) << rateIterator->rate << std::endl;
+      configure().outStream << std::setw(20) << rateIterator->temperature << std::setw(20) << rateIterator->rate << std::endl;
     }
-  } else std::cout << "Couldn't open temperature file." << std::endl;
+  } else configure().outStream << "Couldn't open temperature file." << std::endl;
 }
 
 void ReactionRate::WriteRates() {
@@ -128,5 +128,5 @@ void ReactionRate::WriteRates() {
     }
     out.flush();
     out.close();
-  } else  std::cout << "Could not write reaction rate file." << std::endl; 
+  } else  configure().outStream << "Could not write reaction rate file." << std::endl; 
 }
