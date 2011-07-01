@@ -9,7 +9,7 @@ Config::Config(std::ostream& stream) : outStream(stream) {
   screenCheckMask=0;
   fileCheckMask=0;
   paramMask=0;
-  paramMask |= (TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA);
+  paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA);
 }
 
 int Config::ReadConfigFile() {
@@ -21,6 +21,7 @@ int Config::ReadConfigFile() {
   if(line!="<config>") return -1;
   in >> temp;getline(in,dummy);
   if(temp=="true") paramMask |= USE_AMATRIX;
+  else paramMask &= ~USE_AMATRIX;
   in >> outputdir;getline(in,dummy);
   in >> checkdir;getline(in,dummy);
   in >> temp;getline(in,dummy);

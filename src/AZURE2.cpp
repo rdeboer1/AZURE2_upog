@@ -216,7 +216,7 @@ void getParameterFile(bool useReadline, Config& configure) {
  * is required is the user prompted for an external integrals file.
  */
 
-void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
+bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
   std::ifstream in;
   std::string startTag,stopTag;
   if(configure.paramMask & Config::CALCULATE_WITH_DATA) {
@@ -254,18 +254,19 @@ void readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
       }
       if(line!=stopTag) {
 	configure.outStream << "Problem reading segments. Check configuration file." << std::endl;
-	std::exit(1);
+	return false;
       }
     } else {
       configure.outStream << "Problem reading segments. Check configuration file." << std::endl;
-      std::exit(1);
+      return false;
     }
     in.close();
   } else {
     configure.outStream << "Cannot read segments. Check configuration file." << std::endl;
-    std::exit(1);
+    return false;
   }
   in.clear();
+  return true;
 }
 
 /*!
@@ -397,7 +398,7 @@ void getRateParams(Config& configure, std::vector<SegPairs>& segPairs,bool useRe
  * prompted for an integrals file.  The appropriate configure flag is set here.
  */
 
-void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
+bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
   std::ifstream in;
   in.open(configure.configfile.c_str());
   if(in) {
@@ -430,18 +431,18 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	    }
 	  } else {
 	    configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
-	    std::exit(1);
+	    return false;
 	  }
 	}
       }
     } else {
       configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
-      std::exit(1);
-    }
+     return false;
+   }
     in.close();
   } else {
     configure.outStream << "Cannot read external capture. Check configuration file." << std::endl;
-    std::exit(1);
+    return false;
   }
   in.clear();
   if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&
@@ -450,6 +451,7 @@ void checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
 	       << std::endl;
     configure.paramMask &= ~Config::USE_EXTERNAL_CAPTURE;
   }
+  return true;
 }
 
 /*!
@@ -562,12 +564,13 @@ int main(int argc,char *argv[]){
   
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
-  if(!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) readSegmentFile(configure,segPairs);
-  else getRateParams(configure,segPairs,useReadline);
+  if(!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
+    if(!readSegmentFile(configure,segPairs)) std::exit(1);
+  } else getRateParams(configure,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file
   // If so, external capture will be needed
-  checkExternalCapture(configure,segPairs);
+  if(!checkExternalCapture(configure,segPairs)) std::exit(1);
   
   //Read the external capture file name to be used, if any
   getExternalCaptureFile(useReadline,configure);
