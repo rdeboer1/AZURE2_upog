@@ -8,8 +8,8 @@
 double AZURECalc::operator()(const vector_r& p) const {
 
   int thisIteration=data()->Iterations();
-  bool isFit=data()->IsFit();
   data()->Iterate();
+  bool isFit=data()->IsFit();
 
   CNuc * localCompound = NULL;
   EData *localData = NULL;
@@ -46,8 +46,9 @@ double AZURECalc::operator()(const vector_r& p) const {
   }
 
   if(!localData->IsErrorAnalysis()&&thisIteration!=0) {
-    if(thisIteration%100==0) configure().outStream << "\r\tIteration: " << std::setw(6) << thisIteration
-				       << " Chi-Squared: " << chiSquared;  configure().outStream.flush();
+    if(thisIteration%100==0) configure().outStream
+			       << "\r\tIteration: " << std::setw(6) << thisIteration
+			       << " Chi-Squared: " << chiSquared;  configure().outStream.flush();
 
     if(thisIteration%1000==0) {
       localData->WriteOutputFiles(configure(),isFit);

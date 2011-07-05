@@ -520,7 +520,11 @@ void startMessage(const Config& configure) {
  * The AZUREMain oject is created and called.
  */
 
+#ifndef GUI_BUILD
 int main(int argc,char *argv[]){
+#else
+int main_from_gui( int argc,char *argv[]) {
+#endif
   //Create new configuration structure, and parse the command line parameters
   Config configure(std::cout);
   bool useReadline = parseOptions(argc,argv,configure);

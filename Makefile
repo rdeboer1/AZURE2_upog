@@ -3,6 +3,7 @@
 PREFIX = $(HOME)/local
 MINUIT_PREFIX = $(PREFIX)
 GSL_PREFIX = $(PREFIX)
+QT_PREFIX = $(PREFIX)
 
 # Change the variables below for the compiler.  Compiler should have 
 #  dependency generation with -M, and macro setting with -D.  Ok for icc and g++.
@@ -49,7 +50,7 @@ ifneq ($(MINUIT_PREFIX),$(GSL_PREFIX))
    CPPFLAGS += -I$(GSL_PREFIX)/include
    LFLAGS += -L$(GSL_PREFIX)/lib
 endif
-LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline
+LIBS = -lgsl -lgslcblas -lMinuit2 -lreadline 
 ifeq ($(CXX),icpc)
    CPPFLAGS += -openmp
    LFLAGS += -openmp
@@ -81,11 +82,31 @@ accurate :
 	@(echo "Decending Into Source Directory....")
 	@(cd $(srcdir); $(MAKE) CPPFLAGS="$(CPPFLAGS) -I../coul/include -DEXT_COUL" LIBS="$(LIBS) -lcoul" LFLAGS="$(LFLAGS) -L../lib")
 
+setup :
+	@(echo "Building AZURESetup2...")
+	@(cd gui; qmake -t app -o Makefile.app; qmake; make;)
+	@(echo "Decending Into Source Directory....")
+	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
+	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(QT_LIBS) $(LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+
+setup-accurate :
+	@(echo "Decending Coulomb Library Directory....")
+	@(cd $(coul_srcdir); $(MAKE))
+	@(echo "Building AZURESetup2...")
+	@(cd gui; qmake -t app -o Makefile.app; qmake; make;)
+	@(echo "Decending Into Source Directory....")
+	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
+	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD -I../coul/include -DEXT_COUL $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(QT_LIBS) -L../lib -lcoul $(LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+
 
 .PHONY : clean
 clean : 
 	@(echo "Cleaning Up In Coulomb Library Directory...")
 	@(cd $(coul_srcdir); $(MAKE) clean)
+	@(echo "Cleaning Up AZURESetup2...")
+	@(cd gui; make clean; rm -f Makefile; rm -f Makefile.app; rm -f libAZURESetup2.a)
 	@(echo "Cleaning Up In Source Directory...")
 	@(cd $(srcdir); $(MAKE) clean)
 	-rm -rf lib

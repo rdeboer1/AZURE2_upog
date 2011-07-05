@@ -29,7 +29,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
       for(int m=1;m<=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->NumMGroups();m++) {
 	MGroup *theMGroup=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->GetMGroup(m);
 	if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
-	  int jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	  sum+=2.*point->GetGeometricalFactor()*
 	    (2.*jValue+1.)*compound()->GetPair(aa)->GetI1I2Factor()*    
 	    imag(this->GetTMatrixElement(k,m,decayNum));
