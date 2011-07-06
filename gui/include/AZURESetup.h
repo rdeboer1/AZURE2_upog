@@ -55,7 +55,8 @@ class AZURESetup : public QMainWindow {
   bool readConfig(QTextStream& inStream);
   bool writeFile(QString filename);
   bool writeConfig(QTextStream& outStream, QString directory);
-
+  bool readLastRun(QTextStream& inStream);
+  bool writeLastRun(QTextStream& outStream);
   void createActions();
   void createMenus();
 

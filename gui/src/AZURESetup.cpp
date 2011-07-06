@@ -136,6 +136,7 @@ bool AZURESetup::readFile(QString filename) {
 
   QTextStream in(&file);
   QString line("");
+  
   while(line.trimmed()!=QString("<config>")&&!in.atEnd()) line = in.readLine();
   if(in.atEnd()) return false;
   if(!this->readConfig(in)) return false;
@@ -165,11 +166,89 @@ bool AZURESetup::readFile(QString filename) {
   if(in.atEnd()) return false;
   if(!targetIntTab->readFile(in)) return false;
 
+  while(line.trimmed()!=QString("<lastRun>")&&!in.atEnd()) line = in.readLine();
+  if(!in.atEnd()) 
+    if(!this->readLastRun(in)) return false;
+
   GetConfig().configfile=info.absoluteFilePath().toStdString();
   setWindowTitle(QString("AZURESetup2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 
   file.close();
+  return true;
+}
+
+bool AZURESetup::readLastRun(QTextStream& inStream) {
+  unsigned int paramMask;
+  unsigned int useTempFile;
+  unsigned int rateEntrancePair;
+  unsigned int rateExitPair;
+  QString paramFile;
+  QString integralsFile;
+  QString temperatureFile;
+  QString dummyString;
+  double minTemp;
+  double maxTemp;
+  double tempStep;
+
+  inStream >> paramMask;dummyString=inStream.readLine();
+  inStream >> paramFile;dummyString=inStream.readLine();
+  inStream >> integralsFile;dummyString=inStream.readLine();
+  inStream >> rateEntrancePair >> rateExitPair;dummyString=inStream.readLine();
+  inStream >> useTempFile >> temperatureFile;dummyString=inStream.readLine();
+  inStream >> minTemp >> maxTemp >> tempStep;
+  
+  QString line("");
+  while(line.trimmed()!=QString("</lastRun>")&&!inStream.atEnd()) 
+    line=inStream.readLine();
+  if(line.trimmed()!=QString("</lastRun>")) return false;
+
+  if(paramMask &  Config::CALCULATE_WITH_DATA) {
+    if(paramMask & Config::PERFORM_FIT) runTab->calcType->setCurrentIndex(0);
+    else if(paramMask & Config::PERFORM_ERROR_ANALYSIS) runTab->calcType->setCurrentIndex(3);
+    else runTab->calcType->setCurrentIndex(1);
+  } else {
+    if(paramMask &  Config::CALCULATE_REACTION_RATE) runTab->calcType->setCurrentIndex(4);
+    else  runTab->calcType->setCurrentIndex(2);
+  }
+
+  if(paramMask & Config::USE_BRUNE_FORMALISM) GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
+  else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
+
+  if(paramMask & Config::IGNORE_ZERO_WIDTHS) GetConfig().paramMask |= Config::IGNORE_ZERO_WIDTHS;
+  else GetConfig().paramMask &= ~Config::IGNORE_ZERO_WIDTHS;
+  
+  if(paramMask & Config::USE_RMC_FORMALISM) GetConfig().paramMask |= Config::USE_RMC_FORMALISM;
+  else GetConfig().paramMask &= ~Config::USE_RMC_FORMALISM;
+
+  if(paramMask & Config::TRANSFORM_PARAMETERS) GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
+  else GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
+  
+  if(rateEntrancePair!=0) runTab->rateEntranceKey->setText(QString("%1").arg(rateEntrancePair));
+  if(rateExitPair!=0) runTab->rateExitKey->setText(QString("%1").arg(rateExitPair));
+
+  if(minTemp!=-1.) runTab->minTempText->setText(QString("%1").arg(minTemp));
+  if(maxTemp!=-1.) runTab->maxTempText->setText(QString("%1").arg(maxTemp));
+  if(tempStep!=-1.) runTab->tempStepText->setText(QString("%1").arg(tempStep));
+  
+  if(useTempFile==1) runTab->fileTempButton->setChecked(true);
+  else runTab->gridTempButton->setChecked(true);
+  if(temperatureFile[0]==QChar('"')) temperatureFile.remove(0,1);
+  if(temperatureFile[temperatureFile.length()-1]==QChar('"')) temperatureFile.remove(temperatureFile.length()-1,1);
+  if(!temperatureFile.trimmed().isEmpty()) runTab->fileTempText->setText(temperatureFile.trimmed());
+  
+  if(paramMask & Config::USE_PREVIOUS_PARAMETERS) runTab->oldParamFileButton->setChecked(true);
+  else runTab->newParamFileButton->setChecked(true);
+  if(paramFile[0]==QChar('"')) paramFile.remove(0,1);
+  if(paramFile[paramFile.length()-1]==QChar('"')) paramFile.remove(paramFile.length()-1,1);
+  if(!paramFile.trimmed().isEmpty()) runTab->paramFileText->setText(paramFile.trimmed());
+
+  if(paramMask & Config::USE_PREVIOUS_INTEGRALS) runTab->oldIntegralsFileButton->setChecked(true);
+  else runTab->newIntegralsFileButton->setChecked(true);
+  if(integralsFile[0]==QChar('"')) integralsFile.remove(0,1);
+  if(integralsFile[integralsFile.length()-1]==QChar('"')) integralsFile.remove(integralsFile.length()-1,1);
+  if(!integralsFile.trimmed().isEmpty()) runTab->integralsFileText->setText(integralsFile.trimmed());
+		      
   return true;
 }
 
@@ -283,6 +362,10 @@ bool AZURESetup::writeFile(QString filename) {
   if(!targetIntTab->writeFile(out)) return false;
   out << "</targetInt>" << endl;  
  
+  out << "<lastRun>" << endl;
+  if(!writeLastRun(out)) return false;
+  out << "</lastRun>" << endl;
+
   GetConfig().configfile=info.absoluteFilePath().toStdString();
   setWindowTitle(QString("AZURESetup2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
@@ -351,6 +434,49 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
   outStream << qSetFieldWidth(100) << pathwaysCheck << qSetFieldWidth(0) << "#Reaction Pathway Check" << endl;
   outStream << qSetFieldWidth(100) << angDistsCheck << qSetFieldWidth(0) << "#Angular Distributions Check" << endl;
 
+  return true;
+}
+
+bool AZURESetup::writeLastRun(QTextStream& outStream) {
+  unsigned int paramMask = GetConfig().paramMask;
+
+  if(runTab->calcType->currentIndex()==0 ||
+     runTab->calcType->currentIndex()==3) paramMask |= Config::PERFORM_FIT;
+  else paramMask &= ~Config::PERFORM_FIT;
+  if(runTab->calcType->currentIndex()==2||
+     runTab->calcType->currentIndex()==4) paramMask &= ~Config::CALCULATE_WITH_DATA;
+  else paramMask |= Config::CALCULATE_WITH_DATA;
+  if(runTab->calcType->currentIndex()==3) paramMask |= Config::PERFORM_ERROR_ANALYSIS;
+  else paramMask &= ~Config::PERFORM_ERROR_ANALYSIS;
+  if(runTab->calcType->currentIndex()==4) paramMask |= Config::CALCULATE_REACTION_RATE;
+  else paramMask &= ~Config::CALCULATE_REACTION_RATE;
+
+  if(runTab->oldParamFileButton->isChecked())
+    paramMask |= Config::USE_PREVIOUS_PARAMETERS;
+  else paramMask &= ~Config::USE_PREVIOUS_PARAMETERS;
+  if(runTab->oldIntegralsFileButton->isChecked())
+    paramMask |= Config::USE_PREVIOUS_INTEGRALS;
+  else paramMask &= ~Config::USE_PREVIOUS_INTEGRALS;
+
+  outStream << paramMask << endl;
+  outStream << '"' << runTab->paramFileText->text() << '"' << endl;
+  outStream << '"' << runTab->integralsFileText->text() << '"' << endl;
+  if(!runTab->rateEntranceKey->text().isEmpty()) outStream << runTab->rateEntranceKey->text() << ' ';
+  else outStream << "0 "; 
+  if(!runTab->rateExitKey->text().isEmpty()) outStream << runTab->rateExitKey->text();
+  else outStream << 0; 
+  outStream << endl;
+  if(runTab->fileTempButton->isChecked()) outStream << "1 "; 
+  else outStream << "0 "; 
+  outStream << '"' << runTab->fileTempText->text() << '"' << endl;
+  if(!runTab->minTempText->text().isEmpty()) outStream << runTab->minTempText->text() << ' ';
+  else outStream << "-1. ";
+  if(!runTab->maxTempText->text().isEmpty()) outStream << runTab->maxTempText->text() << ' ';
+  else outStream << "-1. ";
+  if(!runTab->tempStepText->text().isEmpty()) outStream << runTab->tempStepText->text();
+  else outStream << "-1.";
+  outStream << endl;
+	 
   return true;
 }
 
