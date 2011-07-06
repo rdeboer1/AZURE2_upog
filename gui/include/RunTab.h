@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class ChooseFileButton;
+class FilteredTextEdit;
 
 QT_BEGIN_NAMESPACE
 
@@ -22,9 +23,7 @@ class RunTab : public QWidget {
  public:
   RunTab(QWidget* parent=0);
   friend class AZURESetup;
-
- public slots:
-  void writeToLog(QString string);
+  friend class AZUREMainThread;
 
  private slots:
   void calculationTypeChanged(int index);
@@ -43,7 +42,7 @@ class RunTab : public QWidget {
   QGroupBox* integralsFileGroup;
   QRadioButton* newIntegralsFileButton;
   QRadioButton* oldIntegralsFileButton;
-  QTextEdit* runtimeText;
+  FilteredTextEdit* runtimeText;
   QLineEdit* chiVarianceText;
   QGroupBox* rateParamsGroup;
   QRadioButton* gridTempButton;

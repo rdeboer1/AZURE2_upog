@@ -100,9 +100,6 @@ void AZURESetup::createMenus() {
   fileMenu->addAction(saveAsAction);
   fileMenu->addSeparator();
   
-  /*editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(copyAction);*/
-
   configMenu = menuBar()->addMenu(tr("&Configure"));
   formalismMenu = configMenu->addMenu(tr("&Formalism"));
   formalismMenu->addAction(aMatrixAction);
@@ -479,6 +476,7 @@ void AZURESetup::editOptions() {
 
 void AZURESetup::SaveAndRun() {
   save();
+  if(GetConfig().configfile.empty()) return;
   runTab->runtimeText->clear();
   QFile file(QString::fromStdString(GetConfig().configfile));
   QFileInfo info(file);
@@ -523,6 +521,17 @@ void AZURESetup::SaveAndRun() {
 			 runTab->rateExitKey->text().toInt()}; 
     segPairs.push_back(tempPair);
   }
+  if(segPairs.size()==0) {
+    QMessageBox::information(this,tr("Empty Segments"),tr("No active segments have been found."));
+    return;
+  }
+  int maxPairs=pairsTab->getPairsModel()->getPairs().size();
+  for(std::vector<SegPairs>::const_iterator it = segPairs.begin();it<segPairs.end();it++) {
+    if(it->firstPair>maxPairs||it->secondPair>maxPairs) {
+      QMessageBox::information(this,tr("Undefined Key"),tr("An undefined pair key is specified."));
+      return;
+    }
+  }
 
   GetConfig().paramMask &= ~Config::USE_EXTERNAL_CAPTURE;
   if(!checkExternalCapture(GetConfig(),segPairs)) return;
@@ -536,11 +545,13 @@ void AZURESetup::SaveAndRun() {
 
   azureMain = new AZUREMainThread(runTab,GetConfig());
   connect(azureMain,SIGNAL(finished()),this,SLOT(DeleteThread()));
-  azureMain->start();
   runTab->calcButton->setEnabled(false);
+  runTab->runtimeText->SetMouseFiltered(true);
+  azureMain->start();
 }
 
 void AZURESetup::DeleteThread() {
   runTab->calcButton->setEnabled(true);
+  runTab->runtimeText->SetMouseFiltered(false);
   delete azureMain;
 }

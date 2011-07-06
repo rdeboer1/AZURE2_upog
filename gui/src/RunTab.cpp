@@ -1,5 +1,6 @@
 #include "RunTab.h"
 #include "ChooseFileButton.h"
+#include "FilteredTextEdit.h"
 #include <QtGui>
 
 RunTab::RunTab(QWidget* parent) : QWidget(parent) {
@@ -136,7 +137,7 @@ RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   rateParamsLayout->addLayout(fileTempLayout);
   rateParamsGroup->setLayout(rateParamsLayout);
 
-  runtimeText = new QTextEdit;
+  runtimeText = new FilteredTextEdit;
   runtimeText->setReadOnly(true);
   runtimeText->setAcceptRichText(false);
 
@@ -206,14 +207,4 @@ void RunTab::setChooseFile(QLineEdit *lineEdit) {
   if(!filename.isEmpty()) {
     lineEdit->setText(filename);
   }
-}
-
-void RunTab::writeToLog(QString string) {
-  if(string[0]=='\r') {
-    QTextCursor cursor = runtimeText->textCursor();
-    cursor.select(QTextCursor::LineUnderCursor);
-    runtimeText->setTextCursor(cursor);
-    string.remove(0,1);
-  }  
-  runtimeText->insertPlainText(string);
 }

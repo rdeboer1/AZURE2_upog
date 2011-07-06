@@ -2,6 +2,7 @@
 #define AZUREMAINTHREAD_H
 
 #include "TextEditBuffer.h"
+#include "FilteredTextEdit.h"
 #include "RunTab.h"
 #include "AZUREMain.h"
 #include "Config.h"
@@ -41,7 +42,7 @@ class AZUREMainThread : public QThread {
     configure_.paramfile = configure.paramfile;
     configure_.integralsfile = configure.integralsfile;
     configure_.rateParams = configure.rateParams;    
-    connect(&buffer_,SIGNAL(updateLog(QString)),tab,SLOT(writeToLog(QString)));
+    connect(&buffer_,SIGNAL(updateLog(QString)),tab->runtimeText,SLOT(write(QString)));
     connect(this,SIGNAL(readyToRun()),&worker_,SLOT(run()));
     connect(&worker_,SIGNAL(done()),this,SLOT(quit()));
     worker_.moveToThread(this);

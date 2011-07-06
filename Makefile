@@ -3,7 +3,6 @@
 PREFIX = $(HOME)/local
 MINUIT_PREFIX = $(PREFIX)
 GSL_PREFIX = $(PREFIX)
-QT_PREFIX = $(PREFIX)
 
 # Change the variables below for the compiler.  Compiler should have 
 #  dependency generation with -M, and macro setting with -D.  Ok for icc and g++.
@@ -73,24 +72,28 @@ export RANLIB
 export LD
 
 all :   
+	@(rm -f AZURE2)
 	@(echo "Decending Into Source Directory....")
 	@(cd $(srcdir); $(MAKE) CPPFLAGS="$(CPPFLAGS)" LIBS="$(LIBS)" LFLAGS="$(LFLAGS)")
 
 accurate : 
+	@(rm -f AZURE2)
 	@(echo "Decending Coulomb Library Directory....")
 	@(cd $(coul_srcdir); $(MAKE))
 	@(echo "Decending Into Source Directory....")
 	@(cd $(srcdir); $(MAKE) CPPFLAGS="$(CPPFLAGS) -I../coul/include -DEXT_COUL" LIBS="$(LIBS) -lcoul" LFLAGS="$(LFLAGS) -L../lib")
 
 setup :
+	@(rm -f AZURE2)
 	@(echo "Building AZURESetup2...")
 	@(cd gui; qmake -t app -o Makefile.app; qmake; make;)
 	@(echo "Decending Into Source Directory....")
 	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
 	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
-	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(QT_LIBS) $(LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
 
 setup-accurate :
+	@(rm -f AZURE2)
 	@(echo "Decending Coulomb Library Directory....")
 	@(cd $(coul_srcdir); $(MAKE))
 	@(echo "Building AZURESetup2...")
@@ -98,7 +101,7 @@ setup-accurate :
 	@(echo "Decending Into Source Directory....")
 	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
 	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
-	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD -I../coul/include -DEXT_COUL $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(QT_LIBS) -L../lib -lcoul $(LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD -I../coul/include -DEXT_COUL $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 -L../lib -lcoul $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
 
 
 .PHONY : clean

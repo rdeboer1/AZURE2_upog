@@ -20,6 +20,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#ifdef GUI_BUILD
+extern int start_gui(int argc, char *argv[]);
+#endif
 struct SegPairs {int firstPair; int secondPair;};
 
 /*!
@@ -104,6 +107,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
     else if(*it=="--ignore-externals") configure.paramMask |= Config::IGNORE_ZERO_WIDTHS;
     else if(*it=="--use-rmc") configure.paramMask |= Config::USE_RMC_FORMALISM;
+    else if(*it=="--no-gui") continue;
     else configure.outStream << "WARNING: Unknown option " << *it << '.' << std::endl;
   }
   return useReadline;
@@ -520,10 +524,12 @@ void startMessage(const Config& configure) {
  * The AZUREMain oject is created and called.
  */
 
-#ifndef GUI_BUILD
 int main(int argc,char *argv[]){
-#else
-int main_from_gui( int argc,char *argv[]) {
+#ifdef GUI_BUILD
+  bool useGUI=true;
+  for(int i=1;i<argc;i++)
+    if(strcmp(argv[i],"--no-gui")==0) useGUI=false;
+  if(useGUI) return start_gui(argc,argv);
 #endif
   //Create new configuration structure, and parse the command line parameters
   Config configure(std::cout);

@@ -15,7 +15,7 @@ class TextEditBuffer : public QWidget, public std::streambuf {
 Q_OBJECT
 
  public:
-  TextEditBuffer(std::size_t buff_size = 256, QWidget* parent=0) : buffer_(buff_size+1), QWidget(parent) {
+  TextEditBuffer(std::size_t buff_size = 256, QWidget* parent=0) : QWidget(parent), buffer_(buff_size+1) {
     char* base = &buffer_.front();
     setp(base, base + buffer_.size() -1);
   };
@@ -37,13 +37,10 @@ Q_OBJECT
   };
  private:
   bool writeToTextEdit() {
-    std::ptrdiff_t n = pptr() - pbase();
-    if(n) {
-      std::string tempString(pbase(),pbase()+n);
-      emit updateLog(QString::fromStdString(tempString));
-      pbump(-n);
-    }
-    return (std::equal_to<char*>()(pptr(),pbase())) ? true : false;
+    std::string tempString(pbase(),pptr());
+    pbump(pbase()-pptr());
+    if(!tempString.empty()) emit updateLog(QString::fromStdString(tempString));
+    return true;
   };
  private:
   std::vector<char> buffer_;

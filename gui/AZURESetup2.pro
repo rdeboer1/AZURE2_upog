@@ -37,7 +37,8 @@ HEADERS += include/AddECLineDialog.h \
            include/SegmentsTestModel.h \
            include/TargetIntModel.h \
            include/TargetIntTab.h \
-           include/TextEditBuffer.h
+           include/TextEditBuffer.h \
+           include/FilteredTextEdit.h
 SOURCES += src/AddECLineDialog.cpp \
            src/AddLevelDialog.cpp \
            src/AddPairDialog.cpp \
