@@ -25,6 +25,9 @@ class FilteredTextEdit : public QTextEdit {
   void mousePressEvent(QMouseEvent *event) {
     if(!filtered_) QTextEdit::mousePressEvent(event);
   };
+  void mouseDoubleClickEvent(QMouseEvent *event) {
+    if(!filtered_) QTextEdit::mouseDoubleClickEvent(event);
+  }
  private:
   bool filtered_;
 };
