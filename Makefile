@@ -8,6 +8,7 @@ GSL_PREFIX = $(PREFIX)
 #  dependency generation with -M, and macro setting with -D.  Ok for icc and g++.
 
 CXX = icpc
+QT_SPEC = linux-icc
 AR = ar
 RANLIB = ranlib
 LD = icpc
@@ -86,7 +87,7 @@ accurate :
 setup :
 	@(rm -f AZURE2)
 	@(echo "Building AZURESetup2...")
-	@(cd gui; qmake -t app -o Makefile.app; qmake; make;)
+	@(cd gui; qmake -spec $(QT_SPEC) -t app -o Makefile.app; qmake -spec $(QT_SPEC); make;)
 	@(echo "Decending Into Source Directory....")
 	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
 	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
@@ -97,7 +98,7 @@ setup-accurate :
 	@(echo "Decending Coulomb Library Directory....")
 	@(cd $(coul_srcdir); $(MAKE))
 	@(echo "Building AZURESetup2...")
-	@(cd gui; qmake -t app -o Makefile.app; qmake; make;)
+	@(cd gui; qmake -spec $(QT_SPEC) -t app -o Makefile.app; qmake -spec $(QT_SPEC); make;)
 	@(echo "Decending Into Source Directory....")
 	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
 	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)

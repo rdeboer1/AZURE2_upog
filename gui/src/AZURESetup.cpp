@@ -37,19 +37,19 @@ AZURESetup::AZURESetup() : config(std::cout) {
   runTab = new RunTab();
   connect(runTab->calcButton,SIGNAL(clicked()),this,SLOT(SaveAndRun()));
 
-  tabWidget->addTab(pairsTab,tr("Particle Pairs (R)"));
+  tabWidget->addTab(pairsTab,tr("Particle Pairs"));
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
   tabWidget->addTab(externalCaptureTab,tr("External Capture"));
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
   tabWidget->addTab(targetIntTab,tr("Target Effects"));
-  tabWidget->addTab(runTab,tr("Run AZURE2"));
+  tabWidget->addTab(runTab,tr("Perform Calculation"));
 
   setCentralWidget(tabWidget);
   
   createActions();
   createMenus();
 
-  setWindowTitle(tr("AZURESetup2 -- untitled"));
+  setWindowTitle(tr("AZURE2 -- untitled"));
  
 }
 
@@ -171,7 +171,7 @@ bool AZURESetup::readFile(QString filename) {
     if(!this->readLastRun(in)) return false;
 
   GetConfig().configfile=info.absoluteFilePath().toStdString();
-  setWindowTitle(QString("AZURESetup2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
+  setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 
   file.close();
@@ -367,7 +367,7 @@ bool AZURESetup::writeFile(QString filename) {
   out << "</lastRun>" << endl;
 
   GetConfig().configfile=info.absoluteFilePath().toStdString();
-  setWindowTitle(QString("AZURESetup2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
+  setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 
   out.flush();
