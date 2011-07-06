@@ -3,6 +3,9 @@
 #include "AZUREParams.h"
 #include "Config.h"
 #include "ReactionRate.h"
+#include <Minuit2/FunctionMinimum.h>
+#include <Minuit2/MnMigrad.h>
+#include <Minuit2/MnMinos.h>
 
 int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile
