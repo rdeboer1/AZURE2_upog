@@ -114,8 +114,8 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
       stm.str(line);
       ExtrapLine segment(stm);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
+      numTotalSegments++;
       if(segment.isActive()==1) {
-	numTotalSegments++;
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
