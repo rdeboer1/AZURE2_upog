@@ -13,6 +13,7 @@
 #include "AZUREMain.h"
 #include "Config.h"
 #include "ECLine.h"
+#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -101,7 +102,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
   for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
     if(*it=="--help") {
       printHelp(configure);
-      std::exit(0);
+      exit(0);
     } else if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
@@ -172,7 +173,7 @@ void processCommand(int command, Config& configure) {
     configure.paramMask |= Config::CALCULATE_REACTION_RATE;
   } else if(command==6) {
     exitMessage(configure);
-    std::exit(0);
+    exit(0);
   }
 }
 
@@ -575,12 +576,12 @@ int main(int argc,char *argv[]){
   //Parse the segment files for entrance,exit pairs
   std::vector<SegPairs> segPairs;
   if(!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
-    if(!readSegmentFile(configure,segPairs)) std::exit(1);
+    if(!readSegmentFile(configure,segPairs)) exit(1);
   } else getRateParams(configure,segPairs,useReadline);
 
   //Check if the entrance,exit pairs are in the external capture file
   // If so, external capture will be needed
-  if(!checkExternalCapture(configure,segPairs)) std::exit(1);
+  if(!checkExternalCapture(configure,segPairs)) exit(1);
   
   //Read the external capture file name to be used, if any
   getExternalCaptureFile(useReadline,configure);

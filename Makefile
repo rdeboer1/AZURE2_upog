@@ -9,6 +9,7 @@ GSL_PREFIX = $(PREFIX)
 
 CXX = icpc
 QT_SPEC = linux-icc
+QMAKE = qmake
 AR = ar
 RANLIB = ranlib
 LD = icpc
@@ -36,6 +37,8 @@ ifeq ($(CROSS),yes)
    AR:=$(CROSS_HOST)$(AR)
    RANLIB:=$(CROSS_HOST)$(RANLIB)
    LD:=$(CROSS_HOST)$(LD)
+   QMAKE:=$(CROSS_HOST)$(QMAKE)
+   QT_SPEC=""
 endif
 
 CPPFLAGS = -I../include -I$(MINUIT_PREFIX)/include
@@ -60,10 +63,13 @@ else
    LFLAGS += -fopenmp
    LIBS += -lgomp -lpthread
 endif
+AZURESETUP_LIB_PATH = .
+QT_MAKFILE_SUFFIX = ""
 ifeq ($(CROSS),yes)
-   LIBS += -lpdcurses
+   LIBS += -ltermcap
+   AZURESETUP_LIB_PATH=release
+   QT_MAKEFILE_SUFFIX=.Release
 endif
-
 srcdir = src
 coul_srcdir = coul/src
 
@@ -87,22 +93,22 @@ accurate :
 setup :
 	@(rm -f AZURE2)
 	@(echo "Building AZURESetup2...")
-	@(cd gui; qmake -spec $(QT_SPEC) -t app -o Makefile.app; qmake -spec $(QT_SPEC); make;)
+	@(cd gui; $(QMAKE) -spec $(QT_SPEC) -t app -o Makefile.app; $(QMAKE) -spec $(QT_SPEC); make;cp $(AZURESETUP_LIB_PATH)/libAZURESetup2.a ../lib)
 	@(echo "Decending Into Source Directory....")
-	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
-	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
-	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+	$(eval QT_LIBS := `grep 'LIBS[[:blank:]]*=' ../gui/Makefile.app$(QT_MAKEFILE_SUFFIX) | sed 's/LIBS[[:blank:]]*=//'`)
+	$(eval QT_LFLAGS := `grep 'LFLAGS[[:blank:]]*=' ../gui/Makefile.app$(QT_MAKEFILE_SUFFIX) | sed 's/LFLAGS[[:blank:]]*=//'`)
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD $(CPPFLAGS)" LIBS="-lAZURESetup2 $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
 
 setup-accurate :
 	@(rm -f AZURE2)
 	@(echo "Decending Coulomb Library Directory....")
 	@(cd $(coul_srcdir); $(MAKE))
 	@(echo "Building AZURESetup2...")
-	@(cd gui; qmake -spec $(QT_SPEC) -t app -o Makefile.app; qmake -spec $(QT_SPEC); make;)
+	@(cd gui; $(QMAKE) -spec $(QT_SPEC) -t app -o Makefile.app; $(QMAKE) -spec $(QT_SPEC); make;cp $(AZURESETUP_LIB_PATH)/libAZURESetup2.a ../lib)
 	@(echo "Decending Into Source Directory....")
-	$(eval QT_LIBS := `egrep 'LIBS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LIBS[[:blank:]]\+=//'`)
-	$(eval QT_LFLAGS := `egrep 'LFLAGS[[:blank:]]+=' ../gui/Makefile.app | sed 's/LFLAGS[[:blank:]]\+=//'`)
-	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD -I../coul/include -DEXT_COUL $(CPPFLAGS)" LIBS="-L../gui -lAZURESetup2 -L../lib -lcoul $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
+	$(eval QT_LIBS := `grep 'LIBS[[:blank:]]*=' ../gui/Makefile.app$(QT_MAKEFILE_SUFFIX) | sed 's/LIBS[[:blank:]]*=//'`)
+	$(eval QT_LFLAGS := `grep 'LFLAGS[[:blank:]]*=' ../gui/Makefile.app$(QT_MAKEFILE_SUFFIX) | sed 's/LFLAGS[[:blank:]]*=//'`)
+	@(cd $(srcdir); $(MAKE) CPPFLAGS="-DGUI_BUILD -I../coul/include -DEXT_COUL $(CPPFLAGS)" LIBS="-lAZURESetup2 -L../lib -lcoul $(LIBS) $(QT_LIBS)" LFLAGS="$(QT_LFLAGS) $(LFLAGS)")
 
 
 .PHONY : clean
