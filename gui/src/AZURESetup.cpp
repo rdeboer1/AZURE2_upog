@@ -482,7 +482,17 @@ bool AZURESetup::writeLastRun(QTextStream& outStream) {
 
 void AZURESetup::matrixChanged(QAction *action) {
   if(action==aMatrixAction) GetConfig().paramMask |= Config::USE_AMATRIX;
-  else GetConfig().paramMask &= ~Config::USE_AMATRIX;
+  else {
+    if(GetConfig().paramMask & Config::USE_BRUNE_FORMALISM) {
+      QMessageBox::information(this,tr("Incompatible Option"),
+			       tr("The Brune formalism is not enabled for the R-Matrix. Remove option to use R-Matrix formalism."));
+      aMatrixAction->activate(QAction::Trigger);
+    } else if(GetConfig().paramMask & Config::IGNORE_ZERO_WIDTHS) {
+      QMessageBox::information(this,tr("Incompatible Option"),
+			       tr("The option to ignore external widths is not possible for R-Matrix formalism. Remove option to use R-Matrix formalism."));
+      aMatrixAction->activate(QAction::Trigger);
+    } else GetConfig().paramMask &= ~Config::USE_AMATRIX;
+  }
 }
 
 void AZURESetup::editChecks() {
@@ -585,15 +595,27 @@ void AZURESetup::editOptions() {
   else aDialog.noTransformCheck->setChecked(false);
 
   if(aDialog.exec()) {
-    if(aDialog.useBruneCheck->isChecked()) GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
-    else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
+    if(aDialog.useBruneCheck->isChecked()) {
+      GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
+      if(!(GetConfig().paramMask & Config::USE_AMATRIX)) {
+	QMessageBox::information(this,tr("Incompatible Option"),
+				 tr("Brune formalism is not enabled for R-Matrix formalism.  The formalism will be changed to A-Matrix. "));
+	aMatrixAction->activate(QAction::Trigger);
+      }
+    } else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
 
-    if(aDialog.ignoreExternalsCheck->isChecked()) GetConfig().paramMask |= Config::IGNORE_ZERO_WIDTHS;
-    else  GetConfig().paramMask &= ~Config::IGNORE_ZERO_WIDTHS;
-
+    if(aDialog.ignoreExternalsCheck->isChecked()) {
+      GetConfig().paramMask |= Config::IGNORE_ZERO_WIDTHS;
+      if(!(GetConfig().paramMask & Config::USE_AMATRIX)) {
+	QMessageBox::information(this,tr("Incompatible Option"),
+				 tr("The option to ignore external widths is not possible for R-Matrix formalism.  The formalism will be changed to A-Matrix. "));
+	aMatrixAction->activate(QAction::Trigger);
+      }
+    } else  GetConfig().paramMask &= ~Config::IGNORE_ZERO_WIDTHS;
+    
     if(aDialog.useRMCCheck->isChecked()) GetConfig().paramMask |= Config::USE_RMC_FORMALISM;
     else GetConfig().paramMask &= ~Config::USE_RMC_FORMALISM;
-
+    
     if(aDialog.noTransformCheck->isChecked()) GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
 
