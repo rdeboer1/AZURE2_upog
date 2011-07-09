@@ -86,7 +86,7 @@ int AZUREMain::operator()(){
 	    errors.push_back(error);
 	  } else errors.push_back(std::pair< double, double > (0.,0.));
 	}
-	std::cout << min.UserCovariance();
+//	std::cout << min.UserCovariance();
 
         std::ofstream out;
         out.open("covariance_matrix.out");
