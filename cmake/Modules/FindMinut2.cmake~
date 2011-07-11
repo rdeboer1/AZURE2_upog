@@ -1,0 +1,11 @@
+find_path(MINUIT2_INCLUDE_DIR Minuit2/gsl_cblas.h
+          HINTS ${HOME}/local ${HOME})
+
+find_library(GSL_LIBRARY NAMES gsl gslcblas
+             HINTS ${HOME}/local/lib ${HOME}/lib)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(gsl  DEFAULT_MSG
+                                  GSL_LIBRARY GSL_INCLUDE_DIR)
+
+mark_as_advanced(GSL_INCLUDE_DIR GSL_LIBRARY)
