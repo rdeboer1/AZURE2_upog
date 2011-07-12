@@ -152,7 +152,11 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segDataButtonBox->setColumnStretch(3,0);
   segDataButtonBox->setColumnStretch(4,0);
  /*segDataLayout->addLayout(segDataButtonBox,2,0);*/
+#ifdef MACX_SPACING
+  segDataButtonBox->setHorizontalSpacing(12);
+#else 
   segDataButtonBox->setHorizontalSpacing(0);
+#endif
   segDataLayout->addLayout(segDataButtonBox,1,0);
   segDataBox->setLayout(segDataLayout);
 
@@ -183,7 +187,11 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segTestButtonBox->setColumnStretch(3,0);
   segTestButtonBox->setColumnStretch(4,0);
   /*segTestLayout->addLayout(segTestButtonBox,2,0);*/
+#ifdef MACX_SPACING
+  segTestButtonBox->setHorizontalSpacing(12);
+#else 
   segTestButtonBox->setHorizontalSpacing(0);
+#endif
   segTestLayout->addLayout(segTestButtonBox,1,0);
   segTestBox->setLayout(segTestLayout);
 

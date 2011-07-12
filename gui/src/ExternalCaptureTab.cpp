@@ -70,7 +70,11 @@ ExternalCaptureTab::ExternalCaptureTab(QWidget *parent) : QWidget(parent) {
   buttonBox->setColumnStretch(0,0);
   buttonBox->setColumnStretch(1,0);
   buttonBox->setColumnStretch(2,1);
+#ifdef MACX_SPACING
+  buttonBox->setHorizontalSpacing(12);
+#else 
   buttonBox->setHorizontalSpacing(0);
+#endif
 
   QGridLayout *mainLayout = new QGridLayout;
   /*mainLayout->addWidget(fileBox,0,0);
