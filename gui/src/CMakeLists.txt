@@ -9,6 +9,10 @@ set (AZURESETUP_HEADERS ../include/AddECLineDialog.h ../include/AddLevelDialog.h
 include (${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
+if (APPLE)
+add_definitions(-DMACX_SPACING)
+endif (APPLE)
+
 QT4_WRAP_CPP(AZURESETUP_HEADERS_MOC ${AZURESETUP_HEADERS})
 
 add_library(AZURESetup ${AZURESETUP_SOURCES} ${AZURESETUP_HEADERS_MOC})

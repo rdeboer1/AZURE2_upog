@@ -12,9 +12,9 @@ extern bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPa
 extern bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs);
 
 AZURESetup::AZURESetup() : config(std::cout) {
-  tabWidget=new QTabWidget();
-  
-  tabWidget->setMinimumSize(1000,640);
+  setMinimumSize(1000,640);
+
+  tabWidget=new QTabWidget();  
 
   pairsTab=new PairsTab;
 
@@ -43,14 +43,14 @@ AZURESetup::AZURESetup() : config(std::cout) {
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
   tabWidget->addTab(targetIntTab,tr("Target Effects"));
   tabWidget->addTab(runTab,tr("Perform Calculation"));
-
-  setCentralWidget(tabWidget);
   
+  setCentralWidget(tabWidget);
+
   createActions();
   createMenus();
 
+
   setWindowTitle(tr("AZURE2 -- untitled"));
- 
 }
 
 Config& AZURESetup::GetConfig() {

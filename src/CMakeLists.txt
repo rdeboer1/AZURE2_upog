@@ -2,7 +2,11 @@ set(AZURE2_SOURCES AChannel.cpp CoulFunc.cpp GenMatrixFunc.cpp KLGroup.cpp ALeve
 
 include_directories(${AZURE2_SOURCE_DIR}/include)
 
-add_executable (AZURE2 ${AZURE2_SOURCES})
+if (APPLE)
+set(AZURE2_PROPERTIES MACOSX_BUNDLE)
+endif (APPLE)
+
+add_executable (AZURE2 ${AZURE2_PROPERTIES} ${AZURE2_SOURCES})
 target_link_libraries (AZURE2 ${EXTRA_LIBS} ${GSL_LIBRARIES} ${MINUIT2_LIBRARY} readline ncurses)
 
 install(TARGETS AZURE2 DESTINATION ${AZURE2_BINARY_DIR})
