@@ -89,7 +89,7 @@ void AZURESetup::createActions() {
   editDirsAction = new QAction(tr("&Directories..."),this);
   connect(editDirsAction,SIGNAL(triggered()),this,SLOT(editDirs()));
   
-  editOptionsAction = new QAction(tr("&Options..."),this);
+  editOptionsAction = new QAction(tr("&Runtime Options..."),this);
   connect(editOptionsAction,SIGNAL(triggered()),this,SLOT(editOptions()));
 }
 
