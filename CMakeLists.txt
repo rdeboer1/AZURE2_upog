@@ -13,8 +13,17 @@ option (USE_EXT_COUL
        "Use non-gsl Coulomb functions" OFF)
 option (BUILD_GUI 
        "Build AZURE2 with graphical setup program" ON)
+option (USE_STAT
+          "Use stat() function to check for directories.  Not
+          recommended for windows builds" YES)
 
 set (EXTRA_LIBS "")
+
+if (BUILD_GUI)
+add_subdirectory (gui)
+set(EXTRA_LIBS ${EXTRA_LIBS} ${AZURESETUP_LIBRARIES})
+add_definitions(-DGUI_BUILD)
+endif (BUILD_GUI)
 
 if (USE_EXT_COUL) 
 include_directories(${AZURE2_SOURCE_DIR}/coul/include)
@@ -23,11 +32,9 @@ add_definitions(-DEXT_COUL)
 set (EXTRA_LIBS ${EXTRA_LIBS} coul)
 endif (USE_EXT_COUL)
 
-if (BUILD_GUI)
-add_subdirectory (gui)
-set(EXTRA_LIBS ${EXTRA_LIBS} ${AZURESETUP_LIBRARIES})
-add_definitions(-DGUI_BUILD)
-endif (BUILD_GUI)
+if (NOT USE_STAT) 
+add_definitions (-DNO_STAT) 
+endif (NOT USE_STAT)
 
 add_subdirectory (src)
 
