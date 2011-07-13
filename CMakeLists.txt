@@ -10,7 +10,7 @@ find_package (OpenMP REQUIRED)
 set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 
 option (USE_EXT_COUL
-       "Use non-gsl Coulomb functions" OFF)
+       "Use Coulomb functions of N. Michel" OFF)
 option (BUILD_GUI 
        "Build AZURE2 with graphical setup program" ON)
 option (USE_STAT
