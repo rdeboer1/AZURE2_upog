@@ -1,8 +1,20 @@
 find_path(MINUIT2_INCLUDE_DIR Minuit2/MnUserFcn.h
-          HINTS ${HOME}/local ${HOME})
+          HINTS ${HOME}/local/include ${HOME}/include $ENV{ROOTSYS}/include)
 
 find_library(MINUIT2_LIBRARY NAMES Minuit2
-             HINTS ${HOME}/local/lib ${HOME}/lib)
+             HINTS ${HOME}/local/lib ${HOME}/lib $ENV{ROOTSYS}/lib)
+
+set (MINUIT2_LIBRARIES ${MINUIT2_LIBRARY})
+
+if (MINUIT2_INCLUDE_DIR MATCHES $ENV{ROOTSYS}/include)
+execute_process(COMMAND root-config --libs 
+    RESULT_VARIABLE return_code
+    OUTPUT_VARIABLE output ERROR_VARIABLE error
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (output)
+   set (MINUIT2_LIBRARIES ${MINUIT2_LIBRARIES} ${output})
+endif (output)
+endif (MINUIT2_INCLUDE_DIR MATCHES $ENV{ROOTSYS}/include)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(gsl  DEFAULT_MSG

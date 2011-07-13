@@ -84,7 +84,7 @@ int AZUREMain::operator()(){
       else configure().outStream << "Performing R-Matrix Fit..." << std::endl;
       data()->SetFit(true);
       ROOT::Minuit2::MnMigrad migrad(theFunc,params.GetMinuitParams());
-      ROOT::Minuit2::FunctionMinimum min=migrad();
+      ROOT::Minuit2::FunctionMinimum min=migrad(50000);
       if(configure().paramMask & Config::PERFORM_ERROR_ANALYSIS) {
 	configure().outStream << std::endl 
 		  << "Performing parameter error analysis with Up=" <<  configure().chiVariance << "." << std::endl;

@@ -17,11 +17,8 @@ option (USE_STAT
           "Use stat() function to check for directories.  Not
           recommended for windows builds" YES)
 
-set (EXTRA_LIBS "")
-
 if (BUILD_GUI)
 add_subdirectory (gui)
-set(EXTRA_LIBS ${EXTRA_LIBS} ${AZURESETUP_LIBRARIES})
 add_definitions(-DGUI_BUILD)
 endif (BUILD_GUI)
 
@@ -29,7 +26,7 @@ if (USE_EXT_COUL)
 include_directories(${AZURE2_SOURCE_DIR}/coul/include)
 add_subdirectory (coul)
 add_definitions(-DEXT_COUL)
-set (EXTRA_LIBS ${EXTRA_LIBS} coul)
+set (EXTRA_LIBS coul)
 endif (USE_EXT_COUL)
 
 if (NOT USE_STAT) 
