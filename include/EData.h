@@ -51,6 +51,7 @@ class EData {
   void SetNormParamOffset(int);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillNormsFromParams(const vector_r &);
+  void DeleteLastSegment();
   ESegment *GetSegment(int);
   ESegment *GetSegmentFromKey(int);
   EData *Clone() const;

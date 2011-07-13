@@ -161,9 +161,10 @@ int CNuc::Fill(const Config &configure) {
   if(line!="</levels>") return -1;
 
   in.close();
-  
+
   this->SetMaxLValue(maxLValue);
-  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)
+  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
+     this->NumJGroups()>0 && this->NumPairs()>0)
     if(this->ReadECFile(configure)==-1) return -1;
   
   return 0;

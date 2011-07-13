@@ -392,10 +392,10 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
   else isAMatrix="false";
   if(!GetConfig().outputdir.empty()) 
     outputDirectory=QString::fromStdString(GetConfig().outputdir);
-  else outputDirectory=directory+'/';
+  else outputDirectory=QDir::fromNativeSeparators(directory)+'/';
   if(!GetConfig().checkdir.empty()) 
     checksDirectory=QString::fromStdString(GetConfig().checkdir);
-  else checksDirectory=directory+'/';
+  else checksDirectory=QDir::fromNativeSeparators(directory)+'/';
   if(GetConfig().fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="file";
   else if(GetConfig().screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="screen";
   else compoundCheck="none";
@@ -629,8 +629,8 @@ void AZURESetup::SaveAndRun() {
   QFile file(QString::fromStdString(GetConfig().configfile));
   QFileInfo info(file);
   QString directory=info.absolutePath();
-  if(GetConfig().outputdir.empty()) GetConfig().outputdir=directory.toStdString()+'/';
-  if(GetConfig().checkdir.empty()) GetConfig().checkdir=directory.toStdString()+'/';
+  if(GetConfig().outputdir.empty()) GetConfig().outputdir=QDir::fromNativeSeparators(directory).toStdString()+'/';
+  if(GetConfig().checkdir.empty()) GetConfig().checkdir=QDir::fromNativeSeparators(directory).toStdString()+'/';
   
   GetConfig().chiVariance=runTab->chiVarianceText->text().toDouble();
 
@@ -675,7 +675,7 @@ void AZURESetup::SaveAndRun() {
   }
   int maxPairs=pairsTab->getPairsModel()->getPairs().size();
   for(std::vector<SegPairs>::const_iterator it = segPairs.begin();it<segPairs.end();it++) {
-    if(it->firstPair>maxPairs||it->secondPair>maxPairs) {
+    if(it->firstPair>maxPairs||it->secondPair>maxPairs||it->firstPair<1||it->secondPair<1) {
       QMessageBox::information(this,tr("Undefined Key"),tr("An undefined pair key is specified."));
       return;
     }
@@ -690,6 +690,38 @@ void AZURESetup::SaveAndRun() {
       GetConfig().integralsfile=runTab->integralsFileText->text().toStdString();
     } else GetConfig().paramMask &= ~Config::USE_PREVIOUS_INTEGRALS;
   }
+
+  if(!QDir(QString::fromStdString(GetConfig().outputdir)).exists()) {
+    QMessageBox::information(this,tr("Directory Doesn't Exist"),
+			     tr("The specified output directory doesn't exist."));
+    return;
+  }
+  if(!QDir(QString::fromStdString(GetConfig().checkdir)).exists()) {
+    QMessageBox::information(this,tr("Directory Doesn't Exist"),
+			     tr("The specified checks directory doesn't exist."));
+    return;
+  }
+  if((GetConfig().paramMask & Config::USE_PREVIOUS_PARAMETERS) &&
+     !QFile(QString::fromStdString(GetConfig().paramfile)).exists()) {
+    QMessageBox::information(this,tr("File Doesn't Exist"),
+			     tr("The specified parameter file doesn't exist."));
+    return;
+  }
+  if(((GetConfig().paramMask & Config::USE_PREVIOUS_INTEGRALS) &&
+      (GetConfig().paramMask & Config::USE_EXTERNAL_CAPTURE)) &&
+     !QFile(QString::fromStdString(GetConfig().integralsfile)).exists()) {
+    QMessageBox::information(this,tr("File Doesn't Exist"),
+			     tr("The specified integrals file doesn't exist."));
+    return;
+  }
+  if((GetConfig().paramMask & Config::CALCULATE_REACTION_RATE &&
+      GetConfig().rateParams.useFile) &&
+     !QFile(QString::fromStdString(GetConfig().rateParams.temperatureFile)).exists()) {
+    QMessageBox::information(this,tr("File Doesn't Exist"),
+			     tr("The specified rate temperature file doesn't exist."));
+    return;
+  }
+
 
   azureMain = new AZUREMainThread(runTab,GetConfig());
   connect(azureMain,SIGNAL(finished()),this,SLOT(DeleteThread()));

@@ -66,12 +66,17 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
 	    if(this->GetSegment(this->NumSegments())->Fill(theCNuc,this,configure)==-1) {
-              configure.outStream << "Could Not Fill Segment " << this->NumSegments() 
+              configure.outStream << "WARNING: Could Not Fill Segment #" << this->NumSegments() 
 			<< " from file." << std::endl;
-	    } 
-	  } else configure.outStream << "Pair key " << NewSegment.GetExitKey() 
+	      this->DeleteLastSegment();
+	    } else if(this->GetSegment(this->NumSegments())->NumPoints()==0) {
+	      configure.outStream << "WARNING: Segment #" << this->NumSegments() 
+				  << " is empty and will not be used." << std::endl;
+	      this->DeleteLastSegment();
+	    }
+	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
 			   << " not in compound nucleus." << std::endl;
-	} else configure.outStream << "Pair key " << NewSegment.GetEntranceKey() 
+	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
 			 << " not in compound nucleus." << std::endl;
       }
     }
@@ -80,8 +85,11 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsData>") return -1;
 
   in.close();
-  if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
-  this->MapData();
+
+  if(this->NumSegments()>0) {
+    if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
+    this->MapData();
+  }
 
   return 0; 
 }
@@ -148,9 +156,14 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 	      }
 	      if(aStep==0.0) break;
 	    }
-	  } else configure.outStream << "Pair key " << NewSegment.GetExitKey() 
+	    if(theSegment->NumPoints()==0) {
+	      configure.outStream << "WARNING: Extrapolation segment #" << this->NumSegments() 
+				  << " is empty and will not be used." << std::endl;
+	      this->DeleteLastSegment();
+	    }
+	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
 			   << " not in compound nucleus." << std::endl;
-	} else configure.outStream << "Pair key " << NewSegment.GetEntranceKey() 
+	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
 			 << " not in compound nucleus." << std::endl;
       }
     }
@@ -159,8 +172,12 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsTest>") return -1;
   
   in.close();
-  if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
-  this->MapData();
+
+  if(this->NumSegments()>0) {
+    if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
+    this->MapData();
+  }
+
   return 0; 
 }
 
@@ -890,6 +907,14 @@ void EData::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
   }
 }
 
+
+/*!
+ * Deletes the last segment from the segment vector.
+ */
+
+void EData::DeleteLastSegment() {
+  segments_.pop_back();
+}
 
 /*!
  * Fills the Normalizations from the Minuit parameter array.

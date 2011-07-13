@@ -14,7 +14,10 @@ int AZUREMain::operator()(){
     configure().outStream << "Could not fill compound nucleus from file." 
 	      << std::endl;
     return -1;
-  }
+  } else if(compound()->NumPairs()==0 || compound()->NumJGroups()==0) {
+    configure().outStream << "No nuclear data exists. Calculation not possible." << std::endl; 
+    return -1;
+  } 
   if((configure().screenCheckMask|configure().fileCheckMask) & 
      Config::CHECK_COMPOUND_NUCLEUS) compound()->PrintNuc(configure());
 
@@ -27,10 +30,16 @@ int AZUREMain::operator()(){
       if(data()->Fill(configure(),compound())==-1) {
 	configure().outStream << "Could not fill data object from file." << std::endl;
 	return -1;
+      } else if(data()->NumSegments()==0) {
+	configure().outStream << "There is no data provided." << std::endl;
+	return -1;
       }
     } else {
       if(data()->MakePoints(configure(),compound())==-1) {
 	configure().outStream << "Could not fill data object from file." << std::endl;
+	return -1;
+      } else if(data()->NumSegments()==0) {
+	configure().outStream << "Extrapolation segments produce no data." << std::endl;
 	return -1;
       }
     } 
