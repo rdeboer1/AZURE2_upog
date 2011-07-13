@@ -17,7 +17,7 @@ endif (output)
 endif (MINUIT2_INCLUDE_DIR MATCHES $ENV{ROOTSYS}/include)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(gsl  DEFAULT_MSG
+find_package_handle_standard_args(Minuit2  DEFAULT_MSG
                                   MINUIT2_LIBRARY MINUIT2_INCLUDE_DIR)
 
 mark_as_advanced(MINUIT2_INCLUDE_DIR MINUIT2_LIBRARY)
