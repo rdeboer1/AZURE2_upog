@@ -170,7 +170,7 @@ bool AZURESetup::readFile(QString filename) {
   if(!in.atEnd()) 
     if(!this->readLastRun(in)) return false;
 
-  GetConfig().configfile=info.absoluteFilePath().toStdString();
+  GetConfig().configfile=QDir::fromNativeSeparators(info.absoluteFilePath()).toStdString();
   setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 
@@ -366,7 +366,7 @@ bool AZURESetup::writeFile(QString filename) {
   if(!writeLastRun(out)) return false;
   out << "</lastRun>" << endl;
 
-  GetConfig().configfile=info.absoluteFilePath().toStdString();
+  GetConfig().configfile=QDir::fromNativeSeparators(info.absoluteFilePath()).toStdString();
   setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 

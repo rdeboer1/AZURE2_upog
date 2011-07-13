@@ -44,6 +44,6 @@ EditDirsDialog::EditDirsDialog(QWidget *parent) : QDialog(parent) {
 void EditDirsDialog::setChooseDirectory(QLineEdit *lineEdit) {
   QString filename = QFileDialog::getExistingDirectory(this);
   if(!filename.isEmpty()) {
-    lineEdit->setText(filename+'/');
+    lineEdit->setText(QDir::fromNativeSeparators(filename)+'/');
   }
 }

@@ -205,6 +205,6 @@ void RunTab::fileTempButtonChanged(bool checked) {
 void RunTab::setChooseFile(QLineEdit *lineEdit) {
   QString filename = QFileDialog::getOpenFileName(this);
   if(!filename.isEmpty()) {
-    lineEdit->setText(filename);
+    lineEdit->setText(QDir::fromNativeSeparators(filename));
   }
 }

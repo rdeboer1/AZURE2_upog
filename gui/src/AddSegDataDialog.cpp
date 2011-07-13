@@ -113,7 +113,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
 void AddSegDataDialog::setChooseFile() {
   QString filename = QFileDialog::getOpenFileName(this);
   if(!filename.isEmpty()) {
-    dataFileText->setText(filename);
+    dataFileText->setText(QDir::fromNativeSeparators(filename));
   }
 }
 
