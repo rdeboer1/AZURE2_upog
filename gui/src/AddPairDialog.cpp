@@ -133,6 +133,8 @@ void AddPairDialog::updateLightParticle(int index) {
     lightGText->setEnabled(false);
     seperationEnergyText->setText("0.0");
     seperationEnergyText->setEnabled(false);
+    channelRadiusText->setText("0");
+    channelRadiusText->setEnabled(false);
   } else {
     lightJText->setEnabled(true);
     lightPiCombo->setEnabled(true);
@@ -140,5 +142,6 @@ void AddPairDialog::updateLightParticle(int index) {
     lightMText->setEnabled(true);    
     lightGText->setEnabled(true);    
     seperationEnergyText->setEnabled(true);
+    channelRadiusText->setEnabled(true);
   }
 }
