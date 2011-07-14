@@ -4,6 +4,11 @@
 #endif
 #include <iostream>
 
+/*!
+ * The constructor of the Config class sets defaults and the 
+ * stream reference for output.
+ */
+
 Config::Config(std::ostream& stream) : outStream(stream) {
   chiVariance=1.0;
   screenCheckMask=0;
@@ -11,6 +16,10 @@ Config::Config(std::ostream& stream) : outStream(stream) {
   paramMask=0;
   paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA);
 }
+
+/*!
+ * This funciton reads the configuration file and parses various options.
+ */
 
 int Config::ReadConfigFile() {
   std::string dummy; std::string temp;
@@ -54,6 +63,11 @@ int Config::ReadConfigFile() {
   in.close();
   return 0;
 }
+
+/*!
+ * If stat() is enabled, this function checks for the output and checks 
+ * directories at runtime.
+ */
 
 #ifndef NO_STAT
 int Config::CheckForInputFiles() {

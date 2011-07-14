@@ -37,6 +37,9 @@ struct RateParams {
 class Config {
  public:
   Config(std::ostream& stream);
+  /*!
+   * Bit flags for various options in AZURE2.
+   */
   enum ParameterFlags {
     USE_AMATRIX             =(1<<0),
     PERFORM_ERROR_ANALYSIS  =(1<<1),
@@ -51,6 +54,9 @@ class Config {
     IGNORE_ZERO_WIDTHS      =(1<<10),
     USE_RMC_FORMALISM       =(1<<11)
   };
+  /*!
+   * Bit flags for check file control in AZURE2.
+   */
   enum CheckFileFlags {
     CHECK_COMPOUND_NUCLEUS    =(1<<0),
     CHECK_PATHWAYS            =(1<<1),
