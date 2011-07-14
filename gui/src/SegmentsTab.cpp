@@ -208,6 +208,7 @@ void SegmentsTab::deleteSegDataLine() {
   QModelIndex index=indexes.at(0);
   
   segmentsDataModel->removeRows(index.row(),1,QModelIndex());
+  updateSegDataButtons(selectionModel->selection());
 }
 
 void SegmentsTab::deleteSegTestLine() {
@@ -216,6 +217,7 @@ void SegmentsTab::deleteSegTestLine() {
   QModelIndex index=indexes.at(0);
   
   segmentsTestModel->removeRows(index.row(),1,QModelIndex());
+  updateSegTestButtons(selectionModel->selection());
 }
 
 void SegmentsTab::addSegDataLine() {
@@ -273,6 +275,7 @@ void SegmentsTab::addSegDataLine(SegmentsDataData line) {
     index = segmentsDataModel->index(lines.size(),12,QModelIndex());
     segmentsDataModel->setData(index,line.phaseL,Qt::EditRole);
     segmentsDataView->resizeRowToContents(lines.size());
+    updateSegDataButtons(segmentsDataView->selectionModel()->selection());
   } else {
     QMessageBox::information(this,tr("Duplicate Line"),tr("This line already exists."));
   }
@@ -329,6 +332,7 @@ void SegmentsTab::addSegTestLine(SegmentsTestData line) {
     index = segmentsTestModel->index(lines.size(),11,QModelIndex());
     segmentsTestModel->setData(index,line.phaseL,Qt::EditRole);
     segmentsTestView->resizeRowToContents(lines.size());
+    updateSegTestButtons(segmentsTestView->selectionModel()->selection());
   } else {
     QMessageBox::information(this,tr("Duplicate Line"),tr("This line already exists."));
   }
