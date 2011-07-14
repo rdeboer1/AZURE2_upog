@@ -1,8 +1,8 @@
 find_path(MINUIT2_INCLUDE_DIR Minuit2/MnUserFcn.h
-          HINTS ${HOME}/local/include ${HOME}/include $ENV{ROOTSYS}/include)
+          HINTS $ENV{HOME}/local/include $ENV{HOME}/include $ENV{ROOTSYS}/include)
 
 find_library(MINUIT2_LIBRARY NAMES Minuit2
-             HINTS ${HOME}/local/lib ${HOME}/lib $ENV{ROOTSYS}/lib)
+             HINTS $ENV{HOME}/local/lib $ENV{HOME}/lib $ENV{ROOTSYS}/lib)
 
 set (MINUIT2_LIBRARIES ${MINUIT2_LIBRARY})
 

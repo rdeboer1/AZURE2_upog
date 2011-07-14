@@ -1,11 +1,11 @@
 find_path(GSL_INCLUDE_DIR gsl/gsl_cblas.h
-          HINTS ${HOME}/local ${HOME})
+          HINTS $ENV{HOME}/local/include $ENV{HOME}/include)
 
 find_library(GSL_LIBRARY NAMES gsl 
-             HINTS ${HOME}/local/lib ${HOME}/lib)
+             HINTS $ENV{HOME}/local/lib $ENV{HOME}/lib)
 
 find_library(GSLCBLAS_LIBRARY NAMES gslcblas 
-             HINTS ${HOME}/local/lib ${HOME}/lib)
+             HINTS $ENV{HOME}/local/lib $ENV{HOME}/lib)
 
 set(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
 
