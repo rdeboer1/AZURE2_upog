@@ -44,6 +44,7 @@ class AZURESetup : public QMainWindow {
  private slots:
   void open();
   void openRecent();
+  void clearRecent();
   void save();
   void saveAs();
   void matrixChanged(QAction* action);
@@ -73,6 +74,8 @@ class AZURESetup : public QMainWindow {
   QAction* aMatrixAction;
   QAction* rMatrixAction;
   QAction* editOptionsAction;
+  QAction* recentSeparator;
+  QAction* clearRecentAction;
   enum { numRecent = 5 };
   QAction* recentFileActions[numRecent];
 

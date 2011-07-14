@@ -75,6 +75,9 @@ void AZURESetup::createActions() {
     recentFileActions[i] -> setVisible(false);
     connect(recentFileActions[i],SIGNAL(triggered()),this,SLOT(openRecent()));
   }
+  clearRecentAction = new QAction(tr("&Clear"),this);
+  clearRecentAction->setVisible(false);
+  connect(clearRecentAction,SIGNAL(triggered()),this,SLOT(clearRecent()));
 
   copyAction = new QAction(tr("&Copy"),this);
   copyAction->setShortcuts(QKeySequence::Copy);
@@ -104,6 +107,8 @@ void AZURESetup::createMenus() {
   fileMenu->addAction(openAction);
   recentFileMenu = fileMenu->addMenu(tr("Open &Recent..."));
   for(int i = 0; i < numRecent; i++ ) recentFileMenu->addAction(recentFileActions[i]);
+  recentSeparator = recentFileMenu->addSeparator();
+  recentFileMenu->addAction(clearRecentAction);
   updateRecent();
   fileMenu->addAction(saveAction);
   fileMenu->addAction(saveAsAction);
@@ -130,6 +135,8 @@ void AZURESetup::updateRecent() {
   }
   
   for(int i = numFiles; i<numRecent; i++) recentFileActions[i]->setVisible(false);
+  recentSeparator->setVisible(numFiles>0);
+  clearRecentAction->setVisible(numFiles>0);
 }
 
 void AZURESetup::open() {
@@ -154,6 +161,14 @@ void AZURESetup::open(QString filename) {
 void AZURESetup::openRecent() {
   QString filename = qobject_cast<QAction*>(sender())->data().toString();
   open(filename);
+}
+
+void AZURESetup::clearRecent() {
+  QSettings settings;
+  QStringList files = settings.value("recentFileList").toStringList();
+  files.clear();
+  settings.setValue("recentFileList",files);
+  updateRecent();
 }
 
 bool AZURESetup::readFile(QString filename) {
@@ -206,8 +221,9 @@ bool AZURESetup::readFile(QString filename) {
 
   QSettings settings;
   QStringList files = settings.value("recentFileList").toStringList();
-  files.removeAll(filename);
-  files.prepend(filename);
+  QString fullFileName = QDir::fromNativeSeparators(info.absoluteFilePath());
+  files.removeAll(fullFileName);
+  files.prepend(fullFileName);
   while(files.size()>numRecent) files.removeLast();
 
   settings.setValue("recentFileList",files);
