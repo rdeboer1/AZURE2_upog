@@ -70,6 +70,12 @@ void AZURESetup::createActions() {
   saveAsAction->setShortcuts(QKeySequence::SaveAs);
   connect(saveAsAction,SIGNAL(triggered()),this,SLOT(saveAs()));
 
+  for(int i=0;i<numRecent;i++) {
+    recentFileActions[i] = new QAction(this);
+    recentFileActions[i] -> setVisible(false);
+    connect(recentFileActions[i],SIGNAL(triggered()),this,SLOT(openRecent()));
+  }
+
   copyAction = new QAction(tr("&Copy"),this);
   copyAction->setShortcuts(QKeySequence::Copy);
 
@@ -96,9 +102,11 @@ void AZURESetup::createActions() {
 void AZURESetup::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openAction);
+  recentFileMenu = fileMenu->addMenu(tr("Open &Recent..."));
+  for(int i = 0; i < numRecent; i++ ) recentFileMenu->addAction(recentFileActions[i]);
+  updateRecent();
   fileMenu->addAction(saveAction);
   fileMenu->addAction(saveAsAction);
-  fileMenu->addSeparator();
   
   configMenu = menuBar()->addMenu(tr("&Configure"));
   formalismMenu = configMenu->addMenu(tr("&Formalism"));
@@ -107,6 +115,21 @@ void AZURESetup::createMenus() {
   configMenu->addAction(editChecksAction);
   configMenu->addAction(editDirsAction);
   configMenu->addAction(editOptionsAction);
+}
+
+void AZURESetup::updateRecent() {
+  QSettings settings;
+  QStringList files = settings.value("recentFileList").toStringList();
+
+  int numFiles = qMin(files.size(),(int)numRecent);
+
+  for(int i = 0; i<numFiles; i++) {
+    recentFileActions[i]->setText(tr("&%1 %2").arg(i+1).arg(QFileInfo(files[i]).fileName()));
+    recentFileActions[i]->setData(files[i]);
+    recentFileActions[i]->setVisible(true);
+  }
+  
+  for(int i = numFiles; i<numRecent; i++) recentFileActions[i]->setVisible(false);
 }
 
 void AZURESetup::open() {
@@ -126,6 +149,11 @@ void AZURESetup::open(QString filename) {
 			       tr("Can't Access File"),
 			       tr("An error was encountered while reading the file."));
   }
+}
+
+void AZURESetup::openRecent() {
+  QString filename = qobject_cast<QAction*>(sender())->data().toString();
+  open(filename);
 }
 
 bool AZURESetup::readFile(QString filename) {
@@ -170,11 +198,21 @@ bool AZURESetup::readFile(QString filename) {
   if(!in.atEnd()) 
     if(!this->readLastRun(in)) return false;
 
+  file.close();
+
   GetConfig().configfile=QDir::fromNativeSeparators(info.absoluteFilePath()).toStdString();
   setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
 
-  file.close();
+  QSettings settings;
+  QStringList files = settings.value("recentFileList").toStringList();
+  files.removeAll(filename);
+  files.prepend(filename);
+  while(files.size()>numRecent) files.removeLast();
+
+  settings.setValue("recentFileList",files);
+  updateRecent();
+
   return true;
 }
 

@@ -43,6 +43,7 @@ class AZURESetup : public QMainWindow {
 
  private slots:
   void open();
+  void openRecent();
   void save();
   void saveAs();
   void matrixChanged(QAction* action);
@@ -59,6 +60,7 @@ class AZURESetup : public QMainWindow {
   bool writeLastRun(QTextStream& outStream);
   void createActions();
   void createMenus();
+  void updateRecent();
 
   Config config;
 
@@ -71,6 +73,8 @@ class AZURESetup : public QMainWindow {
   QAction* aMatrixAction;
   QAction* rMatrixAction;
   QAction* editOptionsAction;
+  enum { numRecent = 5 };
+  QAction* recentFileActions[numRecent];
 
   QActionGroup* matrixActionGroup;
 
@@ -78,6 +82,7 @@ class AZURESetup : public QMainWindow {
   QMenu *editMenu;
   QMenu *configMenu;
   QMenu *formalismMenu;
+  QMenu *recentFileMenu;
   QTabWidget *tabWidget;
   PairsTab *pairsTab;
   LevelsTab *levelsTab;
