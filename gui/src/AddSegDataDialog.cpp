@@ -17,7 +17,11 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   lowEnergyText = new QLineEdit;
   highEnergyText = new QLineEdit;
   lowAngleText = new QLineEdit;
+  lowAngleText->setText("0");
+  lowAngleText->setEnabled(false);
   highAngleText = new QLineEdit;
+  highAngleText->setText("180");
+  highAngleText->setEnabled(false);
   dataTypeCombo = new QComboBox;
   dataTypeCombo->addItem(tr("Angle Integrated"));
   dataTypeCombo->addItem(tr("Differential"));
@@ -132,5 +136,14 @@ void AddSegDataDialog::dataTypeChanged(int index) {
     phaseLValueLabel->setVisible(false);
     phaseJValueText->setVisible(false);
     phaseLValueText->setVisible(false);
+  }
+  if(index==1) {
+    lowAngleText->setEnabled(true);
+    highAngleText->setEnabled(true);
+  } else {
+    lowAngleText->setEnabled(false);
+    highAngleText->setEnabled(false);
+    lowAngleText->setText("0");
+    highAngleText->setText("180");
   }
 }

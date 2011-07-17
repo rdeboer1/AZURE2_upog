@@ -18,8 +18,14 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   highEnergyText = new QLineEdit;
   energyStepText = new QLineEdit;
   lowAngleText = new QLineEdit;
+  lowAngleText->setText("0");
+  lowAngleText->setEnabled(false);
   highAngleText = new QLineEdit;
+  highAngleText->setText("0");
+  highAngleText->setEnabled(false);
   angleStepText = new QLineEdit;
+  angleStepText->setText("0");
+  angleStepText->setEnabled(false);
   dataTypeCombo = new QComboBox;
   dataTypeCombo->addItem(tr("Angle Integrated"));
   dataTypeCombo->addItem(tr("Differential"));
@@ -112,31 +118,38 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
 }
 
 void AddSegTestDialog::dataTypeChanged(int index) {
-  if(index==3) {
+  if(index==2) {
+    angDistLabel->setVisible(false);
+    angDistSpin->setVisible(false);
+    phaseJValueLabel->setVisible(true);
+    phaseLValueLabel->setVisible(true);
+    phaseJValueText->setVisible(true);
+    phaseLValueText->setVisible(true);
+  } else if(index==3) {
+    phaseJValueLabel->setVisible(false);
+    phaseLValueLabel->setVisible(false);
+    phaseJValueText->setVisible(false);
+    phaseLValueText->setVisible(false);
     angDistLabel->setVisible(true);
     angDistSpin->setVisible(true);
+  } else {
+    phaseJValueLabel->setVisible(false);
+    phaseLValueLabel->setVisible(false);
+    phaseJValueText->setVisible(false);
+    phaseLValueText->setVisible(false);
+    angDistLabel->setVisible(false);
+    angDistSpin->setVisible(false);
+  }
+  if(index==1) {
+    lowAngleText->setEnabled(true);
+    highAngleText->setEnabled(true);
+    angleStepText->setEnabled(true);
+  } else {
     lowAngleText->setEnabled(false);
     highAngleText->setEnabled(false);
     angleStepText->setEnabled(false);
     lowAngleText->setText("0");
     highAngleText->setText("0");
     angleStepText->setText("0");
-  } else {
-    angDistLabel->setVisible(false);
-    angDistSpin->setVisible(false);
-    lowAngleText->setEnabled(true);
-    highAngleText->setEnabled(true);
-    angleStepText->setEnabled(true);
-  }
-  if(index==2) {
-    phaseJValueLabel->setVisible(true);
-    phaseLValueLabel->setVisible(true);
-    phaseJValueText->setVisible(true);
-    phaseLValueText->setVisible(true);
-  } else {
-    phaseJValueLabel->setVisible(false);
-    phaseLValueLabel->setVisible(false);
-    phaseJValueText->setVisible(false);
-    phaseLValueText->setVisible(false);
   }
 }
