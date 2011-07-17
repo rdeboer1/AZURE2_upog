@@ -37,11 +37,12 @@ class EPoint {
  public:
   EPoint(DataLine, ESegment*);
   EPoint(double, double, ESegment*);
-  EPoint(double, double, int, int, bool, bool, double, int);
+  EPoint(double, double, int, int, bool, bool, bool, double, int, int);
   bool IsDifferential() const;
   bool IsPhase() const;
   bool IsMapped() const;
   bool IsTargetEffect() const;
+  bool IsAngularDist() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
   int GetMaxLOrder() const;
@@ -49,6 +50,8 @@ class EPoint {
   int NumLocalMappedPoints() const;
   int NumSubPoints() const;
   int GetTargetEffectNum() const;
+  int GetMaxAngDistOrder() const;
+  int GetNumAngularDists() const;
   double GetLabAngle() const;
   double GetCMAngle() const;
   double GetLabEnergy() const;
@@ -65,6 +68,7 @@ class EPoint {
   double GetJ() const;
   double GetStoppingPower() const;
   double GetTargetThickness() const;
+  double GetAngularDist(int) const;
   complex GetLoElement(int,int) const;
   complex GetExpCoulombPhase(int,int) const;
   complex GetExpHardSpherePhase(int,int) const;
@@ -100,6 +104,7 @@ class EPoint {
   void SetParentData(EData*);
   void SetStoppingPower(double);
   void SetTargetThickness(double);
+  void SetAngularDists(vector_r);
   EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
   EPoint* GetSubPoint(int);
@@ -109,10 +114,12 @@ class EPoint {
   bool is_differential_;
   bool is_phase_;
   bool is_mapped_;
+  bool is_ang_dist_;
   int entrance_key_;
   int exit_key_;
   int l_value_;
   int targetEffectNum_;
+  int max_ang_dist_order_;
   double cm_angle_;
   double lab_angle_;
   double cm_energy_;
@@ -130,6 +137,7 @@ class EPoint {
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;
+  vector_r angularDists_;
   matrix_c lo_elements_;
   matrix_r penetrabilities_;
   matrix_c coulombphase_;

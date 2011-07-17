@@ -8,6 +8,12 @@
 #include <QLabel>
 #include <QCheckBox>
 
+QT_BEGIN_NAMESPACE
+
+class QLabel;
+
+QT_END_NAMESPACE
+
 class AddSegDataDialog : public QDialog {
   Q_OBJECT
 
@@ -25,6 +31,8 @@ class AddSegDataDialog : public QDialog {
   QCheckBox *varyNormCheck;
   QLineEdit *phaseJValueText;
   QLineEdit *phaseLValueText;
+  QLabel* phaseLValueLabel;
+  QLabel* phaseJValueLabel;
 
  public slots:
   void setChooseFile();

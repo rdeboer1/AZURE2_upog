@@ -24,12 +24,13 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   dataTypeCombo->addItem(tr("Angle Integrated"));
   dataTypeCombo->addItem(tr("Differential"));
   dataTypeCombo->addItem(tr("Phase Shift"));
+  dataTypeCombo->addItem(tr("Angular Distribution"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
   phaseJValueText = new QLineEdit;
-  phaseJValueText->setEnabled(false);
+  phaseJValueText->setVisible(false);
   phaseJValueText->setMaximumWidth(50);
   phaseLValueText = new QLineEdit;
-  phaseLValueText->setEnabled(false);
+  phaseLValueText->setVisible(false);
   phaseLValueText->setMaximumWidth(50);
 
   cancelButton = new QPushButton(tr("Cancel"));
@@ -68,14 +69,27 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
-  lowerLayout->addItem(new QSpacerItem(20,20),0,2);
+  lowerLayout->addItem(new QSpacerItem(1,25),0,2);
   lowerLayout->setColumnStretch(2,1);
 
-  QGridLayout* phaseLayout = new QGridLayout;
-  phaseLayout->addWidget(new QLabel(tr("J:")),0,0,Qt::AlignRight);
-  phaseLayout->addWidget(phaseJValueText,0,1);
-  phaseLayout->addWidget(new QLabel(tr("l:")),0,2,Qt::AlignRight);
-  phaseLayout->addWidget(phaseLValueText,0,3);
+  QHBoxLayout* phaseLayout = new QHBoxLayout;
+  phaseJValueLabel = new QLabel(tr("J:"));
+  phaseJValueLabel->setVisible(false);
+  phaseLayout->addWidget(phaseJValueLabel);
+  phaseLayout->addWidget(phaseJValueText);
+  phaseLValueLabel = new QLabel(tr("l:"));
+  phaseLValueLabel->setVisible(false);
+  phaseLayout->addWidget(phaseLValueLabel);
+  phaseLayout->addWidget(phaseLValueText);
+  angDistLabel = new QLabel(tr("Maximum Order"));
+  angDistSpin = new QSpinBox;
+  angDistSpin->setMinimum(0);
+  angDistSpin->setMaximum(10);
+  angDistSpin->setSingleStep(1);
+  angDistLabel->setVisible(false);
+  angDistSpin->setVisible(false);
+  phaseLayout->addWidget(angDistLabel);
+  phaseLayout->addWidget(angDistSpin);
   lowerLayout->addLayout(phaseLayout,0,3);
 
   valueLayout->addLayout(lowerLayout,2,0,1,2);
@@ -98,11 +112,31 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
 }
 
 void AddSegTestDialog::dataTypeChanged(int index) {
-  if(index==2) {
-    phaseJValueText->setEnabled(true);
-    phaseLValueText->setEnabled(true);
+  if(index==3) {
+    angDistLabel->setVisible(true);
+    angDistSpin->setVisible(true);
+    lowAngleText->setEnabled(false);
+    highAngleText->setEnabled(false);
+    angleStepText->setEnabled(false);
+    lowAngleText->setText("0");
+    highAngleText->setText("0");
+    angleStepText->setText("0");
   } else {
-    phaseJValueText->setEnabled(false);
-    phaseLValueText->setEnabled(false);
+    angDistLabel->setVisible(false);
+    angDistSpin->setVisible(false);
+    lowAngleText->setEnabled(true);
+    highAngleText->setEnabled(true);
+    angleStepText->setEnabled(true);
+  }
+  if(index==2) {
+    phaseJValueLabel->setVisible(true);
+    phaseLValueLabel->setVisible(true);
+    phaseJValueText->setVisible(true);
+    phaseLValueText->setVisible(true);
+  } else {
+    phaseJValueLabel->setVisible(false);
+    phaseLValueLabel->setVisible(false);
+    phaseJValueText->setVisible(false);
+    phaseLValueText->setVisible(false);
   }
 }

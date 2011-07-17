@@ -144,7 +144,8 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 		EPoint *thePoint=theSegment->GetPoint(theSegment->NumPoints());
 		thePoint->SetParentData(this);
 		thePoint->ConvertLabEnergy(entrancePair);
-		if(exitPair->GetPType()==0&&theSegment->IsDifferential()&&!theSegment->IsPhase()) {
+		if(exitPair->GetPType()==0&&theSegment->IsDifferential()&&
+		   !theSegment->IsPhase()&&!theSegment->IsAngularDist()) {
 		  if(theSegment->GetEntranceKey()==theSegment->GetExitKey()) {
 		    thePoint->ConvertLabAngle(entrancePair);
 		  } else {
@@ -697,18 +698,24 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     std::ostream out(output(aa,ir));
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
-      out << std::setw(13) << std::scientific << point->GetCMEnergy()
-	  << std::setw(13) << std::scientific << point->GetCMAngle()
-	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
-	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
-      if(!output.IsExtrap()) {
-      double dataNorm=segment->GetNorm();
-      out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
-	  << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
-	  << std::endl;
-      } else out << std::endl;
+      if(segment->IsAngularDist()) {
+	out << std::setw(13) << std::scientific << point->GetCMEnergy();
+	for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
+	out << std::endl;
+      } else {
+	out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	    << std::setw(13) << std::scientific << point->GetCMAngle()
+	    << std::setw(13) << std::scientific << point->GetFitCrossSection()
+	    << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
+	if(!output.IsExtrap()) {
+	  double dataNorm=segment->GetNorm();
+	  out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
+	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
+	      << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
+	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
+	      << std::endl;
+	} else out << std::endl;
+      }
     }
     if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
       totalChiSquared+=segment->GetSegmentChiSquared();

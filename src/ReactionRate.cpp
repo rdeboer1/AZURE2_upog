@@ -26,7 +26,7 @@ double gsl_reactionrate_integrand(double x, void * p) {
 
   double crossSection;
   if(x<50.0&&x>0.001) {
-    EPoint *point = new EPoint(55.0,x,entranceKey,exitKey,false,false,0.0,0);
+    EPoint *point = new EPoint(55.0,x,entranceKey,exitKey,false,false,false,0.0,0,0);
     point->Initialize(compound,configure);
     point->Calculate(compound,configure);
     crossSection=point->GetFitCrossSection();

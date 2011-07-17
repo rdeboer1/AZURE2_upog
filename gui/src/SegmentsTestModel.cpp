@@ -42,12 +42,14 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
     } else if(index.column() == 7) return QVariant();
     else if(index.column() == 8) return line.angleStep;
     else if(index.column() == 9) {
-      if(line.dataType==2) return QString(tr("Phase Shift"));
+      if(line.dataType==3) return QString(tr("Angular Distribution"));
+      else if(line.dataType==2) return QString(tr("Phase Shift"));
       else if(line.dataType==1) return QString(tr("Differential"));
       else return QString(tr("Angle Integrated"));
     } 
     else if(index.column() == 10) return QVariant();
     else if(index.column() == 11) return QVariant();
+    else if(index.column() == 12) return QVariant();
   } else if (role == Qt::EditRole) {
     SegmentsTestData line = segTestLineList.at(index.row());
     if(index.column() == 1) return line.entrancePairIndex;
@@ -61,6 +63,7 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 9) return line.dataType;
     else if(index.column() == 10) return line.phaseJ;
     else if(index.column() == 11) return line.phaseL;
+    else if(index.column() == 12) return line.maxAngDistOrder;
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     SegmentsTestData line = segTestLineList.at(index.row());
     if(line.isActive==1) return Qt::Checked;
@@ -98,6 +101,8 @@ QVariant SegmentsTestModel::headerData(int section, Qt::Orientation orientation,
       return QVariant();
     case 11:
       return QVariant();
+    case 12:
+      return QVariant();
     default: 
       return QVariant();
     }
@@ -123,6 +128,7 @@ bool SegmentsTestModel::setData(const QModelIndex &index, const QVariant &value,
     else if(index.column() == 9) tempData.dataType=value.toInt();
     else if(index.column() == 10) tempData.phaseJ=value.toDouble();
     else if(index.column() == 11) tempData.phaseL=value.toInt();
+    else if(index.column() == 12) tempData.maxAngDistOrder=value.toInt();
     else return false;
 
     segTestLineList.replace(row,tempData);
@@ -187,7 +193,8 @@ int SegmentsTestModel::isSegTestLine(const SegmentsTestData &line) const {
        tempLine.angleStep==line.angleStep&&
        tempLine.dataType==line.dataType&&
        tempLine.phaseJ==line.phaseJ&&
-       tempLine.phaseL==line.phaseL) {
+       tempLine.phaseL==line.phaseL&&
+       tempLine.maxAngDistOrder==line.maxAngDistOrder) {
       foundLine=i;
       break;
     }

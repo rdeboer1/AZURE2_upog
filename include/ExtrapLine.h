@@ -19,6 +19,8 @@ class ExtrapLine {
     stream >> isActive_ >> entranceKey_ >> exitKey_ >> minE_ 
 	   >> maxE_ >> eStep_ >> minA_ >> maxA_ >> aStep_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
+    else if(isDiff_==3) stream >> maxAngDistOrder_;
+
   };
   /*!
    * Returns non-zero if the line is to be included in the calculation.
@@ -73,6 +75,11 @@ class ExtrapLine {
    * if the segment is to contain phase shift.
    */
   int phaseL() const {return phaseL_;};
+  /*!
+   * Returns the maximum polynomial order if segment is
+   * angular distribution.
+   */
+  int maxAngDistOrder() const {return maxAngDistOrder_;};
  private:
   int isActive_;
   int entranceKey_;
@@ -86,6 +93,7 @@ class ExtrapLine {
   int isDiff_;
   double phaseJ_;
   int phaseL_;
+  int maxAngDistOrder_;
 };
 
 #endif

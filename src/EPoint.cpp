@@ -35,6 +35,8 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   sfactorconv_=0.;
   is_differential_=parent->IsDifferential();
   is_phase_=parent->IsPhase();
+  is_ang_dist_=parent->IsAngularDist();
+  max_ang_dist_order_=parent->GetMaxAngDistOrder();
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
@@ -65,6 +67,8 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   sfactorconv_=0.;
   is_differential_=parent->IsDifferential();
   is_phase_=parent->IsPhase();
+  is_ang_dist_=parent->IsAngularDist();
+  max_ang_dist_order_=parent->GetMaxAngDistOrder();
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
@@ -81,7 +85,7 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
  */
 
 EPoint::EPoint(double angle, double energy, int entranceKey, 
-	       int exitKey, bool isDifferential, bool isPhase, double jValue, int lValue) {
+	       int exitKey, bool isDifferential, bool isPhase, bool isAngularDist, double jValue, int lValue, int maxAngDistOrder) {
   entrance_key_=entranceKey;
   exit_key_=exitKey;
   lab_angle_=angle;
@@ -97,6 +101,8 @@ EPoint::EPoint(double angle, double energy, int entranceKey,
   sfactorconv_=0.;
   is_differential_=isDifferential;
   is_phase_=isPhase;
+  is_ang_dist_=isAngularDist;
+  max_ang_dist_order_=maxAngDistOrder;
   j_value_=jValue;
   l_value_=lValue;
   is_mapped_=false;
@@ -119,6 +125,14 @@ bool EPoint::IsDifferential() const {
 
 bool EPoint::IsPhase() const {
   return is_phase_;
+}
+
+/*!
+ * Returns true if the point is angular distribution, otherwise returns false.
+ */
+
+bool EPoint::IsAngularDist() const {
+  return is_ang_dist_;
 }
 
 /*!
@@ -200,6 +214,22 @@ int EPoint::NumSubPoints() const {
 
 int EPoint::GetTargetEffectNum() const {
   return targetEffectNum_;
+}
+
+/*!
+ * Returns the maximum polynomial order of the point is angular distribution.
+ */
+
+int EPoint::GetMaxAngDistOrder() const {
+  return max_ang_dist_order_;
+}
+
+/*!
+ * Return the number of angular distribution coefficients in the vector.
+ */
+
+int EPoint::GetNumAngularDists() const {
+  return angularDists_.size();
 }
 
 /*! 
@@ -330,6 +360,14 @@ double EPoint::GetStoppingPower() const {
 
 double EPoint::GetTargetThickness() const {
   return targetThickness_;
+}
+
+/*!
+ * Returns the angular distribution coefficient corresponding to the given order;
+ */
+
+double EPoint::GetAngularDist(int order) const {
+  return angularDists_[order];
 }
 
 /*!
@@ -1010,6 +1048,15 @@ void EPoint::SetStoppingPower(double stoppingPower) {
 
 void EPoint::SetTargetThickness(double targetThickness) {
   targetThickness_=targetThickness;
+}
+
+/*!
+ * Sets the angular distribution coefficients.
+ */
+
+void EPoint::SetAngularDists(vector_r dists) {
+  angularDists_.clear();
+  angularDists_=dists;
 }
 
 /*!

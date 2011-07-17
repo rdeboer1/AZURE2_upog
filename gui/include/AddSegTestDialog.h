@@ -7,6 +7,12 @@
 #include <QComboBox>
 #include <QLabel>
 
+QT_BEGIN_NAMESPACE
+
+class QLabel;
+
+QT_END_NAMESPACE
+
 class AddSegTestDialog : public QDialog {
   Q_OBJECT
 
@@ -23,6 +29,10 @@ class AddSegTestDialog : public QDialog {
   QComboBox *dataTypeCombo;
   QLineEdit *phaseJValueText;
   QLineEdit *phaseLValueText;
+  QLabel *phaseJValueLabel;
+  QLabel *phaseLValueLabel;
+  QLabel *angDistLabel;
+  QSpinBox *angDistSpin;
  
  public slots:
   void dataTypeChanged(int);

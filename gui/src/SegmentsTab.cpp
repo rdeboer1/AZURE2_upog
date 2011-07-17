@@ -76,6 +76,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   for(int i = 8; i<SegmentsTestData::SIZE;i++) segmentsTestView->setColumnWidth(i,90);
   segmentsTestView->setColumnHidden(10,true);
   segmentsTestView->setColumnHidden(11,true);
+  segmentsTestView->setColumnHidden(12,true);
   connect(segmentsTestView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateSegTestButtons(QItemSelection)));
   connect(segmentsTestView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editSegTestLine()));
 
@@ -294,11 +295,13 @@ void SegmentsTab::addSegTestLine() {
     newLine.lowAngle=aDialog.lowAngleText->text().toDouble();
     newLine.highAngle=aDialog.highAngleText->text().toDouble();
     newLine.angleStep=aDialog.angleStepText->text().toDouble();
-    if(aDialog.dataTypeCombo->currentIndex()==2) newLine.dataType=2;
+    if(aDialog.dataTypeCombo->currentIndex()==3) newLine.dataType=3;
+    else if(aDialog.dataTypeCombo->currentIndex()==2) newLine.dataType=2;
     else if(aDialog.dataTypeCombo->currentIndex()==1) newLine.dataType=1;
     else newLine.dataType=0;
     newLine.phaseJ=aDialog.phaseJValueText->text().toDouble();
     newLine.phaseL=aDialog.phaseLValueText->text().toInt();
+    newLine.maxAngDistOrder=aDialog.angDistSpin->value();
     addSegTestLine(newLine);
    }
 }
@@ -331,6 +334,8 @@ void SegmentsTab::addSegTestLine(SegmentsTestData line) {
     segmentsTestModel->setData(index,line.phaseJ,Qt::EditRole);
     index = segmentsTestModel->index(lines.size(),11,QModelIndex());
     segmentsTestModel->setData(index,line.phaseL,Qt::EditRole);
+    index = segmentsTestModel->index(lines.size(),12,QModelIndex());
+    segmentsTestModel->setData(index,line.maxAngDistOrder,Qt::EditRole);
     segmentsTestView->resizeRowToContents(lines.size());
     updateSegTestButtons(segmentsTestView->selectionModel()->selection());
   } else {
@@ -505,6 +510,9 @@ void SegmentsTab::editSegTestLine() {
   i=segmentsTestModel->index(index.row(),11,QModelIndex());
   var=segmentsTestModel->data(i,Qt::EditRole);
   QString phaseL=var.toString();
+  i=segmentsTestModel->index(index.row(),12,QModelIndex());
+  var=segmentsTestModel->data(i,Qt::EditRole);
+  int maxAngDistOrder=var.toInt();
 
   AddSegTestDialog aDialog;
   aDialog.setWindowTitle(tr("Edit A Extrapolation Segment Line"));
@@ -516,11 +524,13 @@ void SegmentsTab::editSegTestLine() {
   aDialog.lowAngleText->setText(lowAngle);
   aDialog.highAngleText->setText(highAngle);
   aDialog.angleStepText->setText(angleStep);
-  if(dataType==2) aDialog.dataTypeCombo->setCurrentIndex(2);
+  if(dataType==3) aDialog.dataTypeCombo->setCurrentIndex(3);
+  else if(dataType==2) aDialog.dataTypeCombo->setCurrentIndex(2);
   else if(dataType==1) aDialog.dataTypeCombo->setCurrentIndex(1);
   else aDialog.dataTypeCombo->setCurrentIndex(0);
   aDialog.phaseJValueText->setText(phaseJ);
   aDialog.phaseLValueText->setText(phaseL);
+  aDialog.angDistSpin->setValue(maxAngDistOrder);
  
  
   if(aDialog.exec()) {
@@ -565,7 +575,8 @@ void SegmentsTab::editSegTestLine() {
       segmentsTestModel->setData(i,newAngleStep,Qt::EditRole);
     }
     int newDataType;
-    if(aDialog.dataTypeCombo->currentIndex()==2) newDataType=2;
+    if(aDialog.dataTypeCombo->currentIndex()==3) newDataType=3;
+    else if(aDialog.dataTypeCombo->currentIndex()==2) newDataType=2;
     else if(aDialog.dataTypeCombo->currentIndex()==1) newDataType=1;
     else newDataType=0;
     if(newDataType!=dataType) {
@@ -581,6 +592,11 @@ void SegmentsTab::editSegTestLine() {
     if(newPhaseL!=phaseL) {
       i=segmentsTestModel->index(index.row(),11,QModelIndex());
       segmentsTestModel->setData(i,newPhaseL,Qt::EditRole);
+    }
+    int newMaxAngDistOrder=aDialog.angDistSpin->value();
+    if(newMaxAngDistOrder!=maxAngDistOrder) {
+      i=segmentsTestModel->index(index.row(),12,QModelIndex());
+      segmentsTestModel->setData(i,newMaxAngDistOrder,Qt::EditRole);      
     }
   }
 }
@@ -682,6 +698,8 @@ void SegmentsTab::moveSegTestLine(unsigned int upDown) {
   segmentsTestModel->setData(index,line.phaseJ,Qt::EditRole);
   index = segmentsTestModel->index(future,11,QModelIndex());
   segmentsTestModel->setData(index,line.phaseL,Qt::EditRole);
+  index = segmentsTestModel->index(future,12,QModelIndex());
+  segmentsTestModel->setData(index,line.maxAngDistOrder,Qt::EditRole);
   segmentsTestView->resizeRowToContents(future);
   
   selectionModel->select(segmentsTestModel->index(future,0,QModelIndex()),
@@ -924,6 +942,7 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
   int dataType;
   double phaseJ;
   int phaseL;
+  int maxAngDistOrder;
 
   /*QTextStream in(&file);
     QString dummyString=in.readLine();*/
@@ -941,9 +960,14 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
 	phaseJ=0.;
 	phaseL = 0;
       }
+      if(dataType==3) {
+	in >> maxAngDistOrder;
+      } else {
+	maxAngDistOrder=0;
+      }
       if(in.status()!=QTextStream::Ok) return false;
       SegmentsTestData newLine = {isActive,entrancePairIndex,exitPairIndex,lowEnergy,highEnergy,energyStep,lowAngle,
-				  highAngle,angleStep,dataType,phaseJ,phaseL};
+				  highAngle,angleStep,dataType,phaseJ,phaseL,maxAngDistOrder};
       addSegTestLine(newLine);
     }
   }
@@ -975,7 +999,8 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
       << endl;*/
   for(int i = 0; i<lines.size(); i++) {
     int dataType;
-    if(lines.at(i).dataType==2) dataType=2;
+    if(lines.at(i).dataType==3) dataType=3;
+    else if(lines.at(i).dataType==2) dataType=2;
     else if(lines.at(i).dataType==1) dataType=1;
     else dataType=0;
     outStream << qSetFieldWidth(15) << lines.at(i).isActive
@@ -993,6 +1018,10 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
 		<< qSetFieldWidth(0) << lines.at(i).phaseL
 		<< endl;
 	
+    } else if(dataType==3)  {
+      outStream << qSetFieldWidth(15) << dataType 
+		<< qSetFieldWidth(0) << lines.at(i).maxAngDistOrder
+		<< endl;
     } else {
       outStream << qSetFieldWidth(0)  << dataType
 		<< endl;

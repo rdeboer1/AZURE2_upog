@@ -23,6 +23,7 @@ class ESegment {
   bool IsPhase() const;
   bool IsTargetEffect() const;
   bool IsVaryNorm() const;
+  bool IsAngularDist() const;
   int NumPoints() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
@@ -30,6 +31,7 @@ class ESegment {
   int GetL() const;
   int GetTargetEffectNum() const;
   int GetSegmentKey() const;
+  int GetMaxAngDistOrder() const;
   double GetMinEnergy() const;
   double GetMaxEnergy() const;
   double GetMinAngle() const;
@@ -52,11 +54,13 @@ class ESegment {
   bool isphase_;
   bool isTargetEffect_;
   bool varyNorm_;
+  bool isAngDist_;
   int entrancekey_;
   int exitkey_;
   int l_;
   int targetEffectNum_;
   int segmentKey_;
+  int maxAngDistOrder_;
   double min_e_;
   double max_e_;
   double min_a_;

@@ -62,6 +62,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
     }
     point->SetFitCrossSection(real(sum)/100.);
   } else {
+    double angleIntegratedXS=0.;
     if(!point->IsDifferential()) {
       for(int k=1;k<=theDecay->NumKGroups();k++) {
 	this->ClearTempTMatrices();
@@ -94,56 +95,74 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	    (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
 	}
       }
-      point->SetFitCrossSection(real(sum)/100.);
-    } else {
-      for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
-	for(int inter=1;inter<=theDecay->GetKLGroup(kL)
-	      ->NumInterferences();inter++) {
-	  Interference *theInterference=theDecay->GetKLGroup(kL)
+      angleIntegratedXS=real(sum)/100.;
+      if(!point->IsAngularDist()) {
+	point->SetFitCrossSection(angleIntegratedXS);
+	return;
+      }
+    }   
+    std::vector<double> angularCoeff(std::min(point->GetMaxLOrder()+1,point->GetMaxAngDistOrder()+1),0.);
+    for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
+      for(int inter=1;inter<=theDecay->GetKLGroup(kL)
+	    ->NumInterferences();inter++) {
+	Interference *theInterference=theDecay->GetKLGroup(kL)
 	  ->GetInterference(inter);
-	  complex T1(0.0,0.0),T2(0.0,0.0);
-	  std::string interferenceType=theInterference->GetInterferenceType();
-	  if(interferenceType=="RR") {
-	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  } else if(interferenceType=="ER") {
-	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  } else if(interferenceType=="RE") {
-	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  } else if(interferenceType=="EE") {
-	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  }
-	  sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
-	    point->GetLegendreP(theDecay->GetKLGroup(kL)->GetLOrder());
+	complex T1(0.0,0.0),T2(0.0,0.0);
+	std::string interferenceType=theInterference->GetInterferenceType();
+	if(interferenceType=="RR") {
+	  T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	  T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	} else if(interferenceType=="ER") {
+	  T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	  T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	} else if(interferenceType=="RE") {
+	  T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	  T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	} else if(interferenceType=="EE") {
+	  T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	  T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	}
+	int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
+	sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
+	  point->GetLegendreP(lOrder);
+	if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
+	  double tempCoeff=angularCoeff[lOrder]+
+	    real(theInterference->GetZ1Z2()*T1*conj(T2))*point->GetGeometricalFactor()*
+	    compound()->GetPair(aa)->GetI1I2Factor()/100.*4./angleIntegratedXS;
+	  angularCoeff[lOrder]=tempCoeff;
 	}
       }
-      complex RT=sum/pi*point->GetGeometricalFactor()*
-	compound()->GetPair(aa)->GetI1I2Factor();
+    }
+    if(point->IsAngularDist()) {
+      point->SetAngularDists(angularCoeff);
+      return;
+    }
+    complex RT=sum/pi*point->GetGeometricalFactor()*
+      compound()->GetPair(aa)->GetI1I2Factor();
+    
+    complex CT(0.,0.), IT(0.,0.);
+    if(aa==ir) {
+      complex coulombAmplitude=point->GetCoulombAmplitude();
+      CT=coulombAmplitude*conj(coulombAmplitude)*point->GetGeometricalFactor();
       
-      complex CT(0.,0.), IT(0.,0.);
-      if(aa==ir) {
-	complex coulombAmplitude=point->GetCoulombAmplitude();
-	CT=coulombAmplitude*conj(coulombAmplitude)*point->GetGeometricalFactor();
-	
-	sum=complex(0.,0.);
-	for(int k=1;k<=theDecay->NumKGroups();k++) {
-	  for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	    MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);	
-	    AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
-	    AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
-	    if(entranceChannel==exitChannel) 
-	      sum+=theMGroup->GetStatSpinFactor()*
-		coulombAmplitude*conj(this->GetTMatrixElement(k,m))*
-		point->GetLegendreP(compound()->GetJGroup(theMGroup->GetJNum())->
-				    GetChannel(theMGroup->GetChNum())->GetL());
-	  }
+      sum=complex(0.,0.);
+      for(int k=1;k<=theDecay->NumKGroups();k++) {
+	for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
+	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);	
+	  AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
+	  AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
+	  if(entranceChannel==exitChannel) 
+	    sum+=theMGroup->GetStatSpinFactor()*
+	      coulombAmplitude*conj(this->GetTMatrixElement(k,m))*
+	      point->GetLegendreP(compound()->GetJGroup(theMGroup->GetJNum())->
+				  GetChannel(theMGroup->GetChNum())->GetL());
 	}
-	IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
       }
+      IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
+    }
+    if(point->IsDifferential()) {
       point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
+      return;
     }
     if(point->IsPhase()&&aa==ir) {
       double segmentJ=point->GetJ();

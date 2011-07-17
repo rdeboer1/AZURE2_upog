@@ -24,10 +24,10 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   dataTypeCombo->addItem(tr("Phase Shift"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
   phaseJValueText = new QLineEdit;
-  phaseJValueText->setEnabled(false);
+  phaseJValueText->setVisible(false);
   phaseJValueText->setMaximumWidth(50);
   phaseLValueText = new QLineEdit;
-  phaseLValueText->setEnabled(false);
+  phaseLValueText->setVisible(false);
   phaseLValueText->setMaximumWidth(50);
   dataFileText = new QLineEdit;
   QPushButton *chooseFileButton = new QPushButton(tr("Choose..."));
@@ -69,14 +69,18 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
-  lowerLayout->addItem(new QSpacerItem(20,20),0,2);
+  lowerLayout->addItem(new QSpacerItem(1,25),0,2);
   lowerLayout->setColumnStretch(2,1);
 
-  QGridLayout* phaseLayout = new QGridLayout;
-  phaseLayout->addWidget(new QLabel(tr("J:")),0,0,Qt::AlignRight);
-  phaseLayout->addWidget(phaseJValueText,0,1);
-  phaseLayout->addWidget(new QLabel(tr("l:")),0,2,Qt::AlignRight);
-  phaseLayout->addWidget(phaseLValueText,0,3);
+  QHBoxLayout* phaseLayout = new QHBoxLayout;
+  phaseJValueLabel = new QLabel(tr("J:"));
+  phaseJValueLabel->setVisible(false);
+  phaseLayout->addWidget(phaseJValueLabel);
+  phaseLayout->addWidget(phaseJValueText);
+  phaseLValueLabel = new QLabel(tr("l:"));
+  phaseLValueLabel->setVisible(false);
+  phaseLayout->addWidget(phaseLValueLabel);
+  phaseLayout->addWidget(phaseLValueText);
   lowerLayout->addLayout(phaseLayout,0,3);
 
   lowerLayout->addWidget(new QLabel(tr("Data Norm:")),1,0,Qt::AlignRight);
@@ -119,10 +123,14 @@ void AddSegDataDialog::setChooseFile() {
 
 void AddSegDataDialog::dataTypeChanged(int index) {
   if(index==2) {
-    phaseJValueText->setEnabled(true);
-    phaseLValueText->setEnabled(true);
+    phaseJValueLabel->setVisible(true);
+    phaseLValueLabel->setVisible(true);
+    phaseJValueText->setVisible(true);
+    phaseLValueText->setVisible(true);
   } else {
-    phaseJValueText->setEnabled(false);
-    phaseLValueText->setEnabled(false);
+    phaseJValueLabel->setVisible(false);
+    phaseLValueLabel->setVisible(false);
+    phaseJValueText->setVisible(false);
+    phaseLValueText->setVisible(false);
   }
 }
