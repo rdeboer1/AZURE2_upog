@@ -8,12 +8,13 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   pairsView = new QTableView;
   pairsView->setModel(pairsModel);
   pairsView->verticalHeader()->setHighlightSections(false);
-  pairsView->horizontalHeader()->setStretchLastSection(true);
+  //pairsView->horizontalHeader()->setStretchLastSection(true);
   pairsView->horizontalHeader()->setHighlightSections(false);
   pairsView->setColumnHidden(1,true);
   pairsView->setColumnHidden(3,true);
   pairsView->setColumnHidden(6,true);
   pairsView->setColumnHidden(8,true);
+  pairsView->setColumnHidden(PairsData::SIZE-1,true);
   RichTextDelegate *rt = new RichTextDelegate();
   pairsView->setItemDelegateForColumn(0,rt);
   pairsView->setItemDelegateForColumn(5,rt);
@@ -25,7 +26,7 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   connect(pairsView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateButtons(QItemSelection)));
   connect(pairsView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editPair()));
 
-  for(int i = 0; i<PairsData::SIZE;i++) pairsView->setColumnWidth(i,82);
+  for(int i = 0; i<PairsData::SIZE;i++) pairsView->horizontalHeader()->setResizeMode(i,QHeaderView::Stretch);
 
   //addButton=new QPushButton(tr("Add Pair"));
   addButton=new QPushButton(tr("+"));

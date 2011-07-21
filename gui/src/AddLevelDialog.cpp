@@ -14,7 +14,7 @@ AddLevelDialog::AddLevelDialog(QWidget *parent) : QDialog(parent) {
   piValueCombo->addItem("-");
   piValueCombo->addItem("+");
 
-  energyLabel = new QLabel(tr("Level Energy [MeV]:"));
+  energyLabel = new QLabel(tr("Excitation Energy [MeV]:"));
   energyText = new QLineEdit;
 
   cancelButton = new QPushButton(tr("Cancel"));
