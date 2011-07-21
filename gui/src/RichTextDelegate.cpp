@@ -19,7 +19,8 @@ void RichTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
   style->drawControl(QStyle::CE_ItemViewItem, &opt, painter);
 
   QAbstractTextDocumentLayout::PaintContext ctx;
-  if (opt.state & QStyle::State_Selected) 
+  if ((opt.state & QStyle::State_Selected) &&
+      (opt.state & QStyle::State_Active)) 
     ctx.palette.setColor(QPalette::Text, opt.palette.color(QPalette::Active, QPalette::HighlightedText));
   
   painter->translate(opt.rect.topLeft());

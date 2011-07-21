@@ -224,6 +224,46 @@ QString PairsModel::getParticleLabel(const PairsData &pair, int which) const {
   }
 }
 
+QString PairsModel::getReactionLabel(const PairsData &firstPair, const PairsData &secondPair) {
+  QString lightLabel[2];
+  std::map<int, QString>::const_iterator it=elementMap.find(firstPair.lightZ);
+  if(firstPair.pairType==10) lightLabel[0]="&gamma;";
+  else if(it!=elementMap.end()) {
+    if(round(firstPair.lightM)==1) {
+      if(firstPair.lightZ==1) lightLabel[0]="<i>p</i>";
+      else lightLabel[0]=QString("<i>%1</i>").arg(it->second);
+    } else if(firstPair.lightZ==2&&round(firstPair.lightM)==4) lightLabel[0]="&alpha;";
+    else lightLabel[0]=QString("<sup>%1</sup>%2").arg(round(firstPair.lightM)).arg(it->second);
+  } else lightLabel[0]="?";
+  it=elementMap.find(secondPair.lightZ);
+  if(secondPair.pairType==10) lightLabel[1]="&gamma;";
+  else if(it!=elementMap.end()) {
+    if(round(secondPair.lightM)==1) {
+      if(secondPair.lightZ==1) lightLabel[1]="<i>p</i>";
+      else lightLabel[1]=QString("<i>%1</i>").arg(it->second);
+    } else if(secondPair.lightZ==2&&round(secondPair.lightM)==4) lightLabel[1]="&alpha;";
+    else lightLabel[1]=QString("<sup>%1</sup>%2").arg(round(secondPair.lightM)).arg(it->second);
+  } else lightLabel[1]="?";
+  QString heavyLabel[2];
+  it=elementMap.find(firstPair.heavyZ);
+  if(it!=elementMap.end()) {
+    if(round(firstPair.heavyM)==1) {
+      if(firstPair.heavyZ==1) heavyLabel[0]="<i>p</i>";
+      else heavyLabel[0]=QString("<i>%1</i>").arg(it->second);
+    } else if(firstPair.heavyZ==2&&round(firstPair.heavyM)==4) heavyLabel[0]="&alpha;";
+    else heavyLabel[0]=QString("<sup>%1</sup>%2").arg(round(firstPair.heavyM)).arg(it->second);
+  } else heavyLabel[0]="?";
+  it=elementMap.find(secondPair.heavyZ);
+  if(it!=elementMap.end()) {
+    if(round(secondPair.heavyM)==1) {
+      if(secondPair.heavyZ==1) heavyLabel[1]="<i>p</i>";
+      else heavyLabel[1]=QString("<i>%1</i>").arg(it->second);
+    } else if(secondPair.heavyZ==2&&round(secondPair.heavyM)==4) heavyLabel[1]="&alpha;";
+    else heavyLabel[1]=QString("<sup>%1</sup>%2").arg(round(secondPair.heavyM)).arg(it->second);
+  } else heavyLabel[1]="?";
+  return QString("<center>%1(%2,%3)%4 [%5 MeV]</center>").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
+}
+
 QString PairsModel::getSpinLabel(const PairsData &pair, int which) const {
   double tempJ;
   int tempPi;

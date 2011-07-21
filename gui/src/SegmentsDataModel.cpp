@@ -23,16 +23,13 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole) {
     SegmentsDataData line = segDataLineList.at(index.row());
     if(index.column() == 1) {
-      if(pairsModel->getPairs().size()>=line.entrancePairIndex) {
-	PairsData pair=pairsModel->getPairs().at(line.entrancePairIndex-1);
-	return pairsModel->getParticleLabel(pair);
+      if(pairsModel->getPairs().size()>=line.entrancePairIndex&&pairsModel->getPairs().size()>=line.exitPairIndex) {
+	PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+	PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
+	return pairsModel->getReactionLabel(firstPair,secondPair);
       } else return QString("<center><font style='color:red;font-weight:bold'>UNDEFINED</font></center>");
-    } else if(index.column() == 2) {
-      if(pairsModel->getPairs().size()>=line.exitPairIndex) {
-	PairsData pair=pairsModel->getPairs().at(line.exitPairIndex-1);
-	return pairsModel->getParticleLabel(pair);
-      } else return QString("<center><font style='color:red;font-weight:bold'>UNDEFINED</font></center>");
-    } else if(index.column() == 3) {
+    } else if(index.column() == 2) return QVariant();
+    else if(index.column() == 3) {
       if(line.lowEnergy==line.highEnergy) return line.lowEnergy;
       else return QString("%1-%2").arg(line.lowEnergy).arg(line.highEnergy);
     } else if(index.column() == 4) return QVariant();
@@ -46,8 +43,8 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
       else return QString(tr("Angle Integrated"));
     } else if(index.column() == 8) return line.dataFile;
     else if(index.column() == 9) {
-      if(line.varyNorm==1) return QString("<center><font style='color:red;font-weight:bold'>%1</font></center>").arg(line.dataNorm);
-      else return QString("<center>%1</center>").arg(line.dataNorm);
+      if(line.varyNorm==1) return QString("<center><font style='color:red;'>%1</font></center>").arg(line.dataNorm,0,'g',2);
+      else return QString("<center>%1</center>").arg(line.dataNorm,0,'g',2);
     } else if(index.column() == 10) {
       if(line.varyNorm==1) return QString(tr("YES"));
       else return QString(tr("NO"));
@@ -86,9 +83,9 @@ QVariant SegmentsDataModel::headerData(int section, Qt::Orientation orientation,
     case 0:
       return tr("");
     case 1:
-      return tr("Entrance Pair");
+      return tr("Reaction");
     case 2:
-      return tr("Exit Pair");
+      return QVariant();
     case 3:
       return tr("Energy\nRange");
     case 4:

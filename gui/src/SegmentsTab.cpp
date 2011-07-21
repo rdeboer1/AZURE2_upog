@@ -3,31 +3,12 @@
 #include "RichTextDelegate.h"
 
 SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
-  /*segDataFileText=new QLineEdit;
-  segDataFileText->setReadOnly(true);
-  QPushButton *segDataLoadButton=new QPushButton(tr("Open..."));
-  QPushButton *segDataSaveAsButton=new QPushButton(tr("Save As..."));
-  QPushButton *segDataSaveButton=new QPushButton(tr("Save"));
-  connect(segDataLoadButton,SIGNAL(clicked()),this,SLOT(openSegDataFile()));
-  connect(segDataSaveAsButton,SIGNAL(clicked()),this,SLOT(saveAsSegDataFile()));
-  connect(segDataSaveButton,SIGNAL(clicked()),this,SLOT(saveSegDataFile()));*/
-
-  /*segTestFileText=new QLineEdit;
-  segTestFileText->setReadOnly(true);
-  QPushButton *segTestLoadButton=new QPushButton(tr("Open..."));
-  QPushButton *segTestSaveAsButton=new QPushButton(tr("Save As..."));
-  QPushButton *segTestSaveButton=new QPushButton(tr("Save"));
-  connect(segTestLoadButton,SIGNAL(clicked()),this,SLOT(openSegTestFile()));
-  connect(segTestSaveAsButton,SIGNAL(clicked()),this,SLOT(saveAsSegTestFile()));
-  connect(segTestSaveButton,SIGNAL(clicked()),this,SLOT(saveSegTestFile()));*/
- 
   segmentsDataModel = new SegmentsDataModel;
   segmentsDataView = new QTableView;
   segmentsDataView->setModel(segmentsDataModel);
-  //segmentsDataView->verticalHeader()->hide();
   RichTextDelegate *rt = new RichTextDelegate();
   segmentsDataView->setItemDelegateForColumn(1,rt);
-  segmentsDataView->setItemDelegateForColumn(2,rt);
+  segmentsDataView->setColumnHidden(2,true);
   segmentsDataView->setColumnHidden(4,true);
   segmentsDataView->setColumnHidden(6,true);
   segmentsDataView->horizontalHeader()->setStretchLastSection(true);
@@ -40,12 +21,12 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsDataView->horizontalHeader()->setResizeMode(0,QHeaderView::Fixed);
   segmentsDataView->horizontalHeader()->setResizeMode(1,QHeaderView::Fixed);
   segmentsDataView->horizontalHeader()->setResizeMode(2,QHeaderView::Fixed);
-  for(int i = 1; i<3;i++) segmentsDataView->setColumnWidth(i,160);
-  for(int i = 3; i<6;i++) segmentsDataView->setColumnWidth(i,120);
-  segmentsDataView->setColumnWidth(SegmentsDataData::SIZE-6,140);
-  segmentsDataView->setColumnWidth(SegmentsDataData::SIZE-5,150);
-  segmentsDataView->setItemDelegateForColumn(SegmentsDataData::SIZE-4,rt);
-  segmentsDataView->setColumnHidden(SegmentsDataData::SIZE-3,true);
+  for(int i = 1; i<3;i++) segmentsDataView->setColumnWidth(i,200);
+  for(int i = 3; i<7;i++) segmentsDataView->setColumnWidth(i,120);
+  segmentsDataView->setColumnWidth(7,140);
+  segmentsDataView->setColumnWidth(8,220);
+  segmentsDataView->setItemDelegateForColumn(9,rt);
+  segmentsDataView->setColumnHidden(10,true);
   segmentsDataView->setColumnHidden(11,true);
   segmentsDataView->setColumnHidden(12,true);
   connect(segmentsDataView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateSegDataButtons(QItemSelection)));
@@ -54,9 +35,8 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsTestModel = new SegmentsTestModel;
   segmentsTestView = new QTableView;
   segmentsTestView->setModel(segmentsTestModel);
-  //segmentsTestView->verticalHeader()->hide();
   segmentsTestView->setItemDelegateForColumn(1,rt);
-  segmentsTestView->setItemDelegateForColumn(2,rt);
+  segmentsTestView->setColumnHidden(2,true);
   segmentsTestView->setColumnHidden(4,true);
   segmentsTestView->setColumnHidden(7,true);
   segmentsTestView->horizontalHeader()->setStretchLastSection(true);
@@ -69,7 +49,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsTestView->horizontalHeader()->setResizeMode(0,QHeaderView::Fixed);
   segmentsTestView->horizontalHeader()->setResizeMode(1,QHeaderView::Fixed);
   segmentsTestView->horizontalHeader()->setResizeMode(2,QHeaderView::Fixed);
-  for(int i = 1; i<3;i++) segmentsTestView->setColumnWidth(i,160);
+  for(int i = 1; i<3;i++) segmentsTestView->setColumnWidth(i,200);
   segmentsTestView->setColumnWidth(3,120);
   segmentsTestView->setColumnWidth(5,90);
   segmentsTestView->setColumnWidth(6,120);
