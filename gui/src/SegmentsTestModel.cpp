@@ -39,10 +39,40 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
     } else if(index.column() == 7) return QVariant();
     else if(index.column() == 8) return line.angleStep;
     else if(index.column() == 9) {
-      if(line.dataType==3) return QString(tr("Angular Distribution"));
-      else if(line.dataType==2) return QString(tr("Phase Shift"));
-      else if(line.dataType==1) return QString(tr("Differential"));
-      else return QString(tr("Angle Integrated"));
+      if(line.dataType==3) return QString(tr("<center>Angular Distribution</center>"));
+      else if(line.dataType==2) {
+	QChar orbital;
+	switch (line.phaseL) {
+	case 0:
+	  orbital='s';
+	  break;
+	case 1:
+	  orbital='p';
+	  break;
+	case 2:
+	  orbital='d';
+	  break;
+	case 3:
+	  orbital='f';
+	  break;
+	case 4:
+	  orbital='g';
+	  break;
+	case 5:
+	  orbital='h';
+	  break;
+	case 6:
+	  orbital='i';
+	  break;
+	default:
+	  orbital='?';
+	}
+	QString tempSpin;
+	if(((int)(line.phaseJ*2))%2!=0&&line.phaseJ!=0.) tempSpin=QString("%1/2").arg((int)(line.phaseJ*2));
+	else tempSpin=QString("%1").arg(line.phaseJ);
+	return QString("<center>Phase Shift [%1<sub>%2</sub>]</center>").arg(orbital).arg(tempSpin);
+      } else if(line.dataType==1) return QString(tr("<center>Differential</center>"));
+      else return QString(tr("<center>Angle Integrated</center>"));
     } 
     else if(index.column() == 10) return QVariant();
     else if(index.column() == 11) return QVariant();

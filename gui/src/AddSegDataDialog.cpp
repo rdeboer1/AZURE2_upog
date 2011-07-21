@@ -27,10 +27,16 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   dataTypeCombo->addItem(tr("Differential"));
   dataTypeCombo->addItem(tr("Phase Shift"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
+  QRegExp spinRX("^\\d{0,2}(\\.[05]{0,1})?$");
+  QValidator *spinValidator = new QRegExpValidator(spinRX, this);
   phaseJValueText = new QLineEdit;
+  phaseJValueText->setValidator(spinValidator);
   phaseJValueText->setVisible(false);
   phaseJValueText->setMaximumWidth(50);
+  QRegExp intRX("^[0-6]$");
+  QValidator *intValidator = new QRegExpValidator(intRX, this);
   phaseLValueText = new QLineEdit;
+  phaseLValueText->setValidator(intValidator);
   phaseLValueText->setVisible(false);
   phaseLValueText->setMaximumWidth(50);
   dataFileText = new QLineEdit;
@@ -52,7 +58,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   pairLayout->addWidget(new QLabel(tr("Exit Pair Index:")),0,2,Qt::AlignRight);
   pairLayout->addWidget(exitPairIndexSpin,0,3);
   valueLayout->addLayout(pairLayout,0,0,1,2);
-  QGroupBox* energyBox = new QGroupBox(tr("Energy"));
+  QGroupBox* energyBox = new QGroupBox(tr("Lab Energy [MeV]"));
   QGridLayout *energyLayout = new QGridLayout;
   energyLayout->addWidget(new QLabel(tr("Low Energy:")),0,0,Qt::AlignRight);
   energyLayout->addWidget(lowEnergyText,0,1);
@@ -60,7 +66,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   energyLayout->addWidget(highEnergyText,1,1);
   energyBox->setLayout(energyLayout);
   valueLayout->addWidget(energyBox,1,0);
-  QGroupBox* angleBox = new QGroupBox(tr("Angle"));
+  QGroupBox* angleBox = new QGroupBox(tr("Lab Angle [degrees]"));
   QGridLayout *angleLayout = new QGridLayout;
   angleLayout->addWidget(new QLabel(tr("Low Angle:")),0,0,Qt::AlignRight);
   angleLayout->addWidget(lowAngleText,0,1);

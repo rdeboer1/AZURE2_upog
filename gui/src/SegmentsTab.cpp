@@ -24,6 +24,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   for(int i = 1; i<3;i++) segmentsDataView->setColumnWidth(i,200);
   for(int i = 3; i<7;i++) segmentsDataView->setColumnWidth(i,120);
   segmentsDataView->setColumnWidth(7,140);
+  segmentsDataView->setItemDelegateForColumn(7,rt);
   segmentsDataView->setColumnWidth(8,220);
   segmentsDataView->setItemDelegateForColumn(9,rt);
   segmentsDataView->setColumnHidden(10,true);
@@ -54,6 +55,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsTestView->setColumnWidth(5,90);
   segmentsTestView->setColumnWidth(6,120);
   for(int i = 8; i<SegmentsTestData::SIZE;i++) segmentsTestView->setColumnWidth(i,90);
+  segmentsTestView->setItemDelegateForColumn(9,rt);
   segmentsTestView->setColumnHidden(10,true);
   segmentsTestView->setColumnHidden(11,true);
   segmentsTestView->setColumnHidden(12,true);
