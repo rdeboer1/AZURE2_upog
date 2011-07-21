@@ -9,7 +9,11 @@ class FilteredTextEdit : public QTextEdit {
 
  public:
   FilteredTextEdit(QWidget *parent = 0) : 
-  QTextEdit(parent), filtered_(false) {};
+  QTextEdit(parent), filtered_(false) {
+    QFont font("Courier",10);
+    font.setStyleHint(QFont::TypeWriter);
+    setCurrentFont(font);
+  };
   void SetMouseFiltered(bool filtered) { filtered_=filtered;};
   bool IsMouseFiltered() const {return filtered_;};
  public slots:

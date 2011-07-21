@@ -492,24 +492,39 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
     PairsData pair=pairsModel->getPairs().at(pairIndex);
 
     QString details="";
-    details.append(QString("%1 MeV level populating/depopulating via R = %2\n").arg(level.energy).arg(pairIndex+1));
+    QTextStream stm(&details,QIODevice::Append);
+    stm << QString("%1 MeV level populating/depopulating via pair #%2").arg(level.energy).arg(pairIndex+1) 
+	<< endl;
     if(channel.radType=='P') {
-      details.append(QString("Channel configuration is s = %1, l = %2\n").arg(channel.sValue).arg(channel.lValue));
-      if(pair.lightPi==-1) details.append(QString("Light Particle Spin: %1-\n").arg(pair.lightJ));
-      else details.append(QString("Light Particle Spin: %1+\n").arg(pair.lightJ));
-      details.append(QString("Light Particle Z: %1\n").arg(pair.lightZ));
-      details.append(QString("Light Particle M: %1\n").arg(pair.lightM));
-      details.append(QString("Light Particle G: %1\n").arg(pair.lightG));
-    } else details.append(QString("Capture gamma is %1%2 radiation\n").arg(channel.radType).arg(channel.lValue));
-    if(pair.heavyPi==-1) details.append(QString("Heavy Particle Spin: %1-\n").arg(pair.heavyJ));
-    else details.append(QString("Heavy Particle Spin: %1+\n").arg(pair.heavyJ));
-    details.append(QString("Heavy Particle Z: %1\n").arg(pair.heavyZ));
-    details.append(QString("Heavy Particle M: %1\n").arg(pair.heavyM));
-    details.append(QString("Heavy Particle G: %1\n").arg(pair.heavyG));
-    details.append(QString("Excitation Energy: %1 MeV\n").arg(pair.excitationEnergy));
-    if(channel.radType=='P') details.append(QString("Seperation Energy: %1 MeV\n").arg(pair.seperationEnergy));
-    details.append(QString("Channel Radius: %1 fm\n").arg(pair.channelRadius));
-
+      stm << QString("Channel configuration is s = %1, l = %2").arg(channelsModel->getSpinLabel(channel)).arg(channel.lValue) 
+	  << endl << endl;
+      stm << qSetFieldWidth(21) << right << "Light Particle Spin: " 
+	  << qSetFieldWidth(0) << left << QString("%1").arg(pairsModel->getSpinLabel(pair,0)) << endl;
+      stm << qSetFieldWidth(21) << right << "Light Particle Z: " 
+	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightZ) << endl;
+      stm << qSetFieldWidth(21) << right << "Light Particle M: " 
+	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightM) << endl;
+      stm << qSetFieldWidth(21) << right << "Light Particle G: " 
+	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightG) << endl;
+    } else stm << QString("Capture gamma is %1%2 radiation").arg(channel.radType).arg(channel.lValue) 
+	       << endl << endl;
+    stm << qSetFieldWidth(21) << right << "Heavy Particle Spin: "
+	<< qSetFieldWidth(0) << left <<QString("%1").arg(pairsModel->getSpinLabel(pair,1)) << endl;
+    stm << qSetFieldWidth(21) << right << "Heavy Particle Z: "
+	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.heavyZ) << endl;
+    stm << qSetFieldWidth(21) << right << "Heavy Particle M: "
+	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.heavyM) << endl;
+    stm << qSetFieldWidth(21) << right << "Heavy Particle G: "
+	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.heavyG) << endl;
+    stm << qSetFieldWidth(21) << right << "Excitation Energy: "
+	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.excitationEnergy) << endl;
+    if(channel.radType=='P') {
+      stm << qSetFieldWidth(21) << right << "Seperation Energy: "
+	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.seperationEnergy) << endl;
+      stm << qSetFieldWidth(21) << right << "Channel Radius: "
+	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.channelRadius) << endl;
+    }
+    stm.flush();
     channelDetails->details->setText(details);
     if(level.energy<(pair.seperationEnergy+pair.excitationEnergy)&&pair.pairType==0) channelDetails->setNormParam(1);
     else if (pair.pairType==10&&level.energy==pair.excitationEnergy&&level.jValue==pair.heavyJ&&

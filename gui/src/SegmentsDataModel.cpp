@@ -27,7 +27,7 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
 	PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
 	PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
 	return pairsModel->getReactionLabel(firstPair,secondPair);
-      } else return QString("<center><font style='color:red;font-weight:bold'>UNDEFINED</font></center>");
+      } else return QString("<center><font style='color:red;font-weight:bold;'>UNDEFINED</font></center>");
     } else if(index.column() == 2) return QVariant();
     else if(index.column() == 3) {
       if(line.lowEnergy==line.highEnergy) return line.lowEnergy;
@@ -43,7 +43,7 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
       else return QString(tr("Angle Integrated"));
     } else if(index.column() == 8) return line.dataFile;
     else if(index.column() == 9) {
-      if(line.varyNorm==1) return QString("<center><font style='color:red;'>%1</font></center>").arg(line.dataNorm,0,'g',2);
+      if(line.varyNorm==1) return QString("<center><font style='color:red;font-weight:bold;'>%1</font></center>").arg(line.dataNorm,0,'g',2);
       else return QString("<center>%1</center>").arg(line.dataNorm,0,'g',2);
     } else if(index.column() == 10) {
       if(line.varyNorm==1) return QString(tr("YES"));

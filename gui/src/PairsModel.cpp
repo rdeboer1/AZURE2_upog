@@ -220,7 +220,7 @@ QString PairsModel::getParticleLabel(const PairsData &pair, int which) const {
       } else if(pair.heavyZ==2&&round(pair.heavyM)==4) heavyLabel="&alpha;";
       else heavyLabel=QString("<sup>%1</sup>%2").arg(round(pair.heavyM)).arg(it->second);
     } else heavyLabel="?";
-    return QString("<center>%1+%2 (%3 MeV)</center>").arg(heavyLabel).arg(lightLabel).arg(pair.excitationEnergy,0,'f',3);
+    return QString("<center>%1+%2 [%3 MeV]</center>").arg(heavyLabel).arg(lightLabel).arg(pair.excitationEnergy,0,'f',3);
   }
 }
 

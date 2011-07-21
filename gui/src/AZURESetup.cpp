@@ -785,6 +785,7 @@ void AZURESetup::SaveAndRun() {
 }
 
 void AZURESetup::DeleteThread() {
+  runTab->runtimeText->insertPlainText("\nThanks for using AZURE2.\n");
   runTab->calcButton->setEnabled(true);
   runTab->runtimeText->SetMouseFiltered(false);
   delete azureMain;

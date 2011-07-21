@@ -3,6 +3,9 @@
 
 ChannelDetails::ChannelDetails(QWidget *parent) : QWidget(parent) {
   details=new QLabel;
+  QFont font("Monospace");
+  font.setStyleHint(QFont::TypeWriter);  
+  details->setFont(font);
   reducedWidthText = new QLineEdit;
   reducedWidthText->setMaximumWidth(100);
   normParam=new QLabel;
