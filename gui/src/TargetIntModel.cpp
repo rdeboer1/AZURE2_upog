@@ -19,7 +19,10 @@ QVariant TargetIntModel::data(const QModelIndex &index, int role) const {
   if(role == Qt::DisplayRole) {
     TargetIntData targetInt=targetIntList.at(index.row());
     if(index.column() == 1) return targetInt.segmentsList;
-    else if(index.column() == 2) return targetInt.numPoints;
+    else if(index.column() == 2) {
+      if(targetInt.isTargetIntegration||targetInt.isConvolution) return targetInt.numPoints;
+      else return QString(tr("N/A"));
+    }
     else if(index.column() == 3) {
       if(targetInt.isConvolution) return QString(tr("YES"));
       else return QString(tr("NO"));
@@ -30,7 +33,11 @@ QVariant TargetIntModel::data(const QModelIndex &index, int role) const {
     } else if(index.column() == 6) return targetInt.density;
     else if(index.column() == 7) return targetInt.stoppingPowerEq;
     else if(index.column() == 8) return targetInt.numParameters;
-    else if(index.column() == 9) return QString(tr("Parameter List")); 
+    else if(index.column() == 9) return QVariant(); 
+    else if(index.column() == 10) {
+      if(targetInt.isQCoefficients) return QString(tr("YES"));
+      else return QString(tr("NO"));
+    } else if(index.column() == 11) return QVariant();
   } else if(role == Qt::EditRole) {
     TargetIntData targetInt=targetIntList.at(index.row());
     if(index.column()==1) return targetInt.segmentsList;
@@ -42,6 +49,8 @@ QVariant TargetIntModel::data(const QModelIndex &index, int role) const {
     if(index.column()==7) return targetInt.stoppingPowerEq;
     if(index.column()==8) return targetInt.numParameters;
     if(index.column()==9) return QVariant::fromValue<QList<double> >(targetInt.parameters);    
+    if(index.column()==10) return  targetInt.isQCoefficients;
+    if(index.column()==11) return QVariant::fromValue<QList<double> >(targetInt.qCoefficients);    
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     TargetIntData targetInt=targetIntList.at(index.row());
     if(targetInt.isActive==1) return Qt::Checked;
@@ -74,6 +83,10 @@ QVariant TargetIntModel::headerData(int section, Qt::Orientation orientation, in
       return tr("Number of Parameters");
     case 9:
       return tr("Parameters List");
+    case 10:
+      return tr("Use Q-Coefficients?");
+    case 11:
+      return tr("Q-Coefficient List");
     default: 
       return QVariant();
     }
@@ -95,6 +108,8 @@ bool TargetIntModel::setData(const QModelIndex &index, const QVariant &value, in
     else if(index.column() == 7) tempData.stoppingPowerEq = value.toString();
     else if(index.column() == 8) tempData.numParameters = value.toInt();
     else if(index.column() == 9) tempData.parameters = qVariantValue<QList<double> >(value);
+    else if(index.column() == 10) tempData.isQCoefficients = value.toBool();
+    else if(index.column() == 11) tempData.qCoefficients = qVariantValue<QList<double> >(value);
     else return false;
     targetIntList.replace(row,tempData);
     emit(dataChanged(index,index));

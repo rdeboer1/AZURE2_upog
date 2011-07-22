@@ -4,6 +4,7 @@
 AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   segmentsListText = new QLineEdit;
   numPointsSpin = new QSpinBox;
+  numPointsSpin->setEnabled(false);
   numPointsSpin -> setMinimum(1);
   numPointsSpin -> setMaximum(10000);
   numPointsSpin -> setSingleStep(10);
@@ -39,6 +40,32 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   labelList.append(QString(tr("Parameter")));
   labelList.append(QString(tr("Value")));
   parametersTable->setHorizontalHeaderLabels(labelList);
+  isQCoefficientCheck = new QCheckBox(tr("Include Attenuation Coefficients"));
+  isQCoefficientCheck->setChecked(false);
+  connect(isQCoefficientCheck,SIGNAL(toggled(bool)),this,SLOT(qCoefficientCheckChanged(bool)));
+  numQCoefficientSpin= new QSpinBox;
+  numQCoefficientSpin->setMinimum(0);
+  numQCoefficientSpin->setMaximum(6);
+  numQCoefficientSpin->setSingleStep(1);
+  numQCoefficientSpin->setValue(0);
+  numQCoefficientSpin->setEnabled(false);
+  connect(numQCoefficientSpin,SIGNAL(valueChanged(int)),this,SLOT(qCoefficientSpinChanged(int)));
+  qCoefficientTable = new QTableWidget(this);
+  qCoefficientTable->setColumnCount(2);
+  qCoefficientTable->setRowCount(0);
+  qCoefficientTable->verticalHeader()->hide();
+  qCoefficientTable->verticalHeader()->setHighlightSections(false);
+  qCoefficientTable->horizontalHeader()->setHighlightSections(false);
+  qCoefficientTable->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+  qCoefficientTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+  qCoefficientTable->setShowGrid(false);
+  connect(qCoefficientTable,SIGNAL(cellChanged(int,int)),this,SLOT(qCoefficientChanged(int,int)));
+  QStringList qlabelList;
+  qlabelList.append(QString(tr("Coefficent")));
+  qlabelList.append(QString(tr("Value")));
+  qCoefficientTable->setHorizontalHeaderLabels(qlabelList);
+
+
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
   okButton->setDefault(true);
@@ -80,6 +107,19 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   stoppingPowerBox->setLayout(stoppingPowerLayout);
   stoppingPowerBox->hide();
 
+  QGridLayout *qCoefficientCheckBoxLayout = new QGridLayout;
+  qCoefficientCheckBoxLayout->addWidget(isQCoefficientCheck,0,0);
+  qCoefficientCheckBoxLayout->addItem(new QSpacerItem(1,20),0,1);
+  qCoefficientCheckBoxLayout->addWidget(new QLabel(tr("Number of Coeffients:")),0,2,Qt::AlignRight);
+  qCoefficientCheckBoxLayout->addWidget(numQCoefficientSpin,0,3);
+  qCoefficientCheckBoxLayout->setColumnStretch(1,1);
+
+  qCoefficientBox = new QGroupBox(tr("Attenuation Coefficients"));
+  QVBoxLayout *qCoefficientLayout = new QVBoxLayout;
+  qCoefficientLayout->addWidget(qCoefficientTable);
+  qCoefficientBox->setLayout(qCoefficientLayout);
+  qCoefficientBox->hide();
+
   QHBoxLayout *buttonBox = new QHBoxLayout;
   buttonBox->addWidget(cancelButton);
   buttonBox->addWidget(okButton);
@@ -88,6 +128,8 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   mainLayout->addLayout(topLayout);
   mainLayout->addLayout(checkBoxLayout);
   mainLayout->addWidget(stoppingPowerBox);
+  mainLayout->addLayout(qCoefficientCheckBoxLayout);
+  mainLayout->addWidget(qCoefficientBox);
   mainLayout->addLayout(buttonBox);
 
   setLayout(mainLayout);
@@ -95,7 +137,7 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   connect(okButton, SIGNAL(clicked()),this,SLOT(accept()));
   connect(cancelButton,SIGNAL(clicked()),this,SLOT(reject()));
 
-  setWindowTitle(tr("Add an Target Effect Line"));
+  setWindowTitle(tr("Add an Experimental Effect Line"));
 }
 
 void AddTargetIntDialog::createParameterItem(int row, double value) {
@@ -106,20 +148,39 @@ void AddTargetIntDialog::createParameterItem(int row, double value) {
   valueItem->setTextAlignment(Qt::AlignCenter);
   parametersTable->setItem(row,0,labelItem);
   parametersTable->setItem(row,1,valueItem);
+  parametersTable->resizeRowsToContents();
+}
+
+void AddTargetIntDialog::createQCoefficientItem(int row, double value) {
+  QTableWidgetItem *labelItem = new QTableWidgetItem(QString("q%1").arg(row));
+  QTableWidgetItem *valueItem = new QTableWidgetItem(QString("%1").arg(value));
+  labelItem->setTextAlignment(Qt::AlignCenter);
+  labelItem->setFlags(Qt::ItemIsEditable);
+  valueItem->setTextAlignment(Qt::AlignCenter);
+  qCoefficientTable->setItem(row,0,labelItem);
+  qCoefficientTable->setItem(row,1,valueItem);
+  qCoefficientTable->resizeRowsToContents();
 }
 
 void AddTargetIntDialog::convolutionCheckChanged(bool checked) {
-  if(checked) sigmaText->setEnabled(true);
-  else sigmaText->setEnabled(false);
+  if(checked) {
+    sigmaText->setEnabled(true);
+    numPointsSpin->setEnabled(true);
+  } else {
+    sigmaText->setEnabled(false);
+    if(!isTargetIntegrationCheck->isChecked()) numPointsSpin->setEnabled(false);
+  }
 }
 
 void AddTargetIntDialog::targetIntCheckChanged(bool checked) {
   if(checked) {
     stoppingPowerBox->show();
     densityText->setEnabled(true);
+    numPointsSpin->setEnabled(true);
   } else {
     stoppingPowerBox->hide();
     densityText->setEnabled(false);
+    if(!isConvolutionCheck->isChecked()) numPointsSpin->setEnabled(false);
     this->adjustSize();
   }
 }
@@ -142,5 +203,37 @@ void AddTargetIntDialog::parameterChanged(int row, int column) {
       tempParameters.append(tempDouble);
     }
     tempParameters[row]=parametersTable->item(row,column)->text().toDouble();
+  }
+}
+
+void AddTargetIntDialog::qCoefficientCheckChanged(bool checked) {
+  if(checked) {
+    qCoefficientBox->show();
+    numQCoefficientSpin->setEnabled(true);
+  } else {
+    qCoefficientBox->hide();
+    numQCoefficientSpin->setEnabled(false);
+    this->adjustSize();
+  }
+}
+
+void AddTargetIntDialog::qCoefficientSpinChanged(int newNumber){
+  qCoefficientTable->clearContents();
+  qCoefficientTable->setRowCount(newNumber);
+  for(int i=0;i<newNumber;i++) {
+    if(i<tempQCoefficients.size())
+      createQCoefficientItem(i,tempQCoefficients.at(i));
+    else 
+      createQCoefficientItem(i);
+  }
+}
+
+void AddTargetIntDialog::qCoefficientChanged(int row, int column) {
+  if(column==1) {
+    while(row>=tempQCoefficients.size()) {
+      double tempDouble=0.0;
+      tempQCoefficients.append(tempDouble);
+    }
+    tempQCoefficients[row]=qCoefficientTable->item(row,column)->text().toDouble();
   }
 }

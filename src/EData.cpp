@@ -250,33 +250,35 @@ int EData::ReadTargetEffectsFile(const Config& configure, CNuc *compound) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
-	double forwardDepth=0.0;
-	double backwardDepth=0.0;
-	if(targetEffect->IsTargetIntegration()) {
-	  double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
-	  double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy(),configure);
-	  point->SetTargetThickness(targetThickness);
-	  if(targetEffect->IsConvolution()) {
-	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
-	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  } else {
-	    backwardDepth=targetThickness;
-	    forwardDepth=0.0;
-	  }
-	} else if(targetEffect->IsConvolution()) {
-	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	}
-	for(int i=0;i<targetEffect->NumSubPoints();i++) {
-	  double subEnergy=point->GetCMEnergy()+forwardDepth
-	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
-	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
+	if(targetEffect->IsTargetIntegration()||targetEffect->IsConvolution()) {
+	  double forwardDepth=0.0;
+	  double backwardDepth=0.0;
 	  if(targetEffect->IsTargetIntegration()) {
-	  	double stoppingPower=cmConversion*targetEffect->
-		  GetStoppingPowerEq()->Evaluate(configure,subEnergy/cmConversion);
-  	    subPoint.SetStoppingPower(stoppingPower);
+	    double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
+	    double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy(),configure);
+	    point->SetTargetThickness(targetThickness);
+	    if(targetEffect->IsConvolution()) {
+	      backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
+	      forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	    } else {
+	      backwardDepth=targetThickness;
+	      forwardDepth=0.0;
+	    }
+	  } else if(targetEffect->IsConvolution()) {
+	    backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	  }
-	  point->AddSubPoint(subPoint);
+	  for(int i=0;i<targetEffect->NumSubPoints();i++) {
+	    double subEnergy=point->GetCMEnergy()+forwardDepth
+	      -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
+	    EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
+	    if(targetEffect->IsTargetIntegration()) {
+	      double stoppingPower=cmConversion*targetEffect->
+		GetStoppingPowerEq()->Evaluate(configure,subEnergy/cmConversion);
+	      subPoint.SetStoppingPower(stoppingPower);
+	    }
+	    point->AddSubPoint(subPoint);
+	  }
 	}
       }
     }
@@ -469,7 +471,9 @@ void EData::PrintData(const Config &configure) {
       } else
 	out << std::setw(12) << "Not Mapped"
 	    << std::setw(18) << data.point()->NumSubPoints();
-      if(data.point()->IsTargetEffect()) {
+      if(data.point()->IsTargetEffect()&&
+	 (data.point()->GetParentData()->GetTargetEffect(data.point()->GetTargetEffectNum())->IsConvolution()||
+	  data.point()->GetParentData()->GetTargetEffect(data.point()->GetTargetEffectNum())->IsTargetIntegration())) {
 	out << std::setw(18) << data.point()->GetSubPoint(data.point()->NumSubPoints())->GetCMEnergy() 
 	    << std::setw(18) << data.point()->GetSubPoint(1)->GetCMEnergy();
       }
@@ -485,24 +489,15 @@ void EData::PrintData(const Config &configure) {
  * Calls EPoint::CalcLegendreP for each point in the entire EData object.
  */
 
-void EData::CalcLegendreP(int maxL) {
-
-  std::map<int,std::vector<double> > qCoeffs;
-  //std::vector<double> segQCoeffs;
-  //Insert segment QCoeffs IN ORDER here with: segQCoeffs.push_back(qValue);
-  // segQCoeffs.push_back(1.0);  //first L=0
-  // segQCoeffs.push_back(1.0);  //then  L=1, etc.
-  //Then insert segQCoeff into qCoeffs with: qCoeffs[segmentKey]=segQCoeffs;
-  // qCoeffs[1]=segQCoeffs;  
-  //clear segQCoeffs with segQCoeffs.clear() and repeat for another segment
-  
+void EData::CalcLegendreP(int maxL) { 
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) { 
-    std::map<int,std::vector<double> >::iterator qCoeffsItr = qCoeffs.find(segment->GetSegmentKey());
-    std::vector<double>* qCoeffsPtr = (qCoeffsItr!=qCoeffs.end()) ? &qCoeffsItr->second : NULL;
+    TargetEffect *effect = (segment->IsTargetEffect() && 
+			    this->GetTargetEffect(segment->GetTargetEffectNum())->IsQCoefficients()) ?
+      this->GetTargetEffect(segment->GetTargetEffectNum()) : NULL;
 #pragma omp parallel for 
     for(int i=1;i<=segment->NumPoints();i++) {
       EPoint* point=segment->GetPoint(i);
-      point->CalcLegendreP(maxL,qCoeffsPtr);    
+      point->CalcLegendreP(maxL, effect);    
     }
   }
 }

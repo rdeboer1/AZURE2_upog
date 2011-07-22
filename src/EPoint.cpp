@@ -151,7 +151,7 @@ bool EPoint::IsMapped() const {
  */
 
 bool EPoint::IsTargetEffect() const {
-  if(GetTargetEffectNum()!=0&&NumSubPoints()>0) return true;
+  if(GetTargetEffectNum()!=0) return true;
   else return false;
 }
 
@@ -549,24 +549,24 @@ void EPoint::SetSFactorConversion(double conversion) {
  * Calculates Legendre polynomials up to a maximum order.  The polynomials are added, in order, to a vector.
  */
 
-void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
+void EPoint::CalcLegendreP(int maxL,TargetEffect* targetEffect) {
   double x=cos(this->GetCMAngle()*pi/180.0);
   if(maxL>=0) {
-    if(qValuePtr && qValuePtr->size()>0)
-      this->AddLegendreP(qValuePtr->operator[](0));
+    if(targetEffect && targetEffect->NumQCoefficients()>0)
+      this->AddLegendreP(targetEffect->GetQCoefficient(0));
     else this->AddLegendreP(1.0);
     double polyMinusTwo=1.0;
     if(maxL>=1) {
-      if(qValuePtr && qValuePtr->size()>1)
-	this->AddLegendreP(x*qValuePtr->operator[](1));
+      if(targetEffect && targetEffect->NumQCoefficients()>1)
+	this->AddLegendreP(x*targetEffect->GetQCoefficient(1));
       else this->AddLegendreP(x);
       double polyMinusOne=x;
       if(maxL>=2) {
 	for(int lOrder=2;lOrder<=maxL;lOrder++) {
 	  double poly=(2.0*lOrder-1.0)/lOrder*x*polyMinusOne-
 	    (lOrder-1.0)/lOrder*polyMinusTwo;
-	  if(qValuePtr && qValuePtr->size()>lOrder)
-	    this->AddLegendreP(poly*qValuePtr->operator[](lOrder));
+	  if(targetEffect && targetEffect->NumQCoefficients()>lOrder)
+	    this->AddLegendreP(poly*targetEffect->GetQCoefficient(lOrder));
 	  else this->AddLegendreP(poly);
 	  polyMinusTwo=polyMinusOne;
 	  polyMinusOne=poly;
@@ -575,7 +575,7 @@ void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalcLegendreP(maxL,qValuePtr);
+    this->GetSubPoint(i)->CalcLegendreP(maxL, targetEffect);
   }
 }
 
@@ -845,7 +845,9 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
 
 void EPoint::Calculate(CNuc* theCNuc,const Config &configure, EPoint *parent, int subPointNum) {
 
-  if(!this->IsTargetEffect()) {
+  if(!this->IsTargetEffect()||
+     (!this->GetParentData()->GetTargetEffect(this->GetTargetEffectNum())->IsConvolution()&&
+      !this->GetParentData()->GetTargetEffect(this->GetTargetEffectNum())->IsTargetIntegration())) {
     GenMatrixFunc *theMatrixFunc;
     if(configure.paramMask & Config::USE_AMATRIX) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
     else theMatrixFunc=new RMatrixFunc(theCNuc,configure);

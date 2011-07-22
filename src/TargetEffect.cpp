@@ -19,15 +19,26 @@ TargetEffect::TargetEffect(std::istream &stream,const Config& configure) {
   std::string stoppingPowerEq;
   int numParameters;
   vector_r parameters; 
+  int isQCoefficients;
+  int numQCoefficients;
+  vector_r qCoefficients;
   stream >> isActive >> segmentList >> numIntegrationPoints >> isConvolution
 	 >> sigma >> isTargetIntegration >> density >> stoppingPowerEq 
 	 >> numParameters;
   if(!stream.eof()) {
-   for(int i=0;i<numParameters;i++) {
+    for(int i=0;i<numParameters;i++) {
       double tempParameter;
       stream >> tempParameter;
       parameters.push_back(tempParameter);
     }
+    stream >> isQCoefficients >> numQCoefficients;
+    for(int i=0;i<numQCoefficients;i++) {
+      double tempQCoefficient;
+      stream >> tempQCoefficient;
+      qCoefficients.push_back(tempQCoefficient);
+    }
+    isQCoefficients_ = (isQCoefficients==1) ? true : false;
+    qCoefficients_=qCoefficients;
     size_t found=0;
     while(found!=std::string::npos) {
       found=segmentList.find('\"');
@@ -85,12 +96,30 @@ bool TargetEffect::IsTargetIntegration() const {
 }
 
 /*!
+ * Returns true if the target effect contains attenuation coefficients, otherwise
+ * returns false.
+ */
+
+bool TargetEffect::IsQCoefficients() const {
+  return isQCoefficients_;
+}
+
+/*!
  * Returns the number of sub-points specified for the target effect in 
  * the input file.
  */
 
 int TargetEffect::NumSubPoints() const {
   return numIntegrationPoints_;
+}
+
+/*!
+ * Returns the number of attenuation coefficients for the target effect in 
+ * the input file.
+ */
+
+int TargetEffect::NumQCoefficients() const {
+  return qCoefficients_.size();
 }
 
 /*!
@@ -117,6 +146,14 @@ double TargetEffect::GetDensity() const {
 
 double TargetEffect::TargetThickness(double energy, const Config& configure)  {
   return this->GetStoppingPowerEq()->Evaluate(configure,energy)*this->GetDensity();
+}
+
+/*!
+ * Returns the attenuation coefficients for the given order specified in by the target effect.
+ */
+
+double TargetEffect::GetQCoefficient(int order)  const {
+  return (qCoefficients_.size()>order) ? qCoefficients_[order] : 1.;
 }
 
 /*!

@@ -41,7 +41,7 @@ AZURESetup::AZURESetup() : config(std::cout) {
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
   tabWidget->addTab(externalCaptureTab,tr("External Capture"));
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
-  tabWidget->addTab(targetIntTab,tr("Target Effects"));
+  tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
   tabWidget->addTab(runTab,tr("Perform Calculation"));
   
   setCentralWidget(tabWidget);

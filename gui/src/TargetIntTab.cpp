@@ -23,12 +23,14 @@ TargetIntTab::TargetIntTab(QWidget *parent) : QWidget(parent) {
   targetIntView->setColumnHidden(7,true);
   targetIntView->setColumnHidden(8,true);
   targetIntView->setColumnHidden(9,true);
+  targetIntView->setColumnHidden(11,true);
   targetIntView->setColumnWidth(0,27);
   targetIntView->horizontalHeader()->setResizeMode(0,QHeaderView::Fixed);
   targetIntView->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
   targetIntView->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
   targetIntView->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
   targetIntView->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
+  targetIntView->horizontalHeader()->setResizeMode(10,QHeaderView::Stretch);
   targetIntView->setSelectionBehavior(QAbstractItemView::SelectRows);
   targetIntView->setSelectionMode(QAbstractItemView::SingleSelection);
   targetIntView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -110,6 +112,9 @@ void TargetIntTab::addLine() {
     newLine.numParameters=aDialog.numParametersSpin->value();
     for(int i=0;i<newLine.numParameters;i++) 
       newLine.parameters.append(aDialog.tempParameters.at(i));
+    newLine.isQCoefficients = (aDialog.isQCoefficientCheck->isChecked()) ? (true) : (false);
+    for(int i=0;i<aDialog.numQCoefficientSpin->value();i++)
+      newLine.qCoefficients.append(aDialog.tempQCoefficients.at(i));
     addLine(newLine);
   }
 }
@@ -137,6 +142,11 @@ void TargetIntTab::addLine(TargetIntData line) {
   targetIntModel->setData(index,line.numParameters,Qt::EditRole);
   index = targetIntModel->index(lines.size(),9,QModelIndex());
   targetIntModel->setData(index,QVariant::fromValue<QList<double> >(line.parameters),Qt::EditRole);
+  index = targetIntModel->index(lines.size(),10,QModelIndex());
+  targetIntModel->setData(index,line.isQCoefficients,Qt::EditRole);
+  index = targetIntModel->index(lines.size(),11,QModelIndex());
+  targetIntModel->setData(index,QVariant::fromValue<QList<double> >(line.qCoefficients),Qt::EditRole);
+
   targetIntView->resizeRowsToContents();
 }
 
@@ -172,9 +182,15 @@ void TargetIntTab::editLine() {
   i=targetIntModel->index(index.row(),9,QModelIndex());
   var=targetIntModel->data(i,Qt::EditRole);
   QList<double> parameters = qVariantValue<QList<double> >(var);
+  i=targetIntModel->index(index.row(),10,QModelIndex());
+  var=targetIntModel->data(i,Qt::EditRole);
+  bool isQCoefficient = var.toBool();
+  i=targetIntModel->index(index.row(),11,QModelIndex());
+  var=targetIntModel->data(i,Qt::EditRole);
+  QList<double> qCoefficients = qVariantValue<QList<double> >(var);  
 
   AddTargetIntDialog aDialog;
-  aDialog.setWindowTitle(tr("Edit a Target Effect Line"));
+  aDialog.setWindowTitle(tr("Edit an Experimental Effect Line"));
   aDialog.segmentsListText->setText(segmentsList);
   aDialog.numPointsSpin->setValue(numPoints);
   if(isConvolution)
@@ -187,6 +203,10 @@ void TargetIntTab::editLine() {
   aDialog.stoppingPowerEqText->setText(stoppingPowerEq);
   aDialog.tempParameters=parameters;
   aDialog.numParametersSpin->setValue(numParameters);
+  if(isQCoefficient) aDialog.isQCoefficientCheck->setChecked(true);
+  else aDialog.isQCoefficientCheck->setChecked(false);
+  aDialog.tempQCoefficients=qCoefficients;
+  aDialog.numQCoefficientSpin->setValue(qCoefficients.size());
 
   if(aDialog.exec()) {
     QString newSegmentsList = aDialog.segmentsListText->text();
@@ -238,6 +258,20 @@ void TargetIntTab::editLine() {
 	parameters.append(newParameters.at(j));
       i=targetIntModel->index(index.row(),9,QModelIndex());
       targetIntModel->setData(i,QVariant::fromValue<QList<double> >(parameters),Qt::EditRole);
+    }
+    bool newIsQCoefficient=false;
+    if(aDialog.isQCoefficientCheck->isChecked()) newIsQCoefficient=true;
+    if(isQCoefficient!=newIsQCoefficient) {
+      i=targetIntModel->index(index.row(),10,QModelIndex());
+      targetIntModel->setData(i,newIsQCoefficient,Qt::EditRole);
+    }
+    QList<double> newQCoefficients = aDialog.tempQCoefficients;
+    if(qCoefficients!=newQCoefficients||qCoefficients.size()!=aDialog.numQCoefficientSpin->value()) {
+      qCoefficients.clear();
+      for(int j=0;j<aDialog.numQCoefficientSpin->value();j++) 
+	qCoefficients.append(newQCoefficients.at(j));
+      i=targetIntModel->index(index.row(),11,QModelIndex());
+      targetIntModel->setData(i,QVariant::fromValue<QList<double> >(qCoefficients),Qt::EditRole);
     }
   }
 }
@@ -307,8 +341,12 @@ bool TargetIntTab::writeFile(QTextStream& outStream) {
 	      << qSetFieldWidth(0) << lines.at(i).numParameters << qSetFieldWidth(0) << ' ';
     for(int j=0;j<lines.at(i).numParameters;j++) 
       outStream << lines.at(i).parameters.at(j) <<  qSetFieldWidth(0) << ' ';
+    if(lines.at(i).isQCoefficients) outStream << qSetFieldWidth(0) << "              1";
+    else outStream << qSetFieldWidth(0) << "              0";
+    outStream << qSetFieldWidth(0) << "              " <<  lines.at(i).qCoefficients.size() << ' ';
+    for(int j=0;j<lines.at(i).qCoefficients.size();j++) 
+      outStream << qSetFieldWidth(0) <<  lines.at(i).qCoefficients.at(j) << ' ';
     outStream<<endl;
-	
   }
   /*file.flush();
     file.close();*/
@@ -354,7 +392,9 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
   QString stoppingPowerEq;
   int numParameters;
   QList<double> parameters;
-
+  int numQCoefficients;
+  QList<double> qCoefficients;
+  int isQCoefficient;
 
   /*QTextStream in(&file);*/
   QString line("");
@@ -368,23 +408,40 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
 	 >> density >> stoppingPowerEq >> numParameters;
       if(in.status()!=QTextStream::Ok) return false;
       int i=0;
-      while(i<numParameters&&!inStream.atEnd()) {	
+      while(i<numParameters) {	
 	double tempParameter;
 	in >> tempParameter;
 	parameters.append(tempParameter);
 	i++;
       }
-      if(inStream.atEnd()) return false;
+      if(in.status()!=QTextStream::Ok) return false;
+      in >> isQCoefficient;
+      if(in.status()==QTextStream::Ok) {
+	in >> numQCoefficients;
+	i=0;
+	while(i<numQCoefficients) {	
+	  double tempQCoefficient;
+	  in >> tempQCoefficient;
+	  qCoefficients.append(tempQCoefficient);
+	  i++;
+	}
+	if(in.status()!=QTextStream::Ok) return false;
+      } else {
+	isQCoefficient=0;
+      }
+      bool tempIsQCoefficient=false;
+      if(isQCoefficient==1) tempIsQCoefficient=true;
       bool tempIsConvolution=false;
       if(isConvolution==1) tempIsConvolution=true;
       bool tempIsTargetIntegration=false;
       if(isTargetIntegration==1) tempIsTargetIntegration=true;
       TargetIntData newLine = {isActive,segmentsList.remove('\"'),numPoints,tempIsConvolution,sigma,tempIsTargetIntegration,
-			       density,stoppingPowerEq.remove('\"'),numParameters,parameters};
+			       density,stoppingPowerEq.remove('\"'),numParameters,parameters,tempIsQCoefficient,qCoefficients};
       addLine(newLine);
     }
   }
   /*file.close();*/
+  targetIntView->resizeRowsToContents();
   if(line.trimmed()!=QString("</targetInt>")) return false;
   return true;
 }
