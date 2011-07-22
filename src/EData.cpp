@@ -732,7 +732,7 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     std::ofstream out(outputfile.c_str());
     if(out) {
       out.precision(4);
-      out << std::fixed;
+      out << std::scientific;
       for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
 	if(segment->IsVaryNorm()) out << std::setw(20) << "Segment Key #" << segment->GetSegmentKey()
 				      << std::setw(10) << segment->GetNorm() << std::endl;
