@@ -1,5 +1,6 @@
 #include <QtGui>
 #include "LevelsTab.h"
+#include "LevelsHeaderView.h"
 #include "AddLevelDialog.h"
 #include "RichTextDelegate.h"
 #include <iostream>
@@ -16,8 +17,14 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   connect(saveAsButton,SIGNAL(clicked()),this,SLOT(saveAsFile()));*/
 
   levelsModel=new LevelsModel(this);
+  levelsModelProxy = new QSortFilterProxyModel(this);
+  levelsModelProxy->setSourceModel(levelsModel);
+  levelsModelProxy->setDynamicSortFilter(true);
   levelsView=new QTableView;
-  levelsView->setModel(levelsModel);
+  levelsView->setHorizontalHeader(new LevelsHeaderView(Qt::Horizontal, levelsView));
+  levelsView->setModel(levelsModelProxy);
+  levelsView->horizontalHeader()->setSortIndicator(4,Qt::AscendingOrder);
+  levelsView->setSortingEnabled(true);
   levelsView->verticalHeader()->hide();
   levelsView->horizontalHeader()->setHighlightSections(false);
   levelsView->setColumnWidth(0,60);
@@ -216,7 +223,7 @@ void LevelsTab::addLevel(LevelsData level, bool fromFile) {
 void LevelsTab::removeLevel() {
   QItemSelectionModel *selectionModel = levelsView->selectionModel();
   QModelIndexList indexes = selectionModel->selectedRows();
-  QModelIndex index=indexes[0];
+  QModelIndex index=levelsModelProxy->mapToSource(indexes[0]);
   
   levelsModel->removeRows(index.row(),1,QModelIndex());
   updateChannelsLevelDeleted(index.row());
@@ -226,7 +233,7 @@ void LevelsTab::removeLevel() {
 void LevelsTab::editLevel() {
   QItemSelectionModel *selectionModel = levelsView->selectionModel();
   QModelIndexList indexes = selectionModel->selectedRows();
-  QModelIndex index=indexes[0];
+  QModelIndex index=levelsModelProxy->mapToSource(indexes[0]);
   
   QModelIndex i=levelsModel->index(index.row(),2,QModelIndex());
   QVariant var=levelsModel->data(i,Qt::EditRole);
@@ -408,7 +415,7 @@ void LevelsTab::updateFilter(const QItemSelection &selection) {
   if(indexes.isEmpty())
     proxyModel->setFilterRegExp("-1");
   else {
-    QModelIndex index = indexes.at(0);
+    QModelIndex index = levelsModelProxy->mapToSource(indexes.at(0));
     int row=index.row();
     proxyModel->setFilterRegExp(QString("\\b%1\\b").arg(row));
   } 
@@ -860,6 +867,7 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   maxLSpin->blockSignals(false);
   maxMultSpin->blockSignals(false);
   maxNumMultSpin->blockSignals(false);
+  levelsView->resizeRowsToContents();
 
   /*file.close();*/
   return true;

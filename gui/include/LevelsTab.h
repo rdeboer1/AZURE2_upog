@@ -62,6 +62,7 @@ class LevelsTab : public QWidget {
   ChannelsModel *channelsModel;
   QTableView *levelsView;
   QTableView *channelsView;
+  QSortFilterProxyModel *levelsModelProxy;
   QSortFilterProxyModel *proxyModel;
   ChannelDetails *channelDetails;
 };
