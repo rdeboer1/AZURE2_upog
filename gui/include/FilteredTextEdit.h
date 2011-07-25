@@ -10,7 +10,7 @@ class FilteredTextEdit : public QTextEdit {
  public:
   FilteredTextEdit(QWidget *parent = 0) : 
   QTextEdit(parent), filtered_(false) {
-    QFont font("Courier",10);
+    QFont font("Courier");
     font.setStyleHint(QFont::TypeWriter);
     setCurrentFont(font);
   };
