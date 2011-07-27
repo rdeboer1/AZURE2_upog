@@ -65,6 +65,7 @@ class AZURESetup : public QMainWindow {
 
   Config config;
 
+  QAction* quitAction;
   QAction* openAction;
   QAction* saveAction;
   QAction* saveAsAction;

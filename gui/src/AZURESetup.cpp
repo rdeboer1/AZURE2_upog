@@ -58,6 +58,10 @@ Config& AZURESetup::GetConfig() {
 }
 
 void AZURESetup::createActions() {
+  quitAction = new QAction(tr("&Quit"),this);
+  quitAction->setShortcuts(QKeySequence::Quit);
+  connect(quitAction,SIGNAL(triggered()),this,SLOT(close()));
+
   openAction = new QAction(tr("&Open..."),this);
   openAction->setShortcuts(QKeySequence::Open);
   connect(openAction,SIGNAL(triggered()),this,SLOT(open()));
@@ -112,6 +116,8 @@ void AZURESetup::createMenus() {
   updateRecent();
   fileMenu->addAction(saveAction);
   fileMenu->addAction(saveAsAction);
+  fileMenu->addSeparator();
+  fileMenu->addAction(quitAction);
   
   configMenu = menuBar()->addMenu(tr("&Configure"));
   formalismMenu = configMenu->addMenu(tr("&Formalism"));
