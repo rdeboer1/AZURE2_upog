@@ -213,7 +213,7 @@ void LevelsTab::addLevel(LevelsData level, bool fromFile) {
     levelsModel->setData(index,level.piValue,Qt::EditRole);
     index = levelsModel->index(levels.size(),4,QModelIndex());
     levelsModel->setData(index,level.energy,Qt::EditRole);
-    levelsView->resizeRowToContents(levels.size());
+    levelsView->resizeRowsToContents();
     if(!fromFile) updateChannelsLevelAdded(levels.size());
   } else {
     QMessageBox::information(this,tr("Duplicate Level"),tr("This level already exists."));
