@@ -19,10 +19,8 @@ class TargetIntTab : public QWidget {
 
  public:
   TargetIntTab(QWidget *parent = 0);
-  /*QLineEdit *getFileText() const {return fileText;};*/
-  /*bool writeFile(QString filename);*/
+  TargetIntModel* getTargetIntModel();
   bool writeFile(QTextStream& outStream);
-  /*bool readFile(QString filename);*/
   bool readFile(QTextStream& inStream);
 
  public slots:
@@ -31,17 +29,12 @@ class TargetIntTab : public QWidget {
   void editLine();
   void deleteLine();
   void updateButtons(const QItemSelection &selection);
-  /* void saveFile();
-  void saveAsFile();
-  void openFile();
-  void openFile(QString filename);*/
 
  private:
   TargetIntModel *targetIntModel;
   QTableView *targetIntView;
-  /*QLineEdit *fileText;*/
   QPushButton *addButton;
-  //QPushButton *editButton;
   QPushButton *deleteButton;
 };
+
 #endif

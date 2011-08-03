@@ -4,14 +4,6 @@
 #include "RichTextDelegate.h"
 
 ExternalCaptureTab::ExternalCaptureTab(QWidget *parent) : QWidget(parent) {
-  /*fileText=new QLineEdit;
-  fileText->setReadOnly(true);
-  QPushButton *loadButton=new QPushButton(tr("Open..."));
-  QPushButton *saveAsButton=new QPushButton(tr("Save As..."));
-  QPushButton *saveButton=new QPushButton(tr("Save"));
-  connect(loadButton,SIGNAL(clicked()),this,SLOT(openFile()));
-  connect(saveButton,SIGNAL(clicked()),this,SLOT(saveFile()));
-  connect(saveAsButton,SIGNAL(clicked()),this,SLOT(saveAsFile()));*/
 
   externalCaptureModel = new ExternalCaptureModel(this);
   externalCaptureView = new QTableView;
@@ -36,35 +28,16 @@ ExternalCaptureTab::ExternalCaptureTab(QWidget *parent) : QWidget(parent) {
     
   for(int i = 2; i<ExternalCaptureData::SIZE;i++) externalCaptureView->horizontalHeader()->setResizeMode(i,QHeaderView::Stretch);
   
-  //addButton=new QPushButton(tr("Add Line"));
-  //deleteButton = new QPushButton(tr("Delete Line"));
   addButton=new QPushButton(tr("+"));
   addButton->setMaximumSize(28,28);
   deleteButton = new QPushButton(tr("-"));
   deleteButton->setMaximumSize(28,28);
   deleteButton->setEnabled(false);
-  //editButton = new QPushButton(tr("Edit Line"));
-  //editButton->setEnabled(false);
   connect(addButton,SIGNAL(clicked()),this,SLOT(addLine()));
-  //connect(editButton,SIGNAL(clicked()),this,SLOT(editLine()));
   connect(deleteButton,SIGNAL(clicked()),this,SLOT(deleteLine()));
-
-  /* QGroupBox *fileBox = new QGroupBox(tr("External Capture File"));
-  QGridLayout *fileLayout = new QGridLayout;
-  fileLayout->setContentsMargins(6,6,6,6);
-  fileLayout->addWidget(fileText,0,0);
-  fileLayout->addWidget(loadButton,0,1);
-  fileLayout->addWidget(saveAsButton,0,2);
-  fileLayout->addWidget(saveButton,0,3);
-  fileLayout->setColumnStretch(0,4);
-  fileLayout->setColumnStretch(1,1);
-  fileLayout->setColumnStretch(2,1);
-  fileLayout->setColumnStretch(3,1);
-  fileBox->setLayout(fileLayout);*/
 
   QGridLayout *buttonBox = new QGridLayout;
   buttonBox->addWidget(addButton,0,0);
-  //buttonBox->addWidget(editButton);
   buttonBox->addWidget(deleteButton,0,1);
   buttonBox->addItem(new QSpacerItem(28,28),0,2);
   buttonBox->setColumnStretch(0,0);
@@ -77,12 +50,6 @@ ExternalCaptureTab::ExternalCaptureTab(QWidget *parent) : QWidget(parent) {
 #endif
 
   QGridLayout *mainLayout = new QGridLayout;
-  /*mainLayout->addWidget(fileBox,0,0);
-  mainLayout->addWidget(externalCaptureView,1,0);
-  mainLayout->addLayout(buttonBox,2,0);
-  mainLayout->setRowStretch(0,0);
-  mainLayout->setRowStretch(1,1);
-  mainLayout->setRowStretch(2,0);*/
   mainLayout->addWidget(externalCaptureView,0,0);
   mainLayout->addLayout(buttonBox,1,0);
   mainLayout->setRowStretch(0,1);
@@ -197,60 +164,13 @@ void ExternalCaptureTab::deleteLine() {
 void ExternalCaptureTab::updateButtons(const QItemSelection &selection) {
   QModelIndexList indexes=selection.indexes();
   if(indexes.isEmpty()) {
-    //editButton->setEnabled(false);
     deleteButton->setEnabled(false);
   } else {
-    //editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }
 }
 
-/*void ExternalCaptureTab::openFile() {
-  QString filename = QFileDialog::getOpenFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->readExternalCaptureFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The external capture file could not be read."));
-    else fileText->setText(filename);
-  }
-}
-
-void ExternalCaptureTab::openFile(QString filename) {
-  if(!filename.isEmpty()) {
-    if(!this->readExternalCaptureFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The external capture file could not be read."));
-    else fileText->setText(filename);
-  }
-}
-
-void ExternalCaptureTab::saveFile() {
-  QString filename=fileText->text();
-  if(!filename.isEmpty()) {
-    if(!this->writeExternalCaptureFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The external capture file could not be written."));
-  } else saveAsFile();
-}
-
-void ExternalCaptureTab::saveAsFile() {
-  QString filename = QFileDialog::getSaveFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->writeExternalCaptureFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The external capture file could not be written."));
-    else fileText->setText(filename);
-  }
-  }*/
-
-/*bool ExternalCaptureTab::readExternalCaptureFile(QString filename) {*/
 bool ExternalCaptureTab::readExternalCaptureFile(QTextStream& inStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) return false;*/
 
   externalCaptureModel->removeRows(0,externalCaptureModel->getLines().size(),QModelIndex());
 
@@ -260,8 +180,6 @@ bool ExternalCaptureTab::readExternalCaptureFile(QTextStream& inStream) {
   double maxJ;
   int multMask;
 
-  /*QTextStream in(&file);
-    QString dummyString=in.readLine();*/
   QString line("");
   while(line.trimmed()!=QString("</externalCapture>")&&!inStream.atEnd()) {
     line = inStream.readLine();
@@ -275,30 +193,13 @@ bool ExternalCaptureTab::readExternalCaptureFile(QTextStream& inStream) {
     }
   }
   if(line.trimmed()!=QString("</externalCapture>")) return false;
-  /*file.close();*/
   return true;
 }
 
-/*bool ExternalCaptureTab::writeExternalCaptureFile(QString filename) {*/
 bool ExternalCaptureTab::writeExternalCaptureFile(QTextStream& outStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::WriteOnly)) return false;*/
 
   QList<ExternalCaptureData> lines = externalCaptureModel->getLines();
 
-  /*QTextStream out(&file);
-    out.setFieldAlignment(QTextStream::AlignLeft);
-
-  out << qSetFieldWidth(8) << "is_dc"
-      << qSetFieldWidth(8) << "aa"
-      << qSetFieldWidth(8) << "ir"
-      << qSetFieldWidth(8) << "Jmin"
-      << qSetFieldWidth(8) << "Jmax"
-      << qSetFieldWidth(8) << "limin"
-      << qSetFieldWidth(8) << "limax"
-      << qSetFieldWidth(8) << "ldcmax"
-      << qSetFieldWidth(0) << "! enter physical values, except for Jmin,Jmax=2*physical value"
-      << endl;*/
   for(int i = 0; i<lines.size(); i++) {
     outStream << qSetFieldWidth(8) << lines.at(i).isActive
 	      << qSetFieldWidth(8) << lines.at(i).exitPairIndex
@@ -308,6 +209,5 @@ bool ExternalCaptureTab::writeExternalCaptureFile(QTextStream& outStream) {
 	      << qSetFieldWidth(0) << "! USER IS RESPONSIBLE FOR CHOOSING ALL DC L-VALUES."
 	      << endl;
   }
-  /*file.close();*/
   return true;
 }

@@ -23,11 +23,8 @@ class LevelsTab : public QWidget {
   void updateChannelsLevelDeleted(int levelIndex);
   void updateChannelsLevelEdited(int levelIndex);
   QList<ChannelsData> calculateChannels(int levelIndex);
-  /*bool writeNuclearFile(QString filename);*/
   bool writeNuclearFile(QTextStream& outStream);
-  /*bool readNuclearFile(QString filename);*/
   bool readNuclearFile(QTextStream& inStream);
-  /*QLineEdit *getFileText() const {return fileText;};*/
 
  public slots:
   void addLevel();
@@ -40,17 +37,12 @@ class LevelsTab : public QWidget {
   void updateChannelsPairRemoved(int pairIndex);
   void updateDetails(const QItemSelection &selection);
   void updateReducedWidth(const QString &string);
-  /*void saveAsFile();
-  void saveFile();
-  void loadFile();
-  void loadFile(QString loadName);*/
 
  signals:
   void readNewPair(PairsData,int,bool);
   void readExistingPair(PairsData,int,bool);
 
  private:  
-  /*QLineEdit *fileText;*/
   QSpinBox *maxLSpin;
   QSpinBox *maxMultSpin;
   QSpinBox *maxNumMultSpin;

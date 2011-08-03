@@ -3,16 +3,6 @@
 
 
 TargetIntTab::TargetIntTab(QWidget *parent) : QWidget(parent) {
-  /*fileText = new QLineEdit;
-  fileText->setReadOnly(true);
-  QPushButton *loadButton = new QPushButton(tr("Open..."));
-  QPushButton *saveAsButton = new QPushButton(tr("Save As..."));
-  QPushButton *saveButton = new QPushButton(tr("Save"));
-  connect(loadButton,SIGNAL(clicked()),this,SLOT(openFile()));
-  connect(saveAsButton,SIGNAL(clicked()),this,SLOT(saveAsFile()));
-  connect(saveButton,SIGNAL(clicked()),this,SLOT(saveFile()));*/
-
-
   targetIntModel = new TargetIntModel(this);
   targetIntView = new QTableView;
   targetIntView->setModel(targetIntModel);
@@ -38,35 +28,16 @@ TargetIntTab::TargetIntTab(QWidget *parent) : QWidget(parent) {
   connect(targetIntView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateButtons(QItemSelection)));
   connect(targetIntView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editLine()));
   
-  //addButton = new QPushButton(tr("Add Line"));
   addButton = new QPushButton(tr("+"));
   addButton->setMaximumSize(28,28);
   connect(addButton,SIGNAL(clicked()),this,SLOT(addLine()));
-  //editButton = new QPushButton(tr("Edit Line"));
-  //editButton->setEnabled(false);
-  //connect(editButton,SIGNAL(clicked()),this,SLOT(editLine()));
-  //deleteButton = new QPushButton(tr("Delete Line"));
   deleteButton = new QPushButton(tr("-"));
   deleteButton->setMaximumSize(28,28);
   deleteButton->setEnabled(false);
   connect(deleteButton,SIGNAL(clicked()),this,SLOT(deleteLine()));
   
-  /*QGroupBox *fileBox = new QGroupBox(tr("Target Effects File"));
-  QGridLayout *fileLayout = new QGridLayout;
-  fileLayout->setContentsMargins(6,6,6,6);
-  fileLayout->addWidget(fileText,0,0);
-  fileLayout->addWidget(loadButton,0,1);
-  fileLayout->addWidget(saveAsButton,0,2);
-  fileLayout->addWidget(saveButton,0,3);
-  fileLayout->setColumnStretch(0,4);
-  fileLayout->setColumnStretch(1,1);
-  fileLayout->setColumnStretch(2,1);
-  fileLayout->setColumnStretch(3,1);
-  fileBox->setLayout(fileLayout);*/
-
   QGridLayout *buttonBox = new QGridLayout;
   buttonBox->addWidget(addButton,0,0);
-  //buttonBox->addWidget(editButton);
   buttonBox->addWidget(deleteButton,0,1);
   buttonBox->addItem(new QSpacerItem(28,28),0,2);
   buttonBox->setColumnStretch(0,0);
@@ -79,18 +50,16 @@ TargetIntTab::TargetIntTab(QWidget *parent) : QWidget(parent) {
 #endif
 
   QGridLayout *mainLayout = new QGridLayout;
-  /*mainLayout->addWidget(fileBox,0,0);
-  mainLayout->addWidget(targetIntView,1,0);
-  mainLayout->addLayout(buttonBox,2,0);
-  mainLayout->setRowStretch(0,0);
-  mainLayout->setRowStretch(1,1);
-  mainLayout->setRowStretch(2,0);*/
   mainLayout->addWidget(targetIntView,0,0);
   mainLayout->addLayout(buttonBox,1,0);
   mainLayout->setRowStretch(0,1);
   mainLayout->setRowStretch(1,0);
   
   setLayout(mainLayout);
+}
+
+TargetIntModel* TargetIntTab::getTargetIntModel() {
+  return targetIntModel;
 }
 
 void TargetIntTab::addLine() {
@@ -288,44 +257,15 @@ void TargetIntTab::updateButtons(const QItemSelection &selection) {
   QModelIndexList indexes=selection.indexes();
   
   if(indexes.isEmpty()) {
-    //editButton->setEnabled(false);
     deleteButton->setEnabled(false);
   } else {
-    //editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }
 }
 
-/*void TargetIntTab::saveFile() {
-  QString filename=fileText->text();
-  if(!filename.isEmpty()) {
-    if(!this->writeFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The target effects file could not be written."));
-  } else saveAsFile();
-}
-
-void TargetIntTab::saveAsFile() {
-  QString filename = QFileDialog::getSaveFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->writeFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The target effects file could not be written."));
-    else fileText->setText(filename);
-  }
-  }*/
-
-/*bool TargetIntTab::writeFile(QString filename) {*/
 bool TargetIntTab::writeFile(QTextStream& outStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::WriteOnly)) return false;*/
   
   QList<TargetIntData> lines = targetIntModel->getLines();
-
-  /*QTextStream out(&file);
-    out.setFieldAlignment(QTextStream::AlignLeft);*/
 
   for(int i=0;i<lines.size();i++) {
     outStream <<  qSetFieldWidth(15) << lines.at(i).isActive
@@ -348,37 +288,11 @@ bool TargetIntTab::writeFile(QTextStream& outStream) {
       outStream << qSetFieldWidth(0) <<  lines.at(i).qCoefficients.at(j) << ' ';
     outStream<<endl;
   }
-  /*file.flush();
-    file.close();*/
+
   return true;
 }
 
-/*void TargetIntTab::openFile() {
-  QString filename = QFileDialog::getOpenFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->readFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The target effects file could not be read."));
-    else fileText->setText(filename);
-  }
-}
-
-void TargetIntTab::openFile(QString filename) {
-  if(!filename.isEmpty()) {
-    if(!this->readFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The target effects file could not be read."));
-    else fileText->setText(filename);
-  }
-  }*/
-
-/*bool TargetIntTab::readFile(QString filename) {*/
 bool TargetIntTab::readFile(QTextStream& inStream) {
-
-  /*QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) return false;*/
   
   targetIntModel->removeRows(0,targetIntModel->getLines().size(),QModelIndex());
   
@@ -396,7 +310,6 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
   QList<double> qCoefficients;
   int isQCoefficient;
 
-  /*QTextStream in(&file);*/
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</targetInt>")) {
     line=inStream.readLine();
@@ -440,7 +353,6 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
       addLine(newLine);
     }
   }
-  /*file.close();*/
   targetIntView->resizeRowsToContents();
   if(line.trimmed()!=QString("</targetInt>")) return false;
   return true;

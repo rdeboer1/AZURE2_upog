@@ -782,6 +782,59 @@ void AZURESetup::SaveAndRun() {
     return;
   }
 
+  if(!(GetConfig().paramMask & Config::CALCULATE_WITH_DATA) &&
+     !(GetConfig().paramMask & Config::CALCULATE_REACTION_RATE)) {
+    QList<TargetIntData> targetIntData = targetIntTab->getTargetIntModel()->getLines();
+    QList<SegmentsTestData> segmentsTestData=segmentsTab->getSegmentsTestModel()->getLines();
+    for(unsigned int i=0;i<targetIntData.size();i++) {
+      if(targetIntData.at(i).isActive==1&&
+	 (targetIntData.at(i).isTargetIntegration||targetIntData.at(i).isConvolution)) {
+	unsigned int j=0;
+	unsigned int lastSegNum=0;
+	bool inclusive=false;
+	QList<unsigned int> tempList;
+	QString segmentsList = targetIntData.at(i).segmentsList;
+	while(j<segmentsList.length()) {
+	  if(segmentsList[j]>='0'&&segmentsList[j]<='9') {
+	    QString tempString;
+	    while(segmentsList[j]!=','&&segmentsList[j]!='-'&&
+		  j<segmentsList.length()) {
+	      tempString+=segmentsList[j];
+	      j++;
+	    }
+	    QTextStream stm(&tempString);
+	    unsigned int tempSegNum;stm>>tempSegNum;
+	    if(inclusive==true) for(int k=lastSegNum+1;k<=tempSegNum;k++) 
+				  tempList.push_back(k);
+	    else tempList.push_back(tempSegNum);
+	    lastSegNum=tempSegNum;
+	  }
+	  if(segmentsList[j]=='-') inclusive=true;
+	  else inclusive =false;
+	  j++;
+	}     
+	bool isAngularDistribution=false;
+	for(j=0;j<tempList.size();j++) {
+	  if(tempList.at(j)<=segmentsTestData.size()) {
+	    for(int k = 0; k<segmentsTestData.size(); k++) {
+	      if(segmentsTestData.at(k).isActive==1&&
+		 tempList.at(j)-1==k&&
+		 segmentsTestData.at(k).dataType==3) {
+		isAngularDistribution=true;
+		break;
+	      }
+	    }
+	  }
+	  if(isAngularDistribution) break;
+	}
+	if(isAngularDistribution) {
+	  QMessageBox::information(this,tr("Incompatable Options"),
+				   tr("Angular distribution coefficients cannot be used with convolution or target integration."));
+	  return;	
+	}
+      }
+    }
+  }
 
   azureMain = new AZUREMainThread(runTab,GetConfig());
   connect(azureMain,SIGNAL(finished()),this,SLOT(DeleteThread()));

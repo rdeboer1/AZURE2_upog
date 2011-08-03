@@ -36,7 +36,6 @@ class PairsTab : public QWidget {
   PairsModel *pairsModel;
   QTableView *pairsView;
   QPushButton *addButton;
-  //QPushButton *editButton;
   QPushButton *deleteButton;
 };
 

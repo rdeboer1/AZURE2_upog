@@ -8,7 +8,6 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   pairsView = new QTableView;
   pairsView->setModel(pairsModel);
   pairsView->verticalHeader()->setHighlightSections(false);
-  //pairsView->horizontalHeader()->setStretchLastSection(true);
   pairsView->horizontalHeader()->setHighlightSections(false);
   pairsView->setColumnHidden(1,true);
   pairsView->setColumnHidden(3,true);
@@ -28,22 +27,16 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
 
   for(int i = 0; i<PairsData::SIZE;i++) pairsView->horizontalHeader()->setResizeMode(i,QHeaderView::Stretch);
 
-  //addButton=new QPushButton(tr("Add Pair"));
   addButton=new QPushButton(tr("+"));
   addButton->setMaximumSize(28,28);
   connect(addButton,SIGNAL(clicked()),this,SLOT(addPair()));
-  //deleteButton = new QPushButton(tr("Delete Pair"));
   deleteButton = new QPushButton(tr("-"));
   deleteButton->setMaximumSize(28,28);
   deleteButton->setEnabled(false);
   connect(deleteButton,SIGNAL(clicked()),this,SLOT(removePair()));
-  //editButton = new QPushButton(tr("Edit Pair"));
-  //editButton->setEnabled(false);
-  //connect(editButton,SIGNAL(clicked()),this,SLOT(editPair()));
 
   QGridLayout *buttonBox = new QGridLayout;
   buttonBox->addWidget(addButton,0,0);
-  //buttonBox->addWidget(editButton,0,1);
   buttonBox->addWidget(deleteButton,0,1);
   buttonBox->addItem(new QSpacerItem(28,28),0,2);
   buttonBox->setColumnStretch(0,0);
@@ -305,9 +298,7 @@ void PairsTab::updateButtons(const QItemSelection &selection) {
   
   if (!indexes.isEmpty()) {
     deleteButton->setEnabled(true);
-    //editButton->setEnabled(true);
   } else {
     deleteButton->setEnabled(false);
-    //editButton->setEnabled(false);
   }
 }

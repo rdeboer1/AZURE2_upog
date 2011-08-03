@@ -185,6 +185,10 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   setLayout(mainLayout);
 }
 
+SegmentsTestModel* SegmentsTab::getSegmentsTestModel() {
+  return segmentsTestModel;
+}
+
 void SegmentsTab::deleteSegDataLine() {
   QItemSelectionModel *selectionModel = segmentsDataView->selectionModel();
   QModelIndexList indexes = selectionModel->selectedRows();

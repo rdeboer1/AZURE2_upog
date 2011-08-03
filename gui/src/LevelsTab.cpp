@@ -7,15 +7,6 @@
 
 LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
 
-  /*fileText=new QLineEdit;
-  fileText->setReadOnly(true);
-  QPushButton *loadButton=new QPushButton(tr("Open..."));
-  QPushButton *saveAsButton=new QPushButton(tr("Save As..."));
-  QPushButton *saveButton=new QPushButton(tr("Save"));
-  connect(loadButton,SIGNAL(clicked()),this,SLOT(loadFile()));
-  connect(saveButton,SIGNAL(clicked()),this,SLOT(saveFile()));
-  connect(saveAsButton,SIGNAL(clicked()),this,SLOT(saveAsFile()));*/
-
   levelsModel=new LevelsModel(this);
   levelsModelProxy = new QSortFilterProxyModel(this);
   levelsModelProxy->setSourceModel(levelsModel);
@@ -104,20 +95,6 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   removeLevelButton->setEnabled(false);
   connect(removeLevelButton,SIGNAL(clicked()),this,SLOT(removeLevel()));
 
-
-  /*QGroupBox *fileBox = new QGroupBox(tr("Nuclear Input File"));
-  QGridLayout *fileLayout = new QGridLayout;
-  fileLayout->setContentsMargins(6,6,6,6);
-  fileLayout->addWidget(fileText,0,0);
-  fileLayout->addWidget(loadButton,0,1);
-  fileLayout->addWidget(saveAsButton,0,2);
-  fileLayout->addWidget(saveButton,0,3);
-  fileLayout->setColumnStretch(0,4);
-  fileLayout->setColumnStretch(1,1);
-  fileLayout->setColumnStretch(2,1);
-  fileLayout->setColumnStretch(3,1);
-  fileBox->setLayout(fileLayout);*/
-
   QVBoxLayout *buttonBox = new QVBoxLayout;
   buttonBox->addWidget(addLevelButton);
   buttonBox->addWidget(editLevelButton);
@@ -168,11 +145,6 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   channelsBox->setLayout(channelsLayout);
   
   QGridLayout *mainLayout = new QGridLayout;
-  /*mainLayout->addWidget(fileBox,0,0);
-  mainLayout->addLayout(topLayout,1,0);
-  mainLayout->addWidget(channelsBox,2,0);
-  mainLayout->setRowStretch(1,4);
-  mainLayout->setRowStretch(2,9);*/
   mainLayout->addLayout(topLayout,0,0);
   mainLayout->addWidget(channelsBox,1,0);
   mainLayout->setRowStretch(0,4);
@@ -557,70 +529,13 @@ void LevelsTab::updateReducedWidth(const QString &string) {
   }
 }
 
-/*void LevelsTab::saveAsFile() {
-  QString saveName = QFileDialog::getSaveFileName(this);
-  if(!saveName.isEmpty()) {
-    if(!this->writeNuclearFile(saveName)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The nuclear file could not be written."));
-    else fileText->setText(saveName);
-  }
-}
-
-void LevelsTab::saveFile() {
-  QString saveName=fileText->text();
-  if(!saveName.isEmpty()) {
-    if(!this->writeNuclearFile(saveName)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The nuclear file could not be written."));
-  } else saveAsFile();
-  }*/
-
-/*bool LevelsTab::writeNuclearFile(QString filename) {*/
 bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
-  /*QFile file(filename);
-  
-    if(!file.open(QIODevice::WriteOnly)) return false;*/
   QList<PairsData> pairs=pairsModel->getPairs();
   QList<LevelsData> levels=levelsModel->getLevels();
   QList<ChannelsData> channels=channelsModel->getChannels();
 
   outStream.setFieldAlignment(QTextStream::AlignRight);
 
-  /*QTextStream out(&file);
-  
-  out << qSetFieldWidth(4)  << "J"  
-      << qSetFieldWidth(5)  << "Pi" 
-      << qSetFieldWidth(13) << "Energy" 
-      << qSetFieldWidth(5)  << "fix"
-      << qSetFieldWidth(5)  << "aa" 
-      << qSetFieldWidth(5)  << "ir"
-      << qSetFieldWidth(5)  << "s"
-      << qSetFieldWidth(5)  << "l"
-      << qSetFieldWidth(5)  << "Lid"
-      << qSetFieldWidth(5)  << "y/n"
-      << qSetFieldWidth(5)  << "fix"
-      << qSetFieldWidth(20) << "width"
-      << qSetFieldWidth(5)  << "j1"
-      << qSetFieldWidth(5)  << "pi1"
-      << qSetFieldWidth(5)  << "j2"
-      << qSetFieldWidth(5)  << "pi2"
-      << qSetFieldWidth(13) << "ExE"
-      << qSetFieldWidth(8)  << "m1"
-      << qSetFieldWidth(8)  << "m2"
-      << qSetFieldWidth(5)  << "z1"
-      << qSetFieldWidth(5)  << "z2"
-      << qSetFieldWidth(13) << "qin"
-      << qSetFieldWidth(13) << "qout"
-      << "    ?    ?            ?" 
-      << qSetFieldWidth(6)  << "pType"
-      << qSetFieldWidth(8)  << "chrad" 
-      << qSetFieldWidth(13) << "g1"
-      << qSetFieldWidth(13) << "g2"
-      << endl;
-  */
   double lowJ=0;
   double highJ=0;
   for(int la=0;la<levels.size();la++) {
@@ -703,41 +618,13 @@ bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
       levelId++;
     }
   }
-  /*file.close();*/
 
   outStream.setFieldAlignment(QTextStream::AlignLeft);
 
   return true;
 }
 
-/*void LevelsTab::loadFile() {
-  QString loadName = QFileDialog::getOpenFileName(this);
-  if(!loadName.isEmpty()) {
-    if(!this->readNuclearFile(loadName)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The nuclear file could not be read."));
-    else fileText->setText(loadName);
-  }
-}
-
-void LevelsTab::loadFile(QString loadName) {
-  if(!loadName.isEmpty()) {
-    if(!this->readNuclearFile(loadName)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The nuclear file could not be read."));
-    else fileText->setText(loadName);
-  }
-}
-*/
-
-/*bool LevelsTab::readNuclearFile(QString filename) {*/
 bool LevelsTab::readNuclearFile(QTextStream &inStream) {
-  /*QFile file(filename);
-
-  if(!file.open(QIODevice::ReadOnly)) return false;
-  QTextStream in(&file);*/
 
   double levelJ;
   int levelPi;
@@ -788,7 +675,6 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   int currentPair=0;
   int thisNumMult=0;
 
-  /*QString dummy=in.readLine();*/
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</levels>")) {
     line=inStream.readLine();
@@ -869,6 +755,5 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   maxNumMultSpin->blockSignals(false);
   levelsView->resizeRowsToContents();
 
-  /*file.close();*/
   return true;
 }
