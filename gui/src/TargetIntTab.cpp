@@ -316,6 +316,7 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
     if(line.trimmed().isEmpty()) continue;
     if(!inStream.atEnd()&&line.trimmed()!=QString("</targetInt>")) {
       parameters.clear();
+      qCoefficients.clear();
       QTextStream in(&line);
       in >> isActive >> segmentsList >> numPoints >> isConvolution >> sigma >> isTargetIntegration 
 	 >> density >> stoppingPowerEq >> numParameters;
