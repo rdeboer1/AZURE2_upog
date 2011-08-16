@@ -9,6 +9,9 @@
 #include "Config.h"
 
 class RunTab;
+#ifdef USE_QWT
+class PlotTab;
+#endif
 class AZUREMainThread;
 
 QT_BEGIN_NAMESPACE
@@ -95,6 +98,9 @@ class AZURESetup : public QMainWindow {
   TargetIntTab *targetIntTab;
   RunTab *runTab;
   AZUREMainThread *azureMain;
+#ifdef USE_QWT
+  PlotTab* plotTab;
+#endif
 };
 
 #endif 

@@ -5,6 +5,9 @@
 #include "Config.h"
 #include "EditOptionsDialog.h"
 #include "AZUREMainThread.h"
+#ifdef USE_QWT
+#include "PlotTab.h"
+#endif
 #include <iostream>
 
 struct SegPairs {int firstPair; int secondPair;};
@@ -37,13 +40,20 @@ AZURESetup::AZURESetup() : config(std::cout) {
   runTab = new RunTab();
   connect(runTab->calcButton,SIGNAL(clicked()),this,SLOT(SaveAndRun()));
 
+#ifdef USE_QWT
+  plotTab = new PlotTab();
+#endif 
+
   tabWidget->addTab(pairsTab,tr("Particle Pairs"));
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
   tabWidget->addTab(externalCaptureTab,tr("External Capture"));
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
   tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
   tabWidget->addTab(runTab,tr("Perform Calculation"));
-  
+#ifdef USE_QWT
+  tabWidget->addTab(plotTab,tr("Plot"));
+#endif
+
   setCentralWidget(tabWidget);
 
   createActions();
