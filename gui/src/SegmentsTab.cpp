@@ -189,6 +189,10 @@ SegmentsTestModel* SegmentsTab::getSegmentsTestModel() {
   return segmentsTestModel;
 }
 
+SegmentsDataModel* SegmentsTab::getSegmentsDataModel() {
+  return segmentsDataModel;
+}
+
 void SegmentsTab::deleteSegDataLine() {
   QItemSelectionModel *selectionModel = segmentsDataView->selectionModel();
   QModelIndexList indexes = selectionModel->selectedRows();

@@ -261,7 +261,7 @@ QString PairsModel::getReactionLabel(const PairsData &firstPair, const PairsData
     } else if(secondPair.heavyZ==2&&round(secondPair.heavyM)==4) heavyLabel[1]="&alpha;";
     else heavyLabel[1]=QString("<sup>%1</sup>%2").arg(round(secondPair.heavyM)).arg(it->second);
   } else heavyLabel[1]="?";
-  return QString("<center>%1(%2,%3)%4 [%5 MeV]</center>").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
+  return QString("%1(%2,%3)%4 [%5 MeV]").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
 }
 
 QString PairsModel::getSpinLabel(const PairsData &pair, int which) const {

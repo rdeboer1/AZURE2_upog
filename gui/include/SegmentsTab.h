@@ -17,6 +17,7 @@ class SegmentsTab : public QWidget {
  public:
   SegmentsTab(QWidget *parent = 0);
   SegmentsTestModel* getSegmentsTestModel();
+  SegmentsDataModel* getSegmentsDataModel();
   /*QLineEdit *getSegDataFileText() const {return segDataFileText;};
     QLineEdit *getSegTestFileText() const {return segTestFileText;};*/
 

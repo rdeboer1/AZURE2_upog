@@ -26,7 +26,7 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
       if(pairsModel->getPairs().size()>=line.entrancePairIndex&&pairsModel->getPairs().size()>=line.exitPairIndex) {
 	PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
 	PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
-	return pairsModel->getReactionLabel(firstPair,secondPair);
+	return QString("<center>%1</center>").arg(pairsModel->getReactionLabel(firstPair,secondPair));
       } else return QString("<center><font style='color:red;font-weight:bold;'>UNDEFINED</font></center>");
     } else if(index.column() == 2) return QVariant();
     else if(index.column() == 3) {
@@ -237,4 +237,11 @@ int SegmentsDataModel::isSegDataLine(const SegmentsDataData &line) const {
 
 void SegmentsDataModel::setPairsModel(PairsModel* model) {
   pairsModel=model;
+}
+
+QString SegmentsDataModel::getReactionLabel(const QModelIndex &index) {
+  SegmentsDataData line = segDataLineList.at(index.row());
+  PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+  PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
+  return pairsModel->getReactionLabel(firstPair,secondPair);
 }

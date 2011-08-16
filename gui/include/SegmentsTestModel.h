@@ -40,7 +40,7 @@ class SegmentsTestModel : public QAbstractTableModel {
   int isSegTestLine(const SegmentsTestData &line) const;
   QList<SegmentsTestData> getLines() const {return segTestLineList;};
   void setPairsModel(PairsModel* model);
-
+  QString getReactionLabel(const QModelIndex &index);
  private:
   QList<SegmentsTestData> segTestLineList;  
   PairsModel* pairsModel;

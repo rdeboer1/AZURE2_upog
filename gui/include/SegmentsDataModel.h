@@ -40,6 +40,7 @@ class SegmentsDataModel : public QAbstractTableModel {
   int isSegDataLine(const SegmentsDataData &line) const;
   QList<SegmentsDataData> getLines() const {return segDataLineList;};
   void setPairsModel(PairsModel* model);
+  QString getReactionLabel(const QModelIndex &index);
 
  private:
   QList<SegmentsDataData> segDataLineList;  
