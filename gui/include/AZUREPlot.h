@@ -13,6 +13,10 @@ class AZUREPlot : public QwtPlot {
   bool getYAxisLog() const { return yAxisLog;};
   void setXAxisLog(bool set) {xAxisLog=set;};
   void setYAxisLog(bool set) {yAxisLog=set;};
+  void setXAxisType(unsigned int type) {xAxisType=type;};
+  void setYAxisType(unsigned int type) {yAxisType=type;};
+  unsigned int getXAxisType() const {return xAxisType;};
+  unsigned int getYAxisType() const {return yAxisType;};
   void fillFromDataSegment();
 
  public slots:
