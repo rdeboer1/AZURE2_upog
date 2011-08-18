@@ -3,9 +3,10 @@
 
 #include <QWidget>
 #include <QSortFilterProxyModel>
-#include <QItemSelection>
 
+class Config;
 class AZUREPlot;
+class PlotEntry;
 class SegmentsDataModel;
 class SegmentsTestModel;
 
@@ -35,17 +36,19 @@ class PlotTab : public QWidget {
   Q_OBJECT
 
  public: 
-  PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent = 0);
-
+  PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent = 0);
+  QList<PlotEntry*> getDataSegments();
+  QList<PlotEntry*> getTestSegments();
+  
  public slots:
-  void dataSegmentSelectionChanged(QItemSelection);
-  void testSegmentSelectionChanged(QItemSelection);
+  void draw();
   void xAxisTypeChanged();
   void yAxisTypeChanged();
   void xAxisLogScaleChanged(bool);
   void yAxisLogScaleChanged(bool);
 
  private:
+  Config& configure;
   AZUREPlot* azurePlot;
   QListView* dataSegmentSelectorList;
   QListView* testSegmentSelectorList;

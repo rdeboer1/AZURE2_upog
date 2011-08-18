@@ -1,9 +1,11 @@
 #include "PlotTab.h"
+#include "Config.h"
 #include "AZUREPlot.h"
 #include "SegmentsDataModel.h"
 #include "SegmentsTestModel.h"
 #include "RichTextDelegate.h"
 #include <QtGui>
+#include <iostream>
 
 QVariant SegTestProxyModel::data(const QModelIndex& index, int role) const {
   if (index.isValid() && role == Qt::DisplayRole) {
@@ -21,7 +23,8 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
   return QVariant();
 }
 
-PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) : QWidget(parent)  {
+PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
+  configure(config), QWidget(parent)  {
 
   azurePlot = new AZUREPlot(this);
 
@@ -94,12 +97,10 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   testSegmentSelectorList->setModel(segTestProxyModel);
   dataSegmentSelectorList->setItemDelegate(new RichTextDelegate());
   testSegmentSelectorList->setItemDelegate(new RichTextDelegate());
-  dataSegmentSelectorList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  testSegmentSelectorList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  dataSegmentSelectorList->setSelectionMode(QAbstractItemView::MultiSelection);
+  testSegmentSelectorList->setSelectionMode(QAbstractItemView::MultiSelection);
   dataSegmentSelectorList->setResizeMode(QListView::Adjust);
   testSegmentSelectorList->setResizeMode(QListView::Adjust);
-  connect(dataSegmentSelectorList->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(dataSegmentSelectionChanged(QItemSelection)));
-  connect(testSegmentSelectorList->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(testSegmentSelectionChanged(QItemSelection)));
 
   QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Data Segment Selection"));
   QGridLayout *dataSegmentSelectorLayout = new QGridLayout;
@@ -113,7 +114,8 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   dataSegmentSelectorBox->setLayout(dataSegmentSelectorLayout);
   testSegmentSelectorBox->setLayout(testSegmentSelectorLayout);
 
-  refreshButton = new QPushButton(tr("Refresh"));
+  refreshButton = new QPushButton(tr("Draw"));
+  connect(refreshButton,SIGNAL(clicked()),this,SLOT(draw()));
   exportButton = new QPushButton(tr("Export..."));
   printButton = new QPushButton(tr("Print..."));
   QHBoxLayout *buttonLayout = new QHBoxLayout; 
@@ -134,11 +136,61 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   setLayout(mainLayout);
 }
 
-void PlotTab::dataSegmentSelectionChanged(QItemSelection selection) {
+QList<PlotEntry*> PlotTab::getDataSegments() {
+  QList<PlotEntry*> dataSegmentPlotEntries;
+  QModelIndexList indexes = dataSegmentSelectorList->selectionModel()->selectedIndexes();
+  for(int i = 0; i< indexes.size(); i++) {
+    int sourceRow = segDataProxyModel->mapToSource(indexes[i]).row();
+    QModelIndex sourceIndex = 
+      segDataProxyModel->mapToSource(segDataProxyModel->index(indexes[i].row(),1,QModelIndex()));
+    int entranceKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(indexes[i].row(),2,QModelIndex()));
+    int exitKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    QString filename = QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.out").arg(entranceKey).arg(exitKey);
+    int numPreviousInBlock = 0;
+    for(int j =0; j<indexes[i].row(); j++) {
+      sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(j,1,QModelIndex()));
+      int previousEntranceKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+      sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(j,2,QModelIndex()));
+      int previousExitKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+      if(previousEntranceKey==entranceKey&&previousExitKey==exitKey) numPreviousInBlock++;
+    }
+    PlotEntry* newPlotEntry = new PlotEntry(0,entranceKey,exitKey,numPreviousInBlock,filename);
+    dataSegmentPlotEntries.push_back(newPlotEntry);
+  }
+  return dataSegmentPlotEntries;
 }
 
-void PlotTab::testSegmentSelectionChanged(QItemSelection selection) {
+QList<PlotEntry*> PlotTab::getTestSegments() {
+  QList<PlotEntry*> testSegmentPlotEntries;
+  QModelIndexList indexes = testSegmentSelectorList->selectionModel()->selectedIndexes();
+  for(int i = 0; i< indexes.size(); i++) {
+    int sourceRow = segTestProxyModel->mapToSource(indexes[i]).row();
+    QModelIndex sourceIndex = 
+      segTestProxyModel->mapToSource(segTestProxyModel->index(indexes[i].row(),1,QModelIndex()));
+    int entranceKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(indexes[i].row(),2,QModelIndex()));
+    int exitKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    QString filename = QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.extrap").arg(entranceKey).arg(exitKey);
+    int numPreviousInBlock = 0;
+    for(int j =0; j<indexes[i].row(); j++) {
+      sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(j,1,QModelIndex()));
+      int previousEntranceKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+      sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(j,2,QModelIndex()));
+      int previousExitKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+      if(previousEntranceKey==entranceKey&&previousExitKey==exitKey) numPreviousInBlock++;
+    }
+    PlotEntry* newPlotEntry = new PlotEntry(1,entranceKey,exitKey,numPreviousInBlock,filename);
+    testSegmentPlotEntries.push_back(newPlotEntry);
+  }
+  return testSegmentPlotEntries;
 }
+
+void PlotTab::draw() {
+  QList<PlotEntry*> entries = getDataSegments();
+  entries.append(getTestSegments());
+  azurePlot->draw(entries);
+}		   
 
 void PlotTab::xAxisTypeChanged() {
   if(xAxisEnergyButton->isChecked()) 

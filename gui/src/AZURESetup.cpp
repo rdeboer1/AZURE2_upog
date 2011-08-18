@@ -41,7 +41,7 @@ AZURESetup::AZURESetup() : config(std::cout) {
   connect(runTab->calcButton,SIGNAL(clicked()),this,SLOT(SaveAndRun()));
 
 #ifdef USE_QWT
-  plotTab = new PlotTab(segmentsTab->getSegmentsDataModel(),segmentsTab->getSegmentsTestModel());
+  plotTab = new PlotTab(config,segmentsTab->getSegmentsDataModel(),segmentsTab->getSegmentsTestModel());
 #endif 
 
   tabWidget->addTab(pairsTab,tr("Particle Pairs"));
