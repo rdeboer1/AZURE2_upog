@@ -23,6 +23,8 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
 
 PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) : QWidget(parent)  {
 
+  azurePlot = new AZUREPlot(this);
+
   segDataProxyModel = new SegDataProxyModel(this);
   segDataProxyModel->setSourceModel(dataModel);
   segDataProxyModel->setDynamicSortFilter(true);
@@ -42,8 +44,16 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
 
   QGroupBox *xAxisBox = new QGroupBox(tr("X-Axis Configuration"));
   xAxisEnergyButton = new QRadioButton(tr("Energy"));
+  connect(xAxisEnergyButton,SIGNAL(toggled(bool)),this,SLOT(xAxisTypeChanged()));
+  xAxisEnergyButton->setChecked(true);
   xAxisAngleButton = new QRadioButton(tr("Angle"));
+  connect(xAxisAngleButton,SIGNAL(toggled(bool)),this,SLOT(xAxisTypeChanged()));
+#ifdef MACX_SPACING
+  xAxisIsLogCheck = new QCheckBox(tr("Use Log Scale"));
+#else
   xAxisIsLogCheck = new QCheckBox(tr("Use Logarithmic Scale"));
+#endif
+  connect(xAxisIsLogCheck,SIGNAL(toggled(bool)),this,SLOT(xAxisLogScaleChanged(bool)));
   QHBoxLayout* xAxisLayout = new QHBoxLayout;
   xAxisLayout->setContentsMargins(5,5,5,5);
   xAxisLayout->addWidget(xAxisEnergyButton);
@@ -52,8 +62,17 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   xAxisBox->setLayout(xAxisLayout);
   QGroupBox *yAxisBox = new QGroupBox(tr("Y-Axis Configuration"));
   yAxisXSButton = new QRadioButton(tr("Cross Section"));
+  connect(yAxisXSButton,SIGNAL(toggled(bool)),this,SLOT(yAxisTypeChanged()));  
+  yAxisXSButton->setChecked(true);
   yAxisSFButton = new QRadioButton(tr("S-Factor"));
+  connect(yAxisSFButton,SIGNAL(toggled(bool)),this,SLOT(yAxisTypeChanged()));  
+#ifdef MACX_SPACING
+  yAxisIsLogCheck = new QCheckBox(tr("Use Log Scale"));
+#else
   yAxisIsLogCheck = new QCheckBox(tr("Use Logarithmic Scale"));
+#endif
+  connect(yAxisIsLogCheck,SIGNAL(toggled(bool)),this,SLOT(yAxisLogScaleChanged(bool)));
+  yAxisIsLogCheck->setChecked(true);
   QHBoxLayout* yAxisLayout = new QHBoxLayout;
   yAxisLayout->setContentsMargins(5,5,5,5);
   yAxisLayout->addWidget(yAxisXSButton);
@@ -63,27 +82,36 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
 
   topLayout->addWidget(xAxisBox,0,0);
   topLayout->addWidget(yAxisBox,0,1);
- 
-  azurePlot = new AZUREPlot(this);
 
   rightLayout->addLayout(topLayout);
   rightLayout->addWidget(azurePlot);
   
-  QGridLayout *segmentPickerLayout = new QGridLayout;
-  segmentPickerLayout->setContentsMargins(5,5,5,5);
-  QGroupBox *whichSegTypeBox = new QGroupBox(tr("Segment Selection"));
-  segDataButton = new QRadioButton(tr("Data Segments"));
-  connect(segDataButton,SIGNAL(toggled(bool)),this,SLOT(segmentTypeChanged()));
-  segTestButton = new QRadioButton(tr("Extrapolation Segments"));
-  connect(segTestButton,SIGNAL(toggled(bool)),this,SLOT(segmentTypeChanged()));
-  segmentPickerLayout->addWidget(segDataButton,0,0);
-  segmentPickerLayout->addWidget(segTestButton,1,0);
-  segmentSelectorList = new QListView;
-  segmentSelectorList->setItemDelegate(new RichTextDelegate());
-  segmentSelectorList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  segmentPickerLayout->addWidget(segmentSelectorList,2,0);
-  whichSegTypeBox->setLayout(segmentPickerLayout);
-  segDataButton->setChecked(true);
+  dataSegmentSelectorList = new QListView;
+  testSegmentSelectorList = new QListView;
+  dataSegmentSelectorList->setAttribute(Qt::WA_MacShowFocusRect, 0);
+  testSegmentSelectorList->setAttribute(Qt::WA_MacShowFocusRect, 0);
+  dataSegmentSelectorList->setModel(segDataProxyModel);
+  testSegmentSelectorList->setModel(segTestProxyModel);
+  dataSegmentSelectorList->setItemDelegate(new RichTextDelegate());
+  testSegmentSelectorList->setItemDelegate(new RichTextDelegate());
+  dataSegmentSelectorList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  testSegmentSelectorList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  dataSegmentSelectorList->setResizeMode(QListView::Adjust);
+  testSegmentSelectorList->setResizeMode(QListView::Adjust);
+  connect(dataSegmentSelectorList->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(dataSegmentSelectionChanged(QItemSelection)));
+  connect(testSegmentSelectorList->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(testSegmentSelectionChanged(QItemSelection)));
+
+  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Data Segment Selection"));
+  QGridLayout *dataSegmentSelectorLayout = new QGridLayout;
+  dataSegmentSelectorLayout->setContentsMargins(5,5,5,5);
+  QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Extrapolation Segment Selection"));
+  QGridLayout *testSegmentSelectorLayout = new QGridLayout;
+  testSegmentSelectorLayout->setContentsMargins(5,5,5,5);
+
+  dataSegmentSelectorLayout->addWidget(dataSegmentSelectorList,0,0);
+  testSegmentSelectorLayout->addWidget(testSegmentSelectorList,0,0);
+  dataSegmentSelectorBox->setLayout(dataSegmentSelectorLayout);
+  testSegmentSelectorBox->setLayout(testSegmentSelectorLayout);
 
   refreshButton = new QPushButton(tr("Refresh"));
   exportButton = new QPushButton(tr("Export..."));
@@ -94,7 +122,8 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   buttonLayout->addWidget(printButton);
 
   QVBoxLayout* leftLayout = new QVBoxLayout;
-  leftLayout->addWidget(whichSegTypeBox);
+  leftLayout->addWidget(dataSegmentSelectorBox);
+  leftLayout->addWidget(testSegmentSelectorBox);
   leftLayout->addLayout(buttonLayout);
 
   QGridLayout* mainLayout = new QGridLayout;
@@ -105,9 +134,30 @@ PlotTab::PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWi
   setLayout(mainLayout);
 }
 
-void PlotTab::segmentTypeChanged() {
-  if(segDataButton->isChecked()) 
-    segmentSelectorList->setModel(segDataProxyModel);
-  else if(segTestButton->isChecked())
-    segmentSelectorList->setModel(segTestProxyModel);
+void PlotTab::dataSegmentSelectionChanged(QItemSelection selection) {
+}
+
+void PlotTab::testSegmentSelectionChanged(QItemSelection selection) {
+}
+
+void PlotTab::xAxisTypeChanged() {
+  if(xAxisEnergyButton->isChecked()) 
+    azurePlot->setXAxisType(0);
+  else if(xAxisAngleButton->isChecked())
+    azurePlot->setXAxisType(1);
+}
+
+void PlotTab::yAxisTypeChanged() {
+  if(yAxisXSButton->isChecked()) 
+    azurePlot->setYAxisType(0);
+  else if(yAxisSFButton->isChecked())
+    azurePlot->setYAxisType(1);
+}
+
+void PlotTab::xAxisLogScaleChanged(bool checked) {
+  azurePlot->setXAxisLog(checked);
+}
+
+void PlotTab::yAxisLogScaleChanged(bool checked) {
+  azurePlot->setYAxisLog(checked);
 }

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QSortFilterProxyModel>
+#include <QItemSelection>
 
 class AZUREPlot;
 class SegmentsDataModel;
@@ -37,13 +38,17 @@ class PlotTab : public QWidget {
   PlotTab(SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent = 0);
 
  public slots:
-  void segmentTypeChanged();
+  void dataSegmentSelectionChanged(QItemSelection);
+  void testSegmentSelectionChanged(QItemSelection);
+  void xAxisTypeChanged();
+  void yAxisTypeChanged();
+  void xAxisLogScaleChanged(bool);
+  void yAxisLogScaleChanged(bool);
 
  private:
   AZUREPlot* azurePlot;
-  QRadioButton* segDataButton;
-  QRadioButton* segTestButton;
-  QListView* segmentSelectorList;
+  QListView* dataSegmentSelectorList;
+  QListView* testSegmentSelectorList;
   QRadioButton* yAxisXSButton;
   QRadioButton* yAxisSFButton;
   QRadioButton* xAxisEnergyButton;

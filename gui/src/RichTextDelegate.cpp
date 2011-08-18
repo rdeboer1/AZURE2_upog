@@ -35,6 +35,6 @@ QSize RichTextDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
   QString value = index.data(Qt::DisplayRole).toString();
   document.setHtml(value);
   document.setTextWidth(option.rect.width());
-  return QSize(document.idealWidth(), document.size().height());
+  return QSize(option.rect.width(),document.size().height());
 } 
 
