@@ -4,10 +4,26 @@
 #include "qwt_plot_intervalcurve.h"
 #include "qwt_interval_symbol.h"
 #include "qwt_scale_engine.h"
-#include "qwt_plot_zoomer.h"
 #include "qwt_plot_panner.h"
 #include "qwt_plot_renderer.h"
 #include <iostream>
+
+QwtText AZUREZoomer::trackerTextF( const QPointF &pos ) const
+{
+    QString text;
+    switch (rubberBand()) {
+        case HLineRubberBand:
+            text.sprintf( "%.4g", pos.y() );
+            break;
+        case VLineRubberBand:
+            text.sprintf( "%.4g", pos.x() );
+            break;
+        default:
+            text.sprintf( "%.4g, %.4g", pos.x(), pos.y() );
+    }
+    return QwtText( text );
+}
+
 
 PlotEntry::PlotEntry(int type, int entranceKey, int exitKey, int index, QString filename) :
   type_(type), entranceKey_(entranceKey), exitKey_(exitKey), index_(index), filename_(filename),
@@ -168,7 +184,7 @@ AZUREPlot::AZUREPlot(QWidget* parent) : QwtPlot(parent) {
   setCanvasBackground(QColor(Qt::white));
   setAutoReplot(true);
 
-  zoomer = new QwtPlotZoomer( canvas() );
+  zoomer = new AZUREZoomer( canvas() );
   zoomer->setRubberBandPen( QColor( Qt::black ) );
   zoomer->setTrackerPen( QColor( Qt::black ) );
   zoomer->setMousePattern( QwtEventPattern::MouseSelect2,

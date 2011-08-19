@@ -3,10 +3,10 @@
 
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
+#include <qwt_plot_zoomer.h>
 
 class QwtPlotCurve;
 class QwtPlotIntervalCurve;
-class QwtPlotZoomer;
 
 struct PlotPoint {
   double energy;
@@ -17,6 +17,14 @@ struct PlotPoint {
   double dataErrorCrossSection;
   double dataSFactor;
   double dataErrorSFactor;
+};
+
+class AZUREZoomer : public QwtPlotZoomer {
+ public:
+  AZUREZoomer(QwtPlotCanvas *canvas) : QwtPlotZoomer(canvas) {};
+ protected:
+  QwtText trackerTextF( const QPointF &pos ) const;
+  
 };
 
 class PlotEntry {
@@ -63,7 +71,7 @@ class AZUREPlot : public QwtPlot {
   unsigned int xAxisType;
   unsigned int yAxisType;
   QList<PlotEntry*> entries;
-  QwtPlotZoomer* zoomer;
+  AZUREZoomer* zoomer;
 };
 
 #endif
