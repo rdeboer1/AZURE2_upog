@@ -6,6 +6,7 @@
 #include "qwt_scale_engine.h"
 #include "qwt_plot_zoomer.h"
 #include "qwt_plot_panner.h"
+#include "qwt_plot_renderer.h"
 #include <iostream>
 
 PlotEntry::PlotEntry(int type, int entranceKey, int exitKey, int index, QString filename) :
@@ -111,7 +112,7 @@ void PlotEntry::attach(QwtPlot* plot, int xAxisType, int yAxisType, QwtSymbol::S
     dataCurve_->setRenderHint( QwtPlotItem::RenderAntialiased );
     dataCurve_->setStyle( QwtPlotCurve::NoCurve );
     QwtSymbol *symbol = new QwtSymbol(style);
-    symbol->setSize( 5 );
+    symbol->setSize( 6 );
     symbol->setPen( QPen( Qt::black ) );
     symbol->setColor( QColor( Qt::black ) );
 
@@ -147,7 +148,7 @@ void PlotEntry::attach(QwtPlot* plot, int xAxisType, int yAxisType, QwtSymbol::S
   fitCurve_ = new QwtPlotCurve;
   fitCurve_->setRenderHint( QwtPlotItem::RenderAntialiased );
   fitCurve_->setStyle( QwtPlotCurve::Lines );
-  fitCurve_->setPen( QPen( Qt::red ) );
+  fitCurve_->setPen( QPen( Qt::red , 2 ) );
 
   fitCurve_->setSymbol(new QwtSymbol(QwtSymbol::NoSymbol));
   fitCurve_->setSamples(fit);
@@ -164,9 +165,7 @@ void PlotEntry::detach() {
 }
 
 AZUREPlot::AZUREPlot(QWidget* parent) : QwtPlot(parent) {
-  QBrush background = canvasBackground();
-  background.setColor(Qt::white);
-  setCanvasBackground(background);
+  setCanvasBackground(QColor(Qt::white));
   setAutoReplot(true);
 
   zoomer = new QwtPlotZoomer( canvas() );
@@ -247,4 +246,61 @@ void AZUREPlot::update() {
   }
   replot();
   zoomer->setZoomBase(false);
+}
+
+void AZUREPlot::exportPlot()
+{
+#ifndef QT_NO_PRINTER
+  QString fileName = "AZUREPlot.pdf";
+#else
+  QString fileName = "AZUREPlot.png";
+#endif
+
+#ifndef QT_NO_FILEDIALOG
+    const QList<QByteArray> imageFormats =
+      QImageWriter::supportedImageFormats();
+    
+    QStringList filter;
+    filter += "PDF Documents (*.pdf)";
+#ifndef QWT_NO_SVG
+    filter += "SVG Documents (*.svg)";
+#endif
+    filter += "Postscript Documents (*.ps)";
+    
+    if (imageFormats.size()>0) {
+      QString imageFilter("Images (");
+      for (int i=0;i<imageFormats.size();i++) {
+	if (i>0) imageFilter += " ";
+	  imageFilter += "*.";
+	  imageFilter += imageFormats[i];
+        }
+      imageFilter += ")";
+  
+      filter += imageFilter;
+    }
+    fileName = QFileDialog::getSaveFileName(
+					    this, "Export File Name", fileName,
+					    filter.join(";;"), NULL, QFileDialog::DontConfirmOverwrite);
+#endif
+    if(!fileName.isEmpty()) {
+      QwtPlotRenderer renderer;
+      renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground, true);
+      renderer.renderDocument(this, fileName, QSizeF(300, 200), 85);
+    }
+}
+
+void AZUREPlot::print()
+{
+    QPrinter printer(QPrinter::HighResolution);
+    QString docName("AZUREPlot");
+    printer.setDocName (docName);
+
+    printer.setCreator("AZURE2");
+    printer.setOrientation(QPrinter::Landscape);
+
+    QPrintDialog dialog(&printer);
+    if (dialog.exec()) {
+        QwtPlotRenderer renderer;
+        renderer.renderTo(this, printer);
+    }
 }

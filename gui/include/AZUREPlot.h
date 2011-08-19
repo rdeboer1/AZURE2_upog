@@ -56,6 +56,8 @@ class AZUREPlot : public QwtPlot {
  public slots:
   void draw(QList<PlotEntry*> newEntries);
   void update();
+  void exportPlot();
+  void print();
 
  private:
   unsigned int xAxisType;

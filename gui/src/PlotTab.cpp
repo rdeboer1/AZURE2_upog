@@ -117,7 +117,9 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   refreshButton = new QPushButton(tr("Draw"));
   connect(refreshButton,SIGNAL(clicked()),this,SLOT(draw()));
   exportButton = new QPushButton(tr("Export..."));
+  connect(exportButton,SIGNAL(clicked()),azurePlot,SLOT(exportPlot()));
   printButton = new QPushButton(tr("Print..."));
+  connect(printButton,SIGNAL(clicked()),azurePlot,SLOT(print()));
   QHBoxLayout *buttonLayout = new QHBoxLayout; 
   buttonLayout->addWidget(refreshButton);
   buttonLayout->addWidget(exportButton);
