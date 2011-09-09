@@ -49,7 +49,7 @@ AZURESetup::AZURESetup() : config(std::cout) {
   tabWidget->addTab(externalCaptureTab,tr("External Capture"));
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
   tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
-  tabWidget->addTab(runTab,tr("Perform Calculation"));
+  tabWidget->addTab(runTab,tr("Calculate"));
 #ifdef USE_QWT
   tabWidget->addTab(plotTab,tr("Plot"));
 #endif

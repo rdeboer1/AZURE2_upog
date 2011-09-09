@@ -209,8 +209,11 @@ void AZUREPlot::setXAxisLog(bool set) {
 void AZUREPlot::setYAxisLog(bool set) {
   setAxisAutoScale(QwtPlot::xBottom,true);
   setAxisAutoScale(QwtPlot::yLeft,true);
-  if(set) setAxisScaleEngine(QwtPlot::yLeft,new QwtLog10ScaleEngine);
-  else setAxisScaleEngine(QwtPlot::yLeft,new QwtLinearScaleEngine);
+  if(set) {
+    QwtLog10ScaleEngine* scaleEngine = new QwtLog10ScaleEngine;
+    scaleEngine->setMargins(0.5,0.5);
+    setAxisScaleEngine(QwtPlot::yLeft,scaleEngine);
+  } else setAxisScaleEngine(QwtPlot::yLeft,new QwtLinearScaleEngine);
   zoomer->setZoomBase(false);
 };
 
