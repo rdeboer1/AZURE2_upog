@@ -779,7 +779,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 #pragma omp parallel for
 		for(int i=1;i<=numPoints;i++) {
 		  EPoint *point = segment->GetPoint(i);
-		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
+		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc,configure);
 		  ++pointIndex;
 		  if(difftime(time(NULL),startTime)>0.25) {
 		  	  startTime=time(NULL);

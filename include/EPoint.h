@@ -92,7 +92,7 @@ class EPoint {
   void AddExpHardSpherePhase(int,int,complex);
   void CalcCoulombAmplitude(CNuc*);
   void SetCoulombAmplitude(complex);
-  void CalculateECAmplitudes(CNuc*);
+  void CalculateECAmplitudes(CNuc*,const Config&);
   void AddECAmplitude(int,int,complex);
   void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);

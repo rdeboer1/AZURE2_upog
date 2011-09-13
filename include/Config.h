@@ -52,7 +52,8 @@ class Config {
     TRANSFORM_PARAMETERS    =(1<<8),
     USE_BRUNE_FORMALISM     =(1<<9),
     IGNORE_ZERO_WIDTHS      =(1<<10),
-    USE_RMC_FORMALISM       =(1<<11)
+    USE_RMC_FORMALISM       =(1<<11),
+    USE_GSL_COULOMB_FUNC    =(1<<12)
   };
   /*!
    * Bit flags for check file control in AZURE2.

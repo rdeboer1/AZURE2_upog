@@ -31,7 +31,7 @@ struct CoulWaves {
 
 class CoulFunc {
  public:
-  CoulFunc(PPair *pPair);
+  CoulFunc(PPair *pPair, bool useGSLFunctions);
   int z1() const;
   int z2() const;
   double redmass() const;
@@ -45,6 +45,7 @@ class CoulFunc {
   double PEShift(int,double,double);
   double PEShift_dE(int,double,double);;
  private:
+  bool useGSLFunctions_;
   int z1_;
   int z2_;
   int lLast_;

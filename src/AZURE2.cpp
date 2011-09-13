@@ -63,7 +63,8 @@ void printHelp(const Config& configure) {
             << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
             << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
             << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
-            << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl;
+            << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
+            << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
 }
 
 /*!
@@ -106,6 +107,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
     } else if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
+    else if(*it=="--gsl-coul") configure.paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else if(*it=="--ignore-externals") configure.paramMask |= Config::IGNORE_ZERO_WIDTHS;
     else if(*it=="--use-rmc") configure.paramMask |= Config::USE_RMC_FORMALISM;
     else if(*it=="--no-gui") continue;

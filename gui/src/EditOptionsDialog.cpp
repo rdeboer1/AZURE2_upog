@@ -3,6 +3,7 @@
 
 EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
   
+  useGSLCoulCheck = new QCheckBox(tr("Use GSL Coulomb functions"));
   useBruneCheck = new QCheckBox(tr("Use Brune formalism"));
   ignoreExternalsCheck = new QCheckBox(tr("Ignore external width\nif internal width is zeroed"));
   useRMCCheck = new QCheckBox(tr("Use RMC capture formalism"));
@@ -10,6 +11,7 @@ EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
 
   QGroupBox* optionsBox = new QGroupBox(tr("AZURE2 Options"));
   QVBoxLayout* optionsLayout = new QVBoxLayout;
+  optionsLayout->addWidget(useGSLCoulCheck);
   optionsLayout->addWidget(useBruneCheck);
   optionsLayout->addWidget(ignoreExternalsCheck);
   optionsLayout->addWidget(useRMCCheck);

@@ -298,7 +298,7 @@ int CNuc::GetMaxLValue() const {
 void CNuc::Initialize(const Config &configure) {
   //Calculate Boundary Conditions
   configure.outStream << "Calculating Boundary Conditions..." << std::endl;
-  this->CalcBoundaryConditions();
+  this->CalcBoundaryConditions(configure);
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_BOUNDARY_CONDITIONS)
     this->PrintBoundaryConditions(configure);
 
@@ -443,7 +443,8 @@ void CNuc::TransformIn(const Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()));
+		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()),
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		double tempPene=theCoulombFunction.Penetrability(theChannel->GetL(),
 								 radius,
 								 localEnergy);
@@ -533,7 +534,8 @@ void CNuc::TransformIn(const Config& configure) {
 	    if(theChannel->GetRadType()=='P') {
 	      if(localEnergy>0.0) {
 		tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()));
+		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()),
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		shifts[levelKeys.size()-1].push_back(theCoulombFunction.PEShift(theChannel->GetL(),
 										radius,
 										localEnergy));
@@ -546,7 +548,7 @@ void CNuc::TransformIn(const Config& configure) {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
 	      if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS))) {
 		complex externalWidth = 
-		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
+		  CalcExternalWidth(theJGroup,theLevel,theChannel,true,configure);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
 		  if(tempGammas[levelKeys.size()-1][ch-1]<0.0) 
 		    tempGammas[levelKeys.size()-1][ch-1]=-sqrt(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)-
@@ -914,7 +916,7 @@ void CNuc::PrintPathways(const Config &configure) {
  * first level read from the nuclear input file in the \f$ J^\pi \f$ group.
  */
 
-void CNuc::CalcBoundaryConditions(){
+void CNuc::CalcBoundaryConditions(const Config& configure){
   for(int j=1;j<=this->NumJGroups();j++) {
     if(this->GetJGroup(j)->IsInRMatrix()) {
       JGroup *theJGroup=this->GetJGroup(j);
@@ -932,7 +934,8 @@ void CNuc::CalcBoundaryConditions(){
 	      theChannel->SetBoundaryCondition(theShiftFunction(lValue,levelEnergy));
 	    }
 	    else {
-	      CoulFunc theCoulombFunction(thePair);
+	      CoulFunc theCoulombFunction(thePair,
+					  !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	      double radius=thePair->GetChRad();
 	      double boundary=theCoulombFunction.PEShift(lValue,radius,resonanceEnergy);
 	      theChannel->SetBoundaryCondition(boundary);
@@ -1235,7 +1238,8 @@ void CNuc::TransformOut(const Config& configure) {
 		  newBoundary=theShiftFunction(theChannel->GetL(),tempE[thisLevel]);
 		}
 		else {
-		  CoulFunc theCoulombFunction(exitPair);
+		  CoulFunc theCoulombFunction(exitPair,
+					      !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		  double radius=exitPair->GetChRad();
 		  newBoundary=theCoulombFunction.PEShift(theChannel->GetL(),radius,localEnergy);
 		}
@@ -1350,7 +1354,8 @@ void CNuc::TransformOut(const Config& configure) {
 	    tempPene.push_back(pene);
 	  }
 	  else {
-	    CoulFunc theCoulombFunction(exitPair);
+	    CoulFunc theCoulombFunction(exitPair,
+					!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	    double radius=exitPair->GetChRad();
 	    normSum+=theCoulombFunction.PEShift_dE(theChannel->GetL(),radius,localEnergy)*
 	      pow(theLevel->GetTransformGamma(ch),2.0);
@@ -1380,7 +1385,8 @@ void CNuc::TransformOut(const Config& configure) {
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
 	   theLevel->IsInRMatrix()&&(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
 	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS)))
-	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
+	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,
+					  this->GetJGroup(j)->GetChannel(ch),false,configure);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
 	int tempSign = (real(totalWidth)<0.) ? (-1) : (1);
@@ -1478,7 +1484,7 @@ void CNuc::SetMaxLValue(int maxL) {
  * functions at new level energies when the Brune parametrization is used. 
  */
 
-void CNuc::CalcShiftFunctions() {
+void CNuc::CalcShiftFunctions(const Config& configure) {
   for(int j=1;j<=this->NumJGroups();j++) {
     if(this->GetJGroup(j)->IsInRMatrix()) {
       JGroup *theJGroup=this->GetJGroup(j);
@@ -1497,7 +1503,8 @@ void CNuc::CalcShiftFunctions() {
 		theLevel->SetShiftFunction(ch,theShiftFunction(lValue,levelEnergy));
 	      }
 	      else {
-		CoulFunc theCoulombFunction(thePair);
+		CoulFunc theCoulombFunction(thePair,
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		double radius=thePair->GetChRad();
 		theLevel->SetShiftFunction(ch,theCoulombFunction.PEShift(lValue,radius,resonanceEnergy));
 	      }
@@ -1516,7 +1523,8 @@ void CNuc::CalcShiftFunctions() {
  * Calculates the external reduced width amplitudes for a given channel.
  */
 
-complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *theChannel,bool isInitial) {
+complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, 
+				AChannel *theChannel,bool isInitial,const Config& configure) {
   complex externalWidth(0.0,0.0);
   if(theChannel->GetRadType()=='E'||(theChannel->GetRadType()=='M'&&theChannel->GetL()==1)) {
     bool isExternal=false;
@@ -1570,7 +1578,7 @@ complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *t
 			theChannel->GetRadType()=='M')) {
 		      PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
 		      
-		      ECIntegral theECIntegral(theFinalPair);
+		      ECIntegral theECIntegral(theFinalPair,configure);
 		      complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
 							initialChannel->GetS(),finalChannel->GetS(),
 							theJGroup->GetJ(),theFinalJGroup->GetJ(),

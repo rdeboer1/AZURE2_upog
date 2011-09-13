@@ -137,7 +137,7 @@ int AZUREMain::operator()(){
     ReactionRate reactionRate(compound(),params.GetMinuitParams().Params(),configure(),
 			      configure().rateParams.entrancePair,configure().rateParams.exitPair);
     if(configure().paramMask & Config::USE_BRUNE_FORMALISM) 
-      compound()->CalcShiftFunctions();
+      compound()->CalcShiftFunctions(configure());
     if(configure().rateParams.useFile)
       reactionRate.CalculateFileRates();
     else 

@@ -282,6 +282,9 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
     else  runTab->calcType->setCurrentIndex(2);
   }
 
+  if(paramMask & Config::USE_GSL_COULOMB_FUNC) GetConfig().paramMask |= Config::USE_GSL_COULOMB_FUNC;
+  else GetConfig().paramMask &= ~Config::USE_GSL_COULOMB_FUNC;
+
   if(paramMask & Config::USE_BRUNE_FORMALISM) GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
   else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
 
@@ -652,6 +655,9 @@ void AZURESetup::editDirs() {
 void AZURESetup::editOptions() {
   EditOptionsDialog aDialog;
 
+  if(GetConfig().paramMask & Config::USE_GSL_COULOMB_FUNC) aDialog.useGSLCoulCheck->setChecked(true);
+  else aDialog.useGSLCoulCheck->setChecked(false);
+
   if(GetConfig().paramMask & Config::USE_BRUNE_FORMALISM) aDialog.useBruneCheck->setChecked(true);
   else aDialog.useBruneCheck->setChecked(false);
   
@@ -665,6 +671,9 @@ void AZURESetup::editOptions() {
   else aDialog.noTransformCheck->setChecked(false);
 
   if(aDialog.exec()) {
+    if(aDialog.useGSLCoulCheck->isChecked()) GetConfig().paramMask |= Config::USE_GSL_COULOMB_FUNC;
+    else GetConfig().paramMask &= ~Config::USE_GSL_COULOMB_FUNC;
+
     if(aDialog.useBruneCheck->isChecked()) {
       GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
       if(!(GetConfig().paramMask & Config::USE_AMATRIX)) {

@@ -21,6 +21,7 @@ Q_OBJECT
  public:
   EditOptionsDialog(QWidget *parent =0);
   QCheckBox* useBruneCheck;
+  QCheckBox* useGSLCoulCheck;
   QCheckBox* ignoreExternalsCheck;
   QCheckBox* useRMCCheck;
   QCheckBox* noTransformCheck;

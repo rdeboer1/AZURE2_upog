@@ -39,7 +39,7 @@ public:
   void TransformIn(const Config&);
   void SortPathways(const Config&);
   void PrintPathways(const Config&);
-  void CalcBoundaryConditions();
+  void CalcBoundaryConditions(const Config&);
   void PrintBoundaryConditions(const Config&);
   void CalcAngularDists(int);
   void PrintAngularDists(const Config&);
@@ -48,8 +48,8 @@ public:
   void TransformOut(const Config&);
   void PrintTransformParams(const Config&);
   void SetMaxLValue(int);
-  void CalcShiftFunctions();
-  complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
+  void CalcShiftFunctions(const Config&);
+  complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool,const Config&);
   PPair *GetPair(int);
   JGroup *GetJGroup(int);
   CNuc *Clone() const;

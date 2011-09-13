@@ -443,7 +443,7 @@ void EPoint::Initialize(CNuc *compound,const Config &configure) {
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder,NULL);
   this->CalcCoulombAmplitude(compound);
-  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) this->CalculateECAmplitudes(compound);
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) this->CalculateECAmplitudes(compound,configure);
 }
 
 /*!
@@ -614,7 +614,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	    this->AddExpCoulombPhase(j,ch,1.0);
 	    this->AddExpHardSpherePhase(j,ch,1.0);
 	  } else {
-	    CoulFunc theCoulombFunction(thePair);
+	    CoulFunc theCoulombFunction(thePair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	    double radius=thePair->GetChRad();
 	    double localPene=theCoulombFunction.Penetrability(lValue,radius,localEnergy);
 	    double localShift=theCoulombFunction.PEShift(lValue,radius,localEnergy);
@@ -756,7 +756,7 @@ void EPoint::SetCoulombAmplitude(complex amplitude) {
  * entrance and exit pairs.
  */
 
-void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
+void EPoint::CalculateECAmplitudes(CNuc *theCNuc, const Config& configure) {
   int aa=theCNuc->GetPairNumFromKey(this->GetEntranceKey());
   if(theCNuc->GetPair(aa)->IsEntrance()) {
     PPair *entrancePair=theCNuc->GetPair(aa);
@@ -772,7 +772,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 	      for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
 		ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
 		//entrance Phase Calculations;
-		CoulFunc theCoulombFunction(entrancePair);
+		CoulFunc theCoulombFunction(entrancePair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		struct CoulWaves 
 		  coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
 					  this->GetCMEnergy());		
@@ -805,7 +805,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 		  theInitialSValue=theKGroup->GetS();
 		}	    
 		
-		ECIntegral theECIntegral(theFinalPair);
+		ECIntegral theECIntegral(theFinalPair,configure);
 		complex integrals = theECIntegral(theInitialLValue, theFinalChannel->GetL(), 
 						  theInitialSValue, theFinalChannel->GetS(),
 						  theECMGroup->GetJ(), theCNuc->GetJGroup(j)->GetJ(),
@@ -824,7 +824,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalculateECAmplitudes(theCNuc);
+    this->GetSubPoint(i)->CalculateECAmplitudes(theCNuc,configure);
   }
 }
 
