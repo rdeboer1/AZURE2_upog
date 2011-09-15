@@ -699,6 +699,7 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
 	out << std::endl;
       } else {
 	out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	    << std::setw(13) << std::scientific << point->GetExcitationEnergy()
 	    << std::setw(13) << std::scientific << point->GetCMAngle()
 	    << std::setw(13) << std::scientific << point->GetFitCrossSection()
 	    << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();

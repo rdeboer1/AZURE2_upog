@@ -10,6 +10,7 @@ class QwtPlotIntervalCurve;
 
 struct PlotPoint {
   double energy;
+  double excitationEnergy;
   double angle;
   double fitCrossSection;
   double fitSFactor;

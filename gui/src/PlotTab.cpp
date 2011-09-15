@@ -46,11 +46,13 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   QGridLayout *topLayout = new QGridLayout;
 
   QGroupBox *xAxisBox = new QGroupBox(tr("X-Axis Configuration"));
-  xAxisEnergyButton = new QRadioButton(tr("Energy"));
-  connect(xAxisEnergyButton,SIGNAL(toggled(bool)),this,SLOT(xAxisTypeChanged()));
-  xAxisEnergyButton->setChecked(true);
-  xAxisAngleButton = new QRadioButton(tr("Angle"));
-  connect(xAxisAngleButton,SIGNAL(toggled(bool)),this,SLOT(xAxisTypeChanged()));
+  xAxisTypeCombo=new QComboBox;
+  xAxisTypeCombo->addItem(tr("CoM Energy"));
+  xAxisTypeCombo->addItem(tr("Excitation Energy"));
+  xAxisTypeCombo->addItem(tr("CoM Angle"));
+  connect(xAxisTypeCombo,SIGNAL(activated(int)),this,SLOT(xAxisTypeChanged()));
+  xAxisTypeCombo->setCurrentIndex(0);
+  azurePlot->setXAxisType(0);
 #ifdef MACX_SPACING
   xAxisIsLogCheck = new QCheckBox(tr("Use Log Scale"));
 #else
@@ -59,8 +61,7 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   connect(xAxisIsLogCheck,SIGNAL(toggled(bool)),this,SLOT(xAxisLogScaleChanged(bool)));
   QHBoxLayout* xAxisLayout = new QHBoxLayout;
   xAxisLayout->setContentsMargins(5,5,5,5);
-  xAxisLayout->addWidget(xAxisEnergyButton);
-  xAxisLayout->addWidget(xAxisAngleButton);
+  xAxisLayout->addWidget(xAxisTypeCombo);
   xAxisLayout->addWidget(xAxisIsLogCheck);
   xAxisBox->setLayout(xAxisLayout);
   QGroupBox *yAxisBox = new QGroupBox(tr("Y-Axis Configuration"));
@@ -68,7 +69,7 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   connect(yAxisXSButton,SIGNAL(toggled(bool)),this,SLOT(yAxisTypeChanged()));  
   yAxisXSButton->setChecked(true);
   yAxisSFButton = new QRadioButton(tr("S-Factor"));
-  connect(yAxisSFButton,SIGNAL(toggled(bool)),this,SLOT(yAxisTypeChanged()));  
+  connect(yAxisSFButton,SIGNAL(toggled(bool)),this,SLOT(yAxisTypeChanged()));
 #ifdef MACX_SPACING
   yAxisIsLogCheck = new QCheckBox(tr("Use Log Scale"));
 #else
@@ -195,10 +196,7 @@ void PlotTab::draw() {
 }		   
 
 void PlotTab::xAxisTypeChanged() {
-  if(xAxisEnergyButton->isChecked()) 
-    azurePlot->setXAxisType(0);
-  else if(xAxisAngleButton->isChecked())
-    azurePlot->setXAxisType(1);
+  azurePlot->setXAxisType(xAxisTypeCombo->currentIndex());
 }
 
 void PlotTab::yAxisTypeChanged() {

@@ -16,6 +16,7 @@ class QRadioButton;
 class QListView;
 class QCheckBox;
 class QPushButton;
+class QComboBox;
 
 QT_END_NAMESPACE
 
@@ -54,8 +55,7 @@ class PlotTab : public QWidget {
   QListView* testSegmentSelectorList;
   QRadioButton* yAxisXSButton;
   QRadioButton* yAxisSFButton;
-  QRadioButton* xAxisEnergyButton;
-  QRadioButton* xAxisAngleButton;
+  QComboBox* xAxisTypeCombo;
   QCheckBox* xAxisIsLogCheck;
   QCheckBox* yAxisIsLogCheck;
   SegTestProxyModel* segTestProxyModel;

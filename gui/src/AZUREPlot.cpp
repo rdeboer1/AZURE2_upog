@@ -65,13 +65,13 @@ bool PlotEntry::readData() {
     }
     if(!inStream.atEnd()&&!foundBlock) {
       QTextStream in(&line);
-      PlotPoint newPoint = {0.,0.,0.,0.,0.,0.,0.,0.};
+      PlotPoint newPoint = {0.,0.,0.,0.,0.,0.,0.,0.,0.};
       if(type_==0) {
-	in >> newPoint.energy >> newPoint.angle >> newPoint.fitCrossSection >> newPoint.fitSFactor 
+	in >> newPoint.energy >> newPoint.excitationEnergy >> newPoint.angle >> newPoint.fitCrossSection >> newPoint.fitSFactor 
 	   >> newPoint.dataCrossSection >> newPoint.dataErrorCrossSection >> newPoint.dataSFactor 
 	   >> newPoint.dataErrorSFactor;
       } else {
-	in >> newPoint.energy >> newPoint.angle >> newPoint.fitCrossSection >> newPoint.fitSFactor; 
+	in >> newPoint.energy >> newPoint.excitationEnergy >> newPoint.angle >> newPoint.fitCrossSection >> newPoint.fitSFactor; 
       }
       points_.push_back(newPoint);
     }
@@ -108,13 +108,29 @@ void PlotEntry::attach(QwtPlot* plot, int xAxisType, int yAxisType, QwtSymbol::S
       }
     } else if(xAxisType==1&&yAxisType==0) {
       for(int i=0;i<points_.size();i++) {
+	data[i]=QPointF(points_[i].excitationEnergy,points_[i].dataCrossSection);
+	fit[i]=QPointF(points_[i].excitationEnergy,points_[i].fitCrossSection);
+	error[i]=QwtIntervalSample(points_[i].excitationEnergy,
+				   QwtInterval(points_[i].dataCrossSection-points_[i].dataErrorCrossSection,
+					       points_[i].dataCrossSection+points_[i].dataErrorCrossSection));
+      }
+    } else if(xAxisType==1&&yAxisType==1) {
+      for(int i=0;i<points_.size();i++) {
+	data[i]=QPointF(points_[i].excitationEnergy,points_[i].dataSFactor);
+	fit[i]=QPointF(points_[i].excitationEnergy,points_[i].fitSFactor);
+	error[i]=QwtIntervalSample(points_[i].excitationEnergy,
+				   QwtInterval(points_[i].dataSFactor-points_[i].dataErrorSFactor,
+					       points_[i].dataSFactor+points_[i].dataErrorSFactor));
+      }
+    } else if(xAxisType==2&&yAxisType==0) {
+      for(int i=0;i<points_.size();i++) {
 	data[i]=QPointF(points_[i].angle,points_[i].dataCrossSection);
 	fit[i]=QPointF(points_[i].angle,points_[i].fitCrossSection);
 	error[i]=QwtIntervalSample(points_[i].angle,
 		QwtInterval(points_[i].dataCrossSection-points_[i].dataErrorCrossSection,
 		points_[i].dataCrossSection+points_[i].dataErrorCrossSection));
       }
-    } else if(xAxisType==1&&yAxisType==1) {
+    } else if(xAxisType==2&&yAxisType==1) {
       for(int i=0;i<points_.size();i++) {
 	data[i]=QPointF(points_[i].angle,points_[i].dataSFactor);
 	fit[i]=QPointF(points_[i].angle,points_[i].fitSFactor);
@@ -154,8 +170,14 @@ void PlotEntry::attach(QwtPlot* plot, int xAxisType, int yAxisType, QwtSymbol::S
 	fit[i]=QPointF(points_[i].energy,points_[i].fitSFactor);
     } else if(xAxisType==1&&yAxisType==0) {
       for(int i=0;i<points_.size();i++) 
-	fit[i]=QPointF(points_[i].angle,points_[i].fitCrossSection);
+	fit[i]=QPointF(points_[i].excitationEnergy,points_[i].fitCrossSection);
     } else if(xAxisType==1&&yAxisType==1) {
+      for(int i=0;i<points_.size();i++) 
+	fit[i]=QPointF(points_[i].excitationEnergy,points_[i].fitSFactor);
+    } else if(xAxisType==2&&yAxisType==0) {
+      for(int i=0;i<points_.size();i++) 
+	fit[i]=QPointF(points_[i].angle,points_[i].fitCrossSection);
+    } else if(xAxisType==2&&yAxisType==1) {
       for(int i=0;i<points_.size();i++) 
 	fit[i]=QPointF(points_[i].angle,points_[i].fitSFactor);
     }
@@ -218,7 +240,10 @@ void AZUREPlot::setYAxisLog(bool set) {
 };
 
 void AZUREPlot::setXAxisType(unsigned int type) {
-  QwtText text = (type==0) ? QwtText(QString("Center of Mass Energy [MeV]")) : QwtText(QString("Center of Mass Angle [degrees]"));
+  QwtText text;
+  if(type==0) text=QwtText(QString("Center of Mass Energy [MeV]"));
+  else if(type==1) text=QwtText(QString("Excitation Energy [MeV]"));
+  else text=QwtText(QString("Center of Mass Angle [degrees]"));
   setAxisTitle(QwtPlot::xBottom,text);
 
   xAxisType=type;

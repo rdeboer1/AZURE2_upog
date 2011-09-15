@@ -26,6 +26,7 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   lab_angle_=dataLine.angle();
   cm_energy_=dataLine.energy();
   lab_energy_=dataLine.energy();
+  excitation_energy_=dataLine.energy();
   cm_crosssection_=dataLine.crossSection();
   cm_dcrosssection_=dataLine.error();
   lab_crosssection_=dataLine.crossSection();
@@ -58,6 +59,7 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   cm_angle_=angle;
   lab_energy_=energy;
   cm_energy_=energy;
+  excitation_energy_=energy;
   cm_crosssection_=0.;
   cm_dcrosssection_=0.1;
   lab_crosssection_=0.;
@@ -92,6 +94,7 @@ EPoint::EPoint(double angle, double energy, int entranceKey,
   cm_angle_=angle;
   lab_energy_=energy;
   cm_energy_=energy;
+  excitation_energy_=energy;
   cm_crosssection_=0.;
   cm_dcrosssection_=0.1;
   lab_crosssection_=0.;
@@ -263,6 +266,15 @@ double EPoint::GetLabEnergy() const {
 double EPoint::GetCMEnergy() const {
   return cm_energy_;
 }
+
+/*! 
+ * Returns the energy of the point in compound excitation energy.
+ */
+
+double EPoint::GetExcitationEnergy() const {
+  return excitation_energy_;
+}
+
 
 /*! 
  * Returns the Legendre polynomial specified by an order.  
@@ -456,6 +468,7 @@ void EPoint::ConvertLabEnergy(PPair *pPair) {
   cm_energy_=this->GetLabEnergy()*
     (pPair->GetM(2))/
     (pPair->GetM(1)+pPair->GetM(2));
+  excitation_energy_=cm_energy_+pPair->GetSepE();
 }
 
 /*!

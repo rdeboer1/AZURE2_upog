@@ -56,6 +56,7 @@ class EPoint {
   double GetCMAngle() const;
   double GetLabEnergy() const;
   double GetCMEnergy() const;
+  double GetExcitationEnergy() const;
   double GetLegendreP(int) const;
   double GetLabCrossSection() const;
   double GetCMCrossSection() const;
@@ -124,6 +125,7 @@ class EPoint {
   double lab_angle_;
   double cm_energy_;
   double lab_energy_;
+  double excitation_energy_;
   double cm_crosssection_;
   double cm_dcrosssection_;
   double lab_crosssection_;
