@@ -70,7 +70,7 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
 			<< " from file." << std::endl;
 	      this->DeleteLastSegment();
 	    } else if(this->GetSegment(this->NumSegments())->NumPoints()==0) {
-	      configure.outStream << "WARNING: Segment #" << this->NumSegments() 
+	      configure.outStream << "WARNING: Segment #" << numTotalSegments
 				  << " is empty and will not be used." << std::endl;
 	      this->DeleteLastSegment();
 	    }
@@ -158,7 +158,7 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 	      if(aStep==0.0) break;
 	    }
 	    if(theSegment->NumPoints()==0) {
-	      configure.outStream << "WARNING: Extrapolation segment #" << this->NumSegments() 
+	      configure.outStream << "WARNING: Extrapolation segment #" << numTotalSegments 
 				  << " is empty and will not be used." << std::endl;
 	      this->DeleteLastSegment();
 	    }
