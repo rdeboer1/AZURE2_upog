@@ -10,6 +10,7 @@ namespace ROOT {
     class MnUserParameters;
   }
 }
+class Config;
 
 ///An AZURE compound nucleus
 
@@ -28,27 +29,27 @@ public:
   int IsPair(PPair);
   int IsJGroup(JGroup);
   int GetPairNumFromKey(int);
-  int Fill(const struct Config&);
-  int ReadECFile(std::string);
+  int Fill(const Config&);
+  int ReadECFile(const Config&);
   int GetMaxLValue() const;
-  void Initialize(const struct Config&);
+  void Initialize(const Config&);
   void AddPair(PPair);
   void AddJGroup(JGroup);
-  void PrintNuc(const struct Config&);
-  void TransformIn(const struct Config&);
-  void SortPathways(const struct Config&);
-  void PrintPathways(const struct Config&);
-  void CalcBoundaryConditions();
-  void PrintBoundaryConditions(const struct Config&);
+  void PrintNuc(const Config&);
+  void TransformIn(const Config&);
+  void SortPathways(const Config&);
+  void PrintPathways(const Config&);
+  void CalcBoundaryConditions(const Config&);
+  void PrintBoundaryConditions(const Config&);
   void CalcAngularDists(int);
-  void PrintAngularDists(const struct Config&);
+  void PrintAngularDists(const Config&);
   void FillMnParams(ROOT::Minuit2::MnUserParameters&);
   void FillCompoundFromParams(const vector_r &);
-  void TransformOut(const struct Config&);
-  void PrintTransformParams(std::string);
+  void TransformOut(const Config&);
+  void PrintTransformParams(const Config&);
   void SetMaxLValue(int);
-  void CalcShiftFunctions();
-  complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool);
+  void CalcShiftFunctions(const Config&);
+  complex CalcExternalWidth(JGroup*, ALevel*,AChannel*,bool,const Config&);
   PPair *GetPair(int);
   JGroup *GetJGroup(int);
   CNuc *Clone() const;

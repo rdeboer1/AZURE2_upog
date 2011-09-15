@@ -31,6 +31,8 @@ ESegment::ESegment(SegLine segLine) {
     j_=0.0;
     l_=0;
   }
+  isAngDist_=false;
+  maxAngDistOrder_=0;
   datafile_=segLine.dataFile();
   dataNorm_=segLine.dataNorm();
   if(segLine.varyNorm()==1) varyNorm_=true;
@@ -65,6 +67,13 @@ ESegment::ESegment(ExtrapLine extrapLine) {
     isphase_=false;
     j_=0.0;
     l_=0;
+  }
+  if(extrapLine.isDiff()==3) {
+    isAngDist_=true;
+    maxAngDistOrder_=extrapLine.maxAngDistOrder();
+  } else {
+    isAngDist_=false;
+    maxAngDistOrder_=0;
   }
   datafile_="";
   dataNorm_=1.;
@@ -104,6 +113,15 @@ bool ESegment::IsDifferential() const {
 
 bool ESegment::IsPhase() const {
   return isphase_;
+}
+
+
+/*!
+ * Returns true if the segment is angular distribution.
+ */
+
+bool ESegment::IsAngularDist() const {
+  return isAngDist_;
 }
 
 /*!
@@ -154,7 +172,7 @@ int ESegment::GetExitKey() const {
  * in the lab frame, and conversions are performed to the center of mass frame.
  */
 
-int ESegment::Fill(CNuc *theCNuc, EData *theData) {
+int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
   std::string infile=this->GetDataFile();
   std::ifstream in(infile.c_str());
   if(!in) return -1;
@@ -172,7 +190,7 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData) {
 	  if(this->GetEntranceKey()==this->GetExitKey()) {
 	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair);
 	  } else {
-	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair,exitPair);
+	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair,exitPair,configure);
 	  }
 	  this->GetPoint(this->NumPoints())->ConvertCrossSection();
 	}
@@ -207,6 +225,14 @@ int ESegment::GetTargetEffectNum() const {
 
 int ESegment::GetSegmentKey() const {
   return segmentKey_;
+}
+
+/*!
+ * Returns the maximum polynomial order if segment is angular distribution.
+ */
+
+int ESegment::GetMaxAngDistOrder() const {
+  return maxAngDistOrder_;
 }
 
 /*!

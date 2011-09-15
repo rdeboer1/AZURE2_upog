@@ -1,12 +1,8 @@
 #include "CoulFunc.h"
 #include "PPair.h"
 #include <iostream>
-
-#ifdef EXT_COUL
-  #include "cwfcomp.H"
-#else
-  #include <gsl/gsl_sf_coulomb.h>
-#endif
+#include "cwfcomp.H"
+#include <gsl/gsl_sf_coulomb.h>
  
 extern double gsl_PEshift_function_dE(CoulFunc*,int,double,double);
 
@@ -14,7 +10,8 @@ extern double gsl_PEshift_function_dE(CoulFunc*,int,double,double);
  * The CoulFunc object is created with reference to a PPair object.
  */
 
-CoulFunc::CoulFunc(PPair *pPair) {
+CoulFunc::CoulFunc(PPair *pPair, bool useGSLFunctions) : 
+  useGSLFunctions_(useGSLFunctions) {
   z1_=pPair->GetZ(1);
   z2_=pPair->GetZ(2);
   redmass_=(double)pPair->GetRedMass();
@@ -111,29 +108,35 @@ CoulWaves CoulFunc::operator()(int l,double radius,double energy) {
   if(l==lLast()&&radius==radiusLast()&&energy==energyLast()) {
     result=coulLast();
   } else {
-
-#ifdef EXT_COUL
-    std::complex<double> eta(sqrt(uconv/2.)*fstruc*z1()*z2()*
-			     sqrt(redmass()/energy),0.);
-    std::complex<double> rho(sqrt(2.*uconv)/hbarc*radius*
-			     sqrt(redmass()*energy),0.);
-    std::complex<double> lValue( (double) l, 0.);
-    Coulomb_wave_functions coul(true,lValue,eta);
-    std::complex<double> c_F, c_dF, c_G, c_dG;
-    coul.F_dF(rho,c_F,c_dF);
-    coul.G_dG(rho,c_G,c_dG);
-    struct CoulWaves newResult={real(c_F),real(c_dF),real(c_G),real(c_dG)};
-#else
-    double eta=sqrt(uconv/2.)*fstruc*z1()*z2()*
-      sqrt(redmass()/energy);
-    double rho=sqrt(2.*uconv)/hbarc*radius*
-      sqrt(redmass()*energy);
-    double lValue=double(l);
-    double eF,eG;
-    gsl_sf_result F,Fp,G,Gp;
-    gsl_sf_coulomb_wave_FG_e(eta,rho,lValue,0,&F,&Fp,&G,&Gp,&eF,&eG);
-    struct CoulWaves newResult={F.val*exp(eF),Fp.val*exp(eF),G.val*exp(eG),Gp.val*exp(eG)};    
-#endif
+    struct CoulWaves newResult;
+    if(!useGSLFunctions_) {
+      std::complex<double> eta(sqrt(uconv/2.)*fstruc*z1()*z2()*
+			       sqrt(redmass()/energy),0.);
+      std::complex<double> rho(sqrt(2.*uconv)/hbarc*radius*
+			       sqrt(redmass()*energy),0.);
+      std::complex<double> lValue( (double) l, 0.);
+      Coulomb_wave_functions coul(true,lValue,eta);
+      std::complex<double> c_F, c_dF, c_G, c_dG;
+      coul.F_dF(rho,c_F,c_dF);
+      coul.G_dG(rho,c_G,c_dG);
+      newResult.F=real(c_F);
+      newResult.dF=real(c_dF);
+      newResult.G=real(c_G);
+      newResult.dG=real(c_dG);      
+    } else {
+      double eta=sqrt(uconv/2.)*fstruc*z1()*z2()*
+	sqrt(redmass()/energy);
+      double rho=sqrt(2.*uconv)/hbarc*radius*
+	sqrt(redmass()*energy);
+      double lValue=double(l);
+      double eF,eG;
+      gsl_sf_result F,Fp,G,Gp;
+      gsl_sf_coulomb_wave_FG_e(eta,rho,lValue,0,&F,&Fp,&G,&Gp,&eF,&eG);
+      newResult.F=F.val*exp(eF);
+      newResult.dF=Fp.val*exp(eF);
+      newResult.G=G.val*exp(eG);
+      newResult.dG=Gp.val*exp(eG);            
+    }
     setLast(l,radius,energy,newResult);
     result=newResult;
   }

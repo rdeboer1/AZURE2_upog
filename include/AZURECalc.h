@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include <vector>
 
+class Config;
 class EData;
 class CNuc;
 
@@ -23,7 +24,7 @@ class AZURECalc : public ROOT::Minuit2::FCNBase {
    * The AZURECalc object is created with reference to an EData and CNuc object.
    *. The runtime configurations are also passed through a Config structure.
    */
-  AZURECalc(EData* data,CNuc* compound, const struct Config& configure) : configure_(configure) {
+  AZURECalc(EData* data,CNuc* compound, const Config& configure) : configure_(configure) {
     data_=data;
     compound_=compound;
   };
@@ -43,7 +44,7 @@ class AZURECalc : public ROOT::Minuit2::FCNBase {
   /*!
    * Returns a reference to the Config structure.
    */
-  const struct Config &configure() const {return configure_;};
+  const Config &configure() const {return configure_;};
   /*!
    * Returns a pointer to the EData object.
    */
@@ -58,7 +59,7 @@ class AZURECalc : public ROOT::Minuit2::FCNBase {
    */
   void SetErrorDef(double def) {theErrorDef=def;};
  private:
-  const struct Config &configure_;
+  const Config &configure_;
   EData *data_;
   CNuc *compound_;
   double theErrorDef;

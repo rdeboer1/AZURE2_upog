@@ -8,8 +8,8 @@
 double AZURECalc::operator()(const vector_r& p) const {
 
   int thisIteration=data()->Iterations();
-  bool isFit=data()->IsFit();
   data()->Iterate();
+  bool isFit=data()->IsFit();
 
   CNuc * localCompound = NULL;
   EData *localData = NULL;
@@ -24,7 +24,7 @@ double AZURECalc::operator()(const vector_r& p) const {
   //Fill Compound Nucleus From Minuit Parameters
   localCompound->FillCompoundFromParams(p);
   localData->FillNormsFromParams(p);
-  if(configure().isBrune) localCompound->CalcShiftFunctions();
+  if(configure().paramMask & Config::USE_BRUNE_FORMALISM) localCompound->CalcShiftFunctions(configure());
   
   //loop over segments and points
   double chiSquared=0.0;
@@ -46,13 +46,14 @@ double AZURECalc::operator()(const vector_r& p) const {
   }
 
   if(!localData->IsErrorAnalysis()&&thisIteration!=0) {
-    if(thisIteration%100==0) std::cout << "\r\tIteration: " << std::setw(6) << thisIteration
-				       << " Chi-Squared: " << chiSquared;  std::cout.flush();
+    if(thisIteration%100==0) configure().outStream
+			       << "\r\tIteration: " << std::setw(6) << thisIteration
+			       << " Chi-Squared: " << chiSquared;  configure().outStream.flush();
 
     if(thisIteration%1000==0) {
       localData->WriteOutputFiles(configure(),isFit);
       localCompound->TransformOut(configure());
-      localCompound->PrintTransformParams(configure().outputdir);
+      localCompound->PrintTransformParams(configure());
     }
   }
   if(isFit) {

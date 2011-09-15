@@ -101,7 +101,7 @@ int CNuc::GetPairNumFromKey(int key) {
  * input files.  Returns -1 if the files could not be read, and 0 if the files were read successfully.
  */
 
-int CNuc::Fill(const struct Config &configure) {
+int CNuc::Fill(const Config &configure) {
   int PairNum,LevelNum,ChannelNum,JGroupNum;
   int maxLValue=0;
   std::ifstream in(configure.configfile.c_str());
@@ -161,10 +161,11 @@ int CNuc::Fill(const struct Config &configure) {
   if(line!="</levels>") return -1;
 
   in.close();
-  
+
   this->SetMaxLValue(maxLValue);
-  if(configure.isEC)
-    if(this->ReadECFile(configure.configfile)==-1) return -1;
+  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
+     this->NumJGroups()>0 && this->NumPairs()>0)
+    if(this->ReadECFile(configure)==-1) return -1;
   
   return 0;
 }
@@ -174,8 +175,8 @@ int CNuc::Fill(const struct Config &configure) {
  * exists from the nuclear file.  If not, the state is created.  
  */
 
-int CNuc::ReadECFile(std::string configfile) {
-  std::ifstream in(configfile.c_str());
+int CNuc::ReadECFile(const Config& configure) {
+  std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line="";
   while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
@@ -269,7 +270,7 @@ int CNuc::ReadECFile(std::string configfile) {
 	      }
 	    }
 	  }
-	} else std::cout << "Final state is not a capture pair." << std::endl;
+	} else configure.outStream << "Final state is not a capture pair." << std::endl;
       }
     }
   }
@@ -294,30 +295,30 @@ int CNuc::GetMaxLValue() const {
  * contributions and coefficients.  A CNuc object can only be initialized for use AFTER it is filled.
  */
 
-void CNuc::Initialize(const struct Config &configure) {
+void CNuc::Initialize(const Config &configure) {
   //Calculate Boundary Conditions
-  std::cout << "Calculating Boundary Conditions..." << std::endl;
-  this->CalcBoundaryConditions();
-  if(configure.checkboundcon=="screen"||
-     configure.checkboundcon=="file") this->PrintBoundaryConditions(configure);
+  configure.outStream << "Calculating Boundary Conditions..." << std::endl;
+  this->CalcBoundaryConditions(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_BOUNDARY_CONDITIONS)
+    this->PrintBoundaryConditions(configure);
 
   //Transform Input Parameters
-  if(configure.transformParams) {
-    std::cout << "Performing Input Parameter Transformation..." << std::endl;
+  if(configure.paramMask & Config::TRANSFORM_PARAMETERS) {
+    configure.outStream << "Performing Input Parameter Transformation..." << std::endl;
     this->TransformIn(configure);
   }
 
   //Sort reaction pathways
-  std::cout << "Sorting Reaction Pathways..." << std::endl;
+  configure.outStream << "Sorting Reaction Pathways..." << std::endl;
   this->SortPathways(configure);
-  if(configure.checkpathways=="screen"|| 
-     configure.checkpathways=="file") this->PrintPathways(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_PATHWAYS) 
+    this->PrintPathways(configure);
   
   //Calculate Angular Distribution Coefficients
-  std::cout << "Calculating Angular Distribution Coefficients..." << std::endl;
+  configure.outStream << "Calculating Angular Distribution Coefficients..." << std::endl;
   this->CalcAngularDists(configure.maxLOrder);
-  if(configure.checkangdists=="screen"|| 
-     configure.checkangdists=="file") this->PrintAngularDists(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ANGULAR_DISTS) 
+    this->PrintAngularDists(configure);
   
 }
 
@@ -342,16 +343,19 @@ void CNuc::AddJGroup(JGroup jGroup) {
  * This includes all particle pairs, \f$ J^\pi \f$ groups, levels and channels.
  */
 
-void CNuc::PrintNuc(const struct Config &configure) {
+void CNuc::PrintNuc(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checknucleus=="file") {
+  if(configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) {
     std::string outfile=configure.checkdir+"compoundnucleus.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checknucleus=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) 
+    sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checknucleus=="file"&&fbuffer.is_open())||configure.checknucleus=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS)&&
+      fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*          Particle Pairs          *" << std::endl
@@ -409,7 +413,7 @@ void CNuc::PrintNuc(const struct Config &configure) {
       }
       out << std::endl;
     }
-  } else std::cout << "Could not write compound nucleus check file." << std::endl;
+  } else configure.outStream << "Could not write compound nucleus check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -418,7 +422,7 @@ void CNuc::PrintNuc(const struct Config &configure) {
  * Performs the initial parameter transformations from physical to formal parameters.
  */
 
-void CNuc::TransformIn(const struct Config& configure) {
+void CNuc::TransformIn(const Config& configure) {
   for(int j=1;j<=this->NumJGroups();j++) {
     JGroup *theJGroup=this->GetJGroup(j);
     if(theJGroup->IsInRMatrix()) {
@@ -439,7 +443,8 @@ void CNuc::TransformIn(const struct Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()));
+		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()),
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		double tempPene=theCoulombFunction.Penetrability(theChannel->GetL(),
 								 radius,
 								 localEnergy);
@@ -484,7 +489,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		if(theLevel->GetGamma(ch)<0.0) isNegative.push_back(true);
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
-		double tempPene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+		double tempPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 		if(tempPene<1e-10) tempPene=1e-10;
 		penes.push_back(tempPene);
 	      }
@@ -529,7 +534,8 @@ void CNuc::TransformIn(const struct Config& configure) {
 	    if(theChannel->GetRadType()=='P') {
 	      if(localEnergy>0.0) {
 		tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()));
+		CoulFunc theCoulombFunction(this->GetPair(theChannel->GetPairNum()),
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		shifts[levelKeys.size()-1].push_back(theCoulombFunction.PEShift(theChannel->GetL(),
 										radius,
 										localEnergy));
@@ -540,9 +546,9 @@ void CNuc::TransformIn(const struct Config& configure) {
 		}
 	    } else {
 	      tempGammas[levelKeys.size()-1].push_back(theLevel->GetGamma(ch));
-	      if(configure.isEC && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && configure.ignoreExternals)) {
+	      if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) && !(fabs(theLevel->GetGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS))) {
 		complex externalWidth = 
-		  CalcExternalWidth(theJGroup,theLevel,theChannel,true);
+		  CalcExternalWidth(theJGroup,theLevel,theChannel,true,configure);
 		if(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)>=pow(imag(externalWidth),2.0)) {
 		  if(tempGammas[levelKeys.size()-1][ch-1]<0.0) 
 		    tempGammas[levelKeys.size()-1][ch-1]=-sqrt(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)-
@@ -550,7 +556,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 		  else tempGammas[levelKeys.size()-1][ch-1]=sqrt(pow(tempGammas[levelKeys.size()-1][ch-1],2.0)-
 								 pow(imag(externalWidth),2.0))-real(externalWidth);
 		} else {
-		  std::cout << "**WARNING: Imaginary portion of external width \n\tfor j=" << j << " la=" 
+		  configure.outStream << "**WARNING: Imaginary portion of external width \n\tfor j=" << j << " la=" 
 			    << la << " ch=" << ch << " is greater than total width." << std::endl;
 		  tempGammas[levelKeys.size()-1][ch-1]=-real(externalWidth);
 		}
@@ -560,7 +566,7 @@ void CNuc::TransformIn(const struct Config& configure) {
 	  }
 	}
       }	  
-      if(!configure.isBrune) {
+      if(!(configure.paramMask & Config::USE_BRUNE_FORMALISM)) {
 	matrix_r nMatrix;
 	matrix_r mMatrix;      
 	for(int mu=0;mu<tempEnergies.size();mu++) {
@@ -619,7 +625,7 @@ void CNuc::TransformIn(const struct Config& configure) {
  * Calculates internal and external reaction pathways.
  */
 
-void CNuc::SortPathways(const struct Config& configure) {
+void CNuc::SortPathways(const Config& configure) {
   int DecayNum, KGroupNum, MGroupNum;
   for(int aa=1;aa<=this->NumPairs();aa++) {
     if(this->GetPair(aa)->IsEntrance()) {
@@ -673,7 +679,7 @@ void CNuc::SortPathways(const struct Config& configure) {
             }
           }
         }
-        else if(this->GetPair(ir)->GetPType()==10 && !configure.useRMC) {
+        else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
           for(double s=fabs(this->GetPair(aa)->GetJ(1)
 			    -this->GetPair(aa)->GetJ(2));
               s<=(this->GetPair(aa)->GetJ(1)
@@ -803,16 +809,17 @@ void CNuc::SortPathways(const struct Config& configure) {
  * Prints the internal and external reaction pathways.
  */
   
-void CNuc::PrintPathways(const struct Config &configure) {
+void CNuc::PrintPathways(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkpathways=="file") {
+  if(configure.fileCheckMask & Config::CHECK_PATHWAYS) {
     std::string outfile=configure.checkdir+"pathways.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkpathways=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_PATHWAYS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkpathways=="file"&&fbuffer.is_open())||configure.checkpathways=="screen") {   
+  if(((configure.fileCheckMask & Config::CHECK_PATHWAYS)&&fbuffer.is_open())
+     ||(configure.screenCheckMask & Config::CHECK_PATHWAYS)) {   
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*    Internal Reaction Pathways    *" << std::endl
@@ -899,7 +906,7 @@ void CNuc::PrintPathways(const struct Config &configure) {
 	out << std::endl;
       }
     }
-  } else std::cout << "Could not write pathways check file." << std::endl;
+  } else configure.outStream << "Could not write pathways check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -909,7 +916,7 @@ void CNuc::PrintPathways(const struct Config &configure) {
  * first level read from the nuclear input file in the \f$ J^\pi \f$ group.
  */
 
-void CNuc::CalcBoundaryConditions(){
+void CNuc::CalcBoundaryConditions(const Config& configure){
   for(int j=1;j<=this->NumJGroups();j++) {
     if(this->GetJGroup(j)->IsInRMatrix()) {
       JGroup *theJGroup=this->GetJGroup(j);
@@ -927,7 +934,8 @@ void CNuc::CalcBoundaryConditions(){
 	      theChannel->SetBoundaryCondition(theShiftFunction(lValue,levelEnergy));
 	    }
 	    else {
-	      CoulFunc theCoulombFunction(thePair);
+	      CoulFunc theCoulombFunction(thePair,
+					  !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	      double radius=thePair->GetChRad();
 	      double boundary=theCoulombFunction.PEShift(lValue,radius,resonanceEnergy);
 	      theChannel->SetBoundaryCondition(boundary);
@@ -947,16 +955,17 @@ void CNuc::CalcBoundaryConditions(){
  * Prints the boundary conditions.
  */
 
-void CNuc::PrintBoundaryConditions(const struct Config &configure) {
+void CNuc::PrintBoundaryConditions(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkboundcon=="file") {
+  if(configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) {
     std::string outfile=configure.checkdir+"boundaryconditions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkboundcon=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkboundcon=="file"&&fbuffer.is_open())||configure.checkboundcon=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_BOUNDARY_CONDITIONS)) {
     out << std::endl
         << "************************************" << std::endl
         << "*        Boundary Conditions       *" << std::endl
@@ -977,7 +986,7 @@ void CNuc::PrintBoundaryConditions(const struct Config &configure) {
 	}
       }
     }
-  } else std::cout << "Could not write boundary conditions check file." << std::endl;
+  } else configure.outStream << "Could not write boundary conditions check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -1085,16 +1094,17 @@ void CNuc::CalcAngularDists(int maxL) {
  * Prints the KLGroup and Interference object structure as well as the calculated coefficients.
  */
 
-void CNuc::PrintAngularDists(const struct Config &configure) {
+void CNuc::PrintAngularDists(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkangdists=="file") {
+  if(configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS) {
     std::string outfile=configure.checkdir+"angulardistributions.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkangdists=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkangdists=="file"&&fbuffer.is_open())||configure.checkangdists=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_ANGULAR_DISTS)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_ANGULAR_DISTS)) {
     out << std::endl
         << "************************************" << std::endl
         << "*       Angular Distributions       *" << std::endl
@@ -1127,7 +1137,7 @@ void CNuc::PrintAngularDists(const struct Config &configure) {
 	} 
       }
     }
-  }  else std::cout << "Could not write angular distributions check file." << std::endl;
+  }  else configure.outStream << "Could not write angular distributions check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -1189,8 +1199,8 @@ void CNuc::FillCompoundFromParams(const vector_r &p) {
  * Performs the final parameter transformations from formal to physical parameters.
  */
 
-void CNuc::TransformOut(const struct Config& configure) {
-  if(!configure.isBrune) {
+void CNuc::TransformOut(const Config& configure) {
+  if(!(configure.paramMask & Config::USE_BRUNE_FORMALISM)) {
     int maxIterations=1000;
     double energyTolerance=1e-6;
     for(int j=1;j<=this->NumJGroups();j++) {
@@ -1228,7 +1238,8 @@ void CNuc::TransformOut(const struct Config& configure) {
 		  newBoundary=theShiftFunction(theChannel->GetL(),tempE[thisLevel]);
 		}
 		else {
-		  CoulFunc theCoulombFunction(exitPair);
+		  CoulFunc theCoulombFunction(exitPair,
+					      !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		  double radius=exitPair->GetChRad();
 		  newBoundary=theCoulombFunction.PEShift(theChannel->GetL(),radius,localEnergy);
 		}
@@ -1274,11 +1285,11 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    }
 	    if(!done) {
 	      if(iteration==maxIterations) {
-		std::cout << "**WARNING: Could Not Transform J = " 
+		configure.outStream << "**WARNING: Could Not Transform J = " 
 			  << this->GetJGroup(j)->GetJ();
-		if(this->GetJGroup(j)->GetPi()==-1) std::cout << '-';
-		else std::cout << '+';
-		std::cout << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
+		if(this->GetJGroup(j)->GetPi()==-1) configure.outStream << '-';
+		else configure.outStream << '+';
+		configure.outStream << " E = " << theLevel->GetFitE() << " MeV**" << std::endl;
 		tempE[thisLevel]=theLevel->GetFitE();
 		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) 
 		  tempGamma[thisLevel][ch-1]=theLevel->GetFitGamma(ch);
@@ -1343,7 +1354,8 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    tempPene.push_back(pene);
 	  }
 	  else {
-	    CoulFunc theCoulombFunction(exitPair);
+	    CoulFunc theCoulombFunction(exitPair,
+					!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	    double radius=exitPair->GetChRad();
 	    normSum+=theCoulombFunction.PEShift_dE(theChannel->GetL(),radius,localEnergy)*
 	      pow(theLevel->GetTransformGamma(ch),2.0);
@@ -1363,7 +1375,7 @@ void CNuc::TransformOut(const struct Config& configure) {
 	    if((int)(2*jValue)%2!=0) pene*=-1.;
 	    tempPene.push_back(pene);
 	  } else {
-	    double pene = configure.useRMC ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
+	    double pene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
 	    tempPene.push_back(pene);
 	  }
 	}
@@ -1371,9 +1383,10 @@ void CNuc::TransformOut(const struct Config& configure) {
       for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	complex externalWidth(0.0,0.0);
 	if(this->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P' &&
-	   theLevel->IsInRMatrix()&&configure.isEC &&
-	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && configure.ignoreExternals))
-	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,this->GetJGroup(j)->GetChannel(ch),false);
+	   theLevel->IsInRMatrix()&&(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
+	   !(fabs(theLevel->GetTransformGamma(ch))<1.0e-8 && (configure.paramMask & Config::IGNORE_ZERO_WIDTHS)))
+	  externalWidth=CalcExternalWidth(this->GetJGroup(j),theLevel,
+					  this->GetJGroup(j)->GetChannel(ch),false,configure);
 	theLevel->SetExternalGamma(ch,externalWidth);
 	complex totalWidth=theLevel->GetTransformGamma(ch)+externalWidth;
 	int tempSign = (real(totalWidth)<0.) ? (-1) : (1);
@@ -1389,9 +1402,9 @@ void CNuc::TransformOut(const struct Config& configure) {
  * Writes the final transformed parameters to "parameters.out" file. 
  */
 
-void CNuc::PrintTransformParams(std::string outdir) {
+void CNuc::PrintTransformParams(const Config& configure) {
   char filename[256];;
-  sprintf(filename,"%sparameters.out",outdir.c_str());
+  sprintf(filename,"%sparameters.out",configure.outputdir.c_str());
   std::ofstream out;
   out.open(filename);
   if(out) {
@@ -1455,7 +1468,7 @@ void CNuc::PrintTransformParams(std::string outdir) {
 	out << std::endl;
       }
     }
-  } else std::cout << "Could not save parameters.out file." << std::endl;
+  } else configure.outStream << "Could not save parameters.out file." << std::endl;
 }
 
 /*!
@@ -1471,7 +1484,7 @@ void CNuc::SetMaxLValue(int maxL) {
  * functions at new level energies when the Brune parametrization is used. 
  */
 
-void CNuc::CalcShiftFunctions() {
+void CNuc::CalcShiftFunctions(const Config& configure) {
   for(int j=1;j<=this->NumJGroups();j++) {
     if(this->GetJGroup(j)->IsInRMatrix()) {
       JGroup *theJGroup=this->GetJGroup(j);
@@ -1490,7 +1503,8 @@ void CNuc::CalcShiftFunctions() {
 		theLevel->SetShiftFunction(ch,theShiftFunction(lValue,levelEnergy));
 	      }
 	      else {
-		CoulFunc theCoulombFunction(thePair);
+		CoulFunc theCoulombFunction(thePair,
+					    !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		double radius=thePair->GetChRad();
 		theLevel->SetShiftFunction(ch,theCoulombFunction.PEShift(lValue,radius,resonanceEnergy));
 	      }
@@ -1509,7 +1523,8 @@ void CNuc::CalcShiftFunctions() {
  * Calculates the external reduced width amplitudes for a given channel.
  */
 
-complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *theChannel,bool isInitial) {
+complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, 
+				AChannel *theChannel,bool isInitial,const Config& configure) {
   complex externalWidth(0.0,0.0);
   if(theChannel->GetRadType()=='E'||(theChannel->GetRadType()=='M'&&theChannel->GetL()==1)) {
     bool isExternal=false;
@@ -1563,7 +1578,7 @@ complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel, AChannel *t
 			theChannel->GetRadType()=='M')) {
 		      PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
 		      
-		      ECIntegral theECIntegral(theFinalPair);
+		      ECIntegral theECIntegral(theFinalPair,configure);
 		      complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
 							initialChannel->GetS(),finalChannel->GetS(),
 							theJGroup->GetJ(),theFinalJGroup->GetJ(),

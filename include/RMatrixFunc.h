@@ -13,12 +13,12 @@
 
 class RMatrixFunc : public GenMatrixFunc {
  public:
-  RMatrixFunc(CNuc*,const struct Config&);
+  RMatrixFunc(CNuc*,const Config&);
   /*!
    * Returns a pointer to the compound nucleus object.
    */
   CNuc *compound() const {return compound_;};
-  const struct Config &configure() const {return configure_;};
+  const Config &configure() const {return configure_;};
 
   void ClearMatrices();
   void FillMatrices(EPoint*);
@@ -40,7 +40,7 @@ class RMatrixFunc : public GenMatrixFunc {
   void AddRLInvRMatrixElement(int,int,int,complex);
  private:
   CNuc *compound_;
-  const struct Config& configure_;
+  const Config& configure_;
   vector_matrix_c r_matrices_;
   vector_matrix_c rl_matrices_;
   vector_matrix_c rl_inv_matrices_;

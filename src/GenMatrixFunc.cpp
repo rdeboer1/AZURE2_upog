@@ -19,7 +19,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
   }
   Decay *theDecay=compound()->GetPair(aa)->GetDecay(ir);
   if(compound()->GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->GetPType()==10 &&
-     configure().useRMC) {
+     (configure().paramMask & Config::USE_RMC_FORMALISM)) {
     int decayNum=0;
     while(decayNum<compound()->GetPair(aa)->NumDecays()) {
       decayNum++;
@@ -29,7 +29,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
       for(int m=1;m<=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->NumMGroups();m++) {
 	MGroup *theMGroup=compound()->GetPair(aa)->GetDecay(decayNum)->GetKGroup(k)->GetMGroup(m);
 	if(theMGroup->GetChNum()==theMGroup->GetChpNum()) {
-	  int jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	  sum+=2.*point->GetGeometricalFactor()*
 	    (2.*jValue+1.)*compound()->GetPair(aa)->GetI1I2Factor()*    
 	    imag(this->GetTMatrixElement(k,m,decayNum));
@@ -62,45 +62,52 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
     }
     point->SetFitCrossSection(real(sum)/100.);
   } else {
-    if(!point->IsDifferential()) {
-      for(int k=1;k<=theDecay->NumKGroups();k++) {
-	this->ClearTempTMatrices();
-	for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
-	  int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
-	  int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
-	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
-	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
-	  if(!tempTNum) {
-	    TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
-	    this->NewTempTMatrix(temptmatrix);
-	  } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
+    if(!point->IsPhase()) {
+      double angleIntegratedXS=0.;
+      if(!point->IsDifferential()) {
+	for(int k=1;k<=theDecay->NumKGroups();k++) {
+	  this->ClearTempTMatrices();
+	  for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
+	    MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
+	    int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
+	    int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
+	    double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	    int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	    if(!tempTNum) {
+	      TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
+	      this->NewTempTMatrix(temptmatrix);
+	    } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
+	  }
+	  for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
+	    ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
+	    int lValue=theECMGroup->GetL();
+	    int lpValue=theECMGroup->GetMult();
+	    double jValue=theECMGroup->GetJ();
+	    int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	    if(!tempTNum) {
+	      TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetECTMatrixElement(k,m)};
+	      this->NewTempTMatrix(temptmatrix);
+	    } else this->AddToTempTMatrix(tempTNum,this->GetECTMatrixElement(k,m));
+	  }
+	  for(int temp=1;temp<=this->NumTempTMatrices();temp++) {
+	    sum+=point->GetGeometricalFactor()*
+	      (2.*this->GetTempTMatrix(temp)->jValue+1.)*
+	      compound()->GetPair(aa)->GetI1I2Factor()*
+	      (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
+	  }
 	}
-	for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
-	  ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
-	  int lValue=theECMGroup->GetL();
-	  int lpValue=theECMGroup->GetMult();
-	  double jValue=theECMGroup->GetJ();
-	  int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
-	  if(!tempTNum) {
-	    TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetECTMatrixElement(k,m)};
-	    this->NewTempTMatrix(temptmatrix);
-	  } else this->AddToTempTMatrix(tempTNum,this->GetECTMatrixElement(k,m));
+	angleIntegratedXS=real(sum)/100.;
+	if(!point->IsAngularDist()) {
+	  point->SetFitCrossSection(angleIntegratedXS);
+	  return;
 	}
-	for(int temp=1;temp<=this->NumTempTMatrices();temp++) {
-	  sum+=point->GetGeometricalFactor()*
-	    (2.*this->GetTempTMatrix(temp)->jValue+1.)*
-	    compound()->GetPair(aa)->GetI1I2Factor()*
-	    (this->GetTempTMatrix(temp)->TMatrix)*conj(this->GetTempTMatrix(temp)->TMatrix);
-	}
-      }
-      point->SetFitCrossSection(real(sum)/100.);
-    } else {
+      }   
+      std::vector<double> angularCoeff(std::min(point->GetMaxLOrder()+1,point->GetMaxAngDistOrder()+1),0.);
       for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
 	for(int inter=1;inter<=theDecay->GetKLGroup(kL)
 	      ->NumInterferences();inter++) {
 	  Interference *theInterference=theDecay->GetKLGroup(kL)
-	  ->GetInterference(inter);
+	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
 	  std::string interferenceType=theInterference->GetInterferenceType();
 	  if(interferenceType=="RR") {
@@ -116,9 +123,20 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
 	  }
+	  int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
 	  sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
-	    point->GetLegendreP(theDecay->GetKLGroup(kL)->GetLOrder());
+	    point->GetLegendreP(lOrder);
+	  if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
+	    double tempCoeff=angularCoeff[lOrder]+
+	      real(theInterference->GetZ1Z2()*T1*conj(T2))*point->GetGeometricalFactor()*
+	      compound()->GetPair(aa)->GetI1I2Factor()/100.*4./angleIntegratedXS;
+	    angularCoeff[lOrder]=tempCoeff;
+	  }
 	}
+      }
+      if(point->IsAngularDist()) {
+	point->SetAngularDists(angularCoeff);
+	return;
       }
       complex RT=sum/pi*point->GetGeometricalFactor()*
 	compound()->GetPair(aa)->GetI1I2Factor();
@@ -144,8 +162,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
       }
       point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
-    }
-    if(point->IsPhase()&&aa==ir) {
+    } else if(aa==ir) {
       double segmentJ=point->GetJ();
       int segmentL=point->GetL();
       this->ClearTempTMatrices();

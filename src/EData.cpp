@@ -35,7 +35,7 @@ int EData::NumSegments() const {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
+int EData::Fill(const Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line="";
@@ -65,13 +65,18 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
 	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
-	    if(this->GetSegment(this->NumSegments())->Fill(theCNuc,this)==-1) {
-              std::cout << "Could Not Fill Segment " << this->NumSegments() 
+	    if(this->GetSegment(this->NumSegments())->Fill(theCNuc,this,configure)==-1) {
+              configure.outStream << "WARNING: Could Not Fill Segment #" << this->NumSegments() 
 			<< " from file." << std::endl;
-	    } 
-	  } else std::cout << "Pair key " << NewSegment.GetExitKey() 
+	      this->DeleteLastSegment();
+	    } else if(this->GetSegment(this->NumSegments())->NumPoints()==0) {
+	      configure.outStream << "WARNING: Segment #" << numTotalSegments
+				  << " is empty and will not be used." << std::endl;
+	      this->DeleteLastSegment();
+	    }
+	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
 			   << " not in compound nucleus." << std::endl;
-	} else std::cout << "Pair key " << NewSegment.GetEntranceKey() 
+	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
 			 << " not in compound nucleus." << std::endl;
       }
     }
@@ -80,8 +85,11 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsData>") return -1;
 
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
-  this->MapData();
+
+  if(this->NumSegments()>0) {
+    if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
+    this->MapData();
+  }
 
   return 0; 
 }
@@ -92,7 +100,7 @@ int EData::Fill(const struct Config& configure, CNuc *theCNuc) {
  * Returns -1 if the input files could not be read, otherwise returns 0.
  */
 
-int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
+int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
   std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line = "";
@@ -136,11 +144,12 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
 		EPoint *thePoint=theSegment->GetPoint(theSegment->NumPoints());
 		thePoint->SetParentData(this);
 		thePoint->ConvertLabEnergy(entrancePair);
-		if(exitPair->GetPType()==0&&theSegment->IsDifferential()&&!theSegment->IsPhase()) {
+		if(exitPair->GetPType()==0&&theSegment->IsDifferential()&&
+		   !theSegment->IsPhase()&&!theSegment->IsAngularDist()) {
 		  if(theSegment->GetEntranceKey()==theSegment->GetExitKey()) {
 		    thePoint->ConvertLabAngle(entrancePair);
 		  } else {
-		    thePoint->ConvertLabAngle(entrancePair,exitPair);
+		    thePoint->ConvertLabAngle(entrancePair,exitPair,configure);
 		  }
 		  thePoint->ConvertCrossSection();
 		}
@@ -148,9 +157,14 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
 	      }
 	      if(aStep==0.0) break;
 	    }
-	  } else std::cout << "Pair key " << NewSegment.GetExitKey() 
+	    if(theSegment->NumPoints()==0) {
+	      configure.outStream << "WARNING: Extrapolation segment #" << numTotalSegments 
+				  << " is empty and will not be used." << std::endl;
+	      this->DeleteLastSegment();
+	    }
+	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
 			   << " not in compound nucleus." << std::endl;
-	} else std::cout << "Pair key " << NewSegment.GetEntranceKey() 
+	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
 			 << " not in compound nucleus." << std::endl;
       }
     }
@@ -159,8 +173,12 @@ int EData::MakePoints(const struct Config& configure, CNuc *theCNuc) {
   if(line!="</segmentsTest>") return -1;
   
   in.close();
-  if(this->ReadTargetEffectsFile(configure.configfile,theCNuc)==-1) return -1;
-  this->MapData();
+
+  if(this->NumSegments()>0) {
+    if(this->ReadTargetEffectsFile(configure,theCNuc)==-1) return -1;
+    this->MapData();
+  }
+
   return 0; 
 }
 
@@ -192,8 +210,8 @@ int EData::GetNormParamOffset() const {
  * to be applied to the data.
  */
 
-int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
-  std::ifstream in(infile.c_str());
+int EData::ReadTargetEffectsFile(const Config& configure, CNuc *compound) {
+  std::ifstream in(configure.configfile.c_str());
   if(!in) return -1;
   std::string line="";
   while(line!="<targetInt>"&&!in.eof()) getline(in,line);
@@ -211,7 +229,7 @@ int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
     if(line!="</targetInt>"&&!in.eof()){
       std::istringstream stm;
       stm.str(line);
-      TargetEffect targetEffect(stm);
+      TargetEffect targetEffect(stm,configure);
       if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
       if(targetEffect.IsActive()) {
 	this->AddTargetEffect(targetEffect);
@@ -232,33 +250,35 @@ int EData::ReadTargetEffectsFile(std::string infile, CNuc *compound) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
-	double forwardDepth=0.0;
-	double backwardDepth=0.0;
-	if(targetEffect->IsTargetIntegration()) {
-	  double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
-	  double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy());
-	  point->SetTargetThickness(targetThickness);
-	  if(targetEffect->IsConvolution()) {
-	    backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
-	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  } else {
-	    backwardDepth=targetThickness;
-	    forwardDepth=0.0;
-	  }
-	} else if(targetEffect->IsConvolution()) {
-	  backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	  forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
-	}
-	for(int i=0;i<targetEffect->NumSubPoints();i++) {
-	  double subEnergy=point->GetCMEnergy()+forwardDepth
-	    -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
-	  EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
+	if(targetEffect->IsTargetIntegration()||targetEffect->IsConvolution()) {
+	  double forwardDepth=0.0;
+	  double backwardDepth=0.0;
 	  if(targetEffect->IsTargetIntegration()) {
-	  	double stoppingPower=cmConversion*targetEffect->
-	  	GetStoppingPowerEq()->Evaluate(subEnergy/cmConversion);
-  	    subPoint.SetStoppingPower(stoppingPower);
+	    double totalM=entrancePair->GetM(1)+entrancePair->GetM(2);
+	    double targetThickness = cmConversion*targetEffect->TargetThickness(point->GetLabEnergy(),configure);
+	    point->SetTargetThickness(targetThickness);
+	    if(targetEffect->IsConvolution()) {
+	      backwardDepth=targetThickness+targetEffect->convolutionRange*targetEffect->GetSigma();
+	      forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	    } else {
+	      backwardDepth=targetThickness;
+	      forwardDepth=0.0;
+	    }
+	  } else if(targetEffect->IsConvolution()) {
+	    backwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
+	    forwardDepth=targetEffect->convolutionRange*targetEffect->GetSigma();
 	  }
-	  point->AddSubPoint(subPoint);
+	  for(int i=0;i<targetEffect->NumSubPoints();i++) {
+	    double subEnergy=point->GetCMEnergy()+forwardDepth
+	      -(forwardDepth+backwardDepth)/(targetEffect->NumSubPoints())*i;
+	    EPoint subPoint(point->GetCMAngle(),subEnergy,&*segment);
+	    if(targetEffect->IsTargetIntegration()) {
+	      double stoppingPower=cmConversion*targetEffect->
+		GetStoppingPowerEq()->Evaluate(configure,subEnergy/cmConversion);
+	      subPoint.SetStoppingPower(stoppingPower);
+	    }
+	    point->AddSubPoint(subPoint);
+	  }
 	}
       }
     }
@@ -343,29 +363,29 @@ void EData::ResetIterations(){
  * and entire EData object instead of a single EPoint object.
  */
 
-void EData::Initialize(CNuc *compound,const struct Config &configure) {
+void EData::Initialize(CNuc *compound,const Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
-  std::cout << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
+  configure.outStream << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
   this->CalcEDependentValues(compound,configure);
-  if(configure.checkpene=="screen"||
-     configure.checkpene=="file") this->PrintEDependentValues(configure,compound);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ENERGY_DEP) 
+    this->PrintEDependentValues(configure,compound);
 
   //Calculate legendre polynomials for each data point
-  std::cout << "Calculating Legendre Polynomials..." << std::endl;
+  configure.outStream << "Calculating Legendre Polynomials..." << std::endl;
   this->CalcLegendreP(configure.maxLOrder);
-  if(configure.checklegpoly=="screen"||
-     configure.checklegpoly=="file") this->PrintLegendreP(configure);
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_LEGENDRE) 
+    this->PrintLegendreP(configure);
 
   //Calculate Coulomb Amplitudes
-  std::cout << "Calculating Coulomb Amplitudes..." << std::endl;
+  configure.outStream << "Calculating Coulomb Amplitudes..." << std::endl;
   this->CalcCoulombAmplitude(compound);
-  if(configure.checkcoulamp=="screen"|| configure.checkcoulamp=="file") {
+  if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_COUL_AMPLITUDES) {
     this->PrintCoulombAmplitude(configure,compound);
   }
 
   //Calculate new ec amplitudes
-  if(configure.isEC) {
-    std::cout << "Calculating External Capture Amplitudes..." << std::endl;
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) {
+    configure.outStream << "Calculating External Capture Amplitudes..." << std::endl;
     this->CalculateECAmplitudes(compound,configure);
   }
 }
@@ -382,16 +402,17 @@ void EData::AddSegment(ESegment segment) {
  * Prints the data point after the object is filled or points are created.
  */
 
-void EData::PrintData(const struct Config &configure) {
+void EData::PrintData(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkdata=="file") {
+  if(configure.fileCheckMask & Config::CHECK_DATA) {
     std::string outfile=configure.checkdir+"data.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkdata=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_DATA) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkdata=="file"&&fbuffer.is_open())||configure.checkdata=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_DATA)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_DATA)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*            Segments              *" << std::endl
@@ -450,14 +471,16 @@ void EData::PrintData(const struct Config &configure) {
       } else
 	out << std::setw(12) << "Not Mapped"
 	    << std::setw(18) << data.point()->NumSubPoints();
-      if(data.point()->IsTargetEffect()) {
+      if(data.point()->IsTargetEffect()&&
+	 (data.point()->GetParentData()->GetTargetEffect(data.point()->GetTargetEffectNum())->IsConvolution()||
+	  data.point()->GetParentData()->GetTargetEffect(data.point()->GetTargetEffectNum())->IsTargetIntegration())) {
 	out << std::setw(18) << data.point()->GetSubPoint(data.point()->NumSubPoints())->GetCMEnergy() 
 	    << std::setw(18) << data.point()->GetSubPoint(1)->GetCMEnergy();
       }
       out << std::endl;
       if(data.point()==data.segment()->GetPoints().end()-1) out << std::endl;
     }
-  } else std::cout << "Could not write data check file." << std::endl;
+  } else configure.outStream << "Could not write data check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -466,24 +489,15 @@ void EData::PrintData(const struct Config &configure) {
  * Calls EPoint::CalcLegendreP for each point in the entire EData object.
  */
 
-void EData::CalcLegendreP(int maxL) {
-
-  std::map<int,std::vector<double> > qCoeffs;
-  //std::vector<double> segQCoeffs;
-  //Insert segment QCoeffs IN ORDER here with: segQCoeffs.push_back(qValue);
-  // segQCoeffs.push_back(1.0);  //first L=0
-  // segQCoeffs.push_back(1.0);  //then  L=1, etc.
-  //Then insert segQCoeff into qCoeffs with: qCoeffs[segmentKey]=segQCoeffs;
-  // qCoeffs[1]=segQCoeffs;  
-  //clear segQCoeffs with segQCoeffs.clear() and repeat for another segment
-  
+void EData::CalcLegendreP(int maxL) { 
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) { 
-    std::map<int,std::vector<double> >::iterator qCoeffsItr = qCoeffs.find(segment->GetSegmentKey());
-    std::vector<double>* qCoeffsPtr = (qCoeffsItr!=qCoeffs.end()) ? &qCoeffsItr->second : NULL;
+    TargetEffect *effect = (segment->IsTargetEffect() && 
+			    this->GetTargetEffect(segment->GetTargetEffectNum())->IsQCoefficients()) ?
+      this->GetTargetEffect(segment->GetTargetEffectNum()) : NULL;
 #pragma omp parallel for 
     for(int i=1;i<=segment->NumPoints();i++) {
       EPoint* point=segment->GetPoint(i);
-      point->CalcLegendreP(maxL,qCoeffsPtr);    
+      point->CalcLegendreP(maxL, effect);    
     }
   }
 }
@@ -492,16 +506,17 @@ void EData::CalcLegendreP(int maxL) {
  * Prints the Legendre polynomials for each point in the EData object.
  */ 
 
-void EData::PrintLegendreP(const struct Config &configure) {
+void EData::PrintLegendreP(const Config &configure) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checklegpoly=="file") {
+  if(configure.fileCheckMask & Config::CHECK_LEGENDRE) {
     std::string outfile=configure.checkdir+"legendre.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checklegpoly=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_LEGENDRE) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checklegpoly=="file"&&fbuffer.is_open())||configure.checklegpoly=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_LEGENDRE)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_LEGENDRE)) {
     out << std::endl
     << "************************************" << std::endl
     << "*       Legendre Polynomials       *" << std::endl
@@ -522,7 +537,7 @@ void EData::PrintLegendreP(const struct Config &configure) {
 	    << std::setw(15) << data.point()->GetLegendreP(lOrder) << std::endl;	
       }
     }
-  } else std::cout << "Could not write legendre polynomials check file." << std::endl;
+  } else configure.outStream << "Could not write legendre polynomials check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();    
 }
@@ -531,7 +546,7 @@ void EData::PrintLegendreP(const struct Config &configure) {
  * Calls EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
+void EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
   for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
 #pragma omp parallel for
   	for(int i=1;i<=segment->NumPoints();i++) {
@@ -545,16 +560,17 @@ void EData::CalcEDependentValues(CNuc *theCNuc,const struct Config& configure) {
  * Prints the values calculated by EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) {
+void EData::PrintEDependentValues(const Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkpene=="file") {
+  if(configure.fileCheckMask & Config::CHECK_ENERGY_DEP) {
     std::string outfile=configure.checkdir+"lomatrixandpene.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkpene=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_ENERGY_DEP) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkpene=="file"&&fbuffer.is_open())||configure.checkpene=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_ENERGY_DEP)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_ENERGY_DEP)) {
     out << std::endl
     << "************************************" << std::endl
     << "*  Lo Matrix and Penetrabilities   *" << std::endl
@@ -590,7 +606,7 @@ void EData::PrintEDependentValues(const struct Config &configure,CNuc *theCNuc) 
 	}
       }
     }   
-  } else std::cout << "Could not write lo-matrix and penetrabilities check file." << std::endl;
+  } else configure.outStream << "Could not write lo-matrix and penetrabilities check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();    
 }
@@ -613,16 +629,17 @@ void EData::CalcCoulombAmplitude(CNuc *theCNuc) {
  * Prints the values calculated by EPoint::CalcCoulombAmplitude for each point in the entire EData object.
  */
 
-void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) {
+void EData::PrintCoulombAmplitude(const Config &configure,CNuc *theCNuc) {
   std::streambuf *sbuffer;
   std::filebuf fbuffer;
-  if(configure.checkcoulamp=="file") {
+  if(configure.fileCheckMask & Config::CHECK_COUL_AMPLITUDES) {
     std::string outfile=configure.checkdir+"coulombamplitudes.chk";
     fbuffer.open(outfile.c_str(),std::ios::out);
     sbuffer = &fbuffer;
-  } else if(configure.checkcoulamp=="screen") sbuffer = std::cout.rdbuf();
+  } else if(configure.screenCheckMask & Config::CHECK_COUL_AMPLITUDES) sbuffer = configure.outStream.rdbuf();
   std::ostream out(sbuffer);
-  if((configure.checkcoulamp=="file"&&fbuffer.is_open())||configure.checkcoulamp=="screen") {
+  if(((configure.fileCheckMask & Config::CHECK_COUL_AMPLITUDES)&&fbuffer.is_open())||
+     (configure.screenCheckMask & Config::CHECK_COUL_AMPLITUDES)) {
     out << std::endl
 	<< "************************************" << std::endl
 	<< "*        Coulomb Amplitudes        *" << std::endl
@@ -647,7 +664,7 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
 	}
       }
     }
-  } else std::cout << "Could not write coulomb amplitudes check file." << std::endl;
+  } else configure.outStream << "Could not write coulomb amplitudes check file." << std::endl;
   out.flush();
   if(fbuffer.is_open()) fbuffer.close();
 }
@@ -658,14 +675,14 @@ void EData::PrintCoulombAmplitude(const struct Config &configure,CNuc *theCNuc) 
  * and experimental s-factor and error.
  */
 
-void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
+void EData::WriteOutputFiles(const Config &configure, bool isFit) {
   AZUREOutput output(configure.outputdir);
   std::ofstream chiOut;
-  if(!isFit&configure.withData) {
+  if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     std::string chiOutFile = configure.outputdir+"chiSquared.out";
     chiOut.open(chiOutFile.c_str());
   }
-  if(!configure.withData) output.SetExtrap();
+  if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
   for(ESegmentIterator segment=GetSegments().begin();
@@ -676,20 +693,27 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
     std::ostream out(output(aa,ir));
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
-      out << std::setw(13) << std::scientific << point->GetCMEnergy()
-	  << std::setw(13) << std::scientific << point->GetCMAngle()
-	  << std::setw(13) << std::scientific << point->GetFitCrossSection()
-	  << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
-      if(!output.IsExtrap()) {
-      double dataNorm=segment->GetNorm();
-      out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
-	  << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
-	  << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
-	  << std::endl;
-      } else out << std::endl;
+      if(segment->IsAngularDist()) {
+	out << std::setw(13) << std::scientific << point->GetCMEnergy();
+	for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
+	out << std::endl;
+      } else {
+	out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	    << std::setw(13) << std::scientific << point->GetExcitationEnergy()
+	    << std::setw(13) << std::scientific << point->GetCMAngle()
+	    << std::setw(13) << std::scientific << point->GetFitCrossSection()
+	    << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
+	if(!output.IsExtrap()) {
+	  double dataNorm=segment->GetNorm();
+	  out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
+	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
+	      << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
+	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
+	      << std::endl;
+	} else out << std::endl;
+      }
     }
-    if(!isFit&configure.withData) {
+    if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
       totalChiSquared+=segment->GetSegmentChiSquared();
       chiOut << "Segment #"
 	     << segment->GetSegmentKey() 
@@ -699,7 +723,7 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
     }
     out<<std::endl<<std::endl;out.flush();
   }
-  if(!isFit&configure.withData) {
+  if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     chiOut << "Total Chi-Squared: " 
 	      << totalChiSquared << std::endl << std::endl;
     chiOut.flush();chiOut.close();
@@ -709,14 +733,14 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
     std::ofstream out(outputfile.c_str());
     if(out) {
       out.precision(4);
-      out << std::fixed;
+      out << std::scientific;
       for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
 	if(segment->IsVaryNorm()) out << std::setw(20) << "Segment Key #" << segment->GetSegmentKey()
-				      << std::setw(10) << segment->GetNorm() << std::endl;
+				      << std::setw(20) << segment->GetNorm() << std::endl;
       }
       out.flush();
       out.close();
-    } else std::cout << "Could not write normalization file." << std::endl;
+    } else configure.outStream << "Could not write normalization file." << std::endl;
   }
 }
 
@@ -726,16 +750,16 @@ void EData::WriteOutputFiles(const struct Config &configure, bool isFit) {
  * Otherwise, the amplitudes are read from the specified file.
  */
 
-void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) {
+void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
-  if(configure.withData) outputfile=configure.outputdir+"intEC.dat";
+  if(configure.paramMask & Config::CALCULATE_WITH_DATA) outputfile=configure.outputdir+"intEC.dat";
   else outputfile=configure.outputdir+"intEC.extrap";
-  if(configure.oldECFile) in.open(configure.integralsfile.c_str());
+  if(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS) in.open(configure.integralsfile.c_str());
   else {
     out.open(outputfile.c_str());
-    if(!out) std::cout << "Could not write to EC Amplitude File." << std::endl;
+    if(!out) configure.outStream << "Could not write to EC Amplitude File." << std::endl;
   }
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     int aa=theCNuc->GetPairNumFromKey(segment->GetEntranceKey());
@@ -747,16 +771,16 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 	    ALevel *ecLevel = theCNuc->GetJGroup(j)->GetLevel(la);
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
-	      if(!configure.oldECFile) {
-		std::cout << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
-		          << std::setw(0) << " [                         ] 0%";std::cout.flush();
+	      if(!(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS)) {
+		configure.outStream << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		          << std::setw(0) << " [                         ] 0%";configure.outStream.flush();
 		int numPoints=segment->NumPoints();
 		int pointIndex=0;
 		time_t startTime = time(NULL);
 #pragma omp parallel for
 		for(int i=1;i<=numPoints;i++) {
 		  EPoint *point = segment->GetPoint(i);
-		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc);
+		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc,configure);
 		  ++pointIndex;
 		  if(difftime(time(NULL),startTime)>0.25) {
 		  	  startTime=time(NULL);
@@ -768,11 +792,11 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 			    	progress+='*';
 			    } else progress+=' ';
 		      } progress+="] ";
-		      std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
-		      	        << std::setw(0) << progress << percent*100 << '%';std::cout.flush();
+		      configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		      	        << std::setw(0) << progress << percent*100 << '%';configure.outStream.flush();
 		  }
 		}
-	    std::cout << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+	    configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
 	              << std::setw(0) << " [*************************] 100%" << std::endl;
 	      }
 	      for(EPointIterator point=segment->GetPoints().begin();
@@ -780,7 +804,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const struct Config& configure) 
 		if(!(point->IsMapped())) {
 		  for(int k=1;k<=entrancePair->GetDecay(ir)->NumKGroups();k++) {
 		    for(int ecm=1;ecm<=entrancePair->GetDecay(ir)->GetKGroup(k)->NumECMGroups();ecm++) {
-		      if(!configure.oldECFile) {
+		      if(!(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS)) {
 			if(out.is_open()) out << point->GetECAmplitude(k,ecm) << std::endl;
 			for(EPointIterator subPoint=point->GetSubPoints().begin();
 			    subPoint<point->GetSubPoints().end();subPoint++)
@@ -886,6 +910,14 @@ void EData::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
   }
 }
 
+
+/*!
+ * Deletes the last segment from the segment vector.
+ */
+
+void EData::DeleteLastSegment() {
+  segments_.pop_back();
+}
 
 /*!
  * Fills the Normalizations from the Minuit parameter array.

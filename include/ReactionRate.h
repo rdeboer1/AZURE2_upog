@@ -5,7 +5,7 @@
 
 class CNuc;
 
-extern double gsl_reactionrate_integration(double,CNuc*,const struct Config&,int,int);
+extern double gsl_reactionrate_integration(double,CNuc*,const Config&,int,int);
 
 ///A container structure for a reaction rate.
 
@@ -33,7 +33,7 @@ class ReactionRate {
    * The ReactionRate object is created with reference to a CNuc object, a vector of Minuit parameters,
    * a Config structure, and a set of entrance and exit pair keys.
    */
-  ReactionRate(CNuc*, const vector_r&, const struct Config &, int, int);
+  ReactionRate(CNuc*, const vector_r&, const Config &, int, int);
   /*!
    * Returns a pointer to the CNuc object.
    */
@@ -41,7 +41,7 @@ class ReactionRate {
   /*!
    * Returns a reference to the Config structure.
    */
-  const struct Config &configure() const {return configure_;};
+  const Config &configure() const {return configure_;};
   /*!
    * Returns the entrance pair key.
    */
@@ -50,8 +50,8 @@ class ReactionRate {
    * Returns the exit pair key.
    */
   int exitKey() const {return exit_key_;};
-  void CalculateRates(double,double,double);
-  void CalculateFileRates(std::string);
+  void CalculateRates();
+  void CalculateFileRates();
   /*!
    * Writes the rates to an output file.
    */
@@ -60,7 +60,7 @@ class ReactionRate {
   int entrance_key_;
   int exit_key_;
   CNuc *compound_;
-  const struct Config &configure_;
+  const Config &configure_;
   std::vector<RateData> rates_;
 };
 

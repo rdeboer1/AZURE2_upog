@@ -26,6 +26,7 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   lab_angle_=dataLine.angle();
   cm_energy_=dataLine.energy();
   lab_energy_=dataLine.energy();
+  excitation_energy_=dataLine.energy();
   cm_crosssection_=dataLine.crossSection();
   cm_dcrosssection_=dataLine.error();
   lab_crosssection_=dataLine.crossSection();
@@ -35,6 +36,8 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   sfactorconv_=0.;
   is_differential_=parent->IsDifferential();
   is_phase_=parent->IsPhase();
+  is_ang_dist_=parent->IsAngularDist();
+  max_ang_dist_order_=parent->GetMaxAngDistOrder();
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
@@ -56,6 +59,7 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   cm_angle_=angle;
   lab_energy_=energy;
   cm_energy_=energy;
+  excitation_energy_=energy;
   cm_crosssection_=0.;
   cm_dcrosssection_=0.1;
   lab_crosssection_=0.;
@@ -65,6 +69,8 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   sfactorconv_=0.;
   is_differential_=parent->IsDifferential();
   is_phase_=parent->IsPhase();
+  is_ang_dist_=parent->IsAngularDist();
+  max_ang_dist_order_=parent->GetMaxAngDistOrder();
   j_value_=parent->GetJ();
   l_value_=parent->GetL();
   is_mapped_=false;
@@ -81,13 +87,14 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
  */
 
 EPoint::EPoint(double angle, double energy, int entranceKey, 
-	       int exitKey, bool isDifferential, bool isPhase, double jValue, int lValue) {
+	       int exitKey, bool isDifferential, bool isPhase, bool isAngularDist, double jValue, int lValue, int maxAngDistOrder) {
   entrance_key_=entranceKey;
   exit_key_=exitKey;
   lab_angle_=angle;
   cm_angle_=angle;
   lab_energy_=energy;
   cm_energy_=energy;
+  excitation_energy_=energy;
   cm_crosssection_=0.;
   cm_dcrosssection_=0.1;
   lab_crosssection_=0.;
@@ -97,6 +104,8 @@ EPoint::EPoint(double angle, double energy, int entranceKey,
   sfactorconv_=0.;
   is_differential_=isDifferential;
   is_phase_=isPhase;
+  is_ang_dist_=isAngularDist;
+  max_ang_dist_order_=maxAngDistOrder;
   j_value_=jValue;
   l_value_=lValue;
   is_mapped_=false;
@@ -122,6 +131,14 @@ bool EPoint::IsPhase() const {
 }
 
 /*!
+ * Returns true if the point is angular distribution, otherwise returns false.
+ */
+
+bool EPoint::IsAngularDist() const {
+  return is_ang_dist_;
+}
+
+/*!
  * Returns true if the point is a mapped point, otherwise returns false.  Mapping in 
  * AZURE is performed so calculations are not redundantly performed for like energies.
  * Energy dependent quantities are calculated only once for a given energy, and then 
@@ -137,7 +154,7 @@ bool EPoint::IsMapped() const {
  */
 
 bool EPoint::IsTargetEffect() const {
-  if(GetTargetEffectNum()!=0&&NumSubPoints()>0) return true;
+  if(GetTargetEffectNum()!=0) return true;
   else return false;
 }
 
@@ -202,6 +219,22 @@ int EPoint::GetTargetEffectNum() const {
   return targetEffectNum_;
 }
 
+/*!
+ * Returns the maximum polynomial order of the point is angular distribution.
+ */
+
+int EPoint::GetMaxAngDistOrder() const {
+  return max_ang_dist_order_;
+}
+
+/*!
+ * Return the number of angular distribution coefficients in the vector.
+ */
+
+int EPoint::GetNumAngularDists() const {
+  return angularDists_.size();
+}
+
 /*! 
  * Returns the angle of the data point in the laboratory frame.
  */
@@ -233,6 +266,15 @@ double EPoint::GetLabEnergy() const {
 double EPoint::GetCMEnergy() const {
   return cm_energy_;
 }
+
+/*! 
+ * Returns the energy of the point in compound excitation energy.
+ */
+
+double EPoint::GetExcitationEnergy() const {
+  return excitation_energy_;
+}
+
 
 /*! 
  * Returns the Legendre polynomial specified by an order.  
@@ -333,6 +375,14 @@ double EPoint::GetTargetThickness() const {
 }
 
 /*!
+ * Returns the angular distribution coefficient corresponding to the given order;
+ */
+
+double EPoint::GetAngularDist(int order) const {
+  return angularDists_[order];
+}
+
+/*!
  * Returns the \f$ L_o \f$ diagonal matrix element for a channel specified
  * by positions in the JGroup and subsequent AChannel vectors.
  */
@@ -400,12 +450,12 @@ EnergyMap EPoint::GetMap() const {
  * to calculate all energy dependent quantities that do no rely on the R-Matrix fit parameters.
  */
 
-void EPoint::Initialize(CNuc *compound,const struct Config &configure) {
+void EPoint::Initialize(CNuc *compound,const Config &configure) {
   this->CalcEDependentValues(compound,configure);
   if(this->IsDifferential()) 
     this->CalcLegendreP(configure.maxLOrder,NULL);
   this->CalcCoulombAmplitude(compound);
-  if(configure.isEC) this->CalculateECAmplitudes(compound);
+  if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) this->CalculateECAmplitudes(compound,configure);
 }
 
 /*!
@@ -418,6 +468,7 @@ void EPoint::ConvertLabEnergy(PPair *pPair) {
   cm_energy_=this->GetLabEnergy()*
     (pPair->GetM(2))/
     (pPair->GetM(1)+pPair->GetM(2));
+  excitation_energy_=cm_energy_+pPair->GetSepE();
 }
 
 /*!
@@ -438,7 +489,7 @@ void EPoint::ConvertLabAngle(PPair *pPair) {
  * overloaded function is for non-elastic particle channels.
  */
 
-void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
+void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config& configure) {
   double qValue=entrancePair->GetSepE()+entrancePair->GetExE()-exitPair->GetSepE()-exitPair->GetExE();
   double a13=(entrancePair->GetM(1)*exitPair->GetM(1))*this->GetLabEnergy()/(this->GetLabEnergy()+qValue)/
     (entrancePair->GetM(1)+entrancePair->GetM(2))/(exitPair->GetM(1)+exitPair->GetM(2));
@@ -447,7 +498,7 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair) {
 
   if(a13>a24) {
     double thetaMax=asin(sqrt(a24/a13))*180./pi;
-    if(thetaMax<this->GetLabAngle()) std::cout << std::endl << "Lab Angle (" << this->GetLabAngle() 
+    if(thetaMax<this->GetLabAngle()) configure.outStream << std::endl << "Lab Angle (" << this->GetLabAngle() 
 					       << " degrees) is not kinematically possible.  Maximum angle is " 
 					       << thetaMax << " degrees." << std::endl;
     assert(thetaMax>=this->GetLabAngle());
@@ -511,24 +562,24 @@ void EPoint::SetSFactorConversion(double conversion) {
  * Calculates Legendre polynomials up to a maximum order.  The polynomials are added, in order, to a vector.
  */
 
-void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
+void EPoint::CalcLegendreP(int maxL,TargetEffect* targetEffect) {
   double x=cos(this->GetCMAngle()*pi/180.0);
   if(maxL>=0) {
-    if(qValuePtr && qValuePtr->size()>0)
-      this->AddLegendreP(qValuePtr->operator[](0));
+    if(targetEffect && targetEffect->NumQCoefficients()>0)
+      this->AddLegendreP(targetEffect->GetQCoefficient(0));
     else this->AddLegendreP(1.0);
     double polyMinusTwo=1.0;
     if(maxL>=1) {
-      if(qValuePtr && qValuePtr->size()>1)
-	this->AddLegendreP(x*qValuePtr->operator[](1));
+      if(targetEffect && targetEffect->NumQCoefficients()>1)
+	this->AddLegendreP(x*targetEffect->GetQCoefficient(1));
       else this->AddLegendreP(x);
       double polyMinusOne=x;
       if(maxL>=2) {
 	for(int lOrder=2;lOrder<=maxL;lOrder++) {
 	  double poly=(2.0*lOrder-1.0)/lOrder*x*polyMinusOne-
 	    (lOrder-1.0)/lOrder*polyMinusTwo;
-	  if(qValuePtr && qValuePtr->size()>lOrder)
-	    this->AddLegendreP(poly*qValuePtr->operator[](lOrder));
+	  if(targetEffect && targetEffect->NumQCoefficients()>lOrder)
+	    this->AddLegendreP(poly*targetEffect->GetQCoefficient(lOrder));
 	  else this->AddLegendreP(poly);
 	  polyMinusTwo=polyMinusOne;
 	  polyMinusOne=poly;
@@ -537,7 +588,7 @@ void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalcLegendreP(maxL,qValuePtr);
+    this->GetSubPoint(i)->CalcLegendreP(maxL, targetEffect);
   }
 }
 
@@ -548,7 +599,7 @@ void EPoint::CalcLegendreP(int maxL,std::vector<double>* qValuePtr) {
  * and hard sphere phase shfits.
  */
 
-void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure) {
+void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
   PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
   double geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
   this->SetGeometricalFactor(geofactor);
@@ -576,7 +627,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure)
 	    this->AddExpCoulombPhase(j,ch,1.0);
 	    this->AddExpHardSpherePhase(j,ch,1.0);
 	  } else {
-	    CoulFunc theCoulombFunction(thePair);
+	    CoulFunc theCoulombFunction(thePair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	    double radius=thePair->GetChRad();
 	    double localPene=theCoulombFunction.Penetrability(lValue,radius,localEnergy);
 	    double localShift=theCoulombFunction.PEShift(lValue,radius,localEnergy);
@@ -601,7 +652,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const struct Config& configure)
 	} else if(thePair->GetPType()==10){
 	  complex loElement = complex(0.0,0.0);
 	  this->AddLoElement(j,ch,loElement);
-	  double sqrtPene = configure.useRMC ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
+	  double sqrtPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
 	  this->AddSqrtPenetrability(j,ch,sqrtPene);
 	  this->AddExpCoulombPhase(j,ch,1.0);
 	  this->AddExpHardSpherePhase(j,ch,1.0);
@@ -718,7 +769,7 @@ void EPoint::SetCoulombAmplitude(complex amplitude) {
  * entrance and exit pairs.
  */
 
-void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
+void EPoint::CalculateECAmplitudes(CNuc *theCNuc, const Config& configure) {
   int aa=theCNuc->GetPairNumFromKey(this->GetEntranceKey());
   if(theCNuc->GetPair(aa)->IsEntrance()) {
     PPair *entrancePair=theCNuc->GetPair(aa);
@@ -734,7 +785,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 	      for(int ecm=1;ecm<=theKGroup->NumECMGroups();ecm++) {
 		ECMGroup *theECMGroup=theKGroup->GetECMGroup(ecm);
 		//entrance Phase Calculations;
-		CoulFunc theCoulombFunction(entrancePair);
+		CoulFunc theCoulombFunction(entrancePair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 		struct CoulWaves 
 		  coul=theCoulombFunction(theECMGroup->GetL(),entrancePair->GetChRad(),
 					  this->GetCMEnergy());		
@@ -767,7 +818,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
 		  theInitialSValue=theKGroup->GetS();
 		}	    
 		
-		ECIntegral theECIntegral(theFinalPair);
+		ECIntegral theECIntegral(theFinalPair,configure);
 		complex integrals = theECIntegral(theInitialLValue, theFinalChannel->GetL(), 
 						  theInitialSValue, theFinalChannel->GetS(),
 						  theECMGroup->GetJ(), theCNuc->GetJGroup(j)->GetJ(),
@@ -786,7 +837,7 @@ void EPoint::CalculateECAmplitudes(CNuc *theCNuc) {
     }
   }
   for(int i=1;i<=this->NumSubPoints();i++) {
-    this->GetSubPoint(i)->CalculateECAmplitudes(theCNuc);
+    this->GetSubPoint(i)->CalculateECAmplitudes(theCNuc,configure);
   }
 }
 
@@ -805,11 +856,13 @@ void EPoint::AddECAmplitude(int kGroupNum, int ecMGroupNum, complex ecAmplitude)
  * Calculates the cross section for a data point based on the fit parameters in the compound nucleus.
  */
 
-void EPoint::Calculate(CNuc* theCNuc,const struct Config &configure, EPoint *parent, int subPointNum) {
+void EPoint::Calculate(CNuc* theCNuc,const Config &configure, EPoint *parent, int subPointNum) {
 
-  if(!this->IsTargetEffect()) {
+  if(!this->IsTargetEffect()||
+     (!this->GetParentData()->GetTargetEffect(this->GetTargetEffectNum())->IsConvolution()&&
+      !this->GetParentData()->GetTargetEffect(this->GetTargetEffectNum())->IsTargetIntegration())) {
     GenMatrixFunc *theMatrixFunc;
-    if(configure.isAMatrix) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
+    if(configure.paramMask & Config::USE_AMATRIX) theMatrixFunc=new AMatrixFunc(theCNuc,configure);
     else theMatrixFunc=new RMatrixFunc(theCNuc,configure);
     theMatrixFunc->ClearMatrices();
     theMatrixFunc->FillMatrices(this);
@@ -1010,6 +1063,15 @@ void EPoint::SetStoppingPower(double stoppingPower) {
 
 void EPoint::SetTargetThickness(double targetThickness) {
   targetThickness_=targetThickness;
+}
+
+/*!
+ * Sets the angular distribution coefficients.
+ */
+
+void EPoint::SetAngularDists(vector_r dists) {
+  angularDists_.clear();
+  angularDists_=dists;
 }
 
 /*!

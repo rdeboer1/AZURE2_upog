@@ -1,4 +1,5 @@
 #include "AZUREParams.h"
+#include "Config.h"
 
 /*!
  * This function returns the MnUserParameters object used by Minuit to store 
@@ -15,7 +16,7 @@ ROOT::Minuit2::MnUserParameters &AZUREParams::GetMinuitParams() {
  * initial parameters determined from the nuclear input file.
  */
 
-void AZUREParams::ReadUserParameters(std::string infile) {
+void AZUREParams::ReadUserParameters(const Config& configure) {
   std::vector<std::string> names;
   vector_r values;
   vector_r errors;
@@ -24,7 +25,7 @@ void AZUREParams::ReadUserParameters(std::string infile) {
   double tempvalue,temperror;
 
   std::ifstream in;
-  in.open(infile.c_str());
+  in.open(configure.paramfile.c_str());
   if(in) {
     while(!in.eof()) {
       in >> tempname >> tempvalue >> temperror; getline(in,tempfixed);
@@ -41,7 +42,7 @@ void AZUREParams::ReadUserParameters(std::string infile) {
       }
     }
     in.close();
-  } else std::cout << "Could not read user parameter file." << std::endl;
+  } else configure.outStream << "Could not read user parameter file." << std::endl;
   
   for(int i=0;i<GetMinuitParams().Params().size();i++) {
     for(int ii=0;ii<names.size();ii++) {
@@ -62,10 +63,10 @@ void AZUREParams::ReadUserParameters(std::string infile) {
  * This function writes the formal R-matrix parameters to a file.
  */
 
-void AZUREParams::WriteUserParameters(std::string outdir, bool fitParameters) {
+void AZUREParams::WriteUserParameters(const Config& configure, bool fitParameters) {
   char filename[256];
-  if(fitParameters) sprintf(filename,"%sparam.sav",outdir.c_str());
-  else sprintf(filename,"%sparam.par",outdir.c_str());
+  if(fitParameters) sprintf(filename,"%sparam.sav",configure.outputdir.c_str());
+  else sprintf(filename,"%sparam.par",configure.outputdir.c_str());
   std::ofstream out;
   out.open(filename);
   if(out) {
@@ -77,16 +78,16 @@ void AZUREParams::WriteUserParameters(std::string outdir, bool fitParameters) {
     }
     out.flush();
     out.close();
-  } else std::cout << "Could not save param.par file." << std::endl;
+  } else configure.outStream << "Could not save param.par file." << std::endl;
 }
 
 /*!
  * This function writes the parameter errors to a file if Minos has been invoked. 
  */
 
-void AZUREParams::WriteParameterErrors(const std::vector<std::pair<double,double> > &errors,std::string outdir) {
+void AZUREParams::WriteParameterErrors(const std::vector<std::pair<double,double> > &errors,const Config& configure) {
   char filename[256];
-  sprintf(filename,"%sparam.errors",outdir.c_str());
+  sprintf(filename,"%sparam.errors",configure.outputdir.c_str());
   std::ofstream out;
   out.open(filename);
   if(out) {
@@ -100,5 +101,5 @@ void AZUREParams::WriteParameterErrors(const std::vector<std::pair<double,double
     }
     out.flush();
     out.close();
-  } else std::cout << "Could not save param.errors file." << std::endl;
+  } else configure.outStream << "Could not save param.errors file." << std::endl;
 }

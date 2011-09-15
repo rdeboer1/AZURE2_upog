@@ -23,7 +23,7 @@ class CNuc;
 class PPair;
 class TargetEffect;
 class DataLine;
-
+class Config;
 
 ///An AZURE data point
 
@@ -37,11 +37,12 @@ class EPoint {
  public:
   EPoint(DataLine, ESegment*);
   EPoint(double, double, ESegment*);
-  EPoint(double, double, int, int, bool, bool, double, int);
+  EPoint(double, double, int, int, bool, bool, bool, double, int, int);
   bool IsDifferential() const;
   bool IsPhase() const;
   bool IsMapped() const;
   bool IsTargetEffect() const;
+  bool IsAngularDist() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
   int GetMaxLOrder() const;
@@ -49,10 +50,13 @@ class EPoint {
   int NumLocalMappedPoints() const;
   int NumSubPoints() const;
   int GetTargetEffectNum() const;
+  int GetMaxAngDistOrder() const;
+  int GetNumAngularDists() const;
   double GetLabAngle() const;
   double GetCMAngle() const;
   double GetLabEnergy() const;
   double GetCMEnergy() const;
+  double GetExcitationEnergy() const;
   double GetLegendreP(int) const;
   double GetLabCrossSection() const;
   double GetCMCrossSection() const;
@@ -65,32 +69,33 @@ class EPoint {
   double GetJ() const;
   double GetStoppingPower() const;
   double GetTargetThickness() const;
+  double GetAngularDist(int) const;
   complex GetLoElement(int,int) const;
   complex GetExpCoulombPhase(int,int) const;
   complex GetExpHardSpherePhase(int,int) const;
   complex GetCoulombAmplitude() const;
   complex GetECAmplitude(int,int) const;
   EnergyMap GetMap() const;
-  void Initialize(CNuc*,const struct Config&);
+  void Initialize(CNuc*,const Config&);
   void ConvertLabEnergy(PPair*);
   void ConvertLabAngle(PPair*);
-  void ConvertLabAngle(PPair*,PPair*);
+  void ConvertLabAngle(PPair*,PPair*,const Config&);
   void ConvertCrossSection();
   void AddLegendreP(double);
   void SetGeometricalFactor(double);
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
-  void CalcLegendreP(int,std::vector<double>*);
-  void CalcEDependentValues(CNuc*,const struct Config&);
+  void CalcLegendreP(int,TargetEffect*);
+  void CalcEDependentValues(CNuc*,const Config&);
   void AddLoElement(int,int,complex);
   void AddSqrtPenetrability(int,int,double);
   void AddExpCoulombPhase(int,int,complex);
   void AddExpHardSpherePhase(int,int,complex);
   void CalcCoulombAmplitude(CNuc*);
   void SetCoulombAmplitude(complex);
-  void CalculateECAmplitudes(CNuc*);
+  void CalculateECAmplitudes(CNuc*,const Config&);
   void AddECAmplitude(int,int,complex);
-  void Calculate(CNuc*,const struct Config &configure,EPoint* parent=NULL, int subPointNum=0);
+  void Calculate(CNuc*,const Config &configure,EPoint* parent=NULL, int subPointNum=0);
   void SetMap(int,int);
   void AddLocalMappedPoint(EPoint*);
   void ClearLocalMappedPoints();
@@ -100,6 +105,7 @@ class EPoint {
   void SetParentData(EData*);
   void SetStoppingPower(double);
   void SetTargetThickness(double);
+  void SetAngularDists(vector_r);
   EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
   EPoint* GetSubPoint(int);
@@ -109,14 +115,17 @@ class EPoint {
   bool is_differential_;
   bool is_phase_;
   bool is_mapped_;
+  bool is_ang_dist_;
   int entrance_key_;
   int exit_key_;
   int l_value_;
   int targetEffectNum_;
+  int max_ang_dist_order_;
   double cm_angle_;
   double lab_angle_;
   double cm_energy_;
   double lab_energy_;
+  double excitation_energy_;
   double cm_crosssection_;
   double cm_dcrosssection_;
   double lab_crosssection_;
@@ -130,6 +139,7 @@ class EPoint {
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;
+  vector_r angularDists_;
   matrix_c lo_elements_;
   matrix_r penetrabilities_;
   matrix_c coulombphase_;

@@ -3,6 +3,7 @@
 
 #include "CoulFunc.h"
 #include "WhitFunc.h"
+#include "Config.h"
 
 ///Return structure for ECIntegral function class
 
@@ -41,8 +42,8 @@ class ECIntegral {
    * The PPair object is used to create new instances of the CoulFunc and 
    * WhitFunc objects.  
    */
-  ECIntegral(PPair *pPair) {
-    coulfunc_ = new CoulFunc(pPair);
+  ECIntegral(PPair *pPair, const Config& configure) {
+    coulfunc_ = new CoulFunc(pPair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
     whitfunc_ = new WhitFunc(pPair);
     pair_ = pPair;
   };

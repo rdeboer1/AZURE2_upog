@@ -74,7 +74,7 @@ class GenMatrixFunc {
   /*!
    *This virtual function in implemented in the child class.
    */
-  virtual const struct Config& configure() const = 0;
+  virtual const Config& configure() const = 0;
  protected:
   ///Vector of internal T-matrix elements accessable to child class.
   std::vector<matrix_c> tmatrix_;
