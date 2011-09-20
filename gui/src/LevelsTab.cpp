@@ -76,6 +76,8 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   channelsView->setColumnHidden(5,true);
   channelsView->setColumnHidden(6,true);
   channelsView->setItemDelegateForColumn(2,new RichTextDelegate());
+  channelsView->setItemDelegateForColumn(3,new RichTextDelegate());
+  channelsView->setItemDelegateForColumn(4,new RichTextDelegate());
   channelsView->setSelectionBehavior(QAbstractItemView::SelectRows);
   channelsView->setSelectionMode(QAbstractItemView::SingleSelection);
   channelsView->setEditTriggers(QAbstractItemView::NoEditTriggers);

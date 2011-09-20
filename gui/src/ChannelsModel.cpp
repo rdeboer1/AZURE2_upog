@@ -24,11 +24,23 @@ QVariant ChannelsModel::data(const QModelIndex &index, int role) const {
     if(index.column() == 1) return channel.levelIndex;
     else if(index.column() == 2) {
       PairsData pair=pairsModel->getPairs().at(channel.pairIndex);
-      return pairsModel->getParticleLabel(pair);
-    } else if(index.column() == 3) return getSpinLabel(channel);
-    else if(index.column() == 4) {
-      if(channel.radType=='P') return channel.lValue;
-      else return QString("%1%2").arg(channel.radType).arg(channel.lValue);
+      if(channel.reducedWidth!=0.) 
+	return QString("<center><font style='font-weight:bold;'>%1</font></center>").arg(pairsModel->getParticleLabel(pair));
+      else return QString("<center>%1</center>").arg(pairsModel->getParticleLabel(pair));
+    } else if(index.column() == 3) {
+       if(channel.reducedWidth!=0.) 
+	 return QString("<center><font style='font-weight:bold;'>%1</font></center>").arg(getSpinLabel(channel));
+       else return QString("<center>%1</center>").arg(getSpinLabel(channel));
+    } else if(index.column() == 4) {
+      if(channel.radType=='P') {
+	if(channel.reducedWidth!=0.) 
+	  return QString("<center><font style='font-weight:bold;'>%1</font></center>").arg(channel.lValue);
+	else return QString("<center>%1</center>").arg(channel.lValue);
+      } else {
+	if(channel.reducedWidth!=0.)
+	  return QString("<center><font style='font-weight:bold;'>%1%2</font></center>").arg(channel.radType).arg(channel.lValue);
+	else return QString("<center>%1%2</center>").arg(channel.radType).arg(channel.lValue);
+      }
     } else if(index.column() == 5) return channel.radType;
     else if(index.column() == 6) return channel.reducedWidth;
   } else if(role==Qt::EditRole) {
