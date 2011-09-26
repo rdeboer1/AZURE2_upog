@@ -3,6 +3,11 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 
+const double IntegratedFermiFunc::alpha_=1./137.036;
+const double IntegratedFermiFunc::pi_=3.14159;
+const double IntegratedFermiFunc::electronMass_=0.51099891;
+const double IntegratedFermiFunc::hbarc_=197.327;
+
 /*!
  * The constructor for the function takes the charge of the Fermion
  * as the first argument. This is expected to be either -1 or 1 for electrons

@@ -15,10 +15,10 @@ class IntegratedFermiFunc {
   IntegratedFermiFunc(int,double V0 = 0.);
   double operator()(double,double,double);
  private:
-  static const double alpha_=1./137.036;
-  static const double pi_=3.14159;
-  static const double electronMass_=0.51099891;
-  static const double hbarc_=197.327;
+  static const double alpha_;
+  static const double pi_;
+  static const double electronMass_;
+  static const double hbarc_;
   static double Integrand(double, void*);  
   typedef struct Params_ {
     int charge;
