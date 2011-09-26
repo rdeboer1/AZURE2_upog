@@ -37,6 +37,7 @@ QVariant PairsModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 12) return pair.channelRadius;
     else if(index.column() == 13) {
       if(pair.pairType == 10) return "Particle, Gamma";
+      else if(pair.pairType == 20) return "Beta Decay";
       else return "Particle, Particle";
     }
   } else if (role == Qt::EditRole) {
@@ -181,7 +182,10 @@ int PairsModel::isPair(const PairsData &pair) const {
 QString PairsModel::getParticleLabel(const PairsData &pair, int which) const {
   if(which!=-1) {
     if(pair.pairType==10&&which==0) return "<center>&gamma;</center>";
-    else {
+    else if(pair.pairType==20&&which==0) {
+      if(pair.lightZ<0) return "<center>&beta;<sup>-</sup></center>";
+      else return "<center>&beta;<sup>+</sup></center>";
+    } else {
       int tempZ;
       int tempM;
       if(which==0) {
@@ -204,7 +208,10 @@ QString PairsModel::getParticleLabel(const PairsData &pair, int which) const {
     QString lightLabel;
     std::map<int, QString>::const_iterator it=elementMap.find(pair.lightZ);
     if(pair.pairType==10) lightLabel="&gamma;";
-    else if(it!=elementMap.end()) {
+    else if(pair.pairType==20) {
+      if(pair.lightZ<0.) lightLabel="&beta;<sup>-</sup>";
+      else lightLabel="&beta;<sup>+</sup>";
+    } else if(it!=elementMap.end()) {
       if(round(pair.lightM)==1) {
 	if(pair.lightZ==1) lightLabel="<i>p</i>";
 	else lightLabel=QString("<i>%1</i>").arg(it->second);
@@ -220,7 +227,8 @@ QString PairsModel::getParticleLabel(const PairsData &pair, int which) const {
       } else if(pair.heavyZ==2&&round(pair.heavyM)==4) heavyLabel="&alpha;";
       else heavyLabel=QString("<sup>%1</sup>%2").arg(round(pair.heavyM)).arg(it->second);
     } else heavyLabel="?";
-    return QString("<center>%1+%2 [%3 MeV]</center>").arg(heavyLabel).arg(lightLabel).arg(pair.excitationEnergy,0,'f',3);
+    if(pair.pairType==20) return QString("<center>%1(%2) [%3 MeV]</center>").arg(heavyLabel).arg(lightLabel).arg(pair.excitationEnergy,0,'f',3);
+    else return QString("<center>%1+%2 [%3 MeV]</center>").arg(heavyLabel).arg(lightLabel).arg(pair.excitationEnergy,0,'f',3);
   }
 }
 
@@ -228,7 +236,10 @@ QString PairsModel::getReactionLabel(const PairsData &firstPair, const PairsData
   QString lightLabel[2];
   std::map<int, QString>::const_iterator it=elementMap.find(firstPair.lightZ);
   if(firstPair.pairType==10) lightLabel[0]="&gamma;";
-  else if(it!=elementMap.end()) {
+  else if(firstPair.pairType==20) {
+    if(firstPair.lightZ<0) lightLabel[0]="&beta;<sup>-</sup>";
+    else lightLabel[0]="&beta;<sup>+</sup>";
+  } else if(it!=elementMap.end()) {
     if(round(firstPair.lightM)==1) {
       if(firstPair.lightZ==1) lightLabel[0]="<i>p</i>";
       else lightLabel[0]=QString("<i>%1</i>").arg(it->second);
@@ -237,7 +248,10 @@ QString PairsModel::getReactionLabel(const PairsData &firstPair, const PairsData
   } else lightLabel[0]="?";
   it=elementMap.find(secondPair.lightZ);
   if(secondPair.pairType==10) lightLabel[1]="&gamma;";
-  else if(it!=elementMap.end()) {
+  else if(secondPair.pairType==20) {
+    if(secondPair.lightZ<0) lightLabel[1]="&beta;<sup>-</sup>";
+    else lightLabel[1]="&beta;<sup>+</sup>";
+  } else if(it!=elementMap.end()) {
     if(round(secondPair.lightM)==1) {
       if(secondPair.lightZ==1) lightLabel[1]="<i>p</i>";
       else lightLabel[1]=QString("<i>%1</i>").arg(it->second);
@@ -261,7 +275,8 @@ QString PairsModel::getReactionLabel(const PairsData &firstPair, const PairsData
     } else if(secondPair.heavyZ==2&&round(secondPair.heavyM)==4) heavyLabel[1]="&alpha;";
     else heavyLabel[1]=QString("<sup>%1</sup>%2").arg(round(secondPair.heavyM)).arg(it->second);
   } else heavyLabel[1]="?";
-  return QString("%1(%2,%3)%4 [%5 MeV]").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
+  if(firstPair.pairType==20) return QString("%1(%2%3)%4 [%5 MeV]").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
+  else return QString("%1(%2,%3)%4 [%5 MeV]").arg(heavyLabel[0]).arg(lightLabel[0]).arg(lightLabel[1]).arg(heavyLabel[1]).arg(secondPair.excitationEnergy,0,'f',3);
 }
 
 QString PairsModel::getSpinLabel(const PairsData &pair, int which) const {

@@ -81,17 +81,29 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 	      double gammaCh=level->GetFitGamma(ch);
 	      double gammaChp=level->GetFitGamma(chp);
 	      double resenergy=level->GetFitE();
-	      double inenergy=point->GetCMEnergy()+
-		compound()->
-		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		GetSepE()+
-		compound()->
-		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		GetExE();
+	      double inenergy;
+	      if(compound()->
+		 GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		 GetPType()==20)
+		inenergy=point->GetCMEnergy()+
+		  compound()->
+		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+		  GetSepE()+
+		  compound()->
+		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+		  GetExE();
+	      else inenergy=point->GetCMEnergy()+
+		     compound()->
+		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		     GetSepE()+
+		     compound()->
+		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		     GetExE();
 	      double gammaSum=0.;
 	      if(configure().paramMask & Config::USE_RMC_FORMALISM) 
 		for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
-		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()!='P')
+		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='M' || 
+		     compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='E')
 		    gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
 	      sum+=gammaCh*gammaChp/(resenergy-inenergy-complex(0.0,1.0)*gammaSum);
 	    }

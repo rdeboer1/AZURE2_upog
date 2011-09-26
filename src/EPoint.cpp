@@ -10,6 +10,7 @@
 #include "RMatrixFunc.h"
 #include "ShftFunc.h"
 #include "TargetEffect.h"
+#include "IntegratedFermiFunc.h"
 #include <iostream>
 #include <assert.h>
 
@@ -471,6 +472,13 @@ void EPoint::ConvertLabEnergy(PPair *pPair) {
   excitation_energy_=cm_energy_+pPair->GetSepE();
 }
 
+void EPoint::ConvertDecayEnergy(PPair *pPair) {
+  cm_energy_=this->GetLabEnergy()/
+    (pPair->GetM(2))*
+    (pPair->GetM(1)+pPair->GetM(2));
+  excitation_energy_=cm_energy_+pPair->GetSepE();
+}
+
 /*!
  * Calculates center of mass angles.  When a data point is initialized, the same angle is copied into
  * the attributes for center of mass and lab angles.  If this function is called, the center of mass angle
@@ -601,13 +609,25 @@ void EPoint::CalcLegendreP(int maxL,TargetEffect* targetEffect) {
 
 void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
   PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
-  double geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
+  PPair *exitPair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetExitKey()));
+
+  double inEnergy;
+  double geofactor;
+  double sfactorconv;
+  if(theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()))->GetPType()==20)  {
+    inEnergy=this->GetCMEnergy()+exitPair->GetSepE()+exitPair->GetExE();
+    geofactor=1.;
+    sfactorconv=1.;
+  } else {
+    inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
+    geofactor=pi*pow(hbarc,2.)/(2*entrancePair->GetRedMass()*uconv*this->GetCMEnergy());
+    sfactorconv=this->GetCMEnergy()*exp(2*pi*sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*
+					entrancePair->GetZ(2)*sqrt(entrancePair->GetRedMass()
+								   /this->GetCMEnergy()));
+  }
   this->SetGeometricalFactor(geofactor);
-  double sfactorconv=this->GetCMEnergy()*exp(2*pi*sqrt(uconv/2.)*fstruc*entrancePair->GetZ(1)*
-					     entrancePair->GetZ(2)*sqrt(entrancePair->GetRedMass()
-									/this->GetCMEnergy()));
   this->SetSFactorConversion(sfactorconv);
-  double inEnergy=this->GetCMEnergy()+entrancePair->GetSepE()+entrancePair->GetExE();
+
   for(int j=1;j<=theCNuc->NumJGroups();j++) {
     if(theCNuc->GetJGroup(j)->IsInRMatrix()) {
       JGroup *theJGroup=theCNuc->GetJGroup(j);
@@ -653,6 +673,15 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	  complex loElement = complex(0.0,0.0);
 	  this->AddLoElement(j,ch,loElement);
 	  double sqrtPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1. : pow(localEnergy/hbarc, (double) lValue+0.5);
+	  this->AddSqrtPenetrability(j,ch,sqrtPene);
+	  this->AddExpCoulombPhase(j,ch,1.0);
+	  this->AddExpHardSpherePhase(j,ch,1.0);
+	} else if(thePair->GetPType()==20){
+	  complex loElement = complex(0.0,0.0);
+	  this->AddLoElement(j,ch,loElement);
+	  IntegratedFermiFunc fermiFunc(thePair->GetZ(1));
+	  double endPointE = thePair->GetSepE()-inEnergy;
+	  double sqrtPene = (1.+endPointE/.511<=1.) ? 0. : sqrt(fermiFunc(1.+endPointE/.511,exitPair->GetZ(1)+exitPair->GetZ(2),entrancePair->GetChRad()));
 	  this->AddSqrtPenetrability(j,ch,sqrtPene);
 	  this->AddExpCoulombPhase(j,ch,1.0);
 	  this->AddExpHardSpherePhase(j,ch,1.0);
@@ -771,6 +800,7 @@ void EPoint::SetCoulombAmplitude(complex amplitude) {
 
 void EPoint::CalculateECAmplitudes(CNuc *theCNuc, const Config& configure) {
   int aa=theCNuc->GetPairNumFromKey(this->GetEntranceKey());
+  if(theCNuc->GetPair(aa)->GetPType()==20) return;
   if(theCNuc->GetPair(aa)->IsEntrance()) {
     PPair *entrancePair=theCNuc->GetPair(aa);
     for(int j=1;j<=theCNuc->NumJGroups();j++) {

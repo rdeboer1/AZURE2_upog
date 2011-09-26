@@ -78,6 +78,7 @@ class EPoint {
   EnergyMap GetMap() const;
   void Initialize(CNuc*,const Config&);
   void ConvertLabEnergy(PPair*);
+  void ConvertDecayEnergy(PPair*);
   void ConvertLabAngle(PPair*);
   void ConvertLabAngle(PPair*,PPair*,const Config&);
   void ConvertCrossSection();

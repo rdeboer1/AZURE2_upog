@@ -3,7 +3,7 @@
 
 class IntegratedFermiFunc {
  public:
-  IntegratedFermiFunc(double V0 = 0.);
+  IntegratedFermiFunc(int,double V0 = 0.);
   double operator()(double,double,double);
  private:
   static const double alpha_=1./137.036;
@@ -12,6 +12,7 @@ class IntegratedFermiFunc {
   static const double hbarc_=197.327;
   static double Integrand(double, void*);  
   typedef struct Params_ {
+    int charge;
     double gamma0;
     double Z;
     double radius;
@@ -19,6 +20,7 @@ class IntegratedFermiFunc {
     double GammaDenom2;
     double V0;
   } Params_;
+  int charge_;
   double V0_;
 };
 

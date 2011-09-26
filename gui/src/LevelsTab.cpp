@@ -361,6 +361,16 @@ QList<ChannelsData> LevelsTab::calculateChannels(int levelIndex) {
 	  }
 	}
       }
+    } else if(pair.pairType==20) {
+      if(fabs(pair.heavyJ-level.jValue)==0.&&pair.heavyPi==level.piValue) {
+	ChannelsData gtChannel = {0,levelIndex,i,0.,1,'G',0.0};
+	ChannelsData fChannel = {0,levelIndex,i,0.,0,'F',0.0}; 
+	channels.push_back(gtChannel);
+	channels.push_back(fChannel);
+      } else if(fabs(pair.heavyJ-level.jValue)==1.&&pair.heavyPi==level.piValue) {
+	ChannelsData gtChannel = {0,levelIndex,i,1.,1,'G',0.0};
+	channels.push_back(gtChannel);
+      }
     } else {
       int numMult=1;
       for(int l=1;l<=maxMult;l++) {
@@ -487,6 +497,13 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
 	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightM) << endl;
       stm << qSetFieldWidth(21) << right << "Light Particle G: " 
 	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightG) << endl;
+    } else if(channel.radType=='G' || channel.radType=='F') {
+      if(channel.radType=='G') 
+	stm << QString("Channel is Gamow-Teller beta decay") << endl << endl;
+      else 
+	stm << QString("Channel is Fermi beta decay") << endl << endl;
+      stm << qSetFieldWidth(21) << right << "Fermion Charge: " 
+	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightZ) << endl;
     } else stm << QString("Capture gamma is %1%2 radiation").arg(channel.radType).arg(channel.lValue) 
 	       << endl << endl;
     stm << qSetFieldWidth(21) << right << "Heavy Particle Spin: "
@@ -497,9 +514,10 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
 	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.heavyM) << endl;
     stm << qSetFieldWidth(21) << right << "Heavy Particle G: "
 	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.heavyG) << endl;
-    stm << qSetFieldWidth(21) << right << "Excitation Energy: "
-	<< qSetFieldWidth(0) << left <<QString("%1").arg(pair.excitationEnergy) << endl;
-    if(channel.radType=='P') {
+    if(channel.radType!='G'&&channel.radType!='F')
+      stm << qSetFieldWidth(21) << right << "Excitation Energy: "
+	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.excitationEnergy) << endl;
+    if(channel.radType!='M'&&channel.radType!='E') {
       stm << qSetFieldWidth(21) << right << "Seperation Energy: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.seperationEnergy) << endl;
       stm << qSetFieldWidth(21) << right << "Channel Radius: "
@@ -514,8 +532,16 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
     else if (pair.pairType==10&&level.energy==pair.excitationEnergy&&level.jValue==pair.heavyJ&&
 	     level.piValue==pair.heavyPi&&channel.radType=='E'&&channel.lValue==2) 
       channelDetails->setNormParam(3);    
+    else if(pair.pairType==20) channelDetails->setNormParam(4); 
     else channelDetails->setNormParam(0);
-    channelDetails->reducedWidthText->setText(QString("%1").arg(channel.reducedWidth));
+    
+    if(pair.seperationEnergy-level.energy<=0 && pair.pairType==20) {
+      channelDetails->reducedWidthText->setText("0.");
+      channelDetails->reducedWidthText->setEnabled(false);
+    } else {
+      channelDetails->reducedWidthText->setText(QString("%1").arg(channel.reducedWidth));
+      channelDetails->reducedWidthText->setEnabled(true);
+    }
     channelDetails->show();
   }
 }
@@ -717,6 +743,10 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
       }
       QChar radType;
       if(pairType==0) radType='P';
+      else if(pairType==20) {
+	if(channelL==0) radType = 'F';
+	else radType = 'G';
+      }
       else {
 	int parityChange=heavyPi*levelPi;
 	if((channelL/2)%2!=0) {

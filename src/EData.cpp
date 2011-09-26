@@ -143,7 +143,8 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 		theSegment->AddPoint(NewPoint);
 		EPoint *thePoint=theSegment->GetPoint(theSegment->NumPoints());
 		thePoint->SetParentData(this);
-		thePoint->ConvertLabEnergy(entrancePair);
+		if(entrancePair->GetPType()==20) thePoint->ConvertDecayEnergy(exitPair);
+		else thePoint->ConvertLabEnergy(entrancePair);
 		if(exitPair->GetPType()==0&&theSegment->IsDifferential()&&
 		   !theSegment->IsPhase()&&!theSegment->IsAngularDist()) {
 		  if(theSegment->GetEntranceKey()==theSegment->GetExitKey()) {
@@ -763,6 +764,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
   }
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     int aa=theCNuc->GetPairNumFromKey(segment->GetEntranceKey());
+    if(theCNuc->GetPair(aa)->GetPType()==20) continue;
     if(theCNuc->GetPair(aa)->IsEntrance()) {
       PPair *entrancePair=theCNuc->GetPair(aa);
       for(int j=1;j<=theCNuc->NumJGroups();j++) {

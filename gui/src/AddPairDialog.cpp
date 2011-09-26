@@ -15,6 +15,7 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   pairTypeCombo = new QComboBox;
   pairTypeCombo->addItem(tr("Particle, Particle"));
   pairTypeCombo->addItem(tr("Particle, Gamma"));
+  pairTypeCombo->addItem(tr("Beta Decay"));
   connect(pairTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLightParticle(int)));
 
   QRegExp rx("^\\d{0,2}(\\.[05]{0,1})?$");
@@ -133,8 +134,23 @@ void AddPairDialog::updateLightParticle(int index) {
     lightGText->setEnabled(false);
     seperationEnergyText->setText("0.0");
     seperationEnergyText->setEnabled(false);
+    excitationEnergyText->setEnabled(true);
     channelRadiusText->setText("0");
     channelRadiusText->setEnabled(false);
+  } else if(index==2) {
+    lightJText->setEnabled(false);
+    lightJText->setText("0.5");
+    lightPiCombo->setEnabled(false);
+    lightPiCombo->setCurrentIndex(1);
+    lightZText->setEnabled(true);
+    lightMText->setEnabled(false);    
+    lightMText->setText("0.0005");
+    lightGText->setEnabled(false);    
+    lightGText->setText("2.0023");
+    seperationEnergyText->setEnabled(true);
+    excitationEnergyText->setEnabled(false);
+    excitationEnergyText->setText("0.000");
+    channelRadiusText->setEnabled(true);
   } else {
     lightJText->setEnabled(true);
     lightPiCombo->setEnabled(true);
@@ -142,6 +158,7 @@ void AddPairDialog::updateLightParticle(int index) {
     lightMText->setEnabled(true);    
     lightGText->setEnabled(true);    
     seperationEnergyText->setEnabled(true);
+    excitationEnergyText->setEnabled(true);
     channelRadiusText->setEnabled(true);
   }
 }

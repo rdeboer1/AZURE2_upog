@@ -36,6 +36,14 @@ QVariant ChannelsModel::data(const QModelIndex &index, int role) const {
 	if(channel.reducedWidth!=0.) 
 	  return QString("<center><font style='font-weight:bold;'>%1</font></center>").arg(channel.lValue);
 	else return QString("<center>%1</center>").arg(channel.lValue);
+      } else if(channel.radType=='F') {
+	if(channel.reducedWidth!=0.) 
+	  return QString("<center><font style='font-weight:bold;'>Fermi</font></center>");
+	else return QString("<center>Fermi</center>");
+      } else if(channel.radType=='G') {
+	if(channel.reducedWidth!=0.) 
+	  return QString("<center><font style='font-weight:bold;'>Gamow-Teller</font></center>");
+	else return QString("<center>Gamow-Teller</center>");
       } else {
 	if(channel.reducedWidth!=0.)
 	  return QString("<center><font style='font-weight:bold;'>%1%2</font></center>").arg(channel.radType).arg(channel.lValue);

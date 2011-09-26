@@ -3,8 +3,8 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 
-IntegratedFermiFunc::IntegratedFermiFunc(double V0) :
-  V0_(V0) {
+IntegratedFermiFunc::IntegratedFermiFunc(int charge, double V0) :
+  charge_(charge), V0_(V0) {
 }
 
 double IntegratedFermiFunc::operator()(double W0, 
@@ -15,7 +15,8 @@ double IntegratedFermiFunc::operator()(double W0,
 
   double gamma0 = sqrt(1.-alpha_*alpha_*Z*Z);
   double GammaDenom = gsl_sf_gamma(2.*gamma0+1.);
-  Params_ params = {gamma0,
+  Params_ params = {charge_,
+  		    gamma0,
 		    Z,
 		    radius,
 		    W0,
@@ -40,8 +41,9 @@ double IntegratedFermiFunc::operator()(double W0,
 double IntegratedFermiFunc::Integrand(double x, void* p) {
   Params_* params = (Params_*)p;
 
-  double W = x-params->V0*alpha_*alpha_*pow(params->Z,4./3.);
-  double eta = alpha_*params->Z*W/sqrt(W*W-1.);
+  double W = (params->charge<0) ? x-params->V0*alpha_*alpha_*pow(params->Z,4./3.) : x+params->V0*alpha_*alpha_*pow(params->Z,4./3.);
+  double eta = (params->charge<0) ? alpha_*params->Z*W/sqrt(W*W-1.) : 
+    -alpha_*params->Z*W/sqrt(W*W-1.);
   gsl_sf_result GammaNumValue;
   gsl_sf_result GammaNumArg;
   gsl_sf_lngamma_complex_e(params->gamma0,eta,&GammaNumValue,&GammaNumArg);

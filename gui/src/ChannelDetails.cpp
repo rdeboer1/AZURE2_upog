@@ -34,6 +34,9 @@ void ChannelDetails::setNormParam(int which) {
   } else if(which==3) {
     normParam->setText("Q:");
     normUnits->setText("b");
+  } else if(which==4) {
+    normParam->setText("B:");
+    normUnits->setText("");
   } else {
     normParam->setText("Partial Width:");
     normUnits->setText("eV");
