@@ -1,6 +1,15 @@
 #ifndef INTEGRATEDFERMIFUNC_H
 #define INTEGRATEDFERMIFUNC_H
 
+///A function class to calculate the integrated Fermi function for beta decay
+
+/*!
+ * This function class calculates the integrated Fermi function for beta decay channels.
+ * The integrand is taken directly from Konopinski and Rose.  While screening potentials
+ * can be added, by default the screening potential is set to zero.  This function
+ * class should be valid for either electron or positron emission.  
+ */
+
 class IntegratedFermiFunc {
  public:
   IntegratedFermiFunc(int,double V0 = 0.);

@@ -472,6 +472,13 @@ void EPoint::ConvertLabEnergy(PPair *pPair) {
   excitation_energy_=cm_energy_+pPair->GetSepE();
 }
 
+/*!
+ * Calculates the total decay energy from the light particle decay energy, assuming the parent nucleus was at
+ * rest when it decayed.  When a data point is initialized, the same energy is copied into
+ * the attributes for center of mass and lab energy.  If this function is called, the center of mass energy
+ * attribute is overwritten with the value calculated from the lab energy attribute.
+ */
+
 void EPoint::ConvertDecayEnergy(PPair *pPair) {
   cm_energy_=this->GetLabEnergy()/
     (pPair->GetM(2))*

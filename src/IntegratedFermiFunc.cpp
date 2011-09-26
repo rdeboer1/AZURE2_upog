@@ -3,9 +3,23 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 
+/*!
+ * The constructor for the function takes the charge of the Fermion
+ * as the first argument. This is expected to be either -1 or 1 for electrons
+ * and positrons, respectively.  The second optional argument is the screening
+ * potential \f$V_0\f$, where the actual screening potential, \f$V\f$, will be calculated
+ * as \f$V = V_0 \alpha^2 Z^{4/3}\f$.
+ */
+
 IntegratedFermiFunc::IntegratedFermiFunc(int charge, double V0) :
   charge_(charge), V0_(V0) {
 }
+
+/*!
+ * The calling operator for the function class takes the end point energy (in
+ * units of \f$m_0c^2\f$), the charge of the daughter nucleus, and the nuclear radius
+ * parameter as arguments.  The return value is the integrated Fermi function.
+ */
 
 double IntegratedFermiFunc::operator()(double W0, 
 				       double Z, 
@@ -37,6 +51,10 @@ double IntegratedFermiFunc::operator()(double W0,
   return result;
 }
 
+/*!
+ * This function returns the actual integrand for use in the GSL dynamic integration
+ * routines.  This is a static member function.
+ */
 
 double IntegratedFermiFunc::Integrand(double x, void* p) {
   Params_* params = (Params_*)p;
