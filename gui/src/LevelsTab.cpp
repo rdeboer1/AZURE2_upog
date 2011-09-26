@@ -534,14 +534,7 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
       channelDetails->setNormParam(3);    
     else if(pair.pairType==20) channelDetails->setNormParam(4); 
     else channelDetails->setNormParam(0);
-    
-    if(pair.seperationEnergy-level.energy<=0 && pair.pairType==20) {
-      channelDetails->reducedWidthText->setText("0.");
-      channelDetails->reducedWidthText->setEnabled(false);
-    } else {
-      channelDetails->reducedWidthText->setText(QString("%1").arg(channel.reducedWidth));
-      channelDetails->reducedWidthText->setEnabled(true);
-    }
+    channelDetails->reducedWidthText->setText(QString("%1").arg(channel.reducedWidth));
     channelDetails->show();
   }
 }
