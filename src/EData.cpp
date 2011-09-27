@@ -246,9 +246,16 @@ int EData::ReadTargetEffectsFile(const Config& configure, CNuc *compound) {
   if(line!="</targetInt>") return -1;
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
     PPair *entrancePair = compound->GetPair(compound->GetPairNumFromKey(segment->GetEntranceKey()));
-    double cmConversion = entrancePair->GetM(2)/(entrancePair->GetM(1)+entrancePair->GetM(2));
+    PPair *exitPair = compound->GetPair(compound->GetPairNumFromKey(segment->GetExitKey()));
+    double cmConversion;
+    if(entrancePair->GetPType()==20)
+      cmConversion = (exitPair->GetM(1)+exitPair->GetM(2))/exitPair->GetM(2);
+    else
+      cmConversion = entrancePair->GetM(2)/(entrancePair->GetM(1)+entrancePair->GetM(2));
     if(segment->IsTargetEffect()) {
       TargetEffect *targetEffect = this->GetTargetEffect(segment->GetTargetEffectNum());
+      double sigma = targetEffect->GetSigma();
+      targetEffect->SetSigma(cmConversion*sigma);
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
 	point->SetTargetEffectNum(segment->GetTargetEffectNum());
 	if(targetEffect->IsTargetIntegration()||targetEffect->IsConvolution()) {
