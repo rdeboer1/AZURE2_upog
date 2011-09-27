@@ -688,7 +688,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	  this->AddLoElement(j,ch,loElement);
 	  IntegratedFermiFunc fermiFunc(thePair->GetZ(1));
 	  double endPointE = thePair->GetSepE()-inEnergy;
-	  double sqrtPene = (1.+endPointE/.511<=1.) ? 0. : sqrt(fermiFunc(1.+endPointE/.511,exitPair->GetZ(1)+exitPair->GetZ(2),entrancePair->GetChRad()));
+	  double sqrtPene = (1.+endPointE/0.510998903<=1.) ? 0. : sqrt(fermiFunc(1.+endPointE/0.510998903,exitPair->GetZ(1)+exitPair->GetZ(2),thePair->GetChRad()));
 	  this->AddSqrtPenetrability(j,ch,sqrtPene);
 	  this->AddExpCoulombPhase(j,ch,1.0);
 	  this->AddExpHardSpherePhase(j,ch,1.0);
