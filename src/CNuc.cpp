@@ -1518,10 +1518,10 @@ void CNuc::PrintTransformParams(const Config& configure) {
 		  << " meV      ";
 	  }  
 	  out << "  g_int = " << std::setw(12) << theLevel->GetTransformGamma(ch); 
-	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(-1/2)";
+	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(1/2) ";
 	  else out << "           ";
 	  out << "  g_ext = " << std::setw(20) << theLevel->GetExternalGamma(ch);
-	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(-1/2)";
+	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(1/2) ";
 	  out << std::endl;
 	}
 	out << std::endl;
