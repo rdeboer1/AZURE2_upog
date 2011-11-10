@@ -5,28 +5,6 @@
 #include "WhitFunc.h"
 #include "Config.h"
 
-///Return structure for ECIntegral function class
-
-/*!
- * The ECintResult structure contains the result of the integral 
- * of regular and irregular Coulomb functions multiplied by Whittaker 
- * functions and \f$ r^L \f$ for EL capture transitions 
- * (term not present for M1 transitions). Negative energy initial 
- * channels are also considered, where the Coulomb function is 
- * replaced by a Whittaker function. In such a case, the result 
- * is returned in the GW attribute.
- */
-
-struct ECIntResult {
-  ///Integral of regular Coulomb solution, Whittaker function, and operator.
-  double FW;
-  ///Integral of irregular Coulomb solution (or Whittaker function for negative energies), Whittaker function, and operator.
-  double GW;
-};
-
-extern struct ECIntResult gsl_ec_integral(CoulFunc*,WhitFunc*,int,int,int,
-		double,double,double);
-
 ///A function class to calculate external capture integrals
 
 /*!
@@ -43,34 +21,42 @@ class ECIntegral {
    * WhitFunc objects.  
    */
   ECIntegral(PPair *pPair, const Config& configure) {
-    coulfunc_ = new CoulFunc(pPair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
-    whitfunc_ = new WhitFunc(pPair);
+    params_.coulFunc = new CoulFunc(pPair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
+    params_.whitFunc = new WhitFunc(pPair);
     pair_ = pPair;
   };
   /*!
    * The CoulFunc and WhitFunc objects are destroyed with the object.
    */
   ~ECIntegral() {
-    delete coulfunc_;
-    delete whitfunc_;
+    delete params_.coulFunc;
+    delete params_.whitFunc;
   };
-  complex operator()(int,int,double,double,double,double,int,char,double,double,bool) const;
-  /*!
-   * Returns a pointer to the Coulomb function.
-   */
-  CoulFunc *coulfunction() const {return coulfunc_;};
-  /*!
-   * Returns a pointer to the Whittaker function.
-   */
-  WhitFunc *whitfunction() const {return whitfunc_;};
-  /*!
-   * Returns the particle pair pointer.
-   */
-  PPair *pair() const {return pair_;};
+  complex operator()(int,int,double,double,double,double,int,char,double,double,bool);
  private:
-  CoulFunc *coulfunc_;
-  WhitFunc *whitfunc_;
+  void ResetIntegrals() {FW_=0.;GW_=0.;};
+  void Integrate(double);
+  static double FWIntegrand(double,void*);
+  static double GWIntegrand(double,void*);
+  static double WWIntegrand(double,void*);
+  CoulFunc *coulfunction() const {return params_.coulFunc;};
+  WhitFunc *whitfunction() const {return params_.whitFunc;};
+  PPair *pair() const {return pair_;};
+  double FW() const {return FW_;};
+  double GW() const {return GW_;};  
+  typedef struct Params {
+    CoulFunc *coulFunc;
+    WhitFunc *whitFunc;
+    int liValue;
+    int lfValue;
+    int multLValue;
+    double pairEnergy;
+    double bindingEnergy;
+  } Params;
+  Params params_;
   PPair *pair_;
+  double FW_;
+  double GW_;
 };
 
 
