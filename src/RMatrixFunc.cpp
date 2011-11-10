@@ -1,6 +1,6 @@
 #include "EPoint.h"
 #include "CNuc.h"
-#include "MatInv.h"
+#include "MatrixInv.h"
 #include "RMatrixFunc.h"
 #include <assert.h>
 
@@ -127,8 +127,8 @@ void RMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       matrix_c *theRLMatrix = this->GetJSpecRLMatrix(j);
-      matrix_c theInvRLMatrix=MatInv(*theRLMatrix);
-      this->AddRLInvMatrix(theInvRLMatrix);
+      MatrixInv matrixInv(*theRLMatrix);
+      this->AddRLInvMatrix(matrixInv.inverse());
       for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
 	for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
 	  complex rlinvrElement(0.,0.);

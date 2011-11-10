@@ -1,5 +1,5 @@
-#ifndef DIAGONALIZE_H
-#define DIAGONALIZE_H
+#ifndef EIGENFUNC_H
+#define EIGENFUNC_H
 
 #include "Constants.h"
 

@@ -2,7 +2,7 @@
 #include "CNuc.h"
 #include "Config.h"
 #include "EPoint.h"
-#include "MatInv.h"
+#include "MatrixInv.h"
 #include <assert.h>
 
 /*!
@@ -106,8 +106,8 @@ void AMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       matrix_c *theAInvMatrix = this->GetJSpecAInvMatrix(j);
-      matrix_c theAMatrix=MatInv(*theAInvMatrix);
-      this->AddAMatrix(theAMatrix);
+      MatrixInv matrixInv(*theAInvMatrix);
+      this->AddAMatrix(matrixInv.inverse());
     }
   }
 }
