@@ -5,7 +5,7 @@
 #include "CNuc.h"
 #include "Config.h"
 #include "CoulFunc.h"
-#include "Diagonalize.h"
+#include "EigenFunc.h"
 #include "ECIntegral.h"
 #include "ECLine.h"
 #include "NucLine.h"
@@ -611,13 +611,13 @@ void CNuc::TransformIn(const Config& configure) {
 	  }
 	}
 	//solve eigenvalue problem
-	struct EigenSolve result=Solve(nMatrix,mMatrix);
+	EigenFunc eigenFunc(nMatrix,mMatrix);
 	for(int la=0;la<tempEnergies.size();la++) {
-	  theJGroup->GetLevel(levelKeys[la])->SetE(result.eigenvalues[la]);
+	  theJGroup->GetLevel(levelKeys[la])->SetE(eigenFunc.eigenvalues()[la]);
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
 	    double sum=0.0;
 	    for(int mu=0;mu<tempEnergies.size();mu++) {
-              sum+=result.eigenvectors[mu][la]*tempGammas[mu][ch-1];
+              sum+=eigenFunc.eigenvectors()[mu][la]*tempGammas[mu][ch-1];
 	    }
 	    theJGroup->GetLevel(levelKeys[la])->SetGamma(ch,sum);
 	  }
@@ -1309,8 +1309,8 @@ void CNuc::TransformOut(const Config& configure) {
 		else cMatrix[mu].push_back(-chanSum);
 	      }
 	    }
-	    struct EigenSolve eigenResult=Diagonalize(cMatrix);	
-	    if(fabs(eigenResult.eigenvalues[thisLevel]-tempE[thisLevel])<=energyTolerance) 
+	    EigenFunc eigenFunc(cMatrix);	
+	    if(fabs(eigenFunc.eigenvalues()[thisLevel]-tempE[thisLevel])<=energyTolerance) 
 	      done=true;
 	    matrix_r newGamma;
 	    for(int mu=0;mu<tempE.size();mu++) {
@@ -1319,13 +1319,13 @@ void CNuc::TransformOut(const Config& configure) {
 	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 		double gammaSum=0.0;
 		for(int mup=0;mup<tempE.size();mup++) {
-		  gammaSum+=eigenResult.eigenvectors[mup][mu]*tempGamma[mup][ch-1];
+		  gammaSum+=eigenFunc.eigenvectors()[mup][mu]*tempGamma[mup][ch-1];
 		}
 		newGamma[mu].push_back(gammaSum);
 	      }
 	    }
 	    for(int mu=0;mu<tempE.size();mu++) {
-	      tempE[mu]=eigenResult.eigenvalues[mu];
+	      tempE[mu]=eigenFunc.eigenvalues()[mu];
 	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 		tempGamma[mu][ch-1]=newGamma[mu][ch-1];
 	      }
