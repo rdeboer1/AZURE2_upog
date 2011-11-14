@@ -155,23 +155,23 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
     ecAmplitude=complex(0.0,-1.0)*
       effectiveCharge*sqrt((8.*(2.*theLMult+1.)*(theLMult+1.))/theLMult)/DoubleFactorial(2*theLMult+1)*
       pow(complex(0.,1.0),theInitialLValue+theLMult-theFinalLValue)*
-      ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
-      Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
+      AngCoeff::ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
+      AngCoeff::Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
   } else {
     complex orbitalTerm=effectiveCharge*
       sqrt((2.*theInitialLValue+1.)*(theInitialLValue+1.)*theInitialLValue)*
-      Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
+      AngCoeff::Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
     complex tau=pow(std::complex<double>(-1.,0.),pair()->GetJ(1)+pair()->GetJ(2))*
       (pow(complex(-1.,0.),theFinalSValue)*
        sqrt(pair()->GetJ(1)*(pair()->GetJ(1)+1.)*(2.*pair()->GetJ(1)+1.))*
-       Racah(theFinalSValue,pair()->GetJ(1),theInitialSValue,pair()->GetJ(1),pair()->GetJ(2),1.)*
+       AngCoeff::Racah(theFinalSValue,pair()->GetJ(1),theInitialSValue,pair()->GetJ(1),pair()->GetJ(2),1.)*
        pair()->GetG(1)+
        pow(complex(-1.,0.),theInitialSValue)*
        sqrt(pair()->GetJ(2)*(pair()->GetJ(2)+1.)*(2.*pair()->GetJ(2)+1.))*
-       Racah(theFinalSValue,pair()->GetJ(2),theInitialSValue,pair()->GetJ(2),pair()->GetJ(1),1.)*
+       AngCoeff::Racah(theFinalSValue,pair()->GetJ(2),theInitialSValue,pair()->GetJ(2),pair()->GetJ(1),1.)*
        pair()->GetG(2));
     complex spinTerm=-sqrt((2.*theInitialSValue+1.)*(2.*theFinalSValue+1.))*
-      Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
+      AngCoeff::Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
     ecAmplitude=complex(0.0,1.0)*
       sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*sqrt(16/3)*sqrt(2*theFinalJValue+1.)*
       (orbitalTerm+spinTerm);

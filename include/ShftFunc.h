@@ -55,7 +55,6 @@ class ShftFunc {
   Params params_;
   double totalSepE_;
   double radius_;
-  WhitFunc *whit_;
 };
 
 #endif

@@ -1103,15 +1103,15 @@ void CNuc::CalcAngularDists(int maxL) {
 	      if((int)(l1+l2+lOrder)%2==0&&(int)(l1p+l2p+w1p+w2p+lOrder)%2==0) {
 		double z1z2=0.0;
 		double z1=sqrt(2.*l1+1.)*sqrt(2.*l2+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
-		  *ClebGord(l1,l2,lOrder,0.,0.,0.)*Racah(l1,j1,l2,j2,s,lOrder);
+		  *AngCoeff::ClebGord(l1,l2,lOrder,0.,0.,0.)*AngCoeff::Racah(l1,j1,l2,j2,s,lOrder);
 		if(this->GetPair(theDecay->GetPairNum())->GetPType()==0) {
 		  double z2=sqrt(2.*l1p+1.)*sqrt(2.*l2p+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
-		    *ClebGord(l1p,l2p,lOrder,0.,0.,0.)*Racah(l1p,j1,l2p,j2,sp,lOrder);
+		    *AngCoeff::ClebGord(l1p,l2p,lOrder,0.,0.,0.)*AngCoeff::Racah(l1p,j1,l2p,j2,sp,lOrder);
 		  z1z2=pow(-1.0,sp-s)/4.*z1*z2;
 		} else if(this->GetPair(theDecay->GetPairNum())->GetPType()==10) {
 		  double jf=this->GetPair(theDecay->GetPairNum())->GetJ(2);
 		  double z2=sqrt(2.*l1p+1.)*sqrt(2.*l2p+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
-		    *ClebGord(l1p,l2p,lOrder,1.,-1.,0)*Racah(l1p,j1,l2p,j2,jf,lOrder);
+		    *AngCoeff::ClebGord(l1p,l2p,lOrder,1.,-1.,0)*AngCoeff::Racah(l1p,j1,l2p,j2,jf,lOrder);
 		  z1z2=pow(-1.,1.+s-jf)/4.*z1*z2;
 		}
 		if(fabs(z1z2)>1e-10) {
