@@ -45,6 +45,13 @@ class CoulFunc {
   double PEShift(int,double,double);
   double PEShift_dE(int,double,double);;
  private:
+  static double thisPEShift(double,void*);
+  typedef struct DEShiftParams {
+    CoulFunc *coulFunc;
+    int lValue;
+    double radius;
+  } DEShiftParams;
+  DEShiftParams dEShiftParams_;
   bool useGSLFunctions_;
   int z1_;
   int z2_;

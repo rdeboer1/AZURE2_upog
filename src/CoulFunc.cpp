@@ -3,9 +3,8 @@
 #include <iostream>
 #include "cwfcomp.H"
 #include <gsl/gsl_sf_coulomb.h>
+#include <gsl/gsl_deriv.h>
  
-extern double gsl_PEshift_function_dE(CoulFunc*,int,double,double);
-
 /*! 
  * The CoulFunc object is created with reference to a PPair object.
  */
@@ -22,6 +21,7 @@ CoulFunc::CoulFunc(PPair *pPair, bool useGSLFunctions) :
   coulLast_.dF=0.0;
   coulLast_.G=0.0;
   coulLast_.dG=0.0;
+  dEShiftParams_.coulFunc=this;
 }
 
 /*!
@@ -167,12 +167,33 @@ double CoulFunc::PEShift(int l,double radius,double energy)  {
     (coul.F*coul.dF+coul.G*coul.dG);
 }
 
+double CoulFunc::thisPEShift(double x, void *p) {
+  DEShiftParams *params = (DEShiftParams*)p;
+  CoulFunc *coulFunc=(params->coulFunc);
+  int lValue=(params->lValue);
+  double radius=(params->radius);
+
+  return coulFunc->PEShift(lValue,radius,x);
+}
+
 /*!
  * Returns the energy derivative of the shift function a function of orbital
  * angular momentum, radius, and energy in the center of mass system.
  */
 
 double CoulFunc::PEShift_dE(int l,double radius,double energy)  {
-  return gsl_PEshift_function_dE(this,l,radius,energy);
+  double result;
+  double error;
+  
+  dEShiftParams_.radius=radius;
+  dEShiftParams_.lValue=l;
+  
+  gsl_function F;
+  F.function=&thisPEShift;
+  F.params=&dEShiftParams_;
+
+  gsl_deriv_central (&F, energy, 1e-6, &result, &error); 
+  
+  return result;
 }
 
