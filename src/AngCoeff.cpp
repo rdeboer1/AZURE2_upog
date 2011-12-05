@@ -2,6 +2,10 @@
 #include <gsl/gsl_sf_coupling.h>
 #include <math.h>
 
+/*!
+ * Returns the Clebsh-Gordan coefficient for the given angular momentum quantum numbers.
+ */
+
 double AngCoeff::ClebGord(double j1, double j2, double j3, double m1, double m2, double m3) {    
   m3=-m3;
   int j1x2=(int)(2*j1);
@@ -15,6 +19,10 @@ double AngCoeff::ClebGord(double j1, double j2, double j3, double m1, double m2,
 
   return pow(-1.0,j1-j2-m3)*sqrt(2.0*j3+1.)*w3j;
 }
+
+/*!
+ * Returns the Racah coefficient for the given angular momentum quantum numbers.
+ */
 
 double AngCoeff::Racah(double j1, double j2, double l2, double l1, double j3, double l3) {
 

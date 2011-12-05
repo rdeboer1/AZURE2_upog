@@ -3,6 +3,13 @@
 
 #include "Constants.h"
 
+///A function class to solve a eigenvalue problems.
+
+/*!
+ * The EigenFunc class is a function class to solve eigenfunction problems.  
+ * The class is used by the parameter trasfomation subroutines in AZURE2.  
+ */
+
 class EigenFunc {
  public:
   EigenFunc(const matrix_r&);

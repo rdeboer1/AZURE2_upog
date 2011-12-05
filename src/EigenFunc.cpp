@@ -2,6 +2,10 @@
 #include <gsl/gsl_eigen.h>
 #include <math.h>
 
+/*!
+ *  This constructor calculates the eigenvectors and eigenvalues for a real symmetric matrix.
+ */
+
 EigenFunc::EigenFunc(const matrix_r &A) {
   eigenvalues_.clear();
   eigenvectors_.clear();
@@ -35,6 +39,10 @@ EigenFunc::EigenFunc(const matrix_r &A) {
   gsl_eigen_symmv_free (w);
 
 }
+
+/*!
+ *  This constructor calulates the eigenvectors and eigenvalues for a real symmetric matrix pair.
+ */
 
 EigenFunc::EigenFunc(const matrix_r &A, const std::vector<vector_r > &B) {
   eigenvalues_.clear();

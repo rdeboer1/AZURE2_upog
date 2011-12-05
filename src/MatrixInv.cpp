@@ -3,6 +3,11 @@
 #include <gsl/gsl_matrix_complex_double.h>
 #include <iostream>
 
+/*!
+ *  The MatrixInv constructor takes a complex matrix as an argument and stores the
+ *  inverse in a private member variable accessable by the MatrixInv::inverse() function.
+ */
+
 MatrixInv::MatrixInv(const matrix_c &A) {
   inverse_.clear();
 
