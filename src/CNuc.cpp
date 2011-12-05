@@ -672,27 +672,63 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }	  
 	}
-      }
-    } else if(this->GetPair(ir)->GetPType()==0) {
-      for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
-	  s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
-	for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
-	    sp<=(this->GetPair(ir)->GetJ(1)+this->GetPair(ir)->GetJ(2));sp+=1.) {
+      } else if(this->GetPair(ir)->GetPType()==0) {
+	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
+	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
+	      sp<=(this->GetPair(ir)->GetJ(1)+this->GetPair(ir)->GetJ(2));sp+=1.) {
+	    for(int j=1;j<=this->NumJGroups();j++) {
+	      if(!this->GetJGroup(j)->IsInRMatrix()) continue;
+	      for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+		if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+		for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+		  if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		     this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
+		     this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue;
+		  Decay NewDecay(ir);
+		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+		  if(!DecayNum) {
+		    this->GetPair(aa)->AddDecay(NewDecay);
+		    DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
+		  }
+		  KGroup NewKGroup(s,sp);
+		  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		  if(!KGroupNum) {
+		    this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		    KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		  }
+		  MGroup NewMGroup(j,ch,chp);
+		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		  if(!MGroupNum) {
+		    this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		    MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		  }
+		  double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
+		    this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
+		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
+		    GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
+		}
+	      }
+	    }
+	  }
+	}
+      } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
+	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(int j=1;j<=this->NumJGroups();j++) {
 	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;
 	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
 	      if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
 	      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
 		if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
-		   this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
-		   this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue;
+		   this->GetJGroup(j)->GetChannel(ch)->GetS()!=s) continue;
 		Decay NewDecay(ir);
 		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
 		if(!DecayNum) {
 		  this->GetPair(aa)->AddDecay(NewDecay);
 		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
 		}
-		KGroup NewKGroup(s,sp);
+		KGroup NewKGroup(s,0);
 		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
 		if(!KGroupNum) {
 		  this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
@@ -703,48 +739,12 @@ void CNuc::SortPathways(const Config& configure) {
 		if(!MGroupNum) {
 		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
 		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-		}
+		}		    
 		double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
 		  this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
 		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
 		  GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
 	      }
-	    }
-	  }
-	}
-      }
-    } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
-      for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
-	  s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
-	for(int j=1;j<=this->NumJGroups();j++) {
-	  if(!this->GetJGroup(j)->IsInRMatrix()) continue;
-	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	    if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
-	    for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
-	      if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
-		 this->GetJGroup(j)->GetChannel(ch)->GetS()!=s) continue;
-	      Decay NewDecay(ir);
-	      DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
-	      if(!DecayNum) {
-		this->GetPair(aa)->AddDecay(NewDecay);
-		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
-	      }
-	      KGroup NewKGroup(s,0);
-	      KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-	      if(!KGroupNum) {
-		this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
-		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-	      }
-	      MGroup NewMGroup(j,ch,chp);
-	      MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-	      if(!MGroupNum) {
-		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
-		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-	      }		    
-	      double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
-		this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
-	      this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
-		GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
 	    }
 	  }
 	}
