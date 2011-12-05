@@ -14,7 +14,13 @@ class EigenFunc {
  public:
   EigenFunc(const matrix_r&);
   EigenFunc(const matrix_r&, const std::vector<vector_r >&);
+  /*!
+   * Returns a vector with the calculated eigenvalues.
+   */
   const vector_r& eigenvalues() const {return eigenvalues_;};
+  /*!
+   * Returns a matrix with the calculated eigenvectors.  
+   */
   const matrix_r& eigenvectors() const {return eigenvectors_;};
  private:
   vector_r eigenvalues_;

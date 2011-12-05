@@ -10,7 +10,13 @@
 
 class AngCoeff {
  public:
+/*!
+ * Returns the Clebsh-Gordan coefficient for the given angular momentum quantum numbers.
+ */
   static double ClebGord(double,double,double,double,double,double);
+/*!
+ * Returns the Racah coefficient for the given angular momentum quantum numbers.
+ */
   static double Racah(double,double,double,double,double,double);
 };
 
