@@ -638,132 +638,113 @@ void CNuc::TransformIn(const Config& configure) {
 void CNuc::SortPathways(const Config& configure) {
   int DecayNum, KGroupNum, MGroupNum;
   for(int aa=1;aa<=this->NumPairs();aa++) {
-    if(this->GetPair(aa)->IsEntrance()) {
-      for(int ir=1;ir<=this->NumPairs();ir++) {
-	if(this->GetPair(ir)->GetPType()==20) continue;
-	if(this->GetPair(aa)->GetPType()==20) {
-	  for(int l = 0; l < 2; l++) {
-	    for(int j=1;j<=this->NumJGroups();j++) {
-	      if(this->GetJGroup(j)->IsInRMatrix()) {	      
-		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		  if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()==aa) {
-		    for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
-		      if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()==ir) {
-			if(this->GetJGroup(j)->GetChannel(ch)->GetL()==l) {
-			  Decay NewDecay(ir);
-			  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
-			  if(!DecayNum) {
-			    this->GetPair(aa)->AddDecay(NewDecay);
-			    DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
-			  }
-			  KGroup NewKGroup(l,0);
-			  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			  if(!KGroupNum) {
-			    this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
-			    KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			  }
-			  MGroup NewMGroup(j,ch,chp);
-			  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			  if(!MGroupNum) {
-			    this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
-			    MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			  }
-			}
-		      }
-		    }
-		  }
+    if(!this->GetPair(aa)->IsEntrance()) continue;
+    for(int ir=1;ir<=this->NumPairs();ir++) {
+      if(this->GetPair(ir)->GetPType()==20) continue;
+      if(this->GetPair(aa)->GetPType()==20) {
+	for(int l = 0; l < 2; l++) {
+	  for(int j=1;j<=this->NumJGroups();j++) {
+	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;	      
+	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+	      if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+	      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+		if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		   this->GetJGroup(j)->GetChannel(ch)->GetL()!=l) continue;
+		Decay NewDecay(ir);
+		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+		if(!DecayNum) {
+		  this->GetPair(aa)->AddDecay(NewDecay);
+		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
+		}
+		KGroup NewKGroup(l,0);
+		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		if(!KGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		}
+		MGroup NewMGroup(j,ch,chp);
+		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		if(!MGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
 		}
 	      }
 	    }
-	  }
-	} else if(this->GetPair(ir)->GetPType()==0) {
-	  for(double s=fabs(this->GetPair(aa)->GetJ(1)
-			    -this->GetPair(aa)->GetJ(2));
-	      s<=(this->GetPair(aa)->GetJ(1)
-		  +this->GetPair(aa)->GetJ(2));s+=1.) {
-	    for(double sp=fabs(this->GetPair(ir)->GetJ(1)
-			       -this->GetPair(ir)->GetJ(2));
-		sp<=(this->GetPair(ir)->GetJ(1)
-		     +this->GetPair(ir)->GetJ(2));sp+=1.) {
-	      for(int j=1;j<=this->NumJGroups();j++) {
-		if(this->GetJGroup(j)->IsInRMatrix()) {
-		  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		    if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()==aa) {
-		      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
-			if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()==ir) {
-			  if(this->GetJGroup(j)->GetChannel(ch)->GetS()==s&&
-			     this->GetJGroup(j)->GetChannel(chp)->GetS()==sp) {
-			    Decay NewDecay(ir);
-			    DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
-			    if(!DecayNum) {
-			      this->GetPair(aa)->AddDecay(NewDecay);
-			      DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
-			    }
-			    KGroup NewKGroup(s,sp);
-			    KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			    if(!KGroupNum) {
-			      this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
-			      KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			    }
-			    MGroup NewMGroup(j,ch,chp);
-			    MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			    if(!MGroupNum) {
-			      this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
-			      MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			    }
-			    double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
-			      this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
-			    this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
-			      GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
-			  }
-			}
-		      }
-		    }
-		  }
+	  }	  
+	}
+      }
+    } else if(this->GetPair(ir)->GetPType()==0) {
+      for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	  s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
+	for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
+	    sp<=(this->GetPair(ir)->GetJ(1)+this->GetPair(ir)->GetJ(2));sp+=1.) {
+	  for(int j=1;j<=this->NumJGroups();j++) {
+	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;
+	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+	      if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+	      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+		if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		   this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
+		   this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue;
+		Decay NewDecay(ir);
+		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+		if(!DecayNum) {
+		  this->GetPair(aa)->AddDecay(NewDecay);
+		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
 		}
+		KGroup NewKGroup(s,sp);
+		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		if(!KGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		}
+		MGroup NewMGroup(j,ch,chp);
+		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		if(!MGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		}
+		double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
+		  this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
+		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
+		  GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
 	      }
 	    }
 	  }
-	} else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
-	  for(double s=fabs(this->GetPair(aa)->GetJ(1)
-			    -this->GetPair(aa)->GetJ(2));
-	      s<=(this->GetPair(aa)->GetJ(1)
-		  +this->GetPair(aa)->GetJ(2));s+=1.) {
-	    for(int j=1;j<=this->NumJGroups();j++) {
-	      if(this->GetJGroup(j)->IsInRMatrix()) {
-		for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-		  if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()==aa) {
-		    for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
-		      if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()==ir) {
-			if(this->GetJGroup(j)->GetChannel(ch)->GetS()==s) {
-			  Decay NewDecay(ir);
-			  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
-			  if(!DecayNum) {
-			    this->GetPair(aa)->AddDecay(NewDecay);
-			    DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
-			  }
-			  KGroup NewKGroup(s,0);
-			  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			  if(!KGroupNum) {
-			    this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
-			    KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-			  }
-			  MGroup NewMGroup(j,ch,chp);
-			  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			  if(!MGroupNum) {
-			    this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
-			    MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-			  }		    
-			  double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
-			    this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
-			  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
-			    GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
-			}
-		      }
-		    }
-		  }
-		}	  
+	}
+      }
+    } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
+      for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	  s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
+	for(int j=1;j<=this->NumJGroups();j++) {
+	  if(!this->GetJGroup(j)->IsInRMatrix()) continue;
+	  for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+	    if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+	    for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+	      if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		 this->GetJGroup(j)->GetChannel(ch)->GetS()!=s) continue;
+	      Decay NewDecay(ir);
+	      DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+	      if(!DecayNum) {
+		this->GetPair(aa)->AddDecay(NewDecay);
+		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
 	      }
+	      KGroup NewKGroup(s,0);
+	      KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+	      if(!KGroupNum) {
+		this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+	      }
+	      MGroup NewMGroup(j,ch,chp);
+	      MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+	      if(!MGroupNum) {
+		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+	      }		    
+	      double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
+		this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
+	      this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
+		GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
 	    }
 	  }
 	}
@@ -772,74 +753,66 @@ void CNuc::SortPathways(const Config& configure) {
   }
   for(int aa=1;aa<=this->NumPairs();aa++) { //loop over all pairs
     PPair *entrancePair=this->GetPair(aa);
-    if(entrancePair->GetPType()==20) continue;
-    if(entrancePair->IsEntrance()) {
-      for(int j=1;j<=this->NumJGroups();j++) {
-	JGroup *theFinalJGroup=this->GetJGroup(j);
-	for(int la=1;la<=theFinalJGroup->NumLevels();la++) {
-	  ALevel *theFinalLevel=theFinalJGroup->GetLevel(la);
-	  if(theFinalLevel->IsECLevel()) {
-	    int decayNum=entrancePair->IsDecay(theFinalLevel->GetECPairNum()); //store RESONANCE decay number to final state
-	    if(decayNum) { //if this is a resonance decay...
-	      for(int k=1;k<=entrancePair->GetDecay(decayNum)->NumKGroups();k++) { //loop over all kgroups for decays to final state 
-		KGroup *theKGroup=entrancePair->GetDecay(decayNum)->GetKGroup(k);
-		for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) { //loop over all final configurations in the capture state
-		  AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
-		  if(this->GetPair(finalChannel->GetPairNum())->GetPType()==0) {  //ensure the configuration is a particle pair
-		    int chDecayNum=entrancePair->IsDecay(finalChannel->GetPairNum());
-		    if(chDecayNum) { //if it is actually a resonance decay...
-		      for(int kp=1;kp<=entrancePair->GetDecay(chDecayNum)->NumKGroups();kp++) { 
-			if(entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetS()==theKGroup->GetS()){
-			  for(int mp=1;mp<=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->NumMGroups();mp++) {
-			    MGroup *chMGroup=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetMGroup(mp);
-			    if(this->GetJGroup(chMGroup->GetJNum())->GetJ()>=theFinalLevel->GetECMinJ()&&
-			       this->GetJGroup(chMGroup->GetJNum())->GetJ()<=theFinalLevel->GetECMaxJ()) {
-			      AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
-			      AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
-			      for(int multL=1;multL<=maxECMult;multL++) { //loop over all allowed gamma parities
-				char radType;
-				if(this->GetJGroup(chMGroup->GetJNum())->GetPi()*theFinalJGroup->GetPi()==
-				   (int)pow(-1,multL)) radType='E';
-				else radType='M'; //calculate radiation type
-				if(((radType=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) ||
-				   ((radType=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) ||
-				   ((radType=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) { //allow only m1,e1,e2
-				  if(fabs(this->GetJGroup(chMGroup->GetJNum())->GetJ()-multL)<=theFinalJGroup->GetJ()&&
-				     theFinalJGroup->GetJ()<=this->GetJGroup(chMGroup->GetJNum())->GetJ()+multL) { 
-				    if((abs(chChannelp->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=chChannelp->GetL()+multL&&
-					fabs(chChannelp->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
-					theFinalJGroup->GetJ()<=chChannelp->GetS()+finalChannel->GetL()&&chChannelp->GetS()==finalChannel->GetS())||
-				       (fabs(chChannelp->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=chChannelp->GetS()+multL&&
-					fabs(chChannelp->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-					theFinalJGroup->GetJ()<=chChannelp->GetL()+finalChannel->GetS()&&
-					chChannelp->GetL()==finalChannel->GetL()&&radType=='M')) { //ensure entrance channel for dc can couple to final state		     			
-				      if(chChannel==chChannelp) {
-					ECMGroup newECMGroup(radType,multL,chChannel->GetL(),
-							     this->GetJGroup(chMGroup->GetJNum())->GetJ(),chp,j,la);
-					theKGroup->AddECMGroup(newECMGroup);
-				      }
-				      int internalChannel=0;
-				      for(int intCh=1;intCh<=this->GetJGroup(chMGroup->GetJNum())->NumChannels();intCh++) {
-					if(this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetRadType()==radType &&
-					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetL()==multL &&
-					   this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetPairNum()==theFinalLevel->GetECPairNum()) {
-					  internalChannel=intCh;
-					  break;
-					}
-				      }
-				      ECMGroup newECMGroup(radType,multL,chChannel->GetL(),this->GetJGroup(chMGroup->GetJNum())->GetJ(),
-							   chp,j,la,chDecayNum,kp,mp,internalChannel);
-				      theKGroup->AddECMGroup(newECMGroup);
-				    }
-				  }
-				}
-			      }
-			    }
-			  }
-			}
-		      }
+    if(entrancePair->GetPType()==20 || !entrancePair->IsEntrance()) continue;
+    for(int j=1;j<=this->NumJGroups();j++) {
+      JGroup *theFinalJGroup=this->GetJGroup(j);
+      for(int la=1;la<=theFinalJGroup->NumLevels();la++) {
+	ALevel *theFinalLevel=theFinalJGroup->GetLevel(la);
+	if(!theFinalLevel->IsECLevel()) continue;
+	int decayNum=entrancePair->IsDecay(theFinalLevel->GetECPairNum()); //store RESONANCE decay number to final state
+	if(!decayNum) continue; //if this is a resonance decay...
+	for(int k=1;k<=entrancePair->GetDecay(decayNum)->NumKGroups();k++) { //loop over all kgroups for decays to final state 
+	  KGroup *theKGroup=entrancePair->GetDecay(decayNum)->GetKGroup(k);
+	  for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) { //loop over all final configurations in the capture state
+	    AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
+	    if(this->GetPair(finalChannel->GetPairNum())->GetPType()!=0) continue;  //ensure the configuration is a particle pair
+	    int chDecayNum=entrancePair->IsDecay(finalChannel->GetPairNum());
+	    if(!chDecayNum) continue; //if it is actually a resonance decay...
+	    for(int kp=1;kp<=entrancePair->GetDecay(chDecayNum)->NumKGroups();kp++) { 
+	      if(entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetS()!=theKGroup->GetS()) continue;
+	      for(int mp=1;mp<=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->NumMGroups();mp++) {
+		MGroup *chMGroup=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetMGroup(mp);
+		if(this->GetJGroup(chMGroup->GetJNum())->GetJ()<theFinalLevel->GetECMinJ()||
+		   this->GetJGroup(chMGroup->GetJNum())->GetJ()>theFinalLevel->GetECMaxJ()) continue;
+		AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
+		AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
+		for(int multL=1;multL<=maxECMult;multL++) { //loop over all allowed gamma parities
+		  char radType;
+		  if(this->GetJGroup(chMGroup->GetJNum())->GetPi()*theFinalJGroup->GetPi()==(int)pow(-1,multL)) radType='E';
+		  else radType='M'; //calculate radiation type
+		  if(!((radType=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) &&
+		     !((radType=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) &&
+		     !((radType=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) continue; //allow only m1,e1,e2
+		  if(fabs(this->GetJGroup(chMGroup->GetJNum())->GetJ()-multL)>theFinalJGroup->GetJ()||
+		     theFinalJGroup->GetJ()>this->GetJGroup(chMGroup->GetJNum())->GetJ()+multL) continue; 
+		  if(!(abs(chChannelp->GetL()-multL)<=finalChannel->GetL()&&
+		       finalChannel->GetL()<=chChannelp->GetL()+multL&&
+		       fabs(chChannelp->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
+		       theFinalJGroup->GetJ()<=chChannelp->GetS()+finalChannel->GetL()&&
+		       chChannelp->GetS()==finalChannel->GetS())&&
+		     !(fabs(chChannelp->GetS()-multL)<=finalChannel->GetS()&&
+		       finalChannel->GetS()<=chChannelp->GetS()+multL&&
+		       fabs(chChannelp->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
+		       theFinalJGroup->GetJ()<=chChannelp->GetL()+finalChannel->GetS()&&
+		       chChannelp->GetL()==finalChannel->GetL()&&
+		       radType=='M')) continue; //ensure entrance channel for dc can couple to final state		     		  
+		  if(chChannel==chChannelp) {
+		    ECMGroup newECMGroup(radType,multL,chChannel->GetL(),
+					 this->GetJGroup(chMGroup->GetJNum())->GetJ(),chp,j,la);
+		    theKGroup->AddECMGroup(newECMGroup);
+		  }
+		  int internalChannel=0;
+		  for(int intCh=1;intCh<=this->GetJGroup(chMGroup->GetJNum())->NumChannels();intCh++) {
+		    if(this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetRadType()==radType &&
+		       this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetL()==multL &&
+		       this->GetJGroup(chMGroup->GetJNum())->GetChannel(intCh)->GetPairNum()==theFinalLevel->GetECPairNum()) {
+		      internalChannel=intCh;
+		      break;
 		    }
 		  }
+		  ECMGroup newECMGroup(radType,multL,chChannel->GetL(),this->GetJGroup(chMGroup->GetJNum())->GetJ(),
+				       chp,j,la,chDecayNum,kp,mp,internalChannel);
+		  theKGroup->AddECMGroup(newECMGroup);
 		}
 	      }
 	    }
@@ -849,7 +822,6 @@ void CNuc::SortPathways(const Config& configure) {
     }
   }
 }
-
 
 /*!
  * Prints the internal and external reaction pathways.
