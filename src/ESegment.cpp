@@ -185,7 +185,8 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
 	PPair *entrancePair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetEntranceKey()));
 	PPair *exitPair=theCNuc->GetPair(theCNuc->GetPairNumFromKey(this->GetExitKey()));
 	this->GetPoint(this->NumPoints())->SetParentData(theData);
-	this->GetPoint(this->NumPoints())->ConvertLabEnergy(entrancePair);
+	if(entrancePair->GetPType()==20) this->GetPoint(this->NumPoints())->ConvertDecayEnergy(exitPair);
+	else this->GetPoint(this->NumPoints())->ConvertLabEnergy(entrancePair);
 	if(exitPair->GetPType()==0&&this->IsDifferential()&&!this->IsPhase()) {
 	  if(this->GetEntranceKey()==this->GetExitKey()) {
 	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair);

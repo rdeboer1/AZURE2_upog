@@ -27,7 +27,7 @@ These are:
 
 BUILD_GUI [ON/OFF] - Toggles whether the graphical setup utility is built and linked to AZURE2.  This is ON by default, and it is not recommended to turn it OFF.
 
-USE_EXT_COUL [ON/OFF] - Toggles whether the non-GSL Coulomb functions of N. Michel should be used.  The default is OFF.  See note below for more details.
+USE_QWT [ON/OFF] - Toggles whether the built-in plotting tab is added to AZURE2.  This is OFF by default. The plotting features are recommended but require the additional QWT libraries to be installed on the build system.  
 
 USE_STAT [ON/OFF] - Toggles whether the stat() function should be used to test for properly set directories at start.  This only applied when running AZURE2 in console (--no-gui) mode, and is ON by default.  This function has been seen to not work properly for Windows, and it is recommended to select OFF if building on/for a Windows system.
 
@@ -37,11 +37,3 @@ GSL_PATH [dir] - If GSL is in a non-standard path, this will add the directory t
 
 After changing options, execute [make clean] and then step 3 above to build/rebuild AZURE2.  
 
-
-A note about the Coulomb Functions:
-
-The AZURE2 package uses, by default, the GSL Coulomb Functions in its calculations.  For certain regions in the rho-eta plane, these functions invoke a WKB approximation which is not very accurate.  This most often manifests itself as discontinuous jump in the calculated excitation curve.  The main advantage of these functions is that they are extremely fast.
-
-A second Coulomb function option is available in AZURE2.  These functions are from N. Michel, Computer Physics Communications 176, 232 (2007).  The files have only been modified to be compilable as a library, and to remove the dependency on a global std namespace.  The routines are otherwise unchanged.  These functions are extremely accurate, but significantly slower. 
-
-IMPORTANT:  When switching between Coulomb function versions, 'make clean' should first be called.

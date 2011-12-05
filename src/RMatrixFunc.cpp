@@ -1,6 +1,6 @@
 #include "EPoint.h"
 #include "CNuc.h"
-#include "MatInv.h"
+#include "MatrixInv.h"
 #include "RMatrixFunc.h"
 #include <assert.h>
 
@@ -81,17 +81,29 @@ void RMatrixFunc::FillMatrices (EPoint *point) {
 	      double gammaCh=level->GetFitGamma(ch);
 	      double gammaChp=level->GetFitGamma(chp);
 	      double resenergy=level->GetFitE();
-	      double inenergy=point->GetCMEnergy()+
-		compound()->
-		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		GetSepE()+
-		compound()->
-		GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		GetExE();
+	      double inenergy;
+	      if(compound()->
+		 GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		 GetPType()==20)
+		inenergy=point->GetCMEnergy()+
+		  compound()->
+		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+		  GetSepE()+
+		  compound()->
+		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+		  GetExE();
+	      else inenergy=point->GetCMEnergy()+
+		     compound()->
+		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		     GetSepE()+
+		     compound()->
+		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+		     GetExE();
 	      double gammaSum=0.;
 	      if(configure().paramMask & Config::USE_RMC_FORMALISM) 
 		for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
-		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()!='P')
+		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='M' || 
+		     compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='E')
 		    gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
 	      sum+=gammaCh*gammaChp/(resenergy-inenergy-complex(0.0,1.0)*gammaSum);
 	    }
@@ -115,8 +127,8 @@ void RMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       matrix_c *theRLMatrix = this->GetJSpecRLMatrix(j);
-      matrix_c theInvRLMatrix=MatInv(*theRLMatrix);
-      this->AddRLInvMatrix(theInvRLMatrix);
+      MatrixInv matrixInv(*theRLMatrix);
+      this->AddRLInvMatrix(matrixInv.inverse());
       for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
 	for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
 	  complex rlinvrElement(0.,0.);

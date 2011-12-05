@@ -26,6 +26,10 @@ Q_OBJECT
   QCheckBox* useRMCCheck;
   QCheckBox* noTransformCheck;
 
+ private slots:
+  void useBruneCheckChanged(int);
+  void useRMCCheckChanged(int);
+
  private:
   QPushButton *okButton;
   QPushButton *cancelButton;

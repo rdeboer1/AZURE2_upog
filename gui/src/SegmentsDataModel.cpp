@@ -241,6 +241,9 @@ void SegmentsDataModel::setPairsModel(PairsModel* model) {
 
 QString SegmentsDataModel::getReactionLabel(const QModelIndex &index) {
   SegmentsDataData line = segDataLineList.at(index.row());
+  int numPairs = pairsModel->getPairs().size();
+  if(line.entrancePairIndex-1>=numPairs || 
+     line.exitPairIndex-1>=numPairs) return QString("<font style='color:red;font-weight:bold'>UNDEFINED</font>");
   PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
   PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
   return pairsModel->getReactionLabel(firstPair,secondPair);

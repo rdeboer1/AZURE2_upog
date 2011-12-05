@@ -37,7 +37,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
       }
     }
     for(int dp=1;dp<=compound()->GetPair(aa)->NumDecays();dp++) {
-      if(compound()->GetPair(compound()->GetPair(aa)->GetDecay(dp)->GetPairNum())->GetPType()!=10) {
+      if(compound()->GetPair(compound()->GetPair(aa)->GetDecay(dp)->GetPairNum())->GetPType()==0) {
 	for(int k=1;k<=compound()->GetPair(aa)->GetDecay(dp)->NumKGroups();k++) {
 	  this->ClearTempTMatrices();
 	  for(int m=1;m<=compound()->GetPair(aa)->GetDecay(dp)->GetKGroup(k)->NumMGroups();m++) {
@@ -68,16 +68,21 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	for(int k=1;k<=theDecay->NumKGroups();k++) {
 	  this->ClearTempTMatrices();
 	  for(int m=1;m<=theDecay->GetKGroup(k)->NumMGroups();m++) {
-	    MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
-	    int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
-	    int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
-	    double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
-	    int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
-	    if(!tempTNum) {
-	      TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
-	      this->NewTempTMatrix(temptmatrix);
-	    } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
+	    if(compound()->GetPair(aa)->GetPType()==20) {
+	      sum+=25.*this->GetTMatrixElement(k,m)*conj(this->GetTMatrixElement(k,m));
+	    } else { 
+	      MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
+	      int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
+	      int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
+	      double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
+	      int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
+	      if(!tempTNum) {
+		TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
+		this->NewTempTMatrix(temptmatrix);
+	      } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
+	    }
 	  }
+	  if(compound()->GetPair(aa)->GetPType()==20) continue;
 	  for(int m=1;m<=theDecay->GetKGroup(k)->NumECMGroups();m++) {
 	    ECMGroup *theECMGroup=theDecay->GetKGroup(k)->GetECMGroup(m);
 	    int lValue=theECMGroup->GetL();

@@ -2,9 +2,8 @@
 #include "CNuc.h"
 #include "Config.h"
 #include "EPoint.h"
-#include "MatInv.h"
+#include "MatrixInv.h"
 #include <assert.h>
-
 
 /*!
  * The AMatrixFunc object is created with reference to a CNuc object.
@@ -46,9 +45,20 @@ void AMatrixFunc::ClearMatrices() {
  */
 
 void AMatrixFunc::FillMatrices (EPoint *point) {
-  double inEnergy=point->GetCMEnergy()+
-    compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetSepE()+
-    compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetExE();
+  double inEnergy;
+  if(compound()->
+     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+     GetPType()==20)
+    inEnergy=point->GetCMEnergy()+
+      compound()->
+      GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+      GetSepE()+
+      compound()->
+      GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+      GetExE();
+  else inEnergy = point->GetCMEnergy()+
+	 compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetSepE()+
+	 compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetExE();
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
@@ -63,7 +73,8 @@ void AMatrixFunc::FillMatrices (EPoint *point) {
 		double gammaChp=levelp->GetFitGamma(ch);
 		complex loElement=point->GetLoElement(j,ch);
 		sum+=gammaCh*gammaChp*loElement;
-		if(compound()->GetJGroup(j)->GetChannel(ch)->GetRadType() != 'P' && 
+		if((compound()->GetJGroup(j)->GetChannel(ch)->GetRadType() == 'M' || 
+		    compound()->GetJGroup(j)->GetChannel(ch)->GetRadType() == 'E' ) && 
 		   la==lap &&
 		   (configure().paramMask & Config::USE_RMC_FORMALISM)) 
 		  sum+=complex(0.0,1.0)*gammaCh*gammaChp;
@@ -95,8 +106,8 @@ void AMatrixFunc::InvertMatrices() {
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
       matrix_c *theAInvMatrix = this->GetJSpecAInvMatrix(j);
-      matrix_c theAMatrix=MatInv(*theAInvMatrix);
-      this->AddAMatrix(theAMatrix);
+      MatrixInv matrixInv(*theAInvMatrix);
+      this->AddAMatrix(matrixInv.inverse());
     }
   }
 }

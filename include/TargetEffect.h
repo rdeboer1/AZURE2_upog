@@ -30,6 +30,7 @@ class TargetEffect {
   double TargetThickness(double,const Config&);
   double GetConvolutionFactor(double, double) const;
   double GetQCoefficient(int) const;
+  void SetSigma(double);
   void SetNumSubPoints(int);
   std::vector<int> GetSegmentsList() const;
   Equation *GetStoppingPowerEq();

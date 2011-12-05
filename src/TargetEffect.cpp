@@ -157,6 +157,14 @@ double TargetEffect::GetQCoefficient(int order)  const {
 }
 
 /*!
+ * Sets the convolution sigma to a new value.
+ */
+
+void TargetEffect::SetSigma(double sigma) {
+  sigma_=sigma;
+}
+
+/*!
  * Sets the number of sub-points for the TargetEffect object.
  */
 

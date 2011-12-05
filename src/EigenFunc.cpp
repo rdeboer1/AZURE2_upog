@@ -1,8 +1,14 @@
-#include "Diagonalize.h"
+#include "EigenFunc.h"
 #include <gsl/gsl_eigen.h>
 #include <math.h>
 
-struct EigenSolve Diagonalize(const matrix_r &A) {
+/*!
+ *  This constructor calculates the eigenvectors and eigenvalues for a real symmetric matrix.
+ */
+
+EigenFunc::EigenFunc(const matrix_r &A) {
+  eigenvalues_.clear();
+  eigenvectors_.clear();
 
   gsl_matrix * m = gsl_matrix_alloc(A.size(),A.size());
   for(int i=0;i<A.size();i++) {
@@ -18,13 +24,12 @@ struct EigenSolve Diagonalize(const matrix_r &A) {
   gsl_eigen_symmv (m,eval,evec,w);
   gsl_eigen_symmv_sort (eval,evec,GSL_EIGEN_SORT_VAL_ASC);
 
-  struct EigenSolve result;
   for(int i=0;i<A.size();i++) {
-    result.eigenvalues.push_back(gsl_vector_get(eval,i));
+    eigenvalues_.push_back(gsl_vector_get(eval,i));
     vector_r tempRow;
-    result.eigenvectors.push_back(tempRow);
+    eigenvectors_.push_back(tempRow);
     for(int ii=0;ii<A.size();ii++) {
-      result.eigenvectors[i].push_back(gsl_matrix_get(evec,i,ii));
+      eigenvectors_[i].push_back(gsl_matrix_get(evec,i,ii));
     }
   }
   
@@ -33,10 +38,16 @@ struct EigenSolve Diagonalize(const matrix_r &A) {
   gsl_matrix_free (m);
   gsl_eigen_symmv_free (w);
 
-  return result;
 }
 
-struct EigenSolve Solve(const matrix_r &A, const std::vector<vector_r > &B) {
+/*!
+ *  This constructor calulates the eigenvectors and eigenvalues for a real symmetric matrix pair.
+ */
+
+EigenFunc::EigenFunc(const matrix_r &A, const std::vector<vector_r > &B) {
+  eigenvalues_.clear();
+  eigenvectors_.clear();
+
   gsl_matrix * n = gsl_matrix_alloc(A.size(),A.size());
   gsl_matrix * m = gsl_matrix_alloc(B.size(),B.size());
   for(int i=0;i<A.size();i++) {
@@ -54,13 +65,12 @@ struct EigenSolve Solve(const matrix_r &A, const std::vector<vector_r > &B) {
   gsl_eigen_gensymmv(n,m,eval,evec,w);
   gsl_eigen_gensymmv_sort (eval,evec,GSL_EIGEN_SORT_VAL_ASC);
 
-  struct EigenSolve result;
   for(int i=0;i<A.size();i++) {
-    result.eigenvalues.push_back(gsl_vector_get(eval,i));
+    eigenvalues_.push_back(gsl_vector_get(eval,i));
     vector_r tempRow;
-    result.eigenvectors.push_back(tempRow);
+    eigenvectors_.push_back(tempRow);
     for(int ii=0;ii<A.size();ii++) {
-      result.eigenvectors[i].push_back(gsl_matrix_get(evec,i,ii));
+      eigenvectors_[i].push_back(gsl_matrix_get(evec,i,ii));
     }
   }
 
@@ -71,16 +81,16 @@ struct EigenSolve Solve(const matrix_r &A, const std::vector<vector_r > &B) {
     for(int ii=0;ii<A.size();ii++) {
       double sum=0.0;
       for(int iii=0;iii<A.size();iii++) {
-	sum+=B[ii][iii]*result.eigenvectors[iii][i];
+	sum+=B[ii][iii]*eigenvectors_[iii][i];
       }
       tempNormVec[ii]=sum;
     }
     double sum=0.0;
     for(int ii=0;ii<A.size();ii++) {
-      sum+=tempNormVec[ii]*result.eigenvectors[ii][i];
+      sum+=tempNormVec[ii]*eigenvectors_[ii][i];
     }
     for(int ii=0;ii<A.size();ii++) {
-      result.eigenvectors[ii][i]=result.eigenvectors[ii][i]/sqrt(sum);
+      eigenvectors_[ii][i]=eigenvectors_[ii][i]/sqrt(sum);
     }
   }
   
@@ -89,6 +99,4 @@ struct EigenSolve Solve(const matrix_r &A, const std::vector<vector_r > &B) {
   gsl_matrix_free (m);
   gsl_matrix_free (n);
   gsl_eigen_gensymmv_free (w);
-
-  return result;
 }

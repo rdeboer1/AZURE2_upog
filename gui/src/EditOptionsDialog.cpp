@@ -8,6 +8,8 @@ EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
   ignoreExternalsCheck = new QCheckBox(tr("Ignore external width\nif internal width is zeroed"));
   useRMCCheck = new QCheckBox(tr("Use RMC capture formalism"));
   noTransformCheck = new QCheckBox(tr("Do not perform parameter\ntransformations"));
+  connect(useBruneCheck,SIGNAL(stateChanged(int)),this,SLOT(useBruneCheckChanged(int)));
+  connect(useRMCCheck,SIGNAL(stateChanged(int)),this,SLOT(useRMCCheckChanged(int)));
 
   QGroupBox* optionsBox = new QGroupBox(tr("AZURE2 Options"));
   QVBoxLayout* optionsLayout = new QVBoxLayout;
@@ -32,4 +34,18 @@ EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
   mainLayout->addLayout(buttonBox);
   setWindowTitle(tr("Edit Options"));
   setLayout(mainLayout);
+}
+
+void EditOptionsDialog::useBruneCheckChanged(int state) {
+  if(state==Qt::Checked) {
+    useRMCCheck->setChecked(false);
+    useRMCCheck->setEnabled(false);
+  } else useRMCCheck->setEnabled(true);
+}
+
+void EditOptionsDialog::useRMCCheckChanged(int state) {
+  if(state==Qt::Checked) {
+    useBruneCheck->setChecked(false);
+    useBruneCheck->setEnabled(false);
+  } else useBruneCheck->setEnabled(true);
 }

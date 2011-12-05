@@ -17,6 +17,9 @@ AChannel::AChannel(NucLine nucLine, int pairNum) {
   } else if(nucLine.pType()==10) {
     if(nucLine.levelPi()*nucLine.pi2()==pow(-1,nucLine.l())) radtype_='E';
     else radtype_='M';
+  } else if(nucLine.pType()==20) {
+    if(nucLine.l()==0) radtype_='F';
+    else radtype_='G';
   }
 }
 

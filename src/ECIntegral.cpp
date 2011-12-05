@@ -6,20 +6,10 @@
 
 extern double DoubleFactorial(int);
 
-struct gsl_ec_integral_params {
-  CoulFunc *theCoulFunc;
-  WhitFunc *theWhitFunc;
-  int liValue;
-  int lfValue;
-  int multLValue;
-  double pairEnergy;
-  double bindingEnergy;
-};
-
-double gsl_ec_fw_integrand(double x, void * p) {
-  struct gsl_ec_integral_params *params = (struct gsl_ec_integral_params *)p;
-  CoulFunc *theCoulFunc=(params->theCoulFunc);
-  WhitFunc *theWhitFunc=(params->theWhitFunc);
+double ECIntegral::FWIntegrand(double x, void * p) {
+  Params *params = (Params*)p;
+  CoulFunc *theCoulFunc=(params->coulFunc);
+  WhitFunc *theWhitFunc=(params->whitFunc);
   int liValue = (params->liValue);
   int lfValue = (params->lfValue);
   int multLValue = (params->multLValue);
@@ -31,10 +21,10 @@ double gsl_ec_fw_integrand(double x, void * p) {
   return coul.F*whit*pow(x,multLValue);
 }
 
-double gsl_ec_gw_integrand(double x, void * p) {
-  struct gsl_ec_integral_params *params = (struct gsl_ec_integral_params *)p;
-  CoulFunc *theCoulFunc=(params->theCoulFunc);
-  WhitFunc *theWhitFunc=(params->theWhitFunc);
+double ECIntegral::GWIntegrand(double x, void * p) {
+  Params *params = (Params*)p;
+  CoulFunc *theCoulFunc=(params->coulFunc);
+  WhitFunc *theWhitFunc=(params->whitFunc);
   int liValue = (params->liValue);
   int lfValue = (params->lfValue);
   int multLValue = (params->multLValue);
@@ -46,9 +36,9 @@ double gsl_ec_gw_integrand(double x, void * p) {
   return coul.G*whit*pow(x,multLValue);
 }
   
-double gsl_ec_ww_integrand(double x, void * p) {
-  struct gsl_ec_integral_params *params = (struct gsl_ec_integral_params *)p;
-  WhitFunc *theWhitFunc=(params->theWhitFunc);
+double ECIntegral::WWIntegrand(double x, void * p) {
+  Params *params = (Params*)p;
+  WhitFunc *theWhitFunc=(params->whitFunc);
   int liValue = (params->liValue);
   int lfValue = (params->lfValue);
   int multLValue = (params->multLValue);
@@ -60,33 +50,28 @@ double gsl_ec_ww_integrand(double x, void * p) {
   return whitIn*whitOut*pow(x,multLValue);
 }
 
-struct ECIntResult gsl_ec_integral(CoulFunc *coul,WhitFunc *whit,int li,int lf, int multL,
-		double energy,double bindingenergy, double chanrad) {
-
-  struct gsl_ec_integral_params params = {coul,whit,li,lf,
-					  multL,energy,bindingenergy};
+void ECIntegral::Integrate(double chanrad) {
   gsl_integration_workspace * w 
     = gsl_integration_workspace_alloc (1000);
 
-  struct ECIntResult result;
-  if(energy<0.0) {
+  if(params_.pairEnergy<0.0) {
     gsl_function WW;
-    WW.function = &gsl_ec_ww_integrand;
-    WW.params= &params;
+    WW.function = &WWIntegrand;
+    WW.params= &params_;
 
     double wwintresult,wwinterror;
 
     gsl_integration_qagiu(&WW,chanrad,0.0,1e-4,1000,w,&wwintresult,&wwinterror);
-    result.GW=wwintresult;
-    result.FW=0.0;
+    GW_=wwintresult;
+    FW_=0.0;
   } else {
     gsl_function FW;
-    FW.function = &gsl_ec_fw_integrand;
-    FW.params= &params;
+    FW.function = &FWIntegrand;
+    FW.params= &params_;
 
     gsl_function GW;
-    GW.function = &gsl_ec_gw_integrand;
-    GW.params= &params;
+    GW.function = &GWIntegrand;
+    GW.params= &params_;
 
 
     double fwintresult,fwinterror;
@@ -94,13 +79,11 @@ struct ECIntResult gsl_ec_integral(CoulFunc *coul,WhitFunc *whit,int li,int lf, 
 
     gsl_integration_qagiu(&FW,chanrad,0.0,1e-4,1000,w,&fwintresult,&fwinterror);
     gsl_integration_qagiu(&GW,chanrad,0.0,1e-4,1000,w,&gwintresult,&gwinterror);
-    result.FW=fwintresult;
-    result.GW=gwintresult;
+    FW_=fwintresult;
+    GW_=gwintresult;
   }
 
   gsl_integration_workspace_free (w);
-  
-  return result;
 }
 
   /*!
@@ -114,21 +97,25 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
 			       double theInitialJValue, double theFinalJValue,
 			       int theLMult, char radType,
 			       double inEnergy, double levelEnergy,
-			       bool isChannelCapture) const {
-
+			       bool isChannelCapture) {
+  ResetIntegrals();
 
   double sepEnergy = pair()->GetSepE()+pair()->GetExE();
   double outEnergy = inEnergy - sepEnergy;
   double chanRad = pair()->GetChRad();
   double redMass = pair()->GetRedMass();
 
-  struct ECIntResult integrals;
+  params_.liValue = theInitialLValue;
+  params_.lfValue = theFinalLValue;
+  params_.multLValue = theLMult;
+  params_.pairEnergy = outEnergy;
+  params_.bindingEnergy = fabs(levelEnergy-sepEnergy);
+
   if(radType=='E') 
-    integrals=gsl_ec_integral(coulfunction(),whitfunction(),theInitialLValue,theFinalLValue,theLMult,
-		    outEnergy,fabs(levelEnergy-sepEnergy),chanRad);
+    params_.multLValue = theLMult;
   else 
-    integrals=gsl_ec_integral(coulfunction(),whitfunction(),theInitialLValue,theFinalLValue,0,
-			      outEnergy,fabs(levelEnergy-sepEnergy),chanRad);
+    params_.multLValue = 0;
+  Integrate(chanRad);
 
   complex overlapIntegral(0.,0.);
   if(outEnergy>0.0) {
@@ -140,14 +127,14 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
       overlapIntegral=complex(0.0,-0.5)*
 	sqrt(coulfunction()->Penetrability(theInitialLValue,chanRad,outEnergy))*
 	pow(redMass*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc)*
-	chanExpHSP*(integrals.GW+complex(0.0,1.0)*integrals.FW);
-    } else overlapIntegral=(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*integrals.FW
-			    -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*integrals.GW)*
+	chanExpHSP*(GW()+complex(0.0,1.0)*FW());
+    } else overlapIntegral=(coul.G/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*FW()
+			    -coul.F/sqrt(pow(coul.F,2.0)+pow(coul.G,2.0))*GW())*
 	     pow(redMass*uconv/2./fabs(outEnergy),0.25)/sqrt(hbarc);
   } else {
     assert(isChannelCapture);
     double whit=whitfunction()->operator()(theInitialLValue,chanRad,fabs(outEnergy));
-    overlapIntegral=complex(0.0,-0.5)*integrals.GW/whit*
+    overlapIntegral=complex(0.0,-0.5)*GW()/whit*
       sqrt(redMass*uconv*chanRad)/hbarc;
   }
  
@@ -168,23 +155,23 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
     ecAmplitude=complex(0.0,-1.0)*
       effectiveCharge*sqrt((8.*(2.*theLMult+1.)*(theLMult+1.))/theLMult)/DoubleFactorial(2*theLMult+1)*
       pow(complex(0.,1.0),theInitialLValue+theLMult-theFinalLValue)*
-      ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
-      Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
+      AngCoeff::ClebGord(theInitialLValue,theLMult,theFinalLValue,0,0,0)*sqrt(2.*theInitialLValue+1.)*sqrt(2.*theFinalJValue+1.)*
+      AngCoeff::Racah(theLMult,theFinalLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
   } else {
     complex orbitalTerm=effectiveCharge*
       sqrt((2.*theInitialLValue+1.)*(theInitialLValue+1.)*theInitialLValue)*
-      Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
+      AngCoeff::Racah(1.,theInitialLValue,theInitialJValue,theInitialSValue,theInitialLValue,theFinalJValue);
     complex tau=pow(std::complex<double>(-1.,0.),pair()->GetJ(1)+pair()->GetJ(2))*
       (pow(complex(-1.,0.),theFinalSValue)*
        sqrt(pair()->GetJ(1)*(pair()->GetJ(1)+1.)*(2.*pair()->GetJ(1)+1.))*
-       Racah(theFinalSValue,pair()->GetJ(1),theInitialSValue,pair()->GetJ(1),pair()->GetJ(2),1.)*
+       AngCoeff::Racah(theFinalSValue,pair()->GetJ(1),theInitialSValue,pair()->GetJ(1),pair()->GetJ(2),1.)*
        pair()->GetG(1)+
        pow(complex(-1.,0.),theInitialSValue)*
        sqrt(pair()->GetJ(2)*(pair()->GetJ(2)+1.)*(2.*pair()->GetJ(2)+1.))*
-       Racah(theFinalSValue,pair()->GetJ(2),theInitialSValue,pair()->GetJ(2),pair()->GetJ(1),1.)*
+       AngCoeff::Racah(theFinalSValue,pair()->GetJ(2),theInitialSValue,pair()->GetJ(2),pair()->GetJ(1),1.)*
        pair()->GetG(2));
     complex spinTerm=-sqrt((2.*theInitialSValue+1.)*(2.*theFinalSValue+1.))*
-      Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
+      AngCoeff::Racah(1,theInitialSValue,theFinalJValue,theInitialLValue,theFinalSValue,theInitialJValue)*tau;
     ecAmplitude=complex(0.0,1.0)*
       sqrt(fstruc)*pow(hbarc,1.5)/(2*1.00727638*uconv)*sqrt(16/3)*sqrt(2*theFinalJValue+1.)*
       (orbitalTerm+spinTerm);

@@ -61,7 +61,7 @@ PairsModel *PairsTab::getPairsModel() {
 void PairsTab::addPair() {
   AddPairDialog aDialog;
   if(aDialog.exec()) {
-    if(!((pairsModel->getPairs()).size()==0&&aDialog.pairTypeCombo->currentIndex()==1)) {
+    if(!((pairsModel->getPairs()).size()==0&&aDialog.pairTypeCombo->currentIndex()!=0)) {
       PairsData newPair;
       newPair.lightJ=(aDialog.lightJText->text()).toDouble();
       if(aDialog.lightPiCombo->currentIndex() == 0) newPair.lightPi=-1;
@@ -79,11 +79,12 @@ void PairsTab::addPair() {
       newPair.excitationEnergy=(aDialog.excitationEnergyText->text()).toDouble();
       newPair.channelRadius=(aDialog.channelRadiusText->text()).toDouble();
       if(aDialog.pairTypeCombo->currentIndex() == 1) newPair.pairType=10;
+      if(aDialog.pairTypeCombo->currentIndex() == 2) newPair.pairType=20;
       else newPair.pairType=0;
       addPair(newPair,pairsModel->numPairs(),false);
     } else {
-      QMessageBox::information(this, tr("Entrance Channel Error"),
-			       tr("The entrance channel cannot be a particle,gamma pair."));
+      QMessageBox::information(this, tr("Pair Type Error"),
+			       tr("The first pair must be a particle,particle pair."));
     }
   }
 }
@@ -215,11 +216,12 @@ void PairsTab::editPair() {
   aDialog.seperationEnergyText->setText(seperationEnergy);
   aDialog.channelRadiusText->setText(channelRadius);
   if(pairType == 10) aDialog.pairTypeCombo->setCurrentIndex(1);
+  if(pairType == 20) aDialog.pairTypeCombo->setCurrentIndex(2);
   else aDialog.pairTypeCombo->setCurrentIndex(0);
   
   
   if (aDialog.exec()) {
-    if(!(index.row()==0&&aDialog.pairTypeCombo->currentIndex()==1)) {
+    if(!(index.row()==0&&aDialog.pairTypeCombo->currentIndex()!=0)) {
       PairsData pair;
       pair.lightJ = aDialog.lightJText->text().toDouble();
       if(aDialog.lightPiCombo->currentIndex()==0) pair.lightPi=-1;
@@ -237,11 +239,12 @@ void PairsTab::editPair() {
       pair.seperationEnergy = aDialog.seperationEnergyText->text().toDouble();
       pair.channelRadius = aDialog.channelRadiusText->text().toDouble();
       if(aDialog.pairTypeCombo->currentIndex()==1) pair.pairType=10;
+      else if(aDialog.pairTypeCombo->currentIndex()==2) pair.pairType=20;
       else pair.pairType=0;
       editPair(pair,index.row(),false);
     } else {
-      QMessageBox::information(this,tr("Entrance Channel Error"),
-			       tr("The entrance channel cannot be a particle,gamma pair."));
+      QMessageBox::information(this,tr("Pair Type Error"),
+			       tr("The first pair must be a particle,particle pair."));
     }
   }
 }
