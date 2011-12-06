@@ -60,5 +60,6 @@ double AZURECalc::operator()(const vector_r& p) const {
     delete localCompound;
     delete localData;
   }
-  return chiSquared;
+  if(configure().stopFlag&&isFit) return 0.;
+  else return chiSquared;
 }

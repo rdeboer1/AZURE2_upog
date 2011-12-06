@@ -72,6 +72,8 @@ class Config {
   std::ostream &outStream;
   ///The runtime configuration file name.
   std::string configfile;
+  ///A control variable to stop AZURE calculation
+  bool stopFlag;
   ///A bitmask for the encoding of configuration flags
   unsigned int paramMask;
   ///A bitmask storing which checks are printed to screen.

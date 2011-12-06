@@ -76,7 +76,11 @@ int AZUREMain::operator()(){
 
   if(!(configure().paramMask & Config::CALCULATE_REACTION_RATE)) {
     //Initialize data object
-    data()->Initialize(compound(),configure());
+    if(data()->Initialize(compound(),configure())==-1) {
+      configure().outStream << std::endl
+			  << "Calculation was aborted." << std::endl;
+      return -1;
+    }
   
     //Declare a new instance of FCNBase
     AZURECalc theFunc(data(),compound(),configure());

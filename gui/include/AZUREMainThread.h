@@ -43,12 +43,17 @@ class AZUREMainThread : public QThread {
     configure_.integralsfile = configure.integralsfile;
     configure_.rateParams = configure.rateParams;    
     connect(&buffer_,SIGNAL(updateLog(QString)),tab->runtimeText,SLOT(write(QString)));
+    connect(tab->stopAZUREButton,SIGNAL(clicked()),this,SLOT(stopAZURE()));
     connect(this,SIGNAL(readyToRun()),&worker_,SLOT(run()));
     connect(&worker_,SIGNAL(done()),this,SLOT(quit()));
     worker_.moveToThread(this);
   };
  signals:
   void readyToRun();
+ public slots:
+  void stopAZURE() {
+    configure_.stopFlag=true;
+  };
  protected:
   void run() {
     emit readyToRun();

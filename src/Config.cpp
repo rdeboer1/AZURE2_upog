@@ -15,6 +15,7 @@ Config::Config(std::ostream& stream) : outStream(stream) {
   fileCheckMask=0;
   paramMask=0;
   paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA);
+  stopFlag=false;
 }
 
 /*!
