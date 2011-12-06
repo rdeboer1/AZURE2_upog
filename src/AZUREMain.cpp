@@ -3,13 +3,10 @@
 #include "AZUREParams.h"
 #include "Config.h"
 #include "ReactionRate.h"
-<<<<<<< HEAD
 #include "Minuit2/MnPrint.h"
-=======
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
 #include <Minuit2/MnMinos.h>
->>>>>>> 0989d478cb1cfc7079ebc32eee6b69f3ff91d993
 
 int AZUREMain::operator()(){
   //Fill compound nucleus from nucfile
@@ -117,7 +114,7 @@ int AZUREMain::operator()(){
           out.close();
         } else std::cout << "Could not save covariance_matrix.out file." << std::endl;
         
-	params.WriteParameterErrors(errors,configure().outputdir);
+	params.WriteParameterErrors(errors,configure());
       }
       params.GetMinuitParams()=min.UserParameters();
       params.WriteUserParameters(configure(),true);
