@@ -858,6 +858,7 @@ void AZURESetup::SaveAndRun() {
   azureMain = new AZUREMainThread(runTab,GetConfig());
   connect(azureMain,SIGNAL(finished()),this,SLOT(DeleteThread()));
   runTab->calcButton->setEnabled(false);
+  runTab->stopAZUREButton->setEnabled(true);
   runTab->runtimeText->SetMouseFiltered(true);
   azureMain->start();
 }
@@ -865,6 +866,7 @@ void AZURESetup::SaveAndRun() {
 void AZURESetup::DeleteThread() {
   runTab->runtimeText->insertPlainText("\nThanks for using AZURE2.\n");
   runTab->calcButton->setEnabled(true);
+  runTab->stopAZUREButton->setEnabled(false);
   runTab->runtimeText->SetMouseFiltered(false);
   delete azureMain;
 }

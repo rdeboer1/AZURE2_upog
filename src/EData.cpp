@@ -371,10 +371,10 @@ void EData::ResetIterations(){
  * and entire EData object instead of a single EPoint object.
  */
 
-void EData::Initialize(CNuc *compound,const Config &configure) {
+int EData::Initialize(CNuc *compound,const Config &configure) {
   //Calculate channel lo-matrix and channel penetrability for each channel at each local energy
   configure.outStream << "Calculating Lo-Matrix, Phases, and Penetrabilities..." << std::endl;
-  this->CalcEDependentValues(compound,configure);
+  if(this->CalcEDependentValues(compound,configure)==-1) return -1;
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ENERGY_DEP) 
     this->PrintEDependentValues(configure,compound);
 
@@ -394,8 +394,9 @@ void EData::Initialize(CNuc *compound,const Config &configure) {
   //Calculate new ec amplitudes
   if(configure.paramMask & Config::USE_EXTERNAL_CAPTURE) {
     configure.outStream << "Calculating External Capture Amplitudes..." << std::endl;
-    this->CalculateECAmplitudes(compound,configure);
+    if(this->CalculateECAmplitudes(compound,configure)==-1) return -1;
   }
+  return 0;
 }
 
 /*!
@@ -554,14 +555,17 @@ void EData::PrintLegendreP(const Config &configure) {
  * Calls EPoint::CalcEDependentValues for each point in the entire EData object.
  */
 
-void EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
+int EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
   for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
 #pragma omp parallel for
-  	for(int i=1;i<=segment->NumPoints();i++) {
+    for(int i=1;i<=segment->NumPoints();i++) {
+      if(configure.stopFlag) continue;
       EPoint *point = segment->GetPoint(i);
       if(!(point->IsMapped())) point->CalcEDependentValues(theCNuc,configure);
     }
+    if(configure.stopFlag) return -1;
   }
+  return 0;
 }
 
 /*!
@@ -758,7 +762,7 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
  * Otherwise, the amplitudes are read from the specified file.
  */
 
-void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
+int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
   std::ifstream in;
   std::ofstream out;
   std::string outputfile;
@@ -788,25 +792,31 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 		time_t startTime = time(NULL);
 #pragma omp parallel for
 		for(int i=1;i<=numPoints;i++) {
+		  if(configure.stopFlag) continue;
 		  EPoint *point = segment->GetPoint(i);
 		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc,configure);
 		  ++pointIndex;
 		  if(difftime(time(NULL),startTime)>0.25) {
-		  	  startTime=time(NULL);
-		      std::string progress=" [";
-		  	  double percent=0.;
-		      for(int j = 1;j<=25;j++) {
-			    if(pointIndex>=percent*numPoints&&percent<1.) {
-			    	percent+=0.04;
-			    	progress+='*';
-			    } else progress+=' ';
-		      } progress+="] ";
-		      configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
-		      	        << std::setw(0) << progress << percent*100 << '%';configure.outStream.flush();
+		    startTime=time(NULL);
+		    std::string progress=" [";
+		    double percent=0.;
+		    for(int j = 1;j<=25;j++) {
+		      if(pointIndex>=percent*numPoints&&percent<1.) {
+			percent+=0.04;
+			progress+='*';
+		      } else progress+=' ';
+		    } progress+="] ";
+		    configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+					<< std::setw(0) << progress << percent*100 << '%';configure.outStream.flush();
 		  }
 		}
-	    configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
-	              << std::setw(0) << " [*************************] 100%" << std::endl;
+		if(configure.stopFlag) {
+		  if(out.is_open()) out.close();
+		  if(in.is_open()) in.close();
+		  return -1;
+		}
+		configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+				    << std::setw(0) << " [*************************] 100%" << std::endl;
 	      }
 	      for(EPointIterator point=segment->GetPoints().begin();
 		  point<segment->GetPoints().end();point++) {
@@ -852,6 +862,7 @@ void EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
     out.close();
   }
   if(in.is_open()) in.close();
+  return 0;
 }
 
 /*!

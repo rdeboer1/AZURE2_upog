@@ -35,6 +35,7 @@ class RunTab : public QWidget {
  private:
   QComboBox* calcType;
   QPushButton* calcButton;
+  QPushButton* stopAZUREButton;
   QLineEdit* paramFileText;
   QLineEdit* integralsFileText;
   QRadioButton* newParamFileButton;

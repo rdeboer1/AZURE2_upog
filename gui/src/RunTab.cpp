@@ -19,6 +19,8 @@ RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   chiVarianceText->setMaximumWidth(50);
  
   calcButton = new QPushButton(tr("Save and Run"));
+  stopAZUREButton = new QPushButton(tr("Stop AZURE2"));
+  stopAZUREButton->setEnabled(false);
 
   QGridLayout* calcLayout = new QGridLayout;
   calcLayout->addWidget(new QLabel(tr("Calculation Type:")),0,0,Qt::AlignRight);
@@ -31,6 +33,8 @@ RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   calcLayout->setColumnStretch(4,0);
   calcLayout->addWidget(calcButton,0,5);
   calcLayout->setColumnStretch(5,0);
+  calcLayout->addWidget(stopAZUREButton,0,6);
+  calcLayout->setColumnStretch(6,0);
 
   paramFileText = new QLineEdit;
   paramFileText->setEnabled(false);
