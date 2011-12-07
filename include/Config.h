@@ -37,6 +37,7 @@ struct RateParams {
 class Config {
  public:
   Config(std::ostream& stream);
+  void Reset();
   /*!
    * Bit flags for various options in AZURE2.
    */

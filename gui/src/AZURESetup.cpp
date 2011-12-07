@@ -198,6 +198,8 @@ bool AZURESetup::readFile(QString filename) {
   QFileInfo info(file);
   QString directory=info.absolutePath();
 
+  GetConfig().Reset();
+
   QTextStream in(&file);
   QString line("");
   

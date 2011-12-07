@@ -454,7 +454,7 @@ bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
   in.clear();
   if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&
      (configure.paramMask & Config::USE_RMC_FORMALISM)) {
-    std:: cout << "WARNING: External capture is not compatible with Reich-Moore.  Ignoring external capture." 
+    configure.outStream << "WARNING: External capture is not compatible with Reich-Moore.  Ignoring external capture." 
 	       << std::endl;
     configure.paramMask &= ~Config::USE_EXTERNAL_CAPTURE;
   }
