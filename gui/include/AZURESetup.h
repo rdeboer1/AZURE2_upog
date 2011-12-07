@@ -54,6 +54,7 @@ class AZURESetup : public QMainWindow {
   void editChecks();
   void editDirs(); 
   void editOptions();
+  void showAbout();
 
  private:
   bool readFile(QString filename);
@@ -68,6 +69,7 @@ class AZURESetup : public QMainWindow {
 
   Config config;
 
+  QAction* aboutAction;
   QAction* quitAction;
   QAction* openAction;
   QAction* saveAction;
