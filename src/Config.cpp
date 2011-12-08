@@ -10,6 +10,14 @@
  */
 
 Config::Config(std::ostream& stream) : outStream(stream) {
+  Reset();
+}
+
+/*!
+ * This function resets Config structure.
+ */
+
+void Config::Reset() {
   chiVariance=1.0;
   screenCheckMask=0;
   fileCheckMask=0;

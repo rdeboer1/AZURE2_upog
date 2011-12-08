@@ -70,48 +70,95 @@ void RMatrixFunc::ClearMatrices() {
  */
 
 void RMatrixFunc::FillMatrices (EPoint *point) {
+  double inEnergy;
+  if(compound()->
+     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
+     GetPType()==20)
+    inEnergy=point->GetCMEnergy()+
+      compound()->
+      GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+      GetSepE()+
+      compound()->
+      GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
+      GetExE();
+  else inEnergy=point->GetCMEnergy()+
+	 compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetSepE()+
+	 compound()->GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->GetExE();
   for(int j=1;j<=compound()->NumJGroups();j++) {
     if(compound()->GetJGroup(j)->IsInRMatrix()) {
-      for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
-	for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
-	  complex sum(0.0,0.0);
-	  for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
-	    if(compound()->GetJGroup(j)->GetLevel(la)->IsInRMatrix()) {
-	      ALevel *level=compound()->GetJGroup(j)->GetLevel(la);
+      if(configure().paramMask & Config::USE_BRUNE_FORMALISM) {
+	matrix_c qMatrixInverse;
+	for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
+	  if(!compound()->GetJGroup(j)->GetLevel(la)->IsInRMatrix()) continue;
+	  ALevel *level=compound()->GetJGroup(j)->GetLevel(la);
+	  vector_c tempVector;
+	  for(int lap=1;lap<=compound()->GetJGroup(j)->NumLevels();lap++) {
+	    if(!compound()->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) continue;
+	    ALevel *levelp=compound()->GetJGroup(j)->GetLevel(lap);
+	    complex sum = (la==lap) ? complex(level->GetFitE()-inEnergy,0.0) : complex(0.0,0.0);
+	    for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
+	      if(compound()->GetJGroup(j)->GetChannel(ch)->GetRadType()!='P') continue;
 	      double gammaCh=level->GetFitGamma(ch);
-	      double gammaChp=level->GetFitGamma(chp);
-	      double resenergy=level->GetFitE();
-	      double inenergy;
-	      if(compound()->
-		 GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		 GetPType()==20)
-		inenergy=point->GetCMEnergy()+
-		  compound()->
-		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
-		  GetSepE()+
-		  compound()->
-		  GetPair(compound()->GetPairNumFromKey(point->GetExitKey()))->
-		  GetExE();
-	      else inenergy=point->GetCMEnergy()+
-		     compound()->
-		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		     GetSepE()+
-		     compound()->
-		     GetPair(compound()->GetPairNumFromKey(point->GetEntranceKey()))->
-		     GetExE();
-	      double gammaSum=0.;
-	      if(configure().paramMask & Config::USE_RMC_FORMALISM) 
-		for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
-		  if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='M' || 
-		     compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='E')
-		    gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
-	      sum+=gammaCh*gammaChp/(resenergy-inenergy-complex(0.0,1.0)*gammaSum);
+	      double gammaChp=levelp->GetFitGamma(ch);
+	      complex channelShift=point->GetLoElement(j,ch)
+		+complex(compound()->GetJGroup(j)->GetChannel(ch)->GetBoundaryCondition(),
+			 -1.*pow(point->GetSqrtPenetrability(j,ch),2.));	      
+	      sum-=gammaCh*gammaChp*channelShift;
+	      if(la==lap) sum+=gammaCh*gammaChp*level->GetShiftFunction(ch);
+	      else sum+=gammaCh*gammaChp*
+		     (level->GetShiftFunction(ch)*(inEnergy-levelp->GetFitE())
+		      -levelp->GetShiftFunction(ch)*(inEnergy-level->GetFitE()))/
+		     (level->GetFitE()-levelp->GetFitE());
 	    }
+	    tempVector.push_back(sum);
 	  }
-	  this->AddRMatrixElement(j,ch,chp,sum);
-	  complex loElement =point->GetLoElement(j,chp);
-	  if(ch==chp) this->AddRLMatrixElement(j,ch,chp,1.0-sum*loElement);
-	  else this->AddRLMatrixElement(j,ch,chp,-sum*loElement);
+	  qMatrixInverse.push_back(tempVector);
+	}
+	MatrixInv matrixInv(qMatrixInverse);
+	for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
+	  for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
+	    complex rTemp(0.0,0.0);;
+	    for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
+	      if(!compound()->GetJGroup(j)->GetLevel(la)->IsInRMatrix()) continue;
+	      complex temp(0.0,0.0);
+	      for(int lap=1;lap<=compound()->GetJGroup(j)->NumLevels();lap++) {
+		if(!compound()->GetJGroup(j)->GetLevel(lap)->IsInRMatrix()) continue;
+		temp+=matrixInv.inverse()[la-1][lap-1]*compound()->GetJGroup(j)->GetLevel(lap)->GetFitGamma(chp);  
+	      }
+	      rTemp+=temp*compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(ch);
+	    }
+	    this->AddRMatrixElement(j,ch,chp,rTemp);
+	    double tempPene = 0.;
+	    if(compound()->GetJGroup(j)->GetChannel(chp)->GetRadType()=='P') 
+	      tempPene=pow(point->GetSqrtPenetrability(j,chp),2.);
+	    if(ch==chp) this->AddRLMatrixElement(j,ch,chp,1.-complex(0.,1.)*rTemp*tempPene);
+	    else this->AddRLMatrixElement(j,ch,chp,-complex(0.,1.)*rTemp*tempPene);
+	  }
+	}
+      } else {
+	for(int ch=1;ch<=compound()->GetJGroup(j)->NumChannels();ch++) {
+	  for(int chp=1;chp<=compound()->GetJGroup(j)->NumChannels();chp++) {
+	    complex sum(0.0,0.0);
+	    for(int la=1;la<=compound()->GetJGroup(j)->NumLevels();la++) {
+	      if(compound()->GetJGroup(j)->GetLevel(la)->IsInRMatrix()) {
+		ALevel *level=compound()->GetJGroup(j)->GetLevel(la);
+		double gammaCh=level->GetFitGamma(ch);
+		double gammaChp=level->GetFitGamma(chp);
+		double resenergy=level->GetFitE();
+		double gammaSum=0.;
+		if(configure().paramMask & Config::USE_RMC_FORMALISM) 
+		  for(int chpp=1;chpp<=compound()->GetJGroup(j)->NumChannels();chpp++) 
+		    if(compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='M' || 
+		       compound()->GetJGroup(j)->GetChannel(chpp)->GetRadType()=='E')
+		      gammaSum+=pow(compound()->GetJGroup(j)->GetLevel(la)->GetFitGamma(chpp),2.0);
+		sum+=gammaCh*gammaChp/(resenergy-inEnergy-complex(0.0,1.0)*gammaSum);
+	      }
+	    }
+	    this->AddRMatrixElement(j,ch,chp,sum);
+	    complex loElement =point->GetLoElement(j,chp);
+	    if(ch==chp) this->AddRLMatrixElement(j,ch,chp,1.0-sum*loElement);
+	    else this->AddRLMatrixElement(j,ch,chp,-sum*loElement);
+	  }
 	}
       }
     }

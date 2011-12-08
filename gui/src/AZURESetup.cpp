@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "EditOptionsDialog.h"
 #include "AZUREMainThread.h"
+#include "AboutAZURE2Dialog.h"
 #ifdef USE_QWT
 #include "PlotTab.h"
 #endif
@@ -68,6 +69,9 @@ Config& AZURESetup::GetConfig() {
 }
 
 void AZURESetup::createActions() {
+  aboutAction = new QAction(tr("&About AZURE2..."),this);
+  connect(aboutAction,SIGNAL(triggered()),this,SLOT(showAbout()));
+
   quitAction = new QAction(tr("&Quit"),this);
   quitAction->setShortcuts(QKeySequence::Quit);
   connect(quitAction,SIGNAL(triggered()),this,SLOT(close()));
@@ -118,6 +122,8 @@ void AZURESetup::createActions() {
 
 void AZURESetup::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(aboutAction);
+  fileMenu->addSeparator();
   fileMenu->addAction(openAction);
   recentFileMenu = fileMenu->addMenu(tr("Open &Recent..."));
   for(int i = 0; i < numRecent; i++ ) recentFileMenu->addAction(recentFileActions[i]);
@@ -192,6 +198,8 @@ bool AZURESetup::readFile(QString filename) {
   if(!file.open(QIODevice::ReadOnly)) return false;
   QFileInfo info(file);
   QString directory=info.absolutePath();
+
+  GetConfig().Reset();
 
   QTextStream in(&file);
   QString line("");
@@ -556,11 +564,7 @@ bool AZURESetup::writeLastRun(QTextStream& outStream) {
 void AZURESetup::matrixChanged(QAction *action) {
   if(action==aMatrixAction) GetConfig().paramMask |= Config::USE_AMATRIX;
   else {
-    if(GetConfig().paramMask & Config::USE_BRUNE_FORMALISM) {
-      QMessageBox::information(this,tr("Incompatible Option"),
-			       tr("The Brune formalism is not enabled for the R-Matrix. Remove option to use R-Matrix formalism."));
-      aMatrixAction->activate(QAction::Trigger);
-    } else if(GetConfig().paramMask & Config::IGNORE_ZERO_WIDTHS) {
+    if(GetConfig().paramMask & Config::IGNORE_ZERO_WIDTHS) {
       QMessageBox::information(this,tr("Incompatible Option"),
 			       tr("The option to ignore external widths is not possible for R-Matrix formalism. Remove option to use R-Matrix formalism."));
       aMatrixAction->activate(QAction::Trigger);
@@ -674,14 +678,9 @@ void AZURESetup::editOptions() {
     if(aDialog.useGSLCoulCheck->isChecked()) GetConfig().paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else GetConfig().paramMask &= ~Config::USE_GSL_COULOMB_FUNC;
 
-    if(aDialog.useBruneCheck->isChecked()) {
+    if(aDialog.useBruneCheck->isChecked()) 
       GetConfig().paramMask |= Config::USE_BRUNE_FORMALISM;
-      if(!(GetConfig().paramMask & Config::USE_AMATRIX)) {
-	QMessageBox::information(this,tr("Incompatible Option"),
-				 tr("Brune formalism is not enabled for R-Matrix formalism.  The formalism will be changed to A-Matrix. "));
-	aMatrixAction->activate(QAction::Trigger);
-      }
-    } else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
+    else GetConfig().paramMask &= ~Config::USE_BRUNE_FORMALISM;
 
     if(aDialog.ignoreExternalsCheck->isChecked()) {
       GetConfig().paramMask |= Config::IGNORE_ZERO_WIDTHS;
@@ -869,4 +868,9 @@ void AZURESetup::DeleteThread() {
   runTab->stopAZUREButton->setEnabled(false);
   runTab->runtimeText->SetMouseFiltered(false);
   delete azureMain;
+}
+
+void AZURESetup::showAbout() {
+  AboutAZURE2Dialog aboutDialog;
+  aboutDialog.exec();
 }
