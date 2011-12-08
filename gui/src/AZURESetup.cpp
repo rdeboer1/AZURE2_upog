@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "EditOptionsDialog.h"
 #include "AZUREMainThread.h"
+#include "AboutAZURE2Dialog.h"
 #ifdef USE_QWT
 #include "PlotTab.h"
 #endif
@@ -870,9 +871,6 @@ void AZURESetup::DeleteThread() {
 }
 
 void AZURESetup::showAbout() {
-  QMessageBox::about(this,tr("About AZURE2"),
-		     "<center><img src=\":/azure-icon.png\" width=\"128\" height=\"128\" /><br/>"
-		     "<b>AZURE2</b><br/><br/>"
-		     "E. Uberseder, R.J. deBoer, R.E. Azuma<br/>"
-		     "Joint Institute For Nuclear Astrophysics (JINA)</center>");
+  AboutAZURE2Dialog aboutDialog;
+  aboutDialog.exec();
 }
