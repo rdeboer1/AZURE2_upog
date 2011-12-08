@@ -871,7 +871,8 @@ void AZURESetup::DeleteThread() {
 
 void AZURESetup::showAbout() {
   QMessageBox::about(this,tr("About AZURE2"),
-		     tr("<center><b>AZURE2</b><br/><br/>"
-			"E. Uberseder, R.J. deBoer, R.E. Azuma<br/>"
-			"Joint Institute For Nuclear Astrophysics (JINA)</center>"));
+		     "<center><img src=\":/azure-icon.png\" /><br/>"
+		     "<b>AZURE2</b><br/><br/>"
+		     "E. Uberseder, R.J. deBoer, R.E. Azuma<br/>"
+		     "Joint Institute For Nuclear Astrophysics (JINA)</center>");
 }
