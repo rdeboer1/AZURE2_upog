@@ -216,7 +216,7 @@ void PairsTab::editPair() {
   aDialog.seperationEnergyText->setText(seperationEnergy);
   aDialog.channelRadiusText->setText(channelRadius);
   if(pairType == 10) aDialog.pairTypeCombo->setCurrentIndex(1);
-  if(pairType == 20) aDialog.pairTypeCombo->setCurrentIndex(2);
+  else if(pairType == 20) aDialog.pairTypeCombo->setCurrentIndex(2);
   else aDialog.pairTypeCombo->setCurrentIndex(0);
   
   
