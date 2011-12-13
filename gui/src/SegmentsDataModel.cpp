@@ -75,12 +75,13 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 9) {
       if(line.varyNorm==1) return QString("<center><font style='color:red;font-weight:bold;'>%1</font></center>").arg(line.dataNorm,0,'g',2);
       else return QString("<center>%1</center>").arg(line.dataNorm,0,'g',2);
-    } else if(index.column() == 10) {
+    }  else if(index.column() == 10) return QVariant();
+    else if(index.column() == 11) {
       if(line.varyNorm==1) return QString(tr("YES"));
       else return QString(tr("NO"));
-    } else if(index.column() == 11) {
-      return QVariant();
     } else if(index.column() == 12) {
+      return QVariant();
+    } else if(index.column() == 13) {
       return QVariant();
     }
   } else if (role == Qt::EditRole) {
@@ -94,9 +95,10 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 7) return line.dataType;
     else if(index.column() == 8) return line.dataFile;
     else if(index.column() == 9) return line.dataNorm;
-    else if(index.column() == 10) return line.varyNorm;
-    else if(index.column() == 11) return line.phaseJ;
-    else if(index.column() == 12) return line.phaseL;
+    else if(index.column() == 10) return line.dataNormError;
+    else if(index.column() == 11) return line.varyNorm;
+    else if(index.column() == 12) return line.phaseJ;
+    else if(index.column() == 13) return line.phaseL;
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     SegmentsDataData line = segDataLineList.at(index.row());
     if(line.isActive==1) return Qt::Checked;
@@ -131,10 +133,12 @@ QVariant SegmentsDataModel::headerData(int section, Qt::Orientation orientation,
     case 9:
       return tr("Data\nNorm.");
     case 10:
-      return tr("Vary\nNorm.?");
+      return tr("Data\nNorm. Err.");
     case 11:
-      return QVariant();
+      return tr("Vary\nNorm.?");
     case 12:
+      return QVariant();
+    case 13:
       return QVariant();
     default: 
       return QVariant();
@@ -159,9 +163,10 @@ bool SegmentsDataModel::setData(const QModelIndex &index, const QVariant &value,
     else if(index.column() == 7) tempData.dataType=value.toInt();
     else if(index.column() == 8) tempData.dataFile=value.toString();
     else if(index.column() == 9) tempData.dataNorm=value.toDouble();
-    else if(index.column() == 10) tempData.varyNorm=value.toInt();
-    else if(index.column() == 11) tempData.phaseJ=value.toDouble();
-    else if(index.column() == 12) tempData.phaseL=value.toInt();
+    else if(index.column() == 10) tempData.dataNormError=value.toDouble();
+    else if(index.column() == 11) tempData.varyNorm=value.toInt();
+    else if(index.column() == 12) tempData.phaseJ=value.toDouble();
+    else if(index.column() == 13) tempData.phaseL=value.toInt();
     else return false;
 
     segDataLineList.replace(row,tempData);
@@ -225,6 +230,7 @@ int SegmentsDataModel::isSegDataLine(const SegmentsDataData &line) const {
        tempLine.dataType==line.dataType&&
        tempLine.dataFile==line.dataFile&&
        tempLine.dataNorm==line.dataNorm&&
+       tempLine.dataNormError==line.dataNormError&&
        tempLine.varyNorm==line.varyNorm&&
        tempLine.phaseJ==line.phaseJ&&
        tempLine.phaseL==line.phaseL) {

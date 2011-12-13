@@ -7,7 +7,7 @@
 
 ALevel::ALevel(NucLine nucLine) :
   level_e_(nucLine.levelE()),fitlevel_e_(0.0), isinrmatrix_(true), sqrt_nf_factor_(1.0), isECLevel_(false),
-  ecMultMask_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {
+  ecMultMask_(0), ecPairNum_(0) {
   if(nucLine.levelFix()==1) energyfixed_=true;
   else energyfixed_=false;
 }
@@ -18,7 +18,7 @@ ALevel::ALevel(NucLine nucLine) :
 
 ALevel::ALevel(double energy) :
   energyfixed_(true),level_e_(energy),fitlevel_e_(0.0), isinrmatrix_(false), sqrt_nf_factor_(1.0), isECLevel_(false),
-  ecMultMask_(0), ecPairNum_(0), ecMinJ_(0.), ecMaxJ_(0.) {};
+  ecMultMask_(0), ecPairNum_(0) {};
 
 /*!
  * Returns true if the level energy is to be fixed in the fitting process, otherwise returns false.
@@ -176,22 +176,6 @@ double ALevel::GetShiftFunction(int channelNum) const {
 }
 
 /*!
- * Returns the minimum allowed J value for external capture to the level.
- */
-
-double ALevel::GetECMinJ() const {
-  return ecMinJ_;
-}
-
-/*!
- * Returns the maximum allowed J value for external capture to the level.
- */
-
-double ALevel::GetECMaxJ() const {
-  return ecMaxJ_;
-}
-
-/*!
  * Returns the external portion of the reduced width amplitude for a given channel number.
  */
 
@@ -340,10 +324,8 @@ void ALevel::SetShiftFunction(int channelNum, double shiftFunction) {
  * Sets the external capture parameters for the level.
  */ 
 
-void ALevel::SetECParams(int pairNum,double minJ, double maxJ, unsigned char multMask) {
+void ALevel::SetECParams(int pairNum, unsigned char multMask) {
   isECLevel_=true;
   ecPairNum_=pairNum;
-  ecMinJ_=minJ;
-  ecMaxJ_=maxJ;
   ecMultMask_=multMask;
 }

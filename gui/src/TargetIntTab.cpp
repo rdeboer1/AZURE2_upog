@@ -44,7 +44,7 @@ TargetIntTab::TargetIntTab(QWidget *parent) : QWidget(parent) {
   buttonBox->setColumnStretch(1,0);
   buttonBox->setColumnStretch(2,1);
 #ifdef MACX_SPACING
-  buttonBox->setHorizontalSpacing(12);
+  buttonBox->setHorizontalSpacing(11);
 #else 
   buttonBox->setHorizontalSpacing(0);
 #endif

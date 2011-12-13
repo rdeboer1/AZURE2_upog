@@ -28,6 +28,8 @@ class AddSegDataDialog : public QDialog {
   QComboBox *dataTypeCombo;
   QLineEdit *dataFileText;
   QLineEdit *dataNormText;
+  QLineEdit *dataNormErrorText;
+  QLabel *dataNormErrorLabel;
   QCheckBox *varyNormCheck;
   QLineEdit *phaseJValueText;
   QLineEdit *phaseLValueText;
@@ -37,6 +39,7 @@ class AddSegDataDialog : public QDialog {
  public slots:
   void setChooseFile();
   void dataTypeChanged(int);
+  void varyNormChanged(int);
   
  private:
   QPushButton *okButton;

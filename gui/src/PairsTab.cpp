@@ -13,7 +13,8 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   pairsView->setColumnHidden(3,true);
   pairsView->setColumnHidden(6,true);
   pairsView->setColumnHidden(8,true);
-  pairsView->setColumnHidden(PairsData::SIZE-1,true);
+  pairsView->setColumnHidden(13,true);
+  pairsView->setColumnHidden(14,true);
   RichTextDelegate *rt = new RichTextDelegate();
   pairsView->setItemDelegateForColumn(0,rt);
   pairsView->setItemDelegateForColumn(5,rt);
@@ -43,7 +44,7 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   buttonBox->setColumnStretch(1,0);
   buttonBox->setColumnStretch(2,1);
 #ifdef MACX_SPACING
-  buttonBox->setHorizontalSpacing(12);
+  buttonBox->setHorizontalSpacing(11);
 #else 
   buttonBox->setHorizontalSpacing(0);
 #endif
@@ -79,8 +80,13 @@ void PairsTab::addPair() {
       newPair.excitationEnergy=(aDialog.excitationEnergyText->text()).toDouble();
       newPair.channelRadius=(aDialog.channelRadiusText->text()).toDouble();
       if(aDialog.pairTypeCombo->currentIndex() == 1) newPair.pairType=10;
-      if(aDialog.pairTypeCombo->currentIndex() == 2) newPair.pairType=20;
+      else if(aDialog.pairTypeCombo->currentIndex() == 2) newPair.pairType=20;
       else newPair.pairType=0;
+      unsigned int newMask=0;
+      if(aDialog.e1Check->isChecked()) newMask |= (1<<0);
+      if(aDialog.m1Check->isChecked()) newMask |= (1<<1);
+      if(aDialog.e2Check->isChecked()) newMask |= (1<<2);
+      newPair.ecMultMask=newMask;
       addPair(newPair,pairsModel->numPairs(),false);
     } else {
       QMessageBox::information(this, tr("Pair Type Error"),
@@ -121,6 +127,8 @@ void PairsTab::addPair(PairsData pair,int pairIndex,bool fromFile) {
     pairsModel->setData(index,pair.channelRadius,Qt::EditRole);
     index = pairsModel->index(pairIndex,13,QModelIndex());
     pairsModel->setData(index,pair.pairType,Qt::EditRole);
+    index = pairsModel->index(pairIndex,14,QModelIndex());
+    pairsModel->setData(index,pair.ecMultMask,Qt::EditRole);
 
     pairsView->resizeRowsToContents();
     if(!fromFile) emit(pairAdded(pairIndex));
@@ -196,6 +204,9 @@ void PairsTab::editPair() {
   i = pairsModel->index(index.row(), 13, QModelIndex());
   var = pairsModel->data(i, Qt::EditRole);
   int pairType = var.toInt();
+  i = pairsModel->index(index.row(), 14, QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  int ecMultMask = var.toInt();
 
   
   AddPairDialog aDialog;
@@ -218,7 +229,12 @@ void PairsTab::editPair() {
   if(pairType == 10) aDialog.pairTypeCombo->setCurrentIndex(1);
   else if(pairType == 20) aDialog.pairTypeCombo->setCurrentIndex(2);
   else aDialog.pairTypeCombo->setCurrentIndex(0);
-  
+  if(ecMultMask&(1<<0)) aDialog.e1Check->setChecked(true);
+  else aDialog.e1Check->setChecked(false);
+  if(ecMultMask&(1<<1)) aDialog.m1Check->setChecked(true);
+  else aDialog.m1Check->setChecked(false);
+  if(ecMultMask&(1<<2)) aDialog.e2Check->setChecked(true);
+  else aDialog.e2Check->setChecked(false);
   
   if (aDialog.exec()) {
     if(!(index.row()==0&&aDialog.pairTypeCombo->currentIndex()!=0)) {
@@ -241,6 +257,11 @@ void PairsTab::editPair() {
       if(aDialog.pairTypeCombo->currentIndex()==1) pair.pairType=10;
       else if(aDialog.pairTypeCombo->currentIndex()==2) pair.pairType=20;
       else pair.pairType=0;
+      unsigned char newECMultMask=0;
+      if(aDialog.e1Check->isChecked()) newECMultMask |= (1<<0);
+      if(aDialog.m1Check->isChecked()) newECMultMask |= (1<<1);
+      if(aDialog.e2Check->isChecked()) newECMultMask |= (1<<2);
+      pair.ecMultMask=newECMultMask;
       editPair(pair,index.row(),false);
     } else {
       QMessageBox::information(this,tr("Pair Type Error"),
@@ -292,6 +313,9 @@ void PairsTab::editPair(PairsData pair,int pairIndex,bool fromFile) {
   i = pairsModel->index(pairIndex,13,QModelIndex());
   var = pairsModel->data(i, Qt::EditRole);
   if (pair.pairType != var.toInt()) pairsModel->setData(i,pair.pairType, Qt::EditRole);
+  i = pairsModel->index(pairIndex,14,QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  if (pair.pairType != var.toInt()) pairsModel->setData(i,pair.ecMultMask, Qt::EditRole);
 
   if(!fromFile) emit(pairEdited(pairIndex));
 }
@@ -304,4 +328,29 @@ void PairsTab::updateButtons(const QItemSelection &selection) {
   } else {
     deleteButton->setEnabled(false);
   }
+}
+
+bool PairsTab::parseOldECSection(QTextStream& inStream) {
+  int isActive;
+  int exitPairIndex;
+  double minJ;
+  double maxJ;
+  int multMask;
+  QString line("");
+  while(line.trimmed()!=QString("</externalCapture>")&&!inStream.atEnd()) {
+    line = inStream.readLine();
+    if(line.trimmed().isEmpty()) continue;
+    if(line.trimmed()!=QString("</externalCapture>")&&!inStream.atEnd()) {
+      QTextStream in(&line);
+      in >> isActive >> exitPairIndex >> minJ >> maxJ >> multMask;
+      if(in.status()!=QTextStream::Ok) return false;
+      if(exitPairIndex-1<pairsModel->getPairs().size()) {
+	QModelIndex i = pairsModel->index(exitPairIndex-1,14,QModelIndex());
+	QVariant var = pairsModel->data(i, Qt::EditRole);
+	pairsModel->setData(i,multMask, Qt::EditRole);
+      }
+    }
+  }
+  if(line.trimmed()!=QString("</externalCapture>")) return false;
+  return true;
 }

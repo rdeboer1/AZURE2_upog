@@ -7,7 +7,7 @@
 class PairsModel;
 
 struct SegmentsDataData {
-  static const int SIZE = 13;
+  static const int SIZE = 14;
   int isActive;
   int entrancePairIndex;
   int exitPairIndex;
@@ -18,6 +18,7 @@ struct SegmentsDataData {
   int dataType;
   QString dataFile;
   double dataNorm;
+  double dataNormError;
   int varyNorm;
   double phaseJ;
   int phaseL;

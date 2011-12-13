@@ -44,7 +44,14 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   connect(chooseFileButton,SIGNAL(clicked()),this,SLOT(setChooseFile()));
   dataNormText = new QLineEdit;
   dataNormText->setText("1.0");
+  dataNormErrorLabel = new QLabel(tr("Norm. Error [%]:"));
+  //  dataNormErrorLabel->setVisible(false);
+  dataNormErrorText = new QLineEdit(this);
+  //  dataNormErrorText->setVisible(false);
+  dataNormErrorText->setText("0.0");
+  dataNormErrorText->setMaximumWidth(50);
   varyNormCheck = new QCheckBox(tr("Vary Norm?"));
+  //connect(varyNormCheck,SIGNAL(stateChanged(int)),this,SLOT(varyNormChanged(int)));
 
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
@@ -73,38 +80,43 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   angleLayout->addWidget(new QLabel(tr("High Angle:")),1,0,Qt::AlignRight);
   angleLayout->addWidget(highAngleText,1,1);
   angleBox->setLayout(angleLayout);
-  valueLayout->addWidget(energyBox,1,0);
   valueLayout->addWidget(angleBox,1,1);
 
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
-  lowerLayout->addItem(new QSpacerItem(1,25),0,2);
-  lowerLayout->setColumnStretch(2,1);
 
-  QHBoxLayout* phaseLayout = new QHBoxLayout;
+  QGridLayout* phaseLayout = new QGridLayout;
+  phaseLayout->addItem(new QSpacerItem(1,25),0,0);
+  phaseLayout->setColumnStretch(0,1);
   phaseJValueLabel = new QLabel(tr("J:"));
   phaseJValueLabel->setVisible(false);
-  phaseLayout->addWidget(phaseJValueLabel);
-  phaseLayout->addWidget(phaseJValueText);
+  phaseLayout->addWidget(phaseJValueLabel,0,1);
+  phaseLayout->addWidget(phaseJValueText,0,2);
   phaseLValueLabel = new QLabel(tr("l:"));
   phaseLValueLabel->setVisible(false);
-  phaseLayout->addWidget(phaseLValueLabel);
-  phaseLayout->addWidget(phaseLValueText);
-  lowerLayout->addLayout(phaseLayout,0,3);
+  phaseLayout->addWidget(phaseLValueLabel,0,3);
+  phaseLayout->addWidget(phaseLValueText,0,4);
+  lowerLayout->addLayout(phaseLayout,0,2);
 
-  lowerLayout->addWidget(new QLabel(tr("Data Norm:")),1,0,Qt::AlignRight);
+  lowerLayout->addWidget(new QLabel(tr("Data Norm.:")),1,0,Qt::AlignRight);
   QHBoxLayout *normLayout = new QHBoxLayout;
   normLayout->addWidget(dataNormText);
   normLayout->addWidget(varyNormCheck);
   lowerLayout->addLayout(normLayout,1,1);
-
+  QGridLayout *normErrorLayout = new QGridLayout;
+  normErrorLayout->addItem(new QSpacerItem(1,25),0,0);
+  normErrorLayout->setColumnStretch(0,1);
+  normErrorLayout->addWidget(dataNormErrorLabel,0,1,Qt::AlignRight);
+  normErrorLayout->addWidget(dataNormErrorText,0,2);
+  lowerLayout->addLayout(normErrorLayout,1,2);  
+  
   lowerLayout->addWidget(new QLabel(tr("Data File:")),2,0,Qt::AlignRight);
   QGridLayout *fileLayout = new QGridLayout;
   fileLayout->addWidget(dataFileText,0,0);
   fileLayout->addWidget(chooseFileButton,0,1);
   fileLayout->setColumnStretch(0,1);
-  lowerLayout->addLayout(fileLayout,2,1,1,3);
+  lowerLayout->addLayout(fileLayout,2,1,1,2);
   valueLayout->addLayout(lowerLayout,2,0,1,2);
   valueBox->setLayout(valueLayout);
 
@@ -151,5 +163,15 @@ void AddSegDataDialog::dataTypeChanged(int index) {
     highAngleText->setEnabled(false);
     lowAngleText->setText("0");
     highAngleText->setText("180");
+  }
+}
+
+void AddSegDataDialog::varyNormChanged(int state) {
+  if(state==Qt::Checked) {
+    dataNormErrorLabel->setVisible(true);
+    dataNormErrorText->setVisible(true);
+  } else {
+    dataNormErrorLabel->setVisible(false);
+    dataNormErrorText->setVisible(false);
   }
 }

@@ -41,6 +41,8 @@ class ESegment {
   double GetAStep() const;
   double GetJ() const;
   double GetNorm() const;
+  double GetNominalNorm() const;
+  double GetNormError() const;
   std::string GetDataFile() const;
   void AddPoint(EPoint);
   void SetSegmentChiSquared(double);
@@ -70,6 +72,8 @@ class ESegment {
   double segment_chi_squared_;
   double j_;
   double dataNorm_;
+  double dataNormNominal_;
+  double dataNormError_;
   std::string datafile_;
   std::vector<EPoint> points_;
 };

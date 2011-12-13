@@ -7,7 +7,6 @@
 #include "CoulFunc.h"
 #include "EigenFunc.h"
 #include "ECIntegral.h"
-#include "ECLine.h"
 #include "NucLine.h"
 #include "Minuit2/MnUserParameters.h"
 #include "NFIntegral.h"
@@ -109,6 +108,7 @@ int CNuc::Fill(const Config &configure) {
   std::string line = "";
   while(line!="<levels>"&&!in.eof()) getline(in,line);
   if(line!="<levels>") return -1;
+  std::map<int,int> ecPairs;
   line="";
   while(!in.eof()&&line!="</levels>") {
     getline(in,line);
@@ -131,6 +131,10 @@ int CNuc::Fill(const Config &configure) {
 	if(!PairNum) {
 	  this->AddPair(NewPair);
 	  PairNum=this->IsPair(NewPair);
+	}
+	if(Line.ecMultMask()!=0) {
+	  std::map<int,int>::iterator it = ecPairs.find(PairNum);
+	  if(it==ecPairs.end()) ecPairs[PairNum]=Line.ecMultMask();
 	}
 	JGroup NewJGroup(Line);
 	JGroupNum=this->IsJGroup(NewJGroup);
@@ -165,7 +169,7 @@ int CNuc::Fill(const Config &configure) {
   this->SetMaxLValue(maxLValue);
   if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE) &&
      this->NumJGroups()>0 && this->NumPairs()>0)
-    if(this->ReadECFile(configure)==-1) return -1;
+    this->ParseExternalCapture(configure,ecPairs);
   
   return 0;
 }
@@ -175,110 +179,83 @@ int CNuc::Fill(const Config &configure) {
  * exists from the nuclear file.  If not, the state is created.  
  */
 
-int CNuc::ReadECFile(const Config& configure) {
-  std::ifstream in(configure.configfile.c_str());
-  if(!in) return -1;
-  std::string line="";
-  while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
-  if(line!="<externalCapture>") return -1;
-  line="";
-  while(line!="</externalCapture>"&&!in.eof()) {
-    getline(in,line);
-    bool empty=true;
-    for(unsigned int i=0;i<line.size();++i) 
-      if(line[i]!=' '&&line[i]!='\t') {
-	empty=false;
-	break;
+void CNuc::ParseExternalCapture(const Config& configure,std::map<int,int>& ecPairs) {
+  for(std::map<int,int>::iterator ec=ecPairs.begin();ec!=ecPairs.end();ec++) {
+    PPair *exitPair=this->GetPair(ec->first);
+    if(exitPair->GetPType()!=10) {
+      configure.outStream << "Final state is not a capture pair." << std::endl;
+      continue;
+    }
+    //create new level in compound nucleus for EC state, if it doesn't exist
+    double jValue=exitPair->GetJ(2);
+    int parity=exitPair->GetPi(2);
+    JGroup newJGroup(jValue,parity);
+    int jGroupNum=this->IsJGroup(newJGroup);
+    int levelNum=0;
+    if(jGroupNum) {
+      ALevel newLevel(exitPair->GetExE());
+      levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
+      if(!levelNum) {
+	this->GetJGroup(jGroupNum)->AddLevel(newLevel);
+	levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
+	for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
+	  if(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetRadType()=='P')
+	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.1);
+	  else this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.0);
+	}
       }
-    if(empty==true) continue;
-    if(line!="</externalCapture>"&&!in.eof()) {
-      std::istringstream stm;
-      stm.str(line);
-      ECLine newECLine(stm);
-      if(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit)) return -1;
-      if(newECLine.isActive()) {
-	PPair *exitPair=this->GetPair(this->GetPairNumFromKey(newECLine.exitKey()));
-	if(exitPair->GetPType()==10) {
-	  //create new level in compound nucleus for EC state, if it doesn't exist
-	  double jValue=exitPair->GetJ(2);
-	  int parity=exitPair->GetPi(2);
-	  JGroup newJGroup(jValue,parity);
-	  int jGroupNum=this->IsJGroup(newJGroup);
-	  int levelNum=0;
-	  if(jGroupNum) {
-	    ALevel newLevel(exitPair->GetExE());
-	    levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
-	    if(!levelNum) {
-	      this->GetJGroup(jGroupNum)->AddLevel(newLevel);
-	      levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
-	      for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
-		if(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetRadType()=='P')
-		  this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.1);
-		else this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.0);
-	      }
-	    }
-	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitKey()),
-									newECLine.jiMin(),newECLine.jiMax(),newECLine.multMask());
-	    for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
-	      PPair *theFinalPair=this->GetPair(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetPairNum());
-	      double nfIntegralValue=0.; 
-	      double ecConvert=0.;
-	      if(theFinalPair->GetPType()==0) {
-		NFIntegral newNFIntegral(theFinalPair);
-		nfIntegralValue=newNFIntegral(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetL(),exitPair->GetExE());
-		WhitFunc newWhitFunc(theFinalPair);
-		double whitConv=newWhitFunc(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetL(),
-					    theFinalPair->GetChRad(),
-					    fabs(exitPair->GetExE()-theFinalPair->GetSepE()-theFinalPair->GetExE()));
-		ecConvert=sqrt(2.0*theFinalPair->GetRedMass()*theFinalPair->GetChRad()*uconv/pow(hbarc,2.0))/whitConv;
-	      }
-	      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddNFIntegral(nfIntegralValue);
-	      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddECConversionFactor(ecConvert);
-	    }
-	  } else {
-	    this->AddJGroup(newJGroup);
-	    jGroupNum=this->IsJGroup(newJGroup);
-	    ALevel newLevel(exitPair->GetExE());
-	    this->GetJGroup(jGroupNum)->AddLevel(newLevel);
-	    levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
-	    this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(this->GetPairNumFromKey(newECLine.exitKey()),
-									newECLine.jiMin(),newECLine.jiMax(),newECLine.multMask());
-	    for(int ir=1;ir<=this->NumPairs();ir++) {
-	      if(this->GetPair(ir)->GetPType()==0) {
-		double s1=this->GetPair(ir)->GetJ(1);
-		double s2=this->GetPair(ir)->GetJ(2);
-		int sPi=this->GetPair(ir)->GetPi(1)*this->GetPair(ir)->GetPi(2);
-		for(double chS=fabs(s1-s2);chS<=s1+s2;chS+=1.) {
-		  for(int chL=0;chL<=this->GetMaxLValue();chL++) {
-		    int chPi=sPi*(int)pow(-1,chL);
-		    if(fabs(chS-chL)<=jValue&&jValue<=chS+chL&&chPi==parity) {
-		      AChannel newChannel(chL,chS,ir,'P');
-		      this->GetJGroup(jGroupNum)->AddChannel(newChannel);
-		      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.1);
-		      NFIntegral newNFIntegral(this->GetPair(ir));
-		      double nfIntegralValue=newNFIntegral(chL,exitPair->GetExE());
-		      WhitFunc newWhitFunc(this->GetPair(ir));
-		      double whitConv=newWhitFunc(chL,this->GetPair(ir)->GetChRad(),
-						  fabs(exitPair->GetExE()-this->GetPair(ir)->GetSepE()-this->GetPair(ir)->GetExE()));
-		      double ecConvert=sqrt(2.0*this->GetPair(ir)->GetRedMass()*this->GetPair(ir)->GetChRad()*uconv/pow(hbarc,2.0))/whitConv;
-		      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddNFIntegral(nfIntegralValue);
-		      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddECConversionFactor(ecConvert);
-		      
-		    }
-		  }
-		}
+      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(ec->first,ec->second);
+      for(int ch=1;ch<=this->GetJGroup(jGroupNum)->NumChannels();ch++) {
+	PPair *theFinalPair=this->GetPair(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetPairNum());
+	double nfIntegralValue=0.; 
+	double ecConvert=0.;
+	if(theFinalPair->GetPType()==0) {
+	  NFIntegral newNFIntegral(theFinalPair);
+	  nfIntegralValue=newNFIntegral(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetL(),exitPair->GetExE());
+	  WhitFunc newWhitFunc(theFinalPair);
+	  double whitConv=newWhitFunc(this->GetJGroup(jGroupNum)->GetChannel(ch)->GetL(),
+				      theFinalPair->GetChRad(),
+				      fabs(exitPair->GetExE()-theFinalPair->GetSepE()-theFinalPair->GetExE()));
+	  ecConvert=sqrt(2.0*theFinalPair->GetRedMass()*theFinalPair->GetChRad()*uconv/pow(hbarc,2.0))/whitConv;
+	}
+	this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddNFIntegral(nfIntegralValue);
+	this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddECConversionFactor(ecConvert);
+      }
+    } else {
+      this->AddJGroup(newJGroup);
+      jGroupNum=this->IsJGroup(newJGroup);
+      ALevel newLevel(exitPair->GetExE());
+      this->GetJGroup(jGroupNum)->AddLevel(newLevel);
+      levelNum=this->GetJGroup(jGroupNum)->IsLevel(newLevel);
+      this->GetJGroup(jGroupNum)->GetLevel(levelNum)->SetECParams(ec->first,ec->second);
+      for(int ir=1;ir<=this->NumPairs();ir++) {
+	if(this->GetPair(ir)->GetPType()==0) {
+	  double s1=this->GetPair(ir)->GetJ(1);
+	  double s2=this->GetPair(ir)->GetJ(2);
+	  int sPi=this->GetPair(ir)->GetPi(1)*this->GetPair(ir)->GetPi(2);
+	  for(double chS=fabs(s1-s2);chS<=s1+s2;chS+=1.) {
+	    for(int chL=0;chL<=this->GetMaxLValue();chL++) {
+	      int chPi=sPi*(int)pow(-1,chL);
+	      if(fabs(chS-chL)<=jValue&&jValue<=chS+chL&&chPi==parity) {
+		AChannel newChannel(chL,chS,ir,'P');
+		this->GetJGroup(jGroupNum)->AddChannel(newChannel);
+		this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddGamma(0.1);
+		NFIntegral newNFIntegral(this->GetPair(ir));
+		double nfIntegralValue=newNFIntegral(chL,exitPair->GetExE());
+		WhitFunc newWhitFunc(this->GetPair(ir));
+		double whitConv=newWhitFunc(chL,this->GetPair(ir)->GetChRad(),
+					    fabs(exitPair->GetExE()-this->GetPair(ir)->GetSepE()-this->GetPair(ir)->GetExE()));
+		double ecConvert=sqrt(2.0*this->GetPair(ir)->GetRedMass()*this->GetPair(ir)->GetChRad()*uconv/pow(hbarc,2.0))/whitConv;
+		this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddNFIntegral(nfIntegralValue);
+		this->GetJGroup(jGroupNum)->GetLevel(levelNum)->AddECConversionFactor(ecConvert);
+		
 	      }
 	    }
 	  }
-	} else configure.outStream << "Final state is not a capture pair." << std::endl;
+	}
       }
     }
   }
-
-  if(line!="</externalCapture>") return -1;
-
-  in.close();
-  return 0;
 }
 
 /*!
@@ -772,8 +749,6 @@ void CNuc::SortPathways(const Config& configure) {
 	      if(entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetS()!=theKGroup->GetS()) continue;
 	      for(int mp=1;mp<=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->NumMGroups();mp++) {
 		MGroup *chMGroup=entrancePair->GetDecay(chDecayNum)->GetKGroup(kp)->GetMGroup(mp);
-		if(this->GetJGroup(chMGroup->GetJNum())->GetJ()<theFinalLevel->GetECMinJ()||
-		   this->GetJGroup(chMGroup->GetJNum())->GetJ()>theFinalLevel->GetECMaxJ()) continue;
 		AChannel *chChannel=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChNum());
 		AChannel *chChannelp=this->GetJGroup(chMGroup->GetJNum())->GetChannel(chMGroup->GetChpNum());
 		for(int multL=1;multL<=maxECMult;multL++) { //loop over all allowed gamma parities
@@ -1575,52 +1550,49 @@ complex CNuc::CalcExternalWidth(JGroup* theJGroup, ALevel* theLevel,
     if(isExternal) {
       JGroup *theFinalJGroup=this->GetJGroup(j);
       ALevel *theFinalLevel=theFinalJGroup->GetLevel(la);
-      if(theJGroup->GetJ()>=theFinalLevel->GetECMinJ()&&
-	 theJGroup->GetJ()<=theFinalLevel->GetECMaxJ()) {
-	double theLevelEnergy;
-	if(!isInitial) theLevelEnergy=theLevel->GetTransformE();
-	else theLevelEnergy=theLevel->GetE();
-	int multL=theChannel->GetL();
-	if(((theChannel->GetRadType()=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) ||
-	   ((theChannel->GetRadType()=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) ||
-	   ((theChannel->GetRadType()=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) { //allow only m1,e1,e2
-	  double theFinalLevelEnergy;
-	  if(!isInitial) theFinalLevelEnergy=theFinalLevel->GetTransformE();
-	  else theFinalLevelEnergy=theFinalLevel->GetE();
-	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
-	    double theInitialChannelGamma;
-	    if(!isInitial) theInitialChannelGamma=theLevel->GetTransformGamma(ch);
-	    else theInitialChannelGamma=theLevel->GetGamma(ch);
-	    AChannel *initialChannel=theJGroup->GetChannel(ch);
-	    if(initialChannel->GetRadType()=='P') {
-	      for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) {
-		double theFinalChannelGamma;
-		if(!isInitial) theFinalChannelGamma=theFinalLevel->GetTransformGamma(chp);
-		else theFinalChannelGamma=theFinalLevel->GetGamma(chp);
-		AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
-		if(finalChannel->GetRadType()=='P') {
-		  if(finalChannel->GetPairNum()==initialChannel->GetPairNum()) {
-		    if((abs(initialChannel->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=initialChannel->GetL()+multL&&
-			fabs(initialChannel->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
-			theFinalJGroup->GetJ()<=initialChannel->GetS()+finalChannel->GetL()&&initialChannel->GetS()==finalChannel->GetS())||
-		       (fabs(initialChannel->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=initialChannel->GetS()+multL&&
-			fabs(initialChannel->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
-			theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&
-			theChannel->GetRadType()=='M')) {
-		      PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
-		      
-		      ECIntegral theECIntegral(theFinalPair,configure);
-		      complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
-							initialChannel->GetS(),finalChannel->GetS(),
-							theJGroup->GetJ(),theFinalJGroup->GetJ(),
-							multL,theChannel->GetRadType(),
-							theLevelEnergy,theFinalLevelEnergy,
-							true);
-		      
-		      double ecNormParam=theFinalChannelGamma*
-			theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
-		      externalWidth-=ecNormParam*theInitialChannelGamma*integrals;
-		    }
+      double theLevelEnergy;
+      if(!isInitial) theLevelEnergy=theLevel->GetTransformE();
+      else theLevelEnergy=theLevel->GetE();
+      int multL=theChannel->GetL();
+      if(((theChannel->GetRadType()=='E' && multL==1) && (theFinalLevel->GetECMultMask()&isE1)) ||
+	 ((theChannel->GetRadType()=='M' && multL==1) && (theFinalLevel->GetECMultMask()&isM1)) ||
+	 ((theChannel->GetRadType()=='E' && multL==2) && (theFinalLevel->GetECMultMask()&isE2)) ) { //allow only m1,e1,e2
+	double theFinalLevelEnergy;
+	if(!isInitial) theFinalLevelEnergy=theFinalLevel->GetTransformE();
+	else theFinalLevelEnergy=theFinalLevel->GetE();
+	for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+	  double theInitialChannelGamma;
+	  if(!isInitial) theInitialChannelGamma=theLevel->GetTransformGamma(ch);
+	  else theInitialChannelGamma=theLevel->GetGamma(ch);
+	  AChannel *initialChannel=theJGroup->GetChannel(ch);
+	  if(initialChannel->GetRadType()=='P') {
+	    for(int chp=1;chp<=theFinalJGroup->NumChannels();chp++) {
+	      double theFinalChannelGamma;
+	      if(!isInitial) theFinalChannelGamma=theFinalLevel->GetTransformGamma(chp);
+	      else theFinalChannelGamma=theFinalLevel->GetGamma(chp);
+	      AChannel *finalChannel=theFinalJGroup->GetChannel(chp);
+	      if(finalChannel->GetRadType()=='P') {
+		if(finalChannel->GetPairNum()==initialChannel->GetPairNum()) {
+		  if((abs(initialChannel->GetL()-multL)<=finalChannel->GetL()&&finalChannel->GetL()<=initialChannel->GetL()+multL&&
+		      fabs(initialChannel->GetS()-finalChannel->GetL())<=theFinalJGroup->GetJ()&&
+		      theFinalJGroup->GetJ()<=initialChannel->GetS()+finalChannel->GetL()&&initialChannel->GetS()==finalChannel->GetS())||
+		     (fabs(initialChannel->GetS()-multL)<=finalChannel->GetS()&&finalChannel->GetS()<=initialChannel->GetS()+multL&&
+		      fabs(initialChannel->GetL()-finalChannel->GetS())<=theFinalJGroup->GetJ()&&
+		      theFinalJGroup->GetJ()<=initialChannel->GetL()+finalChannel->GetS()&&initialChannel->GetL()==finalChannel->GetL()&&
+		      theChannel->GetRadType()=='M')) {
+		    PPair *theFinalPair=this->GetPair(finalChannel->GetPairNum());
+		    
+		    ECIntegral theECIntegral(theFinalPair,configure);
+		    complex integrals = theECIntegral(initialChannel->GetL(),finalChannel->GetL(),
+						      initialChannel->GetS(),finalChannel->GetS(),
+						      theJGroup->GetJ(),theFinalJGroup->GetJ(),
+						      multL,theChannel->GetRadType(),
+						      theLevelEnergy,theFinalLevelEnergy,
+						      true);
+		    
+		    double ecNormParam=theFinalChannelGamma*
+		      theFinalLevel->GetSqrtNFFactor()*theFinalLevel->GetECConversionFactor(chp);
+		    externalWidth-=ecNormParam*theInitialChannelGamma*integrals;
 		  }
 		}
 	      }
