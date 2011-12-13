@@ -18,7 +18,15 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-    stream >> dataNorm_ >> varyNorm_ >> dataFile_;
+    stream >> dataNorm_ >> varyNorm_;
+    std::string nextVariable;
+    stream >> nextVariable;
+    std::istringstream stm; 
+    stm.str(nextVariable);
+    if(!(stm>>dataNormError_)) {
+      dataNormError_=0.;
+      dataFile_=nextVariable;
+    } else stream >> dataFile_;    
   };
   /*!
    * Returns non-zero if the line is to be included in the calculation.
@@ -63,6 +71,10 @@ class SegLine {
    * Returns the data normalization for the segment.
    */
   double dataNorm() const {return dataNorm_;};
+  /*!
+   * Returns the data normalization error for the segment.
+   */
+  double dataNormError() const {return dataNormError_;};
   /*! 
    * Returns non-zero of the normalization is to be fit.
    */
@@ -87,6 +99,7 @@ class SegLine {
   int isDiff_;
   std::string dataFile_;
   double dataNorm_;
+  double dataNormError_;
   int varyNorm_;
   double phaseJ_;
   int phaseL_;

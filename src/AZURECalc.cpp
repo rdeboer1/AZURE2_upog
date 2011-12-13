@@ -34,10 +34,14 @@ double AZURECalc::operator()(const vector_r& p) const {
     if(!data.point()->IsMapped()) data.point()->Calculate(localCompound,configure());
     double fitCrossSection=data.point()->GetFitCrossSection();
     double dataNorm=data.segment()->GetNorm();
+    double dataNormNominal=data.segment()->GetNominalNorm();
+    double dataNormError=dataNormNominal/100.*data.segment()->GetNormError();
     double CrossSection=data.point()->GetCMCrossSection()*dataNorm;
     double CrossSectionError=data.point()->GetCMCrossSectionError()*dataNorm;
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
     double pointChiSquared=pow(chi,2.0);
+    if(dataNormError!=0.) 
+      pointChiSquared+= pow((dataNorm-dataNormNominal)/dataNormError,2.0);
     segmentChiSquared+=pointChiSquared;
     if(data.segment()->GetPoints().end()-1==data.point()) {
       if(!isFit) data.segment()->SetSegmentChiSquared(segmentChiSquared);

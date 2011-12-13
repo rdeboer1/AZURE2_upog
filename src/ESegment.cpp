@@ -34,7 +34,8 @@ ESegment::ESegment(SegLine segLine) {
   isAngDist_=false;
   maxAngDistOrder_=0;
   datafile_=segLine.dataFile();
-  dataNorm_=segLine.dataNorm();
+  dataNorm_= dataNormNominal_ = segLine.dataNorm();
+  dataNormError_=segLine.dataNormError();
   if(segLine.varyNorm()==1) varyNorm_=true;
   else varyNorm_=false;
   targetEffectNum_=0;
@@ -76,7 +77,8 @@ ESegment::ESegment(ExtrapLine extrapLine) {
     maxAngDistOrder_=0;
   }
   datafile_="";
-  dataNorm_=1.;
+  dataNorm_= dataNormNominal_ = 1.;
+  dataNormError_=0.;
   varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
@@ -306,6 +308,22 @@ double ESegment::GetJ() const {
 
 double ESegment::GetNorm() const {
   return dataNorm_;
+}
+
+/*!
+ * Returns the nominal normalization parameter for the data segment.
+ */
+
+double ESegment::GetNominalNorm() const {
+  return dataNormNominal_;
+}
+
+/*!
+ * Returns the normalization error for the data segment.
+ */
+
+double ESegment::GetNormError() const {
+  return dataNormError_;
 }
 
 /*!

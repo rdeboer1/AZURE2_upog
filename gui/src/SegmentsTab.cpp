@@ -30,6 +30,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsDataView->setColumnHidden(10,true);
   segmentsDataView->setColumnHidden(11,true);
   segmentsDataView->setColumnHidden(12,true);
+  segmentsDataView->setColumnHidden(13,true);
   connect(segmentsDataView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateSegDataButtons(QItemSelection)));
   connect(segmentsDataView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editSegDataLine()));
 
@@ -227,6 +228,7 @@ void SegmentsTab::addSegDataLine() {
     else newLine.dataType=0;
     newLine.dataFile=aDialog.dataFileText->text();
     newLine.dataNorm=aDialog.dataNormText->text().toDouble();
+    newLine.dataNormError=aDialog.dataNormErrorText->text().toDouble();
     if(aDialog.varyNormCheck->isChecked()) newLine.varyNorm=1;
     else newLine.varyNorm=0;
     newLine.phaseJ=aDialog.phaseJValueText->text().toDouble();
@@ -260,10 +262,12 @@ void SegmentsTab::addSegDataLine(SegmentsDataData line) {
     index = segmentsDataModel->index(lines.size(),9,QModelIndex());
     segmentsDataModel->setData(index,line.dataNorm,Qt::EditRole);
     index = segmentsDataModel->index(lines.size(),10,QModelIndex());
-    segmentsDataModel->setData(index,line.varyNorm,Qt::EditRole);
+    segmentsDataModel->setData(index,line.dataNormError,Qt::EditRole);
     index = segmentsDataModel->index(lines.size(),11,QModelIndex());
-    segmentsDataModel->setData(index,line.phaseJ,Qt::EditRole);
+    segmentsDataModel->setData(index,line.varyNorm,Qt::EditRole);
     index = segmentsDataModel->index(lines.size(),12,QModelIndex());
+    segmentsDataModel->setData(index,line.phaseJ,Qt::EditRole);
+    index = segmentsDataModel->index(lines.size(),13,QModelIndex());
     segmentsDataModel->setData(index,line.phaseL,Qt::EditRole);
     segmentsDataView->resizeRowToContents(lines.size());
     updateSegDataButtons(segmentsDataView->selectionModel()->selection());
@@ -367,11 +371,14 @@ void SegmentsTab::editSegDataLine() {
   QString dataNorm=var.toString();
   i=segmentsDataModel->index(index.row(),10,QModelIndex());
   var=segmentsDataModel->data(i,Qt::EditRole);
-  int varyNorm=var.toInt();
+  QString dataNormError=var.toString();
   i=segmentsDataModel->index(index.row(),11,QModelIndex());
   var=segmentsDataModel->data(i,Qt::EditRole);
-  QString phaseJ=var.toString();
+  int varyNorm=var.toInt();
   i=segmentsDataModel->index(index.row(),12,QModelIndex());
+  var=segmentsDataModel->data(i,Qt::EditRole);
+  QString phaseJ=var.toString();
+  i=segmentsDataModel->index(index.row(),13,QModelIndex());
   var=segmentsDataModel->data(i,Qt::EditRole);
   QString phaseL=var.toString();
 
@@ -389,6 +396,7 @@ void SegmentsTab::editSegDataLine() {
   else aDialog.dataTypeCombo->setCurrentIndex(0);
   aDialog.dataFileText->setText(dataFile);
   aDialog.dataNormText->setText(dataNorm);
+  aDialog.dataNormErrorText->setText(dataNormError);
   if(varyNorm==1) aDialog.varyNormCheck->setChecked(true);
   else aDialog.varyNormCheck->setChecked(false);
   aDialog.phaseJValueText->setText(phaseJ);
@@ -443,20 +451,25 @@ void SegmentsTab::editSegDataLine() {
       i=segmentsDataModel->index(index.row(),9,QModelIndex());
       segmentsDataModel->setData(i,newDataNorm,Qt::EditRole);
     }
+     QString newDataNormError=aDialog.dataNormErrorText->text();
+    if(newDataNormError!=dataNormError) {
+      i=segmentsDataModel->index(index.row(),10,QModelIndex());
+      segmentsDataModel->setData(i,newDataNormError,Qt::EditRole);
+    }
     int newVaryNorm=0;
     if(aDialog.varyNormCheck->isChecked()) newVaryNorm=1;
     if(newVaryNorm!=varyNorm) {
-      i=segmentsDataModel->index(index.row(),10,QModelIndex());
+      i=segmentsDataModel->index(index.row(),11,QModelIndex());
       segmentsDataModel->setData(i,newVaryNorm,Qt::EditRole);
     }    
     QString newPhaseJ=aDialog.phaseJValueText->text();
     if(newPhaseJ!=phaseJ) {
-      i=segmentsDataModel->index(index.row(),11,QModelIndex());
+      i=segmentsDataModel->index(index.row(),12,QModelIndex());
       segmentsDataModel->setData(i,newPhaseJ,Qt::EditRole);
     }
     QString newPhaseL=aDialog.phaseLValueText->text();
     if(newPhaseL!=phaseL) {
-      i=segmentsDataModel->index(index.row(),12,QModelIndex());
+      i=segmentsDataModel->index(index.row(),13,QModelIndex());
       segmentsDataModel->setData(i,newPhaseL,Qt::EditRole);
     }
   }
@@ -632,10 +645,12 @@ void SegmentsTab::moveSegDataLine(unsigned int upDown) {
   index = segmentsDataModel->index(future,9,QModelIndex());
   segmentsDataModel->setData(index,line.dataNorm,Qt::EditRole);
   index = segmentsDataModel->index(future,10,QModelIndex());
-  segmentsDataModel->setData(index,line.varyNorm,Qt::EditRole);
+  segmentsDataModel->setData(index,line.dataNormError,Qt::EditRole);
   index = segmentsDataModel->index(future,11,QModelIndex());
-  segmentsDataModel->setData(index,line.phaseJ,Qt::EditRole);
+  segmentsDataModel->setData(index,line.varyNorm,Qt::EditRole);
   index = segmentsDataModel->index(future,12,QModelIndex());
+  segmentsDataModel->setData(index,line.phaseJ,Qt::EditRole);
+  index = segmentsDataModel->index(future,13,QModelIndex());
   segmentsDataModel->setData(index,line.phaseL,Qt::EditRole);
   segmentsDataView->resizeRowToContents(future);
 
@@ -792,6 +807,7 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
   int dataType;
   QString dataFile;
   double dataNorm;
+  double dataNormError;
   int varyNorm;
   double phaseJ;
   int phaseL;
@@ -811,10 +827,18 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
 	phaseJ=0.;
 	phaseL=0;
       }
-      in >> dataNorm >> varyNorm >> dataFile;
+      in >> dataNorm >> varyNorm;
+      QString nextVariable;
+      in >> nextVariable;
+      QTextStream stm(&nextVariable);
+      stm>>dataNormError;
+      if(stm.status()!=QTextStream::Ok) {
+	dataNormError=0.;
+	dataFile=nextVariable;
+      } else in >> dataFile;
       if(in.status()!=QTextStream::Ok) return false;
       SegmentsDataData newLine = {isActive,entrancePairIndex,exitPairIndex,lowEnergy,highEnergy,lowAngle,
-				  highAngle,dataType,dataFile,dataNorm,varyNorm,phaseJ,phaseL};
+				  highAngle,dataType,dataFile,dataNorm,dataNormError,varyNorm,phaseJ,phaseL};
       addSegDataLine(newLine);
     }
   }
@@ -862,6 +886,7 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
 					     << qSetFieldWidth(15) << lines.at(i).phaseL;
     outStream << qSetFieldWidth(15) << lines.at(i).dataNorm
 	      << qSetFieldWidth(15) << lines.at(i).varyNorm
+	      << qSetFieldWidth(15) << lines.at(i).dataNormError
 	      << qSetFieldWidth(0) << lines.at(i).dataFile << endl;
   }
   /*file.flush();
