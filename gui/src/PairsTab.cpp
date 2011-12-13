@@ -329,3 +329,28 @@ void PairsTab::updateButtons(const QItemSelection &selection) {
     deleteButton->setEnabled(false);
   }
 }
+
+bool PairsTab::parseOldECSection(QTextStream& inStream) {
+  int isActive;
+  int exitPairIndex;
+  double minJ;
+  double maxJ;
+  int multMask;
+  QString line("");
+  while(line.trimmed()!=QString("</externalCapture>")&&!inStream.atEnd()) {
+    line = inStream.readLine();
+    if(line.trimmed().isEmpty()) continue;
+    if(line.trimmed()!=QString("</externalCapture>")&&!inStream.atEnd()) {
+      QTextStream in(&line);
+      in >> isActive >> exitPairIndex >> minJ >> maxJ >> multMask;
+      if(in.status()!=QTextStream::Ok) return false;
+      if(exitPairIndex-1<pairsModel->getPairs().size()) {
+	QModelIndex i = pairsModel->index(exitPairIndex-1,14,QModelIndex());
+	QVariant var = pairsModel->data(i, Qt::EditRole);
+	pairsModel->setData(i,multMask, Qt::EditRole);
+      }
+    }
+  }
+  if(line.trimmed()!=QString("</externalCapture>")) return false;
+  return true;
+}

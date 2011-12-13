@@ -12,7 +12,7 @@
 
 #include "AZUREMain.h"
 #include "Config.h"
-#include "ECLine.h"
+#include "NucLine.h"
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
@@ -408,54 +408,51 @@ void getRateParams(Config& configure, std::vector<SegPairs>& segPairs,bool useRe
 bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs) {
   std::ifstream in;
   in.open(configure.configfile.c_str());
-  if(in) {
-    std::string line="";
-    while(line!="<externalCapture>"&&!in.eof()) getline(in,line);
-    if(line=="<externalCapture>") {
-      line="";
-      while(line!="</externalCapture>"&&!in.eof()&&
-	    !(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)) {
-	getline(in,line);
-	bool empty=true;
-	for(unsigned int i=0;i<line.size();++i) 
-	  if(line[i]!=' '&&line[i]!='\t') {
-	    empty=false;
+  if(!in) {
+    configure.outStream << "Cannot read nuclear information. Check configuration file." << std::endl;
+    return false;
+  }
+  std::string line="";
+  while(line!="<levels>"&&!in.eof()) getline(in,line);
+  if(line!="<levels>") {
+    configure.outStream << "Cannot read nuclear information. Check configuration file." << std::endl;
+    return false;    
+  }
+  line="";
+  while(line!="</levels>"&&!in.eof()&&
+	!(configure.paramMask & Config::USE_EXTERNAL_CAPTURE)) {
+    getline(in,line);
+    bool empty=true;
+    for(unsigned int i=0;i<line.size();++i) 
+      if(line[i]!=' '&&line[i]!='\t') {
+	empty=false;
+	break;
+      }
+    if(empty==true) continue;
+    if(line!="</levels>"&&!in.eof()) {
+      std::istringstream stm;
+      stm.str(line);
+      NucLine tempNucLine(stm);
+      if((stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
+	configure.outStream << "Problem reading nuclear information. Check configuration file." << std::endl;
+	return false;
+      }
+      if(tempNucLine.ecMultMask()!=0) {
+	for(int i=0;i<segPairs.size();i++) {
+	  if(tempNucLine.ir()==segPairs[i].secondPair) {
+	    configure.paramMask |= Config::USE_EXTERNAL_CAPTURE;
 	    break;
-	  }
-	if(empty==true) continue;
-	if(line!="</externalCapture>"&&!in.eof()) {
-	  std::istringstream stm;
-	  stm.str(line);
-	  ECLine tempECLine(stm);
-	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))) {
-	    if(tempECLine.isActive()!=0) {
-	      for(int i=0;i<segPairs.size();i++) {
-		if(tempECLine.exitKey()==segPairs[i].secondPair) {
-		  configure.paramMask |= Config::USE_EXTERNAL_CAPTURE;
-		  break;
-		}
-	      }
-	    }
-	  } else {
-	    configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
-	    return false;
 	  }
 	}
       }
-    } else {
-      configure.outStream << "Problem reading external capture. Check configuration file." << std::endl;
-     return false;
-   }
-    in.close();
-  } else {
-    configure.outStream << "Cannot read external capture. Check configuration file." << std::endl;
-    return false;
+    }
   }
+  in.close();
   in.clear();
   if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&
      (configure.paramMask & Config::USE_RMC_FORMALISM)) {
     configure.outStream << "WARNING: External capture is not compatible with Reich-Moore.  Ignoring external capture." 
-	       << std::endl;
+			<< std::endl;
     configure.paramMask &= ~Config::USE_EXTERNAL_CAPTURE;
   }
   return true;

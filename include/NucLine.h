@@ -20,7 +20,7 @@ class NucLine {
 	   >> s_ >> l_ >> levelID_ >> isActive_ >> channelFix_ >> gamma_ >> j1_ >> pi1_
 	   >> j2_ >> pi2_ >> e2_ >> m1_ >> m2_ >> z1_ >> z2_
 	   >> entranceSepE_ >> sepE_ >> j3_ >> pi3_ >> e3_ 
-	   >> pType_ >> chRad_ >> g1_ >> g2_;
+	   >> pType_ >> chRad_ >> g1_ >> g2_ >> ecMultMask_;
     s_/=2.;
     l_/=2;
   };
@@ -152,6 +152,10 @@ class NucLine {
    * Returns the g-factor for the heavy particle in the corresponding pair. 
    */
   double g2() const {return g2_;};
+  /*!
+   * Returns the external capture multiplicity mask for the corresponding pair. 
+   */
+  double ecMultMask() const {return ecMultMask_;};
  private:
   double levelJ_;
   int levelPi_;
@@ -183,6 +187,7 @@ class NucLine {
   double chRad_;
   double g1_;
   double g2_;
+  unsigned int ecMultMask_;
 };
 
 #endif

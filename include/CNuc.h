@@ -2,6 +2,7 @@
 #define CNUC_H
 
 #include <string>
+#include <map>
 #include "JGroup.h"
 #include "PPair.h"
 
@@ -30,7 +31,7 @@ public:
   int IsJGroup(JGroup);
   int GetPairNumFromKey(int);
   int Fill(const Config&);
-  int ReadECFile(const Config&);
+  void ParseExternalCapture(const Config&,std::map<int,int>&);
   int GetMaxLValue() const;
   void Initialize(const Config&);
   void AddPair(PPair);

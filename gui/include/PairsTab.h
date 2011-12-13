@@ -18,6 +18,7 @@ class PairsTab : public QWidget {
  public:
   PairsTab(QWidget *parent = 0);
   PairsModel *getPairsModel();
+  bool parseOldECSection(QTextStream&);
 
  public slots:
   void addPair();

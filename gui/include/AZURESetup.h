@@ -3,7 +3,6 @@
 
 #include "PairsTab.h"
 #include "LevelsTab.h"
-#include "ExternalCaptureTab.h"
 #include "SegmentsTab.h"
 #include "TargetIntTab.h"
 #include "Config.h"
@@ -95,7 +94,6 @@ class AZURESetup : public QMainWindow {
   QTabWidget *tabWidget;
   PairsTab *pairsTab;
   LevelsTab *levelsTab;
-  ExternalCaptureTab *externalCaptureTab;
   SegmentsTab *segmentsTab;
   TargetIntTab *targetIntTab;
   RunTab *runTab;

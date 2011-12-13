@@ -30,9 +30,6 @@ AZURESetup::AZURESetup() : config(std::cout) {
   connect(levelsTab,SIGNAL(readNewPair(PairsData,int,bool)),pairsTab,SLOT(addPair(PairsData,int,bool)));
   connect(levelsTab,SIGNAL(readExistingPair(PairsData,int,bool)),pairsTab,SLOT(editPair(PairsData,int,bool)));
 
-  externalCaptureTab = new ExternalCaptureTab;
-  externalCaptureTab->setPairsModel(pairsTab->getPairsModel());
-
   segmentsTab = new SegmentsTab;
   segmentsTab->setPairsModel(pairsTab->getPairsModel());
 
@@ -47,7 +44,6 @@ AZURESetup::AZURESetup() : config(std::cout) {
 
   tabWidget->addTab(pairsTab,tr("Particle Pairs"));
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
-  tabWidget->addTab(externalCaptureTab,tr("External Capture"));
   tabWidget->addTab(segmentsTab,tr("Data Segments"));
   tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
   tabWidget->addTab(runTab,tr("Calculate"));
@@ -214,11 +210,6 @@ bool AZURESetup::readFile(QString filename) {
   if(!levelsTab->readNuclearFile(in)) return false;
   
   line=QString("");
-  while(line.trimmed()!=QString("<externalCapture>")&&!in.atEnd()) line = in.readLine();
-  if(in.atEnd()) return false;
-  if(!externalCaptureTab->readExternalCaptureFile(in)) return false;
-
-  line=QString("");
   while(line.trimmed()!=QString("<segmentsData>")&&!in.atEnd()) line = in.readLine();
   if(in.atEnd()) return false;
   if(!segmentsTab->readSegDataFile(in)) return false;
@@ -239,6 +230,16 @@ bool AZURESetup::readFile(QString filename) {
 
   file.close();
 
+  QFile file2(filename);
+  if(!file2.open(QIODevice::ReadOnly)) return false;
+  QTextStream in2(&file2);
+  line=QString("");
+  while(line.trimmed()!=QString("<externalCapture>")&&!in2.atEnd()) line = in2.readLine();
+  if(!in2.atEnd()) {
+    if(!pairsTab->parseOldECSection(in2)) return false;
+  }
+  file2.close();
+  
   GetConfig().configfile=QDir::fromNativeSeparators(info.absoluteFilePath()).toStdString();
   setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   QDir::setCurrent(directory);
@@ -426,10 +427,6 @@ bool AZURESetup::writeFile(QString filename) {
   out << "<levels>" << endl;
   if(!levelsTab->writeNuclearFile(out)) return false;
   out << "</levels>" << endl;
-
-  out << "<externalCapture>" << endl;
-  if(!externalCaptureTab->writeExternalCaptureFile(out)) return false;
-  out << "</externalCapture>" << endl;
 
   out << "<segmentsData>" << endl;
   if(!segmentsTab->writeSegDataFile(out)) return false;
