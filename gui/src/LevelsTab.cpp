@@ -632,6 +632,7 @@ bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
 		    << qSetFieldWidth(8)  << pairs.at(channels.at(ch).pairIndex).channelRadius 
 		    << qSetFieldWidth(13)  << pairs.at(channels.at(ch).pairIndex).lightG 
 		    << qSetFieldWidth(13)  << pairs.at(channels.at(ch).pairIndex).heavyG 
+		    << qSetFieldWidth(8)  << pairs.at(channels.at(ch).pairIndex).ecMultMask
 		    << qSetFieldWidth(0)  << endl;
 	}
       }  
@@ -676,6 +677,7 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   double heavyG;
   double dummyDouble;
   int dummyInt;
+  int ecMultMask;
 
   pairsModel->removeRows(0,pairsModel->getPairs().size(),QModelIndex());
   levelsModel->removeRows(0,levelsModel->getLevels().size(),QModelIndex());
@@ -707,6 +709,8 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
 	 >> lightM >> heavyM >> lightZ >> heavyZ >> seperationEnergyIn >> seperationEnergyOut
 	 >> dummyInt >> dummyInt >> dummyDouble >> pairType >> channelRadius >> lightG >> heavyG;
       if(in.status()!=QTextStream::Ok) return false;
+      in >> ecMultMask;
+      if(in.status()!=QTextStream::Ok) ecMultMask=0;
       if(firstLine) {
 	lastPair=ir;
 	firstLine=false;
@@ -721,7 +725,8 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
 	if(thisNumMult>maxNumMultValue) maxNumMultValue=thisNumMult;
       }
       
-      PairsData newPair={lightJ,lightPi,lightZ,lightM,lightG,heavyJ,heavyPi,heavyZ,heavyM,heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType};
+      PairsData newPair={lightJ,lightPi,lightZ,lightM,lightG,heavyJ,heavyPi,heavyZ,heavyM,
+			 heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType,ecMultMask};
       int pairIndex=ir-1;
       if(pairsModel->numPairs()<ir) {
 	emit(readNewPair(newPair,pairIndex,true));

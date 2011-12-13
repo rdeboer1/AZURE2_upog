@@ -2,8 +2,10 @@
 
 AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
 
-  this->setMaximumSize(370,440);
-  this->setMinimumSize(370,440);
+  //this->setMaximumSize(370,440);
+  //this->setMinimumSize(370,440);
+  this->setMaximumWidth(370);
+  this->setMinimumWidth(370);
 
   excitationEnergyLabel = new QLabel(tr("Excitation Energy [MeV]:"));
   excitationEnergyText = new QLineEdit;
@@ -47,6 +49,13 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   heavyMText = new QLineEdit;
   heavyGLabel = new QLabel(tr("g:"));
   heavyGText = new QLineEdit;
+
+  e1Check = new QCheckBox(tr("E1"));
+  e1Check->setChecked(false);
+  m1Check = new QCheckBox(tr("M1"));
+  m1Check->setChecked(false);
+  e2Check = new QCheckBox(tr("E2"));
+  e2Check->setChecked(false);
 
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
@@ -106,10 +115,19 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   buttonBox->addWidget(cancelButton);
   buttonBox->addWidget(okButton);
 
+  multBox= new QGroupBox(tr("External Multipolarities"));
+  multBox->hide();
+  QHBoxLayout *multLayout = new QHBoxLayout;
+  multLayout->addWidget(e1Check);
+  multLayout->addWidget(m1Check);
+  multLayout->addWidget(e2Check);
+  multBox->setLayout(multLayout);
+
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addLayout(pairTypeLayout);
   mainLayout->addLayout(entryLayout);
   mainLayout->addWidget(channelGroup);
+  mainLayout->addWidget(multBox);
   mainLayout->addLayout(buttonBox);
 
   setLayout(mainLayout);
@@ -137,6 +155,7 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setEnabled(true);
     channelRadiusText->setText("0");
     channelRadiusText->setEnabled(false);
+    multBox->show();
   } else if(index==2) {
     lightJText->setEnabled(false);
     lightJText->setText("0.5");
@@ -151,6 +170,8 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setEnabled(false);
     excitationEnergyText->setText("0.000");
     channelRadiusText->setEnabled(true);
+    multBox->hide();
+    this->adjustSize();
   } else {
     lightJText->setEnabled(true);
     lightPiCombo->setEnabled(true);
@@ -160,5 +181,7 @@ void AddPairDialog::updateLightParticle(int index) {
     seperationEnergyText->setEnabled(true);
     excitationEnergyText->setEnabled(true);
     channelRadiusText->setEnabled(true);
+    multBox->hide();
+    this->adjustSize();
   }
 }

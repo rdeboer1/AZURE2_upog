@@ -8,6 +8,8 @@ QT_BEGIN_NAMESPACE
 
 class QLineEdit;
 class QLabel;
+class QCheckBox;
+class QGroupBox;
 
 QT_END_NAMESPACE
 
@@ -30,6 +32,10 @@ class AddPairDialog : public QDialog {
   QLineEdit *seperationEnergyText;
   QLineEdit *channelRadiusText;
   QComboBox *pairTypeCombo;
+  QCheckBox *e1Check;
+  QCheckBox *m1Check;
+  QCheckBox *e2Check;
+  QGroupBox *multBox;
 
  public slots:
   void updateLightParticle(int index);

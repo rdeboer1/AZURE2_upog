@@ -39,7 +39,7 @@ QVariant PairsModel::data(const QModelIndex &index, int role) const {
       if(pair.pairType == 10) return "Particle, Gamma";
       else if(pair.pairType == 20) return "Beta Decay";
       else return "Particle, Particle";
-    }
+    } else if(index.column() == 14) return pair.ecMultMask;
   } else if (role == Qt::EditRole) {
     PairsData pair = pairsList.at(index.row());
     if(index.column() == 0) return pair.lightJ;
@@ -55,7 +55,8 @@ QVariant PairsModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 10) return pair.excitationEnergy;
     else if(index.column() == 11) return pair.seperationEnergy;
     else if(index.column() == 12) return pair.channelRadius;
-    else if(index.column() == 13) return pair.pairType;    
+    else if(index.column() == 13) return pair.pairType; 
+    else if(index.column() == 14) return pair.ecMultMask;   
   } else if(role == Qt::TextAlignmentRole) return Qt::AlignCenter;
 
   return QVariant();
@@ -93,6 +94,8 @@ QVariant PairsModel::headerData(int section, Qt::Orientation orientation, int ro
       return tr("Channel\nRadius");
     case 13:
       return tr("Pair\nType");
+    case 14:
+      return tr("EC\nMultipolarities");
     default: 
       return QVariant();
     }
@@ -120,6 +123,7 @@ bool PairsModel::setData(const QModelIndex &index, const QVariant &value, int ro
     else if(index.column() == 11) tempData.seperationEnergy=value.toDouble();
     else if(index.column() == 12) tempData.channelRadius=value.toDouble();
     else if(index.column() == 13) tempData.pairType=value.toInt();
+    else if(index.column() == 14) tempData.ecMultMask=value.toInt();
     else return false;
 
     pairsList.replace(row,tempData);
@@ -171,7 +175,8 @@ int PairsModel::isPair(const PairsData &pair) const {
        tempPair.seperationEnergy==pair.seperationEnergy&&
        tempPair.excitationEnergy==pair.excitationEnergy&&
        tempPair.channelRadius==pair.channelRadius&&
-       tempPair.pairType==pair.pairType) {
+       tempPair.pairType==pair.pairType&&
+       tempPair.ecMultMask==pair.ecMultMask) {
       foundPair=i;
       break;
     }
