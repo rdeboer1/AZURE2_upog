@@ -411,6 +411,18 @@ void AZURESetup::saveAs() {
       QMessageBox::information(this,
 			       tr("Can't Access File"),
 			       tr("An error occured while writing the file."));
+    else {
+      QSettings settings;
+      QStringList files = settings.value("recentFileList").toStringList();
+      QFile file(filename);
+      QFileInfo info(file);
+      QString fullFileName = QDir::fromNativeSeparators(info.absoluteFilePath());
+      files.removeAll(fullFileName);
+      files.prepend(fullFileName);
+      while(files.size()>numRecent) files.removeLast();     
+      settings.setValue("recentFileList",files);
+      updateRecent();
+    }
   }
 }
 

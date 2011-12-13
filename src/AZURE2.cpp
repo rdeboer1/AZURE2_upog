@@ -56,15 +56,18 @@ void exitMessage(const Config& configure) {
  * available runtime options.
  */
 
-void printHelp(const Config& configure) {
-  configure.outStream << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
-	    << "Options:" << std::endl
-            << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
-            << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
-            << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
-            << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
-            << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
-            << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
+void printHelp() {
+  std::cout  << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
+	     << "Options:" << std::endl
+	     << std::setw(25) << std::left << "\t--no-gui:" << std::setw(0) << "Do not use graphical setup utility (if built)." << std::endl 
+	     << std::setw(25) << std::left << "\t" << std::setw(0) << "If this flag is not set all other options are ignored," << std::endl 
+	     << std::setw(25) << std::left << "\t" << std::setw(0) << "and configuration occurs within the setup utility." << std::endl 
+	     << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
+	     << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
+	     << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
+	     << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
+	     << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
+	     << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
 }
 
 /*!
@@ -101,10 +104,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
     } else configure.outStream << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
   }
   for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
-    if(*it=="--help") {
-      printHelp(configure);
-      exit(0);
-    } else if(*it=="--no-readline") useReadline=false;
+    if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
     else if(*it=="--gsl-coul") configure.paramMask |= Config::USE_GSL_COULOMB_FUNC;
@@ -525,12 +525,22 @@ void startMessage(const Config& configure) {
  */
 
 int main(int argc,char *argv[]){
+  
+  //Check for --help option first.  If set, print help and exit.
+  for(int i=1;i<argc;i++) 
+    if(strcmp(argv[i],"--help")==0) {
+      printHelp();
+      return 0;
+    }
+  
+  //If GUI is built, look for --no-gui option.  If not set, hand control to GUI.
 #ifdef GUI_BUILD
   bool useGUI=true;
-  for(int i=1;i<argc;i++)
+  for(int i=1;i<argc;i++) 
     if(strcmp(argv[i],"--no-gui")==0) useGUI=false;
   if(useGUI) return start_gui(argc,argv);
 #endif
+
   //Create new configuration structure, and parse the command line parameters
   Config configure(std::cout);
   bool useReadline = parseOptions(argc,argv,configure);
