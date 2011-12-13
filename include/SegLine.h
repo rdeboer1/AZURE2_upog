@@ -18,15 +18,7 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-    stream >> dataNorm_ >> varyNorm_;
-    std::string nextVariable;
-    stream >> nextVariable;
-    std::istringstream stm; 
-    stm.str(nextVariable);
-    if(!(stm>>dataNormError_)) {
-      dataNormError_=0.;
-      dataFile_=nextVariable;
-    } else stream >> dataFile_;    
+    stream >> dataNorm_ >> varyNorm_ >> dataNormError_ >> dataFile_;
   };
   /*!
    * Returns non-zero if the line is to be included in the calculation.
