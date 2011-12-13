@@ -224,6 +224,7 @@ bool AZURESetup::readFile(QString filename) {
   if(in.atEnd()) return false;
   if(!targetIntTab->readFile(in)) return false;
 
+  line=QString("");
   while(line.trimmed()!=QString("<lastRun>")&&!in.atEnd()) line = in.readLine();
   if(!in.atEnd()) 
     if(!this->readLastRun(in)) return false;

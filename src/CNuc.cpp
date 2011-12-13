@@ -7,7 +7,6 @@
 #include "CoulFunc.h"
 #include "EigenFunc.h"
 #include "ECIntegral.h"
-#include "ECLine.h"
 #include "NucLine.h"
 #include "Minuit2/MnUserParameters.h"
 #include "NFIntegral.h"
