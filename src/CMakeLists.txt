@@ -15,6 +15,7 @@ endif (NCURSES_LIBRARY)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 set(EXTRA_LIBS ${EXTRA_LIBS} termcap lcms)
+set(AZURE2_SOURCES ${AZURE2_SOURCES} AZURE2.rc)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 
