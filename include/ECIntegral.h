@@ -7,6 +7,8 @@
 
 ///A function class to calculate external capture integrals
 
+class EffectiveCharge;
+
 /*!
  * The ECIntegral function class calculates external capture integrals for 
  * both positive and negative energy channels.  The results are returned as 
@@ -45,6 +47,7 @@ class ECIntegral {
   double FW() const {return FW_;};
   double GW() const {return GW_;};  
   typedef struct Params {
+    EffectiveCharge* effectiveCharge;
     CoulFunc *coulFunc;
     WhitFunc *whitFunc;
     int liValue;

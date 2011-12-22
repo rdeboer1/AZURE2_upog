@@ -1,5 +1,6 @@
 #include "ECIntegral.h"
 #include "AngCoeff.h"
+#include "EffectiveCharge.h"
 #include <math.h>
 #include <gsl/gsl_integration.h>
 #include <assert.h>
@@ -18,7 +19,8 @@ double ECIntegral::FWIntegrand(double x, void * p) {
   
   struct CoulWaves coul = theCoulFunc->operator()(liValue,x,pairEnergy);
   double whit = theWhitFunc->operator()(lfValue,x,bindingEnergy);
-  return coul.F*whit*pow(x,multLValue);
+  return (multLValue>0) ? params->effectiveCharge->operator()(x)*coul.F*whit*pow(x,multLValue) :
+    coul.F*whit;
 }
 
 double ECIntegral::GWIntegrand(double x, void * p) {
@@ -33,7 +35,8 @@ double ECIntegral::GWIntegrand(double x, void * p) {
   
   struct CoulWaves coul = theCoulFunc->operator()(liValue,x,pairEnergy);
   double whit = theWhitFunc->operator()(lfValue,x,bindingEnergy);
-  return coul.G*whit*pow(x,multLValue);
+  return (multLValue>0) ?  params->effectiveCharge->operator()(x)*coul.G*whit*pow(x,multLValue) :
+    coul.G*whit;
 }
   
 double ECIntegral::WWIntegrand(double x, void * p) {
@@ -47,7 +50,8 @@ double ECIntegral::WWIntegrand(double x, void * p) {
 
   double whitIn = theWhitFunc->operator()(liValue,x,fabs(pairEnergy));
   double whitOut= theWhitFunc->operator()(lfValue,x,fabs(bindingEnergy));
-  return whitIn*whitOut*pow(x,multLValue);
+  return (multLValue>0) ? params->effectiveCharge->operator()(x)*whitIn*whitOut*pow(x,multLValue) :
+    whitIn*whitOut;
 }
 
 void ECIntegral::Integrate(double chanrad) {
@@ -104,7 +108,10 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
   double outEnergy = inEnergy - sepEnergy;
   double chanRad = pair()->GetChRad();
   double redMass = pair()->GetRedMass();
+  
+  EffectiveCharge effectiveChargeFunc(pair(),inEnergy-levelEnergy,theLMult);
 
+  params_.effectiveCharge=&effectiveChargeFunc;
   params_.liValue = theInitialLValue;
   params_.lfValue = theFinalLValue;
   params_.multLValue = theLMult;
@@ -141,9 +148,7 @@ complex ECIntegral::operator()(int theInitialLValue, int theFinalLValue,
 
   double effectiveCharge;
   if(radType=='E') {
-    double totalM=pair()->GetM(1)+pair()->GetM(2);
-    effectiveCharge=sqrt(fstruc*hbarc)*(pair()->GetZ(1)*pow(pair()->GetM(2)/totalM,theLMult)+
-					pair()->GetZ(2)*pow(-pair()->GetM(1)/totalM,theLMult));
+    effectiveCharge=1.;
   } else {
     effectiveCharge=redMass*1.00727638*
       (pair()->GetZ(1)/pow(pair()->GetM(1),2.)+
