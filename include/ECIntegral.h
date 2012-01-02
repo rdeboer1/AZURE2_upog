@@ -25,6 +25,7 @@ class ECIntegral {
   ECIntegral(PPair *pPair, const Config& configure) {
     params_.coulFunc = new CoulFunc(pPair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
     params_.whitFunc = new WhitFunc(pPair);
+    params_.useLongWavelengthApprox = !!(configure.paramMask&Config::USE_LONGWAVELENGTH_APPROX);
     pair_ = pPair;
   };
   /*!
@@ -55,6 +56,7 @@ class ECIntegral {
     int multLValue;
     double pairEnergy;
     double bindingEnergy;
+    bool useLongWavelengthApprox;
   } Params;
   Params params_;
   PPair *pair_;

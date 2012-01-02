@@ -306,6 +306,9 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
 
   if(paramMask & Config::TRANSFORM_PARAMETERS) GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
   else GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
+
+  if(paramMask & Config::USE_LONGWAVELENGTH_APPROX) GetConfig().paramMask |= Config::USE_LONGWAVELENGTH_APPROX;
+  else GetConfig().paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
   
   if(rateEntrancePair!=0) runTab->rateEntranceKey->setText(QString("%1").arg(rateEntrancePair));
   if(rateExitPair!=0) runTab->rateExitKey->setText(QString("%1").arg(rateExitPair));
@@ -684,6 +687,9 @@ void AZURESetup::editOptions() {
   if(!(GetConfig().paramMask & Config::TRANSFORM_PARAMETERS)) aDialog.noTransformCheck->setChecked(true);
   else aDialog.noTransformCheck->setChecked(false);
 
+  if(!(GetConfig().paramMask & Config::USE_LONGWAVELENGTH_APPROX)) aDialog.noLongWavelengthCheck->setChecked(true);
+  else aDialog.noLongWavelengthCheck->setChecked(false);
+
   if(aDialog.exec()) {
     if(aDialog.useGSLCoulCheck->isChecked()) GetConfig().paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else GetConfig().paramMask &= ~Config::USE_GSL_COULOMB_FUNC;
@@ -707,6 +713,8 @@ void AZURESetup::editOptions() {
     if(aDialog.noTransformCheck->isChecked()) GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
 
+    if(aDialog.noLongWavelengthCheck->isChecked()) GetConfig().paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
+    else GetConfig().paramMask |= Config::USE_LONGWAVELENGTH_APPROX;
   }
 }
 

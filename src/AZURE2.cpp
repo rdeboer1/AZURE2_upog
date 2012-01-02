@@ -64,6 +64,7 @@ void printHelp() {
 	     << std::setw(25) << std::left << "\t" << std::setw(0) << "and configuration occurs within the setup utility." << std::endl 
 	     << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
 	     << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
+	     << std::setw(25) << std::left << "\t--no-long-wavelenth:" << std::setw(0) << "Do not use long wavelength approximation for EL capture." << std::endl
 	     << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
 	     << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
 	     << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
@@ -106,6 +107,7 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
   for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
     if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
+    else if(*it=="--no-long-wavelength") configure.paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
     else if(*it=="--gsl-coul") configure.paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else if(*it=="--ignore-externals") configure.paramMask |= Config::IGNORE_ZERO_WIDTHS;
