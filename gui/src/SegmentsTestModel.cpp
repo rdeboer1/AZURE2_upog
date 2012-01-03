@@ -22,11 +22,22 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole) {
     SegmentsTestData line = segTestLineList.at(index.row());
     if(index.column() == 1) {
-      if(pairsModel->getPairs().size()>=line.entrancePairIndex&&pairsModel->getPairs().size()>=line.exitPairIndex) {
-	PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
-	PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
-	return QString("<center>%1</center>").arg(pairsModel->getReactionLabel(firstPair,secondPair));
-      } else return QString("<center><font style='color:red;font-weight:bold'>UNDEFINED</font></center>");
+      if(line.dataType==4) {
+	int i = 0;
+	QList<PairsData> pairsList = pairsModel->getPairs();
+	for(i=0;i<pairsList.size();i++) 
+	  if(pairsList[i].pairType==10) break;
+	if(pairsList.size()>=line.entrancePairIndex&&i<pairsList.size()) {
+	  PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+	  return QString("<center>%1</center>").arg(pairsModel->getReactionLabelTotalCapture(firstPair));
+	} else return QString("<center><font style='color:red;font-weight:bold;'>UNDEFINED</font></center>");
+      } else {
+	if(pairsModel->getPairs().size()>=line.entrancePairIndex&&pairsModel->getPairs().size()>=line.exitPairIndex) {
+	  PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+	  PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
+	  return QString("<center>%1</center>").arg(pairsModel->getReactionLabel(firstPair,secondPair));
+	} else return QString("<center><font style='color:red;font-weight:bold'>UNDEFINED</font></center>");
+      }
     } else if(index.column() == 2) return QVariant();
     else if(index.column() == 3) {
       if(line.lowEnergy==line.highEnergy) return line.lowEnergy;
@@ -72,6 +83,7 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
 	else tempSpin=QString("%1").arg(line.phaseJ);
 	return QString("<center>Phase Shift [%1<sub>%2</sub>]</center>").arg(orbital).arg(tempSpin);
       } else if(line.dataType==1) return QString(tr("<center>Differential</center>"));
+      else if(line.dataType==4) return QString(tr("<center>Total Capture</center>"));
       else return QString(tr("<center>Angle Integrated</center>"));
     } 
     else if(index.column() == 10) return QVariant();
@@ -235,10 +247,22 @@ void SegmentsTestModel::setPairsModel(PairsModel* model) {
 
 QString SegmentsTestModel::getReactionLabel(const QModelIndex &index) {
   SegmentsTestData line = segTestLineList.at(index.row());
-  int numPairs = pairsModel->getPairs().size();
-  if(line.entrancePairIndex-1>=numPairs || 
-     line.exitPairIndex-1>=numPairs) return QString("<font style='color:red;font-weight:bold'>UNDEFINED</font>");
-  PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
-  PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
-  return pairsModel->getReactionLabel(firstPair,secondPair);
+  if(line.dataType==4) {
+    int i = 0;
+    QList<PairsData> pairsList = pairsModel->getPairs();
+    for(i=0;i<pairsList.size();i++) 
+      if(pairsList[i].pairType==10) break;
+    if(pairsList.size()>=line.entrancePairIndex&&i<pairsList.size()) {
+      PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+      return pairsModel->getReactionLabelTotalCapture(firstPair);
+    }
+    return QString("<font style='color:red;font-weight:bold;'>UNDEFINED</font>");
+  } else {
+    int numPairs = pairsModel->getPairs().size();
+    if(line.entrancePairIndex-1>=numPairs || 
+       line.exitPairIndex-1>=numPairs) return QString("<font style='color:red;font-weight:bold'>UNDEFINED</font>");
+    PairsData firstPair=pairsModel->getPairs().at(line.entrancePairIndex-1);
+    PairsData secondPair=pairsModel->getPairs().at(line.exitPairIndex-1);
+    return pairsModel->getReactionLabel(firstPair,secondPair);
+  }
 }

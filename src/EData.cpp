@@ -162,7 +162,16 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
       if(segment.isActive()==1) {
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
-	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
+	  bool isValidTotal=false;
+	  if(NewSegment.GetExitKey()==-1) {
+	    for(int i = 1;i<=theCNuc->NumPairs();i++) {
+	      if(theCNuc->GetPair(i)->GetPType()==10) {
+		isValidTotal = true;
+		break;
+	      }
+	    }
+	  }
+	  if(isValidTotal||theCNuc->IsPairKey(NewSegment.GetExitKey())) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
 	    ESegment *theSegment=this->GetSegment(this->NumSegments());
@@ -198,11 +207,38 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 	      configure.outStream << "WARNING: Extrapolation segment #" << numTotalSegments 
 				  << " is empty and will not be used." << std::endl;
 	      this->DeleteLastSegment();
+	    } else {
+	      int thisSegmentNum = this->NumSegments();
+	      if(this->GetSegment(thisSegmentNum)->IsTotalCapture()) {
+		int numCapturePairs=0;
+		for(int i = 1;i<=theCNuc->NumPairs();i++) {
+		  if(theCNuc->GetPair(i)->GetPType()==10) {
+		    numCapturePairs++;
+		    if(numCapturePairs==1) {
+		      this->GetSegment(thisSegmentNum)->SetExitKey(theCNuc->GetPair(i)->GetPairKey());
+		    } else {
+		      ESegment newSegment(*this->GetSegment(thisSegmentNum));
+		      newSegment.SetExitKey(theCNuc->GetPair(i)->GetPairKey());
+		      newSegment.SetIsTotalCapture(0);
+		      newSegment.SetVaryNorm(false);
+		      this->AddSegment(newSegment);
+		    }
+		  }
+		}
+		this->GetSegment(thisSegmentNum)->SetIsTotalCapture(numCapturePairs);
+	      } 
 	    }
-	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
-			   << " not in compound nucleus." << std::endl;
+	  } else {
+	    if(NewSegment.GetExitKey()==-1) {
+	      configure.outStream << "WARNING: Total capture specified but no capture pair exists." 
+				  << std::endl;
+	    } else {
+	      configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
+				  << " not in compound nucleus." << std::endl;
+	    }
+	  }
 	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
-			 << " not in compound nucleus." << std::endl;
+				   << " not in compound nucleus." << std::endl;
       }
     }
   }  
@@ -744,7 +780,9 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     int aa=segment->GetEntranceKey();
     int ir=segment->GetExitKey();
     std::filebuf* buf = (firstSumIterator!=GetSegments().end()) ? output(aa,-1) : output(aa,ir);
-    std::ostream out(buf);
+    std::ostream out(buf);	
+    ESegmentIterator thisSegment = segment;
+    if(firstSumIterator!=GetSegments().end()) thisSegment = firstSumIterator;
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
       if(segment->IsAngularDist()) {
@@ -753,12 +791,10 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
 	out << std::endl;
       } else {
 	double fitCrossSection=point->GetFitCrossSection();
-	ESegmentIterator thisSegment = segment;
 	if(firstSumIterator!=GetSegments().end()) {
 	  int pointIndex=point-segment->GetPoints().begin()+1;
 	  for(ESegmentIterator it=firstSumIterator;it<segment;it++) 
 	    fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
-	  thisSegment = firstSumIterator;
 	}
 	out << std::setw(13) << std::scientific << point->GetCMEnergy()
 	    << std::setw(13) << std::scientific << point->GetExcitationEnergy()
@@ -776,11 +812,11 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
       }
     }
     if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
-      totalChiSquared+=segment->GetSegmentChiSquared();
+      totalChiSquared+=thisSegment->GetSegmentChiSquared();
       chiOut << "Segment #"
-	     << segment->GetSegmentKey() 
+	     << thisSegment->GetSegmentKey() 
 	     << " Chi-Squared/N: "
-	     << segment->GetSegmentChiSquared()/segment->NumPoints()
+	     << thisSegment->GetSegmentChiSquared()/thisSegment->NumPoints()
 	     << std::endl;
     }
     out<<std::endl<<std::endl;out.flush();

@@ -47,8 +47,7 @@ int AZUREMain::operator()(){
       data()->PrintData(configure());
   } else {
     if(!compound()->IsPairKey(configure().rateParams.entrancePair)||!compound()->IsPairKey(configure().rateParams.exitPair)) {
-      configure().outStream << "Reaction rate pairs do not exist in compound nucleus." 
-		<< configure().rateParams.entrancePair << configure().rateParams.exitPair << std::endl;
+      configure().outStream << "Reaction rate pairs do not exist in compound nucleus." << std::endl;
       return -1;
     } else {
       compound()->GetPair(compound()->GetPairNumFromKey(configure().rateParams.entrancePair))->SetEntrance();

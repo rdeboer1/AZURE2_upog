@@ -14,6 +14,7 @@
 #include "Config.h"
 #include "NucLine.h"
 #include "SegLine.h"
+#include "ExtrapLine.h"
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
@@ -254,10 +255,18 @@ bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
 	if(line!=stopTag&&!in.eof()) {
 	  std::istringstream stm;
 	  stm.str(line);
-	  SegLine segment(stm);
-	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
-	    SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
-	    segPairs.push_back(tempSet);
+	  if(configure.paramMask & Config::CALCULATE_WITH_DATA) {
+	    SegLine segment(stm);
+	    if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
+	      SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
+	      segPairs.push_back(tempSet);
+	    }
+	  } else {
+	    ExtrapLine segment(stm);
+	    if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
+	      SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
+	      segPairs.push_back(tempSet);
+	    }
 	  }
 	}
       }

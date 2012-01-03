@@ -77,7 +77,7 @@ ESegment::ESegment(ExtrapLine extrapLine) {
     isAngDist_=false;
     maxAngDistOrder_=0;
   }
-  isTotalCapture_=0;
+  isTotalCapture_ =  (extrapLine.isDiff()==4) ? 1 : 0;
   datafile_="";
   dataNorm_= dataNormNominal_ = 1.;
   dataNormError_=0.;

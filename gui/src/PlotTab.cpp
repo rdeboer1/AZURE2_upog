@@ -180,7 +180,9 @@ QList<PlotEntry*> PlotTab::getTestSegments() {
     int exitKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
     sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(indexes[i].row(),9,QModelIndex()));
     int dataType = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
-    QString filename = QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.extrap").arg(entranceKey).arg(exitKey);
+    QString filename = (dataType==4) ? 
+      QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_TOTAL_CAPTURE.extrap").arg(entranceKey) :
+      QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.extrap").arg(entranceKey).arg(exitKey);
     int numPreviousInBlock = 0;
     for(int j =0; j<indexes[i].row(); j++) {
       sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(j,1,QModelIndex()));
