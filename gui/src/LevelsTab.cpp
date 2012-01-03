@@ -504,8 +504,18 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
 	stm << QString("Channel is Fermi beta decay") << endl << endl;
       stm << qSetFieldWidth(21) << right << "Fermion Charge: " 
 	  << qSetFieldWidth(0) << left << QString("%1").arg(pair.lightZ) << endl;
-    } else stm << QString("Capture gamma is %1%2 radiation").arg(channel.radType).arg(channel.lValue) 
-	       << endl << endl;
+    } else {
+      stm << QString("Capture gamma is %1%2 radiation").arg(channel.radType).arg(channel.lValue) << endl;
+      if(((channel.radType=='E'&&channel.lValue==1)&&
+	  (pair.ecMultMask & (1<<0)))||
+	 ((channel.radType=='M'&&channel.lValue==1)&&
+	  (pair.ecMultMask & (1<<1)))||
+	 ((channel.radType=='E'&&channel.lValue==2)&&
+	  (pair.ecMultMask & (1<<2)))) 
+	stm << "Capture is internal and external" << endl;
+      else stm << "Capture is internal only" << endl;
+      stm << endl;
+    }
     stm << qSetFieldWidth(21) << right << "Heavy Particle Spin: "
 	<< qSetFieldWidth(0) << left <<QString("%1").arg(pairsModel->getSpinLabel(pair,1)) << endl;
     stm << qSetFieldWidth(21) << right << "Heavy Particle Z: "

@@ -13,6 +13,8 @@
 #include "AZUREMain.h"
 #include "Config.h"
 #include "NucLine.h"
+#include "SegLine.h"
+#include "ExtrapLine.h"
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
@@ -56,15 +58,19 @@ void exitMessage(const Config& configure) {
  * available runtime options.
  */
 
-void printHelp(const Config& configure) {
-  configure.outStream << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
-	    << "Options:" << std::endl
-            << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
-            << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
-            << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
-            << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
-            << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
-            << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
+void printHelp() {
+  std::cout  << "Syntax: AZURE2 <options> configfile" << std::endl << std::endl
+	     << "Options:" << std::endl
+	     << std::setw(25) << std::left << "\t--no-gui:" << std::setw(0) << "Do not use graphical setup utility (if built)." << std::endl 
+	     << std::setw(25) << std::left << "\t" << std::setw(0) << "If this flag is not set all other options are ignored," << std::endl 
+	     << std::setw(25) << std::left << "\t" << std::setw(0) << "and configuration occurs within the setup utility." << std::endl 
+	     << std::setw(25) << std::left << "\t--no-readline:" << std::setw(0) << "Do not use readline package." <<  std::endl
+	     << std::setw(25) << std::left << "\t--no-transform:" << std::setw(0) << "Do not perform initial parameter transformations." << std::endl
+	     << std::setw(25) << std::left << "\t--no-long-wavelenth:" << std::setw(0) << "Do not use long wavelength approximation for EL capture." << std::endl
+	     << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
+	     << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
+	     << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
+	     << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
 }
 
 /*!
@@ -101,11 +107,9 @@ bool parseOptions(int argc, char *argv[], Config& configure) {
     } else configure.outStream << "AZURE_OPTIONS_FILE variable set, but file not readable." << std::endl;
   }
   for(std::vector<std::string>::iterator it = options.begin();it<options.end();it++) {
-    if(*it=="--help") {
-      printHelp(configure);
-      exit(0);
-    } else if(*it=="--no-readline") useReadline=false;
+    if(*it=="--no-readline") useReadline=false;
     else if(*it=="--no-transform") configure.paramMask &= ~Config::TRANSFORM_PARAMETERS;
+    else if(*it=="--no-long-wavelength") configure.paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
     else if(*it=="--use-brune") configure.paramMask |= Config::USE_BRUNE_FORMALISM;
     else if(*it=="--gsl-coul") configure.paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else if(*it=="--ignore-externals") configure.paramMask |= Config::IGNORE_ZERO_WIDTHS;
@@ -239,7 +243,6 @@ bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
     while(line!=startTag&&!in.eof()) getline(in,line);
     if(line==startTag) {
       line="";
-      int isActive,firstPair,secondPair;
       while(line!=stopTag&&!in.eof()) {
 	getline(in,line);
 	bool empty=true;
@@ -252,10 +255,18 @@ bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
 	if(line!=stopTag&&!in.eof()) {
 	  std::istringstream stm;
 	  stm.str(line);
-	  stm >> isActive >> firstPair >> secondPair;
-	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&isActive==1) {
-	    SegPairs tempSet={firstPair,secondPair};
-	    segPairs.push_back(tempSet);
+	  if(configure.paramMask & Config::CALCULATE_WITH_DATA) {
+	    SegLine segment(stm);
+	    if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
+	      SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
+	      segPairs.push_back(tempSet);
+	    }
+	  } else {
+	    ExtrapLine segment(stm);
+	    if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
+	      SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
+	      segPairs.push_back(tempSet);
+	    }
 	  }
 	}
       }
@@ -439,7 +450,8 @@ bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
       }
       if(tempNucLine.ecMultMask()!=0) {
 	for(int i=0;i<segPairs.size();i++) {
-	  if(tempNucLine.ir()==segPairs[i].secondPair) {
+	  if(tempNucLine.ir()==segPairs[i].secondPair||
+	     segPairs[i].secondPair==-1) {
 	    configure.paramMask |= Config::USE_EXTERNAL_CAPTURE;
 	    break;
 	  }
@@ -464,7 +476,8 @@ bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
  */
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
-  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
+  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&
+     !(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
     configure.outStream << std::endl;
     if(!useReadline) configure.outStream << "External Capture Amplitude File (leave blank for new file): ";
     bool validInfile=false;
@@ -525,12 +538,22 @@ void startMessage(const Config& configure) {
  */
 
 int main(int argc,char *argv[]){
+  
+  //Check for --help option first.  If set, print help and exit.
+  for(int i=1;i<argc;i++) 
+    if(strcmp(argv[i],"--help")==0) {
+      printHelp();
+      return 0;
+    }
+  
+  //If GUI is built, look for --no-gui option.  If not set, hand control to GUI.
 #ifdef GUI_BUILD
   bool useGUI=true;
-  for(int i=1;i<argc;i++)
+  for(int i=1;i<argc;i++) 
     if(strcmp(argv[i],"--no-gui")==0) useGUI=false;
   if(useGUI) return start_gui(argc,argv);
 #endif
+
   //Create new configuration structure, and parse the command line parameters
   Config configure(std::cout);
   bool useReadline = parseOptions(argc,argv,configure);

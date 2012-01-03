@@ -218,14 +218,14 @@ void SegmentsTab::addSegDataLine() {
     SegmentsDataData newLine;
     newLine.isActive=1;
     newLine.entrancePairIndex=aDialog.entrancePairIndexSpin->value();
-    newLine.exitPairIndex=aDialog.exitPairIndexSpin->value();
+    if(aDialog.dataTypeCombo->currentIndex()==3)
+      newLine.exitPairIndex=-1;
+    else newLine.exitPairIndex=aDialog.exitPairIndexSpin->value();
     newLine.lowEnergy=aDialog.lowEnergyText->text().toDouble();
     newLine.highEnergy=aDialog.highEnergyText->text().toDouble();
     newLine.lowAngle=aDialog.lowAngleText->text().toDouble();
     newLine.highAngle=aDialog.highAngleText->text().toDouble();
-    if(aDialog.dataTypeCombo->currentIndex()==2) newLine.dataType=2;
-    else if(aDialog.dataTypeCombo->currentIndex()==1) newLine.dataType=1;
-    else newLine.dataType=0;
+    newLine.dataType=aDialog.dataTypeCombo->currentIndex();
     newLine.dataFile=aDialog.dataFileText->text();
     newLine.dataNorm=aDialog.dataNormText->text().toDouble();
     newLine.dataNormError=aDialog.dataNormErrorText->text().toDouble();
@@ -282,17 +282,16 @@ void SegmentsTab::addSegTestLine() {
     SegmentsTestData newLine;
     newLine.isActive=1;
     newLine.entrancePairIndex=aDialog.entrancePairIndexSpin->value();
-    newLine.exitPairIndex=aDialog.exitPairIndexSpin->value();
+    if(aDialog.dataTypeCombo->currentIndex()==4)
+      newLine.exitPairIndex=-1;
+    else newLine.exitPairIndex=aDialog.exitPairIndexSpin->value();
     newLine.lowEnergy=aDialog.lowEnergyText->text().toDouble();
     newLine.highEnergy=aDialog.highEnergyText->text().toDouble();
     newLine.energyStep=aDialog.energyStepText->text().toDouble();
     newLine.lowAngle=aDialog.lowAngleText->text().toDouble();
     newLine.highAngle=aDialog.highAngleText->text().toDouble();
     newLine.angleStep=aDialog.angleStepText->text().toDouble();
-    if(aDialog.dataTypeCombo->currentIndex()==3) newLine.dataType=3;
-    else if(aDialog.dataTypeCombo->currentIndex()==2) newLine.dataType=2;
-    else if(aDialog.dataTypeCombo->currentIndex()==1) newLine.dataType=1;
-    else newLine.dataType=0;
+    newLine.dataType=aDialog.dataTypeCombo->currentIndex();
     newLine.phaseJ=aDialog.phaseJValueText->text().toDouble();
     newLine.phaseL=aDialog.phaseLValueText->text().toInt();
     newLine.maxAngDistOrder=aDialog.angDistSpin->value();
@@ -391,9 +390,7 @@ void SegmentsTab::editSegDataLine() {
   aDialog.highEnergyText->setText(highEnergy);
   aDialog.lowAngleText->setText(lowAngle);
   aDialog.highAngleText->setText(highAngle);
-  if(dataType==2) aDialog.dataTypeCombo->setCurrentIndex(2);
-  else if(dataType==1) aDialog.dataTypeCombo->setCurrentIndex(1);
-  else aDialog.dataTypeCombo->setCurrentIndex(0);
+  aDialog.dataTypeCombo->setCurrentIndex(dataType);
   aDialog.dataFileText->setText(dataFile);
   aDialog.dataNormText->setText(dataNorm);
   aDialog.dataNormErrorText->setText(dataNormError);
@@ -408,7 +405,8 @@ void SegmentsTab::editSegDataLine() {
       i=segmentsDataModel->index(index.row(),1,QModelIndex());
       segmentsDataModel->setData(i,newEntrancePairIndex,Qt::EditRole);
     }
-    int newExitPairIndex=aDialog.exitPairIndexSpin->value();
+    int newExitPairIndex= (aDialog.dataTypeCombo->currentIndex()==3) ? -1 :
+      aDialog.exitPairIndexSpin->value();
     if(newExitPairIndex!=exitPairIndex) {
       i=segmentsDataModel->index(index.row(),2,QModelIndex());
       segmentsDataModel->setData(i,newExitPairIndex,Qt::EditRole);
@@ -433,10 +431,7 @@ void SegmentsTab::editSegDataLine() {
       i=segmentsDataModel->index(index.row(),6,QModelIndex());
       segmentsDataModel->setData(i,newHighAngle,Qt::EditRole);
     }
-    int newDataType;
-    if(aDialog.dataTypeCombo->currentIndex()==2) newDataType=2;
-    else if(aDialog.dataTypeCombo->currentIndex()==1) newDataType=1;
-    else newDataType=0;
+    int newDataType=aDialog.dataTypeCombo->currentIndex();
     if(newDataType!=dataType) {
       i=segmentsDataModel->index(index.row(),7,QModelIndex());
       segmentsDataModel->setData(i,newDataType,Qt::EditRole);
@@ -527,10 +522,7 @@ void SegmentsTab::editSegTestLine() {
   aDialog.lowAngleText->setText(lowAngle);
   aDialog.highAngleText->setText(highAngle);
   aDialog.angleStepText->setText(angleStep);
-  if(dataType==3) aDialog.dataTypeCombo->setCurrentIndex(3);
-  else if(dataType==2) aDialog.dataTypeCombo->setCurrentIndex(2);
-  else if(dataType==1) aDialog.dataTypeCombo->setCurrentIndex(1);
-  else aDialog.dataTypeCombo->setCurrentIndex(0);
+  aDialog.dataTypeCombo->setCurrentIndex(dataType);
   aDialog.phaseJValueText->setText(phaseJ);
   aDialog.phaseLValueText->setText(phaseL);
   aDialog.angDistSpin->setValue(maxAngDistOrder);
@@ -542,7 +534,8 @@ void SegmentsTab::editSegTestLine() {
       i=segmentsTestModel->index(index.row(),1,QModelIndex());
       segmentsTestModel->setData(i,newEntrancePairIndex,Qt::EditRole);
     }
-    int newExitPairIndex=aDialog.exitPairIndexSpin->value();
+    int newExitPairIndex= (aDialog.dataTypeCombo->currentIndex()==4) ? -1 :
+      aDialog.exitPairIndexSpin->value();
     if(newExitPairIndex!=exitPairIndex) {
       i=segmentsTestModel->index(index.row(),2,QModelIndex());
       segmentsTestModel->setData(i,newExitPairIndex,Qt::EditRole);
@@ -577,11 +570,7 @@ void SegmentsTab::editSegTestLine() {
       i=segmentsTestModel->index(index.row(),8,QModelIndex());
       segmentsTestModel->setData(i,newAngleStep,Qt::EditRole);
     }
-    int newDataType;
-    if(aDialog.dataTypeCombo->currentIndex()==3) newDataType=3;
-    else if(aDialog.dataTypeCombo->currentIndex()==2) newDataType=2;
-    else if(aDialog.dataTypeCombo->currentIndex()==1) newDataType=1;
-    else newDataType=0;
+    int newDataType = aDialog.dataTypeCombo->currentIndex();
     if(newDataType!=dataType) {
       i=segmentsTestModel->index(index.row(),9,QModelIndex());
       segmentsTestModel->setData(i,newDataType,Qt::EditRole);
@@ -870,10 +859,6 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
       << qSetFieldWidth(0) << "dataFile"
       << endl;*/
   for(int i = 0; i<lines.size(); i++) {
-    int dataType;
-    if(lines.at(i).dataType==2) dataType=2;
-    else if(lines.at(i).dataType==1) dataType=1;
-    else dataType=0;
     outStream << qSetFieldWidth(15) << lines.at(i).isActive
 	      << qSetFieldWidth(15) << lines.at(i).entrancePairIndex
 	      << qSetFieldWidth(15) << lines.at(i).exitPairIndex
@@ -881,7 +866,7 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
 	      << qSetFieldWidth(15) << lines.at(i).highEnergy
 	      << qSetFieldWidth(15) << lines.at(i).lowAngle
 	      << qSetFieldWidth(15) << lines.at(i).highAngle
-	      << qSetFieldWidth(15) << dataType;
+	      << qSetFieldWidth(15) << lines.at(i).dataType;
     if(lines.at(i).dataType == 2) outStream  << qSetFieldWidth(15) << lines.at(i).phaseJ
 					     << qSetFieldWidth(15) << lines.at(i).phaseL;
     outStream << qSetFieldWidth(15) << lines.at(i).dataNorm
@@ -1013,11 +998,6 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
       << qSetFieldWidth(0)  << "dataType"
       << endl;*/
   for(int i = 0; i<lines.size(); i++) {
-    int dataType;
-    if(lines.at(i).dataType==3) dataType=3;
-    else if(lines.at(i).dataType==2) dataType=2;
-    else if(lines.at(i).dataType==1) dataType=1;
-    else dataType=0;
     outStream << qSetFieldWidth(15) << lines.at(i).isActive
 	      << qSetFieldWidth(15) << lines.at(i).entrancePairIndex
 	      << qSetFieldWidth(15) << lines.at(i).exitPairIndex
@@ -1027,20 +1007,17 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
 	      << qSetFieldWidth(15) << lines.at(i).lowAngle
 	      << qSetFieldWidth(15) << lines.at(i).highAngle
 	      << qSetFieldWidth(15) << lines.at(i).angleStep;
-    if(dataType==2) {
-      outStream << qSetFieldWidth(15)  << dataType
+    if(lines.at(i).dataType==2) {
+      outStream << qSetFieldWidth(15) << lines.at(i).dataType
 		<< qSetFieldWidth(15) << lines.at(i).phaseJ
-		<< qSetFieldWidth(0) << lines.at(i).phaseL
-		<< endl;
-	
-    } else if(dataType==3)  {
-      outStream << qSetFieldWidth(15) << dataType 
-		<< qSetFieldWidth(0) << lines.at(i).maxAngDistOrder
-		<< endl;
-    } else {
-      outStream << qSetFieldWidth(0)  << dataType
-		<< endl;
-    }
+		<< qSetFieldWidth(0) << lines.at(i).phaseL 
+		<< endl;	
+    } else if(lines.at(i).dataType==3)  {
+      outStream  << qSetFieldWidth(15) << lines.at(i).dataType
+		 << qSetFieldWidth(0) << lines.at(i).maxAngDistOrder
+		 << endl;
+    } else outStream << qSetFieldWidth(0) << lines.at(i).dataType 
+		     << endl;
   }
   /*file.close();*/
 

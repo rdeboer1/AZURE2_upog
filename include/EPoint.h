@@ -86,6 +86,7 @@ class EPoint {
   void SetGeometricalFactor(double);
   void SetFitCrossSection(double);
   void SetSFactorConversion(double);
+  void SetExitKey(int);
   void CalcLegendreP(int,TargetEffect*);
   void CalcEDependentValues(CNuc*,const Config&);
   void AddLoElement(int,int,complex);

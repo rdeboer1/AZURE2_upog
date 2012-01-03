@@ -31,6 +31,7 @@ ESegment::ESegment(SegLine segLine) {
     j_=0.0;
     l_=0;
   }
+  isTotalCapture_ =  (segLine.isDiff()==3) ? 1 : 0;
   isAngDist_=false;
   maxAngDistOrder_=0;
   datafile_=segLine.dataFile();
@@ -76,6 +77,7 @@ ESegment::ESegment(ExtrapLine extrapLine) {
     isAngDist_=false;
     maxAngDistOrder_=0;
   }
+  isTotalCapture_ =  (extrapLine.isDiff()==4) ? 1 : 0;
   datafile_="";
   dataNorm_= dataNormNominal_ = 1.;
   dataNormError_=0.;
@@ -117,6 +119,15 @@ bool ESegment::IsPhase() const {
   return isphase_;
 }
 
+/*!
+ * Returns the number of total capture segments to be summed.  Should be zero if the segment is
+ * not total capture, otherwise the parameter should be the number of segments in the sum 
+ * (inclusive of the current segment).
+ */
+
+int ESegment::IsTotalCapture() const {
+  return isTotalCapture_;
+}
 
 /*!
  * Returns true if the segment is angular distribution.
@@ -376,6 +387,34 @@ void ESegment::SetNorm(double norm) {
   dataNorm_=norm;
 }
 
+/*!
+ * Sets the exit pair key to the given value.
+ */
+
+void ESegment::SetExitKey(int key) {
+  exitkey_=key;
+  for(int i=1;i<=this->NumPoints();i++) 
+    this->GetPoint(i)->SetExitKey(key);
+}
+
+/*!
+ * Sets the number of total capture segments to be summed.  Should be zero if the segment is
+ * not total capture, otherwise the parameter should be the number of segments in the sum 
+ * (inclusive of the current segment).
+ */
+
+void ESegment::SetIsTotalCapture(int num) {
+  isTotalCapture_=num;
+}
+
+/*!
+ * Set the flag determining if the normalization is varied.
+ */
+
+void ESegment::SetVaryNorm(bool varyNorm) {
+  varyNorm_=varyNorm;
+
+}
 /*!
  * Returns a pointer to the data point object specified by a position in the EPoint vector.
  */

@@ -42,19 +42,20 @@ class Config {
    * Bit flags for various options in AZURE2.
    */
   enum ParameterFlags {
-    USE_AMATRIX             =(1<<0),
-    PERFORM_ERROR_ANALYSIS  =(1<<1),
-    PERFORM_FIT             =(1<<2),
-    CALCULATE_WITH_DATA     =(1<<3),
-    USE_PREVIOUS_PARAMETERS =(1<<4),
-    USE_EXTERNAL_CAPTURE    =(1<<5),
-    USE_PREVIOUS_INTEGRALS  =(1<<6),
-    CALCULATE_REACTION_RATE =(1<<7),
-    TRANSFORM_PARAMETERS    =(1<<8),
-    USE_BRUNE_FORMALISM     =(1<<9),
-    IGNORE_ZERO_WIDTHS      =(1<<10),
-    USE_RMC_FORMALISM       =(1<<11),
-    USE_GSL_COULOMB_FUNC    =(1<<12)
+    USE_AMATRIX               =(1<<0),
+    PERFORM_ERROR_ANALYSIS    =(1<<1),
+    PERFORM_FIT               =(1<<2),
+    CALCULATE_WITH_DATA       =(1<<3),
+    USE_PREVIOUS_PARAMETERS   =(1<<4),
+    USE_EXTERNAL_CAPTURE      =(1<<5),
+    USE_PREVIOUS_INTEGRALS    =(1<<6),
+    CALCULATE_REACTION_RATE   =(1<<7),
+    TRANSFORM_PARAMETERS      =(1<<8),
+    USE_BRUNE_FORMALISM       =(1<<9),
+    IGNORE_ZERO_WIDTHS        =(1<<10),
+    USE_RMC_FORMALISM         =(1<<11),
+    USE_GSL_COULOMB_FUNC      =(1<<12),
+    USE_LONGWAVELENGTH_APPROX =(1<<13)
   };
   /*!
    * Bit flags for check file control in AZURE2.

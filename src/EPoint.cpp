@@ -574,6 +574,14 @@ void EPoint::SetSFactorConversion(double conversion) {
 }
 
 /*!
+ * Sets the exit key to the given value;
+ */
+
+void EPoint::SetExitKey(int key) {
+  exit_key_=key;
+}
+
+/*!
  * Calculates Legendre polynomials up to a maximum order.  The polynomials are added, in order, to a vector.
  */
 

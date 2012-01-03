@@ -22,7 +22,7 @@ void Config::Reset() {
   screenCheckMask=0;
   fileCheckMask=0;
   paramMask=0;
-  paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA);
+  paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA|USE_LONGWAVELENGTH_APPROX);
   stopFlag=false;
 }
 

@@ -12,9 +12,13 @@ int start_gui(int argc, char *argv[]) {
   AZURESetup azureSetup;
   azureSetup.show();
   
-  if(argc>1) {
-    QString filename=argv[1];
-    azureSetup.open(filename);
-  }
+  QString filename="";
+  for(int i=1;i<argc;i++) 
+    if(strncmp(argv[i],"--",2)!=0) {
+      filename=argv[i];
+      break;
+    }
+  if(!filename.trimmed().isEmpty()) azureSetup.open(filename);
+  
   return app.exec();
 }

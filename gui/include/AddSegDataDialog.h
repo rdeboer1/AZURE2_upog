@@ -35,6 +35,7 @@ class AddSegDataDialog : public QDialog {
   QLineEdit *phaseLValueText;
   QLabel* phaseLValueLabel;
   QLabel* phaseJValueLabel;
+  QLabel* totalCaptureLabel;
 
  public slots:
   void setChooseFile();

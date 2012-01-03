@@ -306,6 +306,9 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
 
   if(paramMask & Config::TRANSFORM_PARAMETERS) GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
   else GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
+
+  if(paramMask & Config::USE_LONGWAVELENGTH_APPROX) GetConfig().paramMask |= Config::USE_LONGWAVELENGTH_APPROX;
+  else GetConfig().paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
   
   if(rateEntrancePair!=0) runTab->rateEntranceKey->setText(QString("%1").arg(rateEntrancePair));
   if(rateExitPair!=0) runTab->rateExitKey->setText(QString("%1").arg(rateExitPair));
@@ -411,6 +414,18 @@ void AZURESetup::saveAs() {
       QMessageBox::information(this,
 			       tr("Can't Access File"),
 			       tr("An error occured while writing the file."));
+    else {
+      QSettings settings;
+      QStringList files = settings.value("recentFileList").toStringList();
+      QFile file(filename);
+      QFileInfo info(file);
+      QString fullFileName = QDir::fromNativeSeparators(info.absoluteFilePath());
+      files.removeAll(fullFileName);
+      files.prepend(fullFileName);
+      while(files.size()>numRecent) files.removeLast();     
+      settings.setValue("recentFileList",files);
+      updateRecent();
+    }
   }
 }
 
@@ -672,6 +687,9 @@ void AZURESetup::editOptions() {
   if(!(GetConfig().paramMask & Config::TRANSFORM_PARAMETERS)) aDialog.noTransformCheck->setChecked(true);
   else aDialog.noTransformCheck->setChecked(false);
 
+  if(!(GetConfig().paramMask & Config::USE_LONGWAVELENGTH_APPROX)) aDialog.noLongWavelengthCheck->setChecked(true);
+  else aDialog.noLongWavelengthCheck->setChecked(false);
+
   if(aDialog.exec()) {
     if(aDialog.useGSLCoulCheck->isChecked()) GetConfig().paramMask |= Config::USE_GSL_COULOMB_FUNC;
     else GetConfig().paramMask &= ~Config::USE_GSL_COULOMB_FUNC;
@@ -695,6 +713,8 @@ void AZURESetup::editOptions() {
     if(aDialog.noTransformCheck->isChecked()) GetConfig().paramMask &= ~Config::TRANSFORM_PARAMETERS;
     else GetConfig().paramMask |= Config::TRANSFORM_PARAMETERS;
 
+    if(aDialog.noLongWavelengthCheck->isChecked()) GetConfig().paramMask &= ~Config::USE_LONGWAVELENGTH_APPROX;
+    else GetConfig().paramMask |= Config::USE_LONGWAVELENGTH_APPROX;
   }
 }
 
@@ -751,7 +771,17 @@ void AZURESetup::SaveAndRun() {
   }
   int maxPairs=pairsTab->getPairsModel()->getPairs().size();
   for(std::vector<SegPairs>::const_iterator it = segPairs.begin();it<segPairs.end();it++) {
-    if(it->firstPair>maxPairs||it->secondPair>maxPairs||it->firstPair<1||it->secondPair<1) {
+    if(it->secondPair==-1) {
+      QList<PairsData> pairsList = pairsTab->getPairsModel()->getPairs();
+      int i;
+      for(i = 0; i<pairsList.size();i++) 
+	if(pairsList[i].pairType==10) break;
+      if(i==pairsList.size()) {
+	QMessageBox::information(this,tr("No Capture Pairs"),
+				 tr("Total capture is specified, but no capture pairs exist."));
+	return;
+      }
+    } else if(it->firstPair>maxPairs||it->secondPair>maxPairs||it->firstPair<1||it->secondPair<1) {
       QMessageBox::information(this,tr("Undefined Key"),tr("An undefined pair key is specified."));
       return;
     }

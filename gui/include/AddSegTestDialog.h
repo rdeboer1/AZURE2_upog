@@ -32,6 +32,7 @@ class AddSegTestDialog : public QDialog {
   QLabel *phaseJValueLabel;
   QLabel *phaseLValueLabel;
   QLabel *angDistLabel;
+  QLabel *totalCaptureLabel;
   QSpinBox *angDistSpin;
  
  public slots:

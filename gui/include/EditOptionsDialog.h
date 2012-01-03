@@ -25,6 +25,7 @@ Q_OBJECT
   QCheckBox* ignoreExternalsCheck;
   QCheckBox* useRMCCheck;
   QCheckBox* noTransformCheck;
+  QCheckBox* noLongWavelengthCheck;
 
  private slots:
   void useBruneCheckChanged(int);

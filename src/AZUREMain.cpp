@@ -48,8 +48,7 @@ int AZUREMain::operator()(){
       data()->PrintData(configure());
   } else {
     if(!compound()->IsPairKey(configure().rateParams.entrancePair)||!compound()->IsPairKey(configure().rateParams.exitPair)) {
-      configure().outStream << "Reaction rate pairs do not exist in compound nucleus." 
-		<< configure().rateParams.entrancePair << configure().rateParams.exitPair << std::endl;
+      configure().outStream << "Reaction rate pairs do not exist in compound nucleus." << std::endl;
       return -1;
     } else {
       compound()->GetPair(compound()->GetPairNumFromKey(configure().rateParams.entrancePair))->SetEntrance();
@@ -128,12 +127,14 @@ int AZUREMain::operator()(){
     if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
       configure().outStream << std::endl << std::endl;
       for(ESegmentIterator segment=data()->GetSegments().begin();
-	  segment<data()->GetSegments().end();segment++) 
+	  segment<data()->GetSegments().end();segment++) {
 	configure().outStream << "Segment #"
 		  << segment->GetSegmentKey() 
 		  << " Chi-Squared/N: "
 		  << segment->GetSegmentChiSquared()/segment->NumPoints()
 		  << std::endl;
+	if(segment->IsTotalCapture()) segment+=segment->IsTotalCapture()-1;
+      }
       configure().outStream << "Total Chi-Squared: " 
 		<< chiSquared << std::endl << std::endl;
     }

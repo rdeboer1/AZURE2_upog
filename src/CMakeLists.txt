@@ -1,4 +1,4 @@
-set(AZURE2_SOURCES AChannel.cpp CoulFunc.cpp GenMatrixFunc.cpp KLGroup.cpp ALevel.cpp Decay.cpp AngCoeff.cpp MGroup.cpp AMatrixFunc.cpp  DoubleFactorial.cpp EigenFunc.cpp  NFIntegral.cpp AZURE2.cpp ECIntegral.cpp MatrixInv.cpp PPair.cpp AZURECalc.cpp ECMGroup.cpp ReactionRate.cpp AZUREMain.cpp EData.cpp ShftFunc.cpp RMatrixFunc.cpp AZUREOutput.cpp  EDataIterator.cpp   TargetEffect.cpp AZUREParams.cpp EPoint.cpp Interference.cpp CNuc.cpp Equation.cpp JGroup.cpp Config.cpp ESegment.cpp KGroup.cpp IntegratedFermiFunc.cpp)
+set(AZURE2_SOURCES AChannel.cpp CoulFunc.cpp GenMatrixFunc.cpp KLGroup.cpp ALevel.cpp Decay.cpp AngCoeff.cpp MGroup.cpp AMatrixFunc.cpp  DoubleFactorial.cpp EigenFunc.cpp  NFIntegral.cpp AZURE2.cpp ECIntegral.cpp MatrixInv.cpp PPair.cpp AZURECalc.cpp ECMGroup.cpp ReactionRate.cpp AZUREMain.cpp EData.cpp ShftFunc.cpp RMatrixFunc.cpp AZUREOutput.cpp  EDataIterator.cpp   TargetEffect.cpp AZUREParams.cpp EPoint.cpp Interference.cpp CNuc.cpp Equation.cpp JGroup.cpp Config.cpp ESegment.cpp KGroup.cpp IntegratedFermiFunc.cpp EffectiveCharge.cpp)
 
 include_directories(${AZURE2_SOURCE_DIR}/include)
 
@@ -15,6 +15,7 @@ endif (NCURSES_LIBRARY)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 set(EXTRA_LIBS ${EXTRA_LIBS} termcap lcms)
+set(AZURE2_SOURCES ${AZURE2_SOURCES} AZURE2.rc)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 

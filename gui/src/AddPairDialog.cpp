@@ -115,7 +115,7 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   buttonBox->addWidget(cancelButton);
   buttonBox->addWidget(okButton);
 
-  multBox= new QGroupBox(tr("External Multipolarities"));
+  multBox= new QGroupBox(tr("External Capture Multipolarities"));
   multBox->hide();
   QHBoxLayout *multLayout = new QHBoxLayout;
   multLayout->addWidget(e1Check);

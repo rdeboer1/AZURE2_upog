@@ -29,13 +29,30 @@ double AZURECalc::operator()(const vector_r& p) const {
   //loop over segments and points
   double chiSquared=0.0;
   double segmentChiSquared=0.0;
+  ESegmentIterator firstSumIterator = localData->GetSegments().end();
+  ESegmentIterator lastSumIterator = localData->GetSegments().end();
   for(EDataIterator data=localData->begin();data!=localData->end();data++) {
-    if(data.segment()->GetPoints().begin()==data.point()) segmentChiSquared=0.0;
+    if(data.segment()->GetPoints().begin()==data.point()) {
+      segmentChiSquared=0.0;
+      if(data.segment()->IsTotalCapture()) {
+	firstSumIterator=data.segment();
+	lastSumIterator=data.segment()+data.segment()->IsTotalCapture()-1;
+      } 
+    }
     if(!data.point()->IsMapped()) data.point()->Calculate(localCompound,configure());
+    if(firstSumIterator!=localData->GetSegments().end()&&
+       data.segment()!=lastSumIterator) continue;
     double fitCrossSection=data.point()->GetFitCrossSection();
-    double dataNorm=data.segment()->GetNorm();
-    double dataNormNominal=data.segment()->GetNominalNorm();
-    double dataNormError=dataNormNominal/100.*data.segment()->GetNormError();
+    ESegmentIterator thisSegment = data.segment();
+    if(data.segment()==lastSumIterator) {
+      int pointIndex=data.point()-data.segment()->GetPoints().begin()+1;
+      for(ESegmentIterator it=firstSumIterator;it<data.segment();it++) 
+	fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
+      thisSegment = firstSumIterator;
+    }
+    double dataNorm=thisSegment->GetNorm();
+    double dataNormNominal=thisSegment->GetNominalNorm();
+    double dataNormError=dataNormNominal/100.*thisSegment->GetNormError();
     double CrossSection=data.point()->GetCMCrossSection()*dataNorm;
     double CrossSectionError=data.point()->GetCMCrossSectionError()*dataNorm;
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
@@ -44,7 +61,11 @@ double AZURECalc::operator()(const vector_r& p) const {
       pointChiSquared+= pow((dataNorm-dataNormNominal)/dataNormError,2.0);
     segmentChiSquared+=pointChiSquared;
     if(data.segment()->GetPoints().end()-1==data.point()) {
-      if(!isFit) data.segment()->SetSegmentChiSquared(segmentChiSquared);
+      if(!isFit) thisSegment->SetSegmentChiSquared(segmentChiSquared);
+      if(data.segment()==lastSumIterator) {
+	firstSumIterator=localData->GetSegments().end();
+	lastSumIterator=localData->GetSegments().end();
+      }
       chiSquared+=segmentChiSquared;
     }
   }
