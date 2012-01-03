@@ -24,6 +24,7 @@ class ESegment {
   bool IsTargetEffect() const;
   bool IsVaryNorm() const;
   bool IsAngularDist() const;
+  int IsTotalCapture() const;
   int NumPoints() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
@@ -49,6 +50,9 @@ class ESegment {
   void SetTargetEffectNum(int);
   void SetSegmentKey(int);
   void SetNorm(double);
+  void SetExitKey(int);
+  void SetIsTotalCapture(int);
+  void SetVaryNorm(bool);
   EPoint *GetPoint(int);
   std::vector<EPoint>& GetPoints();
  private:
@@ -57,6 +61,7 @@ class ESegment {
   bool isTargetEffect_;
   bool varyNorm_;
   bool isAngDist_;
+  int isTotalCapture_;
   int entrancekey_;
   int exitkey_;
   int l_;

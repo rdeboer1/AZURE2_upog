@@ -117,12 +117,14 @@ int AZUREMain::operator()(){
     if(configure().paramMask & Config::CALCULATE_WITH_DATA) {
       configure().outStream << std::endl << std::endl;
       for(ESegmentIterator segment=data()->GetSegments().begin();
-	  segment<data()->GetSegments().end();segment++) 
+	  segment<data()->GetSegments().end();segment++) {
 	configure().outStream << "Segment #"
 		  << segment->GetSegmentKey() 
 		  << " Chi-Squared/N: "
 		  << segment->GetSegmentChiSquared()/segment->NumPoints()
 		  << std::endl;
+	if(segment->IsTotalCapture()) segment+=segment->IsTotalCapture()-1;
+      }
       configure().outStream << "Total Chi-Squared: " 
 		<< chiSquared << std::endl << std::endl;
     }

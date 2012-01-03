@@ -42,6 +42,7 @@ class PairsModel : public QAbstractTableModel {
   QList<PairsData> getPairs() const {return pairsList;};
   QString getParticleLabel(const PairsData &pair, int which=-1) const;
   QString getReactionLabel(const PairsData &firstPair, const PairsData &secondPair);
+  QString getReactionLabelTotalCapture(const PairsData &firstPair);
   QString getSpinLabel(const PairsData &pair, int which) const;
 
  private:

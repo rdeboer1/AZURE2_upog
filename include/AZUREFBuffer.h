@@ -22,8 +22,13 @@ class AZUREFBuffer {
     char filename[256];
     entrancekey_=entranceKey;
     exitkey_=exitKey;
-    if(!isExtrap) sprintf(filename,"%sAZUREOut_aa=%d_R=%d.out",outputdir.c_str(),entranceKey,exitKey);
-    else sprintf(filename,"%sAZUREOut_aa=%d_R=%d.extrap",outputdir.c_str(),entranceKey,exitKey);
+    if(exitkey_==-1) {
+      if(!isExtrap) sprintf(filename,"%sAZUREOut_aa=%d_TOTAL_CAPTURE.out",outputdir.c_str(),entranceKey);
+      else sprintf(filename,"%sAZUREOut_aa=%d_TOTAL_CAPTURE.extrap",outputdir.c_str(),entranceKey);
+    } else {
+      if(!isExtrap) sprintf(filename,"%sAZUREOut_aa=%d_R=%d.out",outputdir.c_str(),entranceKey,exitKey);
+      else sprintf(filename,"%sAZUREOut_aa=%d_R=%d.extrap",outputdir.c_str(),entranceKey,exitKey);
+    }
     fbuffer_=new std::filebuf;
     fbuffer_->open(filename,std::ios::out);
     assert(fbuffer_->is_open());

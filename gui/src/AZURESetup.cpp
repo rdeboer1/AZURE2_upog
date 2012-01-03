@@ -771,7 +771,17 @@ void AZURESetup::SaveAndRun() {
   }
   int maxPairs=pairsTab->getPairsModel()->getPairs().size();
   for(std::vector<SegPairs>::const_iterator it = segPairs.begin();it<segPairs.end();it++) {
-    if(it->firstPair>maxPairs||it->secondPair>maxPairs||it->firstPair<1||it->secondPair<1) {
+    if(it->secondPair==-1) {
+      QList<PairsData> pairsList = pairsTab->getPairsModel()->getPairs();
+      int i;
+      for(i = 0; i<pairsList.size();i++) 
+	if(pairsList[i].pairType==10) break;
+      if(i==pairsList.size()) {
+	QMessageBox::information(this,tr("No Capture Pairs"),
+				 tr("Total capture is specified, but no capture pairs exist."));
+	return;
+      }
+    } else if(it->firstPair>maxPairs||it->secondPair>maxPairs||it->firstPair<1||it->secondPair<1) {
       QMessageBox::information(this,tr("Undefined Key"),tr("An undefined pair key is specified."));
       return;
     }

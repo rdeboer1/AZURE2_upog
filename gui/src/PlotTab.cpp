@@ -149,7 +149,11 @@ QList<PlotEntry*> PlotTab::getDataSegments() {
     int entranceKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
     sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(indexes[i].row(),2,QModelIndex()));
     int exitKey = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
-    QString filename = QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.out").arg(entranceKey).arg(exitKey);
+    sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(indexes[i].row(),7,QModelIndex()));
+    int dataType = segDataProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    QString filename = (dataType==3) ? 
+      QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_TOTAL_CAPTURE.out").arg(entranceKey) :
+      QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.out").arg(entranceKey).arg(exitKey);
     int numPreviousInBlock = 0;
     for(int j =0; j<indexes[i].row(); j++) {
       sourceIndex = segDataProxyModel->mapToSource(segDataProxyModel->index(j,1,QModelIndex()));
@@ -174,6 +178,8 @@ QList<PlotEntry*> PlotTab::getTestSegments() {
     int entranceKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
     sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(indexes[i].row(),2,QModelIndex()));
     int exitKey = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
+    sourceIndex = segTestProxyModel->mapToSource(segTestProxyModel->index(indexes[i].row(),9,QModelIndex()));
+    int dataType = segTestProxyModel->sourceModel()->data(sourceIndex,Qt::EditRole).toInt();
     QString filename = QString::fromStdString(configure.outputdir)+QString("AZUREOut_aa=%1_R=%2.extrap").arg(entranceKey).arg(exitKey);
     int numPreviousInBlock = 0;
     for(int j =0; j<indexes[i].row(); j++) {

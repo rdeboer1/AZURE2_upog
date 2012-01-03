@@ -13,6 +13,7 @@
 #include "AZUREMain.h"
 #include "Config.h"
 #include "NucLine.h"
+#include "SegLine.h"
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
@@ -241,7 +242,6 @@ bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
     while(line!=startTag&&!in.eof()) getline(in,line);
     if(line==startTag) {
       line="";
-      int isActive,firstPair,secondPair;
       while(line!=stopTag&&!in.eof()) {
 	getline(in,line);
 	bool empty=true;
@@ -254,9 +254,9 @@ bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs) {
 	if(line!=stopTag&&!in.eof()) {
 	  std::istringstream stm;
 	  stm.str(line);
-	  stm >> isActive >> firstPair >> secondPair;
-	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&isActive==1) {
-	    SegPairs tempSet={firstPair,secondPair};
+	  SegLine segment(stm);
+	  if(!(stm.rdstate() & (std::stringstream::failbit | std::stringstream::badbit))&&segment.isActive()==1) {
+	    SegPairs tempSet={segment.entranceKey(),segment.exitKey()};
 	    segPairs.push_back(tempSet);
 	  }
 	}
@@ -441,7 +441,8 @@ bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
       }
       if(tempNucLine.ecMultMask()!=0) {
 	for(int i=0;i<segPairs.size();i++) {
-	  if(tempNucLine.ir()==segPairs[i].secondPair) {
+	  if(tempNucLine.ir()==segPairs[i].secondPair||
+	     segPairs[i].secondPair==-1) {
 	    configure.paramMask |= Config::USE_EXTERNAL_CAPTURE;
 	    break;
 	  }
@@ -466,7 +467,8 @@ bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPai
  */
 
 void getExternalCaptureFile(bool useReadline, Config& configure) {
-  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&!(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
+  if((configure.paramMask & Config::USE_EXTERNAL_CAPTURE)&&
+     !(configure.paramMask & Config::CALCULATE_REACTION_RATE)) {
     configure.outStream << std::endl;
     if(!useReadline) configure.outStream << "External Capture Amplitude File (leave blank for new file): ";
     bool validInfile=false;

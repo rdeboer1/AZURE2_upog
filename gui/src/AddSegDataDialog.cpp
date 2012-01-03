@@ -26,6 +26,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   dataTypeCombo->addItem(tr("Angle Integrated"));
   dataTypeCombo->addItem(tr("Differential"));
   dataTypeCombo->addItem(tr("Phase Shift"));
+  dataTypeCombo->addItem(tr("Angle Integrated Total Capture"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
   QRegExp spinRX("^\\d{0,2}(\\.[05]{0,1})?$");
   QValidator *spinValidator = new QRegExpValidator(spinRX, this);
@@ -64,6 +65,9 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   pairLayout->addWidget(entrancePairIndexSpin,0,1);
   pairLayout->addWidget(new QLabel(tr("Exit Pair Index:")),0,2,Qt::AlignRight);
   pairLayout->addWidget(exitPairIndexSpin,0,3);
+  totalCaptureLabel = new QLabel(tr("Total Capture"));
+  totalCaptureLabel->setVisible(false);
+  pairLayout->addWidget(totalCaptureLabel,0,4);
   valueLayout->addLayout(pairLayout,0,0,1,2);
   QGroupBox* energyBox = new QGroupBox(tr("Lab Energy [MeV]"));
   QGridLayout *energyLayout = new QGridLayout;
@@ -163,6 +167,13 @@ void AddSegDataDialog::dataTypeChanged(int index) {
     highAngleText->setEnabled(false);
     lowAngleText->setText("0");
     highAngleText->setText("180");
+  }
+  if(index==3) {
+    exitPairIndexSpin->setVisible(false);
+    totalCaptureLabel->setVisible(true);
+  } else {
+    totalCaptureLabel->setVisible(false);
+    exitPairIndexSpin->setVisible(true);
   }
 }
 

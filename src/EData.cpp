@@ -62,7 +62,16 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
 	ESegment NewSegment(segment);
 	if(theCNuc->IsPairKey(NewSegment.GetEntranceKey())) {
 	  theCNuc->GetPair(theCNuc->GetPairNumFromKey(NewSegment.GetEntranceKey()))->SetEntrance();
-	  if(theCNuc->IsPairKey(NewSegment.GetExitKey())) {
+	  bool isValidTotal=false;
+	  if(NewSegment.GetExitKey()==-1) {
+	    for(int i = 1;i<=theCNuc->NumPairs();i++) {
+	      if(theCNuc->GetPair(i)->GetPType()==10) {
+		isValidTotal = true;
+		break;
+	      }
+	    }
+	  }
+	  if(isValidTotal||theCNuc->IsPairKey(NewSegment.GetExitKey())) {
 	    NewSegment.SetSegmentKey(numTotalSegments);
 	    this->AddSegment(NewSegment);
 	    if(this->GetSegment(this->NumSegments())->Fill(theCNuc,this,configure)==-1) {
@@ -73,9 +82,36 @@ int EData::Fill(const Config& configure, CNuc *theCNuc) {
 	      configure.outStream << "WARNING: Segment #" << numTotalSegments
 				  << " is empty and will not be used." << std::endl;
 	      this->DeleteLastSegment();
+	    } else {
+	      int thisSegmentNum = this->NumSegments();
+	      if(this->GetSegment(thisSegmentNum)->IsTotalCapture()) {
+		int numCapturePairs=0;
+		for(int i = 1;i<=theCNuc->NumPairs();i++) {
+		  if(theCNuc->GetPair(i)->GetPType()==10) {
+		    numCapturePairs++;
+		    if(numCapturePairs==1) {
+		      this->GetSegment(thisSegmentNum)->SetExitKey(theCNuc->GetPair(i)->GetPairKey());
+		    } else {
+		      ESegment newSegment(*this->GetSegment(thisSegmentNum));
+		      newSegment.SetExitKey(theCNuc->GetPair(i)->GetPairKey());
+		      newSegment.SetIsTotalCapture(0);
+		      newSegment.SetVaryNorm(false);
+		      this->AddSegment(newSegment);
+		    }
+		  }
+		}
+		this->GetSegment(thisSegmentNum)->SetIsTotalCapture(numCapturePairs);
+	      } 
 	    }
-	  } else configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
-			   << " not in compound nucleus." << std::endl;
+	  } else {
+	    if(NewSegment.GetExitKey()==-1) {
+	      configure.outStream << "WARNING: Total capture specified but no capture pair exists." 
+				  << std::endl;
+	    } else {
+	      configure.outStream << "WARNING: Pair key " << NewSegment.GetExitKey() 
+				  << " not in compound nucleus." << std::endl;
+	    }
+	  }
 	} else configure.outStream << "WARNING: Pair key " << NewSegment.GetEntranceKey() 
 			 << " not in compound nucleus." << std::endl;
       }
@@ -697,12 +733,18 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
   if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
+  ESegmentIterator firstSumIterator = GetSegments().end();
   for(ESegmentIterator segment=GetSegments().begin();
       segment<GetSegments().end();segment++) {
+    if(segment->IsTotalCapture()) {
+      firstSumIterator=segment;
+      segment+=segment->IsTotalCapture()-1;
+    } 
     if(segment->IsVaryNorm()) isVaryNorm=true;
     int aa=segment->GetEntranceKey();
     int ir=segment->GetExitKey();
-    std::ostream out(output(aa,ir));
+    std::filebuf* buf = (firstSumIterator!=GetSegments().end()) ? output(aa,-1) : output(aa,ir);
+    std::ostream out(buf);
     for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
       out.precision(4);
       if(segment->IsAngularDist()) {
@@ -710,13 +752,21 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
 	for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
 	out << std::endl;
       } else {
+	double fitCrossSection=point->GetFitCrossSection();
+	ESegmentIterator thisSegment = segment;
+	if(firstSumIterator!=GetSegments().end()) {
+	  int pointIndex=point-segment->GetPoints().begin()+1;
+	  for(ESegmentIterator it=firstSumIterator;it<segment;it++) 
+	    fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
+	  thisSegment = firstSumIterator;
+	}
 	out << std::setw(13) << std::scientific << point->GetCMEnergy()
 	    << std::setw(13) << std::scientific << point->GetExcitationEnergy()
 	    << std::setw(13) << std::scientific << point->GetCMAngle()
-	    << std::setw(13) << std::scientific << point->GetFitCrossSection()
-	    << std::setw(13) << std::scientific << point->GetFitCrossSection()*point->GetSFactorConversion();
+	    << std::setw(13) << std::scientific << fitCrossSection
+	    << std::setw(13) << std::scientific << fitCrossSection*point->GetSFactorConversion();
 	if(!output.IsExtrap()) {
-	  double dataNorm=segment->GetNorm();
+	  double dataNorm=thisSegment->GetNorm();
 	  out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
 	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
 	      << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
@@ -734,6 +784,7 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
 	     << std::endl;
     }
     out<<std::endl<<std::endl;out.flush();
+    firstSumIterator=GetSegments().end();
   }
   if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {
     chiOut << "Total Chi-Squared: " 
@@ -773,7 +824,17 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
     out.open(outputfile.c_str());
     if(!out) configure.outStream << "Could not write to EC Amplitude File." << std::endl;
   }
+  int sumSegmentI=0;
+  int numSumSegments=0;
   for(ESegmentIterator segment=GetSegments().begin();segment<GetSegments().end();segment++) {
+    if(segment->IsTotalCapture()) {
+      numSumSegments = segment->IsTotalCapture();
+      sumSegmentI=0;
+    }
+    if(numSumSegments) sumSegmentI++;
+    char segmentKeyOut[256];
+    if(numSumSegments) sprintf(segmentKeyOut,"%d (%d/%d)",segment->GetSegmentKey(),sumSegmentI,numSumSegments);
+    else sprintf(segmentKeyOut,"%d",segment->GetSegmentKey());
     int aa=theCNuc->GetPairNumFromKey(segment->GetEntranceKey());
     if(theCNuc->GetPair(aa)->GetPType()==20) continue;
     if(theCNuc->GetPair(aa)->IsEntrance()) {
@@ -785,7 +846,7 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 	    int ir=theCNuc->GetPairNumFromKey(segment->GetExitKey());
 	    if(ecLevel->GetECPairNum()==ir) {
 	      if(!(configure.paramMask & Config::USE_PREVIOUS_INTEGRALS)) {
-		configure.outStream << "\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		configure.outStream << "\tSegment #" << std::setw(12) << segmentKeyOut 
 		          << std::setw(0) << " [                         ] 0%";configure.outStream.flush();
 		int numPoints=segment->NumPoints();
 		int pointIndex=0;
@@ -806,7 +867,7 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 			progress+='*';
 		      } else progress+=' ';
 		    } progress+="] ";
-		    configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		    configure.outStream << "\r\tSegment #" << std::setw(12) << segmentKeyOut 
 					<< std::setw(0) << progress << percent*100 << '%';configure.outStream.flush();
 		  }
 		}
@@ -815,7 +876,7 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 		  if(in.is_open()) in.close();
 		  return -1;
 		}
-		configure.outStream << "\r\tSegment #" << std::setw(3) << segment->GetSegmentKey() 
+		configure.outStream << "\r\tSegment #" << std::setw(12) << segmentKeyOut 
 				    << std::setw(0) << " [*************************] 100%" << std::endl;
 	      }
 	      for(EPointIterator point=segment->GetPoints().begin();
@@ -855,6 +916,10 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 	  }
 	}
       }
+    }
+    if(sumSegmentI==numSumSegments) {
+      sumSegmentI=0;
+      numSumSegments=0;
     }
   }
   if(out.is_open()) {
@@ -927,6 +992,7 @@ void EData::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
       sprintf(varname,"segment_%d_norm",segment->GetSegmentKey());
       p.Add(varname,segment->GetNorm(),segment->GetNorm()*0.05);
     }
+    if(segment->IsTotalCapture()) segment+=segment->IsTotalCapture()-1;
   }
 }
 
@@ -950,6 +1016,7 @@ void EData::FillNormsFromParams(const vector_r &p) {
       segment->SetNorm(p[i]); 
       i++;
     }
+    if(segment->IsTotalCapture()) segment+=segment->IsTotalCapture()-1;
   }
 }
 
