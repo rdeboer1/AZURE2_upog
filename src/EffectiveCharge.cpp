@@ -6,6 +6,10 @@
 
 extern double DoubleFactorial(int);
 
+/*!
+ * The constructor takes a PPair object, gamma energy, and multipolarity as arguments.
+ */
+
 EffectiveCharge::EffectiveCharge(PPair* pair, double energy, int L) :
   z1_(pair->GetZ(1)),z2_(pair->GetZ(2)),L_(L),m1_(pair->GetM(1)),m2_(pair->GetM(2)),
   energy_(energy) {
@@ -15,6 +19,11 @@ double EffectiveCharge::Integrand(double x, void* p) {
   int* L = (int*)p;
   return gsl_sf_bessel_jl(*L,x)/x;
 }
+
+/*!
+ * The operator() function takes the radius as an argument, carries out
+ * integration, and returns the rho-dependent effective charge.
+ */
 
 double EffectiveCharge::operator()(double r) {
   gsl_integration_workspace * w 

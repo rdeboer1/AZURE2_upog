@@ -5,9 +5,9 @@
 #include "WhitFunc.h"
 #include "Config.h"
 
-///A function class to calculate external capture integrals
-
 class EffectiveCharge;
+
+///A function class to calculate external capture integrals
 
 /*!
  * The ECIntegral function class calculates external capture integrals for 

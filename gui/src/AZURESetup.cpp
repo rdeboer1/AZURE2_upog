@@ -892,6 +892,9 @@ void AZURESetup::SaveAndRun() {
 
 void AZURESetup::DeleteThread() {
   runTab->runtimeText->insertPlainText("\nThanks for using AZURE2.\n");
+  QScrollBar *sb = runTab->runtimeText->verticalScrollBar();
+  sb->setValue(sb->maximum());
+
   runTab->calcButton->setEnabled(true);
   runTab->stopAZUREButton->setEnabled(false);
   runTab->runtimeText->SetMouseFiltered(false);

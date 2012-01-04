@@ -78,16 +78,11 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segDataDownButton->setIcon(style()->standardIcon(QStyle::SP_ArrowDown));
   segDataDownButton->setEnabled(false);
   segDataDownButton->setMaximumSize(28,28);
-   //segDataEditButton = new QPushButton(tr("Edit Line"));
-  //segDataEditButton->setEnabled(false);
   connect(segDataAddButton,SIGNAL(clicked()),this,SLOT(addSegDataLine()));
-  //connect(segDataEditButton,SIGNAL(clicked()),this,SLOT(editSegDataLine()));
   connect(segDataDeleteButton,SIGNAL(clicked()),this,SLOT(deleteSegDataLine()));
   connect(segDataUpButton,SIGNAL(clicked()),this,SLOT(moveSegDataLineUp()));
   connect(segDataDownButton,SIGNAL(clicked()),this,SLOT(moveSegDataLineDown()));
 
-  //segTestAddButton=new QPushButton(tr("Add Line"));
-  //segTestDeleteButton = new QPushButton(tr("Delete Line"));
   segTestAddButton=new QPushButton(tr("+"));
   segTestAddButton->setMaximumSize(28,28);
   segTestDeleteButton = new QPushButton(tr("-"));
@@ -101,31 +96,16 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segTestDownButton->setIcon(style()->standardIcon(QStyle::SP_ArrowDown));
   segTestDownButton->setEnabled(false);
   segTestDownButton->setMaximumSize(28,28);
-  //segTestEditButton = new QPushButton(tr("Edit Line"));
-  //segTestEditButton->setEnabled(false);
   connect(segTestAddButton,SIGNAL(clicked()),this,SLOT(addSegTestLine()));
-  //connect(segTestEditButton,SIGNAL(clicked()),this,SLOT(editSegTestLine()));
   connect(segTestDeleteButton,SIGNAL(clicked()),this,SLOT(deleteSegTestLine()));
   connect(segTestUpButton,SIGNAL(clicked()),this,SLOT(moveSegTestLineUp()));
   connect(segTestDownButton,SIGNAL(clicked()),this,SLOT(moveSegTestLineDown()));
 
   QGroupBox *segDataBox = new QGroupBox(tr("Data Segments"));
-  /*QGridLayout *segDatafileLayout = new QGridLayout;
-  segDatafileLayout->addWidget(segDataFileText,0,0);
-  segDatafileLayout->addWidget(segDataLoadButton,0,1);
-  segDatafileLayout->addWidget(segDataSaveAsButton,0,2);
-  segDatafileLayout->addWidget(segDataSaveButton,0,3);
-  segDatafileLayout->setColumnStretch(0,4);
-  segDatafileLayout->setColumnStretch(1,1);
-  segDatafileLayout->setColumnStretch(2,1);
-  segDatafileLayout->setColumnStretch(3,1);*/
   QGridLayout *segDataLayout = new QGridLayout;
-  /*segDataLayout->addLayout(segDatafileLayout,0,0);
-    segDataLayout->addWidget(segmentsDataView,1,0);*/
   segDataLayout->addWidget(segmentsDataView,0,0);
   QGridLayout *segDataButtonBox = new QGridLayout;
   segDataButtonBox->addWidget(segDataAddButton,0,0);
-  //segDataButtonBox->addWidget(segDataEditButton);
   segDataButtonBox->addWidget(segDataDeleteButton,0,1);
   segDataButtonBox->addItem(new QSpacerItem(28,28),0,2);
   segDataButtonBox->addWidget(segDataUpButton,0,3);
@@ -135,7 +115,6 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segDataButtonBox->setColumnStretch(2,1);
   segDataButtonBox->setColumnStretch(3,0);
   segDataButtonBox->setColumnStretch(4,0);
- /*segDataLayout->addLayout(segDataButtonBox,2,0);*/
 #ifdef MACX_SPACING
   segDataButtonBox->setHorizontalSpacing(11);
 #else 
@@ -145,22 +124,10 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segDataBox->setLayout(segDataLayout);
 
   QGroupBox *segTestBox = new QGroupBox(tr("Extrapolation Segments"));
-  /*QGridLayout *segTestFileLayout = new QGridLayout;
-  segTestFileLayout->addWidget(segTestFileText,0,0);
-  segTestFileLayout->addWidget(segTestLoadButton,0,1);
-  segTestFileLayout->addWidget(segTestSaveAsButton,0,2);
-  segTestFileLayout->addWidget(segTestSaveButton,0,3);
-  segTestFileLayout->setColumnStretch(0,4);
-  segTestFileLayout->setColumnStretch(1,1);
-  segTestFileLayout->setColumnStretch(2,1);
-  segTestFileLayout->setColumnStretch(3,1);*/
   QGridLayout *segTestLayout = new QGridLayout;
-  /*segTestLayout->addLayout(segTestFileLayout,0,0);
-    segTestLayout->addWidget(segmentsTestView,1,0);*/
   segTestLayout->addWidget(segmentsTestView,0,0);
   QGridLayout *segTestButtonBox = new QGridLayout;
   segTestButtonBox->addWidget(segTestAddButton,0,0);
-  //segTestButtonBox->addWidget(segTestEditButton);
   segTestButtonBox->addWidget(segTestDeleteButton,0,1);
   segTestButtonBox->addItem(new QSpacerItem(28,28),0,2);
   segTestButtonBox->addWidget(segTestUpButton,0,3);
@@ -170,7 +137,6 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segTestButtonBox->setColumnStretch(2,1);
   segTestButtonBox->setColumnStretch(3,0);
   segTestButtonBox->setColumnStretch(4,0);
-  /*segTestLayout->addLayout(segTestButtonBox,2,0);*/
 #ifdef MACX_SPACING
   segTestButtonBox->setHorizontalSpacing(11);
 #else 
@@ -704,12 +670,10 @@ void SegmentsTab::updateSegDataButtons(const QItemSelection &selection) {
   QModelIndexList indexes=selection.indexes();
   
   if(indexes.isEmpty()) {
-    //segDataEditButton->setEnabled(false);
     segDataDeleteButton->setEnabled(false);
     segDataUpButton->setEnabled(false);
     segDataDownButton->setEnabled(false);
   } else {
-    // segDataEditButton->setEnabled(true);
     segDataDeleteButton->setEnabled(true);
     if(indexes.at(0).row()==0) segDataUpButton->setEnabled(false);
     else segDataUpButton->setEnabled(true);
@@ -722,12 +686,10 @@ void SegmentsTab::updateSegTestButtons(const QItemSelection &selection) {
   QModelIndexList indexes=selection.indexes();
   
   if(indexes.isEmpty()) {
-    //segTestEditButton->setEnabled(false);
     segTestDeleteButton->setEnabled(false);
     segTestUpButton->setEnabled(false);
     segTestDownButton->setEnabled(false);
   } else {
-    //segTestEditButton->setEnabled(true);
     segTestDeleteButton->setEnabled(true);
     if(indexes.at(0).row()==0) segTestUpButton->setEnabled(false);
     else segTestUpButton->setEnabled(true);
@@ -736,53 +698,8 @@ void SegmentsTab::updateSegTestButtons(const QItemSelection &selection) {
   }
 }
 
-/*void SegmentsTab::openSegDataFile() {
-  QString filename = QFileDialog::getOpenFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->readSegDataFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The data segments file could not be read."));
-    else segDataFileText->setText(filename);
-  }
-}
 
-void SegmentsTab::openSegDataFile(QString filename) {
-  if(!filename.isEmpty()) {
-    if(!this->readSegDataFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The data segments file could not be read."));
-    else segDataFileText->setText(filename);
-  }
-}
-
-void SegmentsTab::saveSegDataFile() {
-  QString filename=segDataFileText->text();
-  if(!filename.isEmpty()) {
-    if(!this->writeSegDataFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The data segments file could not be written."));
-  } else saveAsSegDataFile();
-}
-
-void SegmentsTab::saveAsSegDataFile() {
-  QString filename = QFileDialog::getSaveFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->writeSegDataFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The data segments file could not be written."));
-    else segDataFileText->setText(filename);
-  }
-}
-*/
-
-/*bool SegmentsTab::readSegDataFile(QString filename) {*/
 bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) return false;*/
 
   segmentsDataModel->removeRows(0,segmentsDataModel->getLines().size(),QModelIndex());
 
@@ -801,8 +718,6 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
   double phaseJ;
   int phaseL;
 
-  /*QTextStream in(&file);
-    QString dummyString=in.readLine();*/
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</segmentsData>")) {
     line=inStream.readLine();
@@ -832,32 +747,13 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
     }
   }
   if(line.trimmed()!=QString("</segmentsData>")) return false;
-  /*file.close();*/
   return true;
 }
 
-/*bool SegmentsTab::writeSegDataFile(QString filename) {*/
 bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::WriteOnly)) return false;*/
 
   QList<SegmentsDataData> lines = segmentsDataModel->getLines();
 
-  /*QTextStream out(&file);
-  out.setFieldAlignment(QTextStream::AlignLeft);
-
-  out << qSetFieldWidth(15) << "active"
-      << qSetFieldWidth(15) << "aa"
-      << qSetFieldWidth(15) << "ir"
-      << qSetFieldWidth(15) << "minE"
-      << qSetFieldWidth(15) << "maxE"
-      << qSetFieldWidth(15) << "minA"
-      << qSetFieldWidth(15) << "maxA"
-      << qSetFieldWidth(15) << "dataType"
-      << qSetFieldWidth(15) << "dataNorm"
-      << qSetFieldWidth(15) << "varyNorm"
-      << qSetFieldWidth(0) << "dataFile"
-      << endl;*/
   for(int i = 0; i<lines.size(); i++) {
     outStream << qSetFieldWidth(15) << lines.at(i).isActive
 	      << qSetFieldWidth(15) << lines.at(i).entrancePairIndex
@@ -874,59 +770,11 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
 	      << qSetFieldWidth(15) << lines.at(i).dataNormError
 	      << qSetFieldWidth(0) << lines.at(i).dataFile << endl;
   }
-  /*file.flush();
-    file.close();*/
-
+ 
   return true;
 }
 
-/*void SegmentsTab::openSegTestFile() {
-  QString filename = QFileDialog::getOpenFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->readSegTestFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The extrapolation segments file could not be read."));
-    else segTestFileText->setText(filename);
-  }
-}
-
-void SegmentsTab::openSegTestFile(QString filename) {
-  if(!filename.isEmpty()) {
-    if(!this->readSegTestFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The extrapolation segments file could not be read."));
-    else segTestFileText->setText(filename);
-  }
-}
-
-void SegmentsTab::saveSegTestFile() {
-  QString filename=segTestFileText->text();
-  if(!filename.isEmpty()) {
-    if(!this->writeSegTestFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The extrapolation segments file could not be written."));
-  } else saveAsSegTestFile();
-}
-
-void SegmentsTab::saveAsSegTestFile() {
-  QString filename = QFileDialog::getSaveFileName(this);
-  if(!filename.isEmpty()) {
-    if(!this->writeSegTestFile(filename)) 
-      QMessageBox::information(this,
-			       tr("Can't Access File"),
-			       tr("The extrapolation segments file could not be written."));
-    else segTestFileText->setText(filename);
-  }
-}
-*/
-
-/*bool SegmentsTab::readSegTestFile(QString filename) {*/
 bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly)) return false;*/
 
   segmentsTestModel->removeRows(0,segmentsTestModel->getLines().size(),QModelIndex());
 
@@ -944,8 +792,6 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
   int phaseL;
   int maxAngDistOrder;
 
-  /*QTextStream in(&file);
-    QString dummyString=in.readLine();*/
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</segmentsTest>")) {
     line = inStream.readLine();
@@ -971,32 +817,14 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
       addSegTestLine(newLine);
     }
   }
-  /*file.close();*/
   if(line.trimmed()!=QString("</segmentsTest>")) return false;
   return true;
 }
 
-/*bool SegmentsTab::writeSegTestFile(QString filename) {*/
 bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
-  /*QFile file(filename);
-    if(!file.open(QIODevice::WriteOnly)) return false;*/
 
   QList<SegmentsTestData> lines = segmentsTestModel->getLines();
 
-  /*QTextStream out(&file);
-  out.setFieldAlignment(QTextStream::AlignLeft);
-
-  out << qSetFieldWidth(15) << "active"
-      << qSetFieldWidth(15) << "aa"
-      << qSetFieldWidth(15) << "ir"
-      << qSetFieldWidth(15) << "minE"
-      << qSetFieldWidth(15) << "maxE"
-      << qSetFieldWidth(15) << "eStep"
-      << qSetFieldWidth(15) << "minA"
-      << qSetFieldWidth(15) << "maxA"
-      << qSetFieldWidth(15) << "aStep"
-      << qSetFieldWidth(0)  << "dataType"
-      << endl;*/
   for(int i = 0; i<lines.size(); i++) {
     outStream << qSetFieldWidth(15) << lines.at(i).isActive
 	      << qSetFieldWidth(15) << lines.at(i).entrancePairIndex
@@ -1019,7 +847,6 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
     } else outStream << qSetFieldWidth(0) << lines.at(i).dataType 
 		     << endl;
   }
-  /*file.close();*/
 
   return true;
 }
