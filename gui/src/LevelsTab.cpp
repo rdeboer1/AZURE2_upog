@@ -528,7 +528,7 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
       stm << qSetFieldWidth(21) << right << "Excitation Energy: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.excitationEnergy) << endl;
     if(channel.radType!='M'&&channel.radType!='E') {
-      stm << qSetFieldWidth(21) << right << "Seperation Energy: "
+      stm << qSetFieldWidth(21) << right << "Separation Energy: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.seperationEnergy) << endl;
       stm << qSetFieldWidth(21) << right << "Channel Radius: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.channelRadius) << endl;

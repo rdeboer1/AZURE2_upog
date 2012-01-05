@@ -5,9 +5,9 @@
 
 RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   calcType = new QComboBox;
-  calcType->addItem(tr("Fit With Data"));
   calcType->addItem(tr("Calculate With Data"));
-  calcType->addItem(tr("Extrapolate without Data"));
+  calcType->addItem(tr("Fit With Data"));
+  calcType->addItem(tr("Extrapolate Without Data"));
   calcType->addItem(tr("Perform MINOS Error Analysis"));
   calcType->addItem(tr("Calculate Reaction Rate"));
   connect(calcType,SIGNAL(currentIndexChanged(int)),this,SLOT(calculationTypeChanged(int)));

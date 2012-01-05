@@ -284,9 +284,9 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
   if(line.trimmed()!=QString("</lastRun>")) return false;
 
   if(paramMask &  Config::CALCULATE_WITH_DATA) {
-    if(paramMask & Config::PERFORM_FIT) runTab->calcType->setCurrentIndex(0);
+    if(paramMask & Config::PERFORM_FIT) runTab->calcType->setCurrentIndex(1);
     else if(paramMask & Config::PERFORM_ERROR_ANALYSIS) runTab->calcType->setCurrentIndex(3);
-    else runTab->calcType->setCurrentIndex(1);
+    else runTab->calcType->setCurrentIndex(0);
   } else {
     if(paramMask &  Config::CALCULATE_REACTION_RATE) runTab->calcType->setCurrentIndex(4);
     else  runTab->calcType->setCurrentIndex(2);
@@ -534,7 +534,7 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
 bool AZURESetup::writeLastRun(QTextStream& outStream) {
   unsigned int paramMask = GetConfig().paramMask;
 
-  if(runTab->calcType->currentIndex()==0 ||
+  if(runTab->calcType->currentIndex()==1 ||
      runTab->calcType->currentIndex()==3) paramMask |= Config::PERFORM_FIT;
   else paramMask &= ~Config::PERFORM_FIT;
   if(runTab->calcType->currentIndex()==2||
@@ -730,7 +730,7 @@ void AZURESetup::SaveAndRun() {
   
   GetConfig().chiVariance=runTab->chiVarianceText->text().toDouble();
 
-  if(runTab->calcType->currentIndex()==0 ||
+  if(runTab->calcType->currentIndex()==1 ||
      runTab->calcType->currentIndex()==3) GetConfig().paramMask |= Config::PERFORM_FIT;
   else GetConfig().paramMask &= ~Config::PERFORM_FIT;
   if(runTab->calcType->currentIndex()==2||
@@ -752,6 +752,11 @@ void AZURESetup::SaveAndRun() {
   } else {
     GetConfig().rateParams.entrancePair=runTab->rateEntranceKey->text().toInt();
     GetConfig().rateParams.exitPair=runTab->rateExitKey->text().toInt();
+    if(GetConfig().rateParams.entrancePair==GetConfig().rateParams.exitPair) {
+      QMessageBox::information(this,tr("No Scattering Rates"),
+			       tr("Reaction rates cannot be calculated for elastic scattering."));
+      return;
+    }
     if(!runTab->fileTempButton->isChecked()) {
       GetConfig().rateParams.useFile=false;
       GetConfig().rateParams.minTemp = runTab->minTempText->text().toDouble();

@@ -9,7 +9,7 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
 
   excitationEnergyLabel = new QLabel(tr("Excitation Energy [MeV]:"));
   excitationEnergyText = new QLineEdit;
-  seperationEnergyLabel = new QLabel(tr("Speration Energy [MeV]:"));
+  seperationEnergyLabel = new QLabel(tr("Separation Energy [MeV]:"));
   seperationEnergyText = new QLineEdit;
   channelRadiusLabel = new QLabel(tr("Channel Radius [fm]:"));
   channelRadiusText = new QLineEdit;
