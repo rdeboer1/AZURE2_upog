@@ -68,6 +68,10 @@ void AZURESetup::createActions() {
   aboutAction = new QAction(tr("&About AZURE2..."),this);
   connect(aboutAction,SIGNAL(triggered()),this,SLOT(showAbout()));
 
+  resetAction = new QAction(tr("&New Project"),this);
+  resetAction->setShortcuts(QKeySequence::New);
+  connect(resetAction,SIGNAL(triggered()),this,SLOT(reset()));
+
   quitAction = new QAction(tr("&Quit"),this);
   quitAction->setShortcuts(QKeySequence::Quit);
   connect(quitAction,SIGNAL(triggered()),this,SLOT(close()));
@@ -120,6 +124,7 @@ void AZURESetup::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(aboutAction);
   fileMenu->addSeparator();
+  fileMenu->addAction(resetAction);
   fileMenu->addAction(openAction);
   recentFileMenu = fileMenu->addMenu(tr("Open &Recent..."));
   for(int i = 0; i < numRecent; i++ ) recentFileMenu->addAction(recentFileActions[i]);
@@ -195,7 +200,7 @@ bool AZURESetup::readFile(QString filename) {
   QFileInfo info(file);
   QString directory=info.absolutePath();
 
-  GetConfig().Reset();
+  reset();
 
   QTextStream in(&file);
   QString line("");
@@ -339,10 +344,6 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
 }
 
 bool AZURESetup::readConfig(QTextStream& inStream) {
-  GetConfig().screenCheckMask=0;
-  GetConfig().fileCheckMask=0;
-  GetConfig().outputdir="";
-  GetConfig().checkdir="";
   
   QString isAMatrix;
   QString outputDirectory;
@@ -909,4 +910,15 @@ void AZURESetup::DeleteThread() {
 void AZURESetup::showAbout() {
   AboutAZURE2Dialog aboutDialog;
   aboutDialog.exec();
+}
+
+void AZURESetup::reset() {
+  GetConfig().Reset();
+  aMatrixAction->activate(QAction::Trigger);  
+  levelsTab->reset();
+  segmentsTab->reset();
+  targetIntTab->reset();
+  runTab->reset();
+  setWindowTitle(tr("AZURE2 -- untitled"));
+  GetConfig().configfile="";
 }

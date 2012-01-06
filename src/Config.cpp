@@ -24,6 +24,8 @@ void Config::Reset() {
   paramMask=0;
   paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA|USE_LONGWAVELENGTH_APPROX);
   stopFlag=false;
+  outputdir="";
+  checkdir="";
 }
 
 /*!

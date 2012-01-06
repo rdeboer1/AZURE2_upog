@@ -689,10 +689,6 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   int dummyInt;
   int ecMultMask;
 
-  pairsModel->removeRows(0,pairsModel->getPairs().size(),QModelIndex());
-  levelsModel->removeRows(0,levelsModel->getLevels().size(),QModelIndex());
-  channelsModel->removeRows(0,channelsModel->getChannels().size(),QModelIndex());
-
   maxLSpin->blockSignals(true);
   maxMultSpin->blockSignals(true);
   maxNumMultSpin->blockSignals(true);
@@ -796,4 +792,19 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   levelsView->resizeRowsToContents();
 
   return true;
+}
+
+void LevelsTab::reset() {
+  pairsModel->removeRows(0,pairsModel->getPairs().size(),QModelIndex());
+  levelsModel->removeRows(0,levelsModel->getLevels().size(),QModelIndex());
+  channelsModel->removeRows(0,channelsModel->getChannels().size(),QModelIndex());
+  maxLSpin->blockSignals(true);
+  maxMultSpin->blockSignals(true);
+  maxNumMultSpin->blockSignals(true);
+  maxLSpin->setValue(2);
+  maxMultSpin->setValue(2);
+  maxNumMultSpin->setValue(2);
+  maxLSpin->blockSignals(false);
+  maxMultSpin->blockSignals(false);
+  maxNumMultSpin->blockSignals(false);
 }

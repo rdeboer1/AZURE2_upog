@@ -701,8 +701,6 @@ void SegmentsTab::updateSegTestButtons(const QItemSelection &selection) {
 
 bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
 
-  segmentsDataModel->removeRows(0,segmentsDataModel->getLines().size(),QModelIndex());
-
   int isActive;
   int entrancePairIndex;
   int exitPairIndex;
@@ -776,8 +774,6 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
 
 bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
 
-  segmentsTestModel->removeRows(0,segmentsTestModel->getLines().size(),QModelIndex());
-
   int isActive;
   int entrancePairIndex;
   int exitPairIndex;
@@ -849,4 +845,9 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
   }
 
   return true;
+}
+
+void SegmentsTab::reset() {
+  segmentsDataModel->removeRows(0,segmentsDataModel->getLines().size(),QModelIndex());
+  segmentsTestModel->removeRows(0,segmentsTestModel->getLines().size(),QModelIndex());
 }

@@ -25,6 +25,7 @@ class LevelsTab : public QWidget {
   QList<ChannelsData> calculateChannels(int levelIndex);
   bool writeNuclearFile(QTextStream& outStream);
   bool readNuclearFile(QTextStream& inStream);
+  void reset();
 
  public slots:
   void addLevel();

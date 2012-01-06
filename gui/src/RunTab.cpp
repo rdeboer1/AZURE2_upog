@@ -212,3 +212,18 @@ void RunTab::setChooseFile(QLineEdit *lineEdit) {
     lineEdit->setText(QDir::fromNativeSeparators(filename));
   }
 }
+
+void RunTab::reset() {
+  calcType->setCurrentIndex(0);
+  newParamFileButton->setChecked(true);
+  paramFileText->setText("");
+  newIntegralsFileButton->setChecked(true);
+  integralsFileText->setText("");
+  rateEntranceKey->setText("");
+  rateExitKey->setText("");
+  gridTempButton->setChecked(true);
+  minTempText->setText("");
+  maxTempText->setText("");
+  tempStepText->setText("");
+  fileTempText->setText("");
+}
