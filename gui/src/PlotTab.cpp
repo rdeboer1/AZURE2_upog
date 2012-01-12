@@ -15,6 +15,18 @@ QVariant SegTestProxyModel::data(const QModelIndex& index, int role) const {
   return QVariant();
 }
 
+
+bool SegTestProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
+  if(QSortFilterProxyModel::filterAcceptsRow(source_row,source_parent)) {
+    SegmentsTestModel* model = static_cast<SegmentsTestModel*>(sourceModel());
+    QModelIndex source_index = model->index(source_row, 9, source_parent);
+    int dataType = model->data(source_index,Qt::EditRole).toInt();
+    if(dataType!=3) return true;
+    return false;
+  }
+  return false;
+}
+
 QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
   if (index.isValid() && role == Qt::DisplayRole) {
     QModelIndex sourceIndex = mapToSource(index);
@@ -22,6 +34,8 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
   } 
   return QVariant();
 }
+
+
 
 PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
   configure(config), QWidget(parent)  {

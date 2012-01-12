@@ -24,6 +24,7 @@ class SegTestProxyModel : public QSortFilterProxyModel {
  public:
   SegTestProxyModel(QWidget* parent = 0) : QSortFilterProxyModel(parent) {};
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+  bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
 };
 
 class SegDataProxyModel : public QSortFilterProxyModel {

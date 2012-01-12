@@ -779,7 +779,13 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     if(segment->IsVaryNorm()) isVaryNorm=true;
     int aa=segment->GetEntranceKey();
     int ir=segment->GetExitKey();
-    std::filebuf* buf = (firstSumIterator!=GetSegments().end()) ? output(aa,-1) : output(aa,ir);
+    std::filebuf* buf;
+    if(firstSumIterator!=GetSegments().end()) buf=output(aa,-1);
+    else {
+      if(segment->IsAngularDist()&&
+	 !(configure.paramMask & Config::CALCULATE_WITH_DATA)) buf=output(aa,ir,true);
+      else buf=output(aa,ir);
+    }
     std::ostream out(buf);	
     ESegmentIterator thisSegment = segment;
     if(firstSumIterator!=GetSegments().end()) thisSegment = firstSumIterator;

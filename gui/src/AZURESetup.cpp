@@ -485,12 +485,35 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
 
   if(GetConfig().paramMask & Config::USE_AMATRIX) isAMatrix="true";
   else isAMatrix="false";
-  if(!GetConfig().outputdir.empty()) 
+  bool emptyCheckDir=false;
+  bool emptyOutputDir=false;
+  if(!GetConfig().outputdir.empty())  
     outputDirectory=QString::fromStdString(GetConfig().outputdir);
-  else outputDirectory=QDir::fromNativeSeparators(directory)+'/';
+  else {
+    outputDirectory=QDir::fromNativeSeparators(directory)+'/';
+    GetConfig().outputdir=outputDirectory.toStdString();
+    emptyOutputDir=true;
+  }
   if(!GetConfig().checkdir.empty()) 
     checksDirectory=QString::fromStdString(GetConfig().checkdir);
-  else checksDirectory=QDir::fromNativeSeparators(directory)+'/';
+  else {
+    checksDirectory=QDir::fromNativeSeparators(directory)+'/';
+    GetConfig().checkdir=checksDirectory.toStdString();
+    emptyCheckDir=true;
+  }
+  if(emptyCheckDir&&emptyOutputDir) { 
+    QMessageBox::information(this,tr("Unspecified Directories"),
+			     QString("The output and checks directories are unspecified. "
+				     "They will be set to %1.").arg(outputDirectory.trimmed()));
+  } else if(emptyCheckDir) {
+    QMessageBox::information(this,tr("Unspecified Directory"),
+			     QString("The checks directory is unspecified. "
+				     "It will be set to %1.").arg(checksDirectory.trimmed()));
+  } else if(emptyOutputDir) {
+    QMessageBox::information(this,tr("Unspecified Directory"),
+			     QString("The output directory is unspecified. "
+				     "It will be set to %1.").arg(outputDirectory.trimmed()));
+  }
   if(GetConfig().fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="file";
   else if(GetConfig().screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="screen";
   else compoundCheck="none";
