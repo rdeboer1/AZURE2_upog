@@ -44,7 +44,7 @@ AZURESetup::AZURESetup() : config(std::cout) {
 
   tabWidget->addTab(pairsTab,tr("Particle Pairs"));
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
-  tabWidget->addTab(segmentsTab,tr("Data Segments"));
+  tabWidget->addTab(segmentsTab,tr("Segments"));
   tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
   tabWidget->addTab(runTab,tr("Calculate"));
 #ifdef USE_QWT

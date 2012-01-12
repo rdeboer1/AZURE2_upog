@@ -101,7 +101,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   connect(segTestUpButton,SIGNAL(clicked()),this,SLOT(moveSegTestLineUp()));
   connect(segTestDownButton,SIGNAL(clicked()),this,SLOT(moveSegTestLineDown()));
 
-  QGroupBox *segDataBox = new QGroupBox(tr("Data Segments"));
+  QGroupBox *segDataBox = new QGroupBox(tr("Segments From Data"));
   QGridLayout *segDataLayout = new QGridLayout;
   segDataLayout->addWidget(segmentsDataView,0,0);
   QGridLayout *segDataButtonBox = new QGridLayout;
@@ -123,7 +123,7 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segDataLayout->addLayout(segDataButtonBox,1,0);
   segDataBox->setLayout(segDataLayout);
 
-  QGroupBox *segTestBox = new QGroupBox(tr("Extrapolation Segments"));
+  QGroupBox *segTestBox = new QGroupBox(tr("Segments Without Data"));
   QGridLayout *segTestLayout = new QGridLayout;
   segTestLayout->addWidget(segmentsTestView,0,0);
   QGridLayout *segTestButtonBox = new QGridLayout;

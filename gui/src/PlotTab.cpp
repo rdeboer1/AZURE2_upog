@@ -117,10 +117,10 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   dataSegmentSelectorList->setResizeMode(QListView::Adjust);
   testSegmentSelectorList->setResizeMode(QListView::Adjust);
 
-  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Data Segment Selection"));
+  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Segment From Data"));
   QGridLayout *dataSegmentSelectorLayout = new QGridLayout;
   dataSegmentSelectorLayout->setContentsMargins(5,5,5,5);
-  QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Extrapolation Segment Selection"));
+  QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Segments Without Data"));
   QGridLayout *testSegmentSelectorLayout = new QGridLayout;
   testSegmentSelectorLayout->setContentsMargins(5,5,5,5);
 
