@@ -14,6 +14,9 @@
 struct SegPairs {int firstPair; int secondPair;};
 extern bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs);
 extern bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs);
+extern void startMessage(const Config& configure);
+extern void exitMessage(const Config& configure);
+
 
 AZURESetup::AZURESetup() : config(std::cout) {
   setMinimumSize(1000,640);
@@ -916,11 +919,12 @@ void AZURESetup::SaveAndRun() {
   runTab->calcButton->setEnabled(false);
   runTab->stopAZUREButton->setEnabled(true);
   runTab->runtimeText->SetMouseFiltered(true);
+  startMessage(azureMain->configure());
   azureMain->start();
 }
 
 void AZURESetup::DeleteThread() {
-  runTab->runtimeText->insertPlainText("\nThanks for using AZURE2.\n");
+  exitMessage(azureMain->configure());
   QScrollBar *sb = runTab->runtimeText->verticalScrollBar();
   sb->setValue(sb->maximum());
 

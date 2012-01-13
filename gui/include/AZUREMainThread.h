@@ -48,6 +48,7 @@ class AZUREMainThread : public QThread {
     connect(&worker_,SIGNAL(done()),this,SLOT(quit()));
     worker_.moveToThread(this);
   };
+  const Config& configure() const {return configure_;};
  signals:
   void readyToRun();
  public slots:

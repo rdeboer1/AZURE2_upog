@@ -68,7 +68,7 @@ QVariant TargetIntModel::headerData(int section, Qt::Orientation orientation, in
     case 1:
       return tr("Segment List");
     case 2:
-      return tr("Number of Sub-Points");
+      return tr("Number of Integration Points");
     case 3:
       return tr("Convolution Active?");
     case 4:
