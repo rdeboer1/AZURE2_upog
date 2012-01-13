@@ -258,12 +258,8 @@ void AZUREPlot::setYAxisType(unsigned int type) {
 }
 
 void AZUREPlot::draw(QList<PlotEntry*> newEntries) {
-  for(int i = 0; i<entries.size(); i++) {
-    entries[i]->detach();
-    delete entries[i]; 
-  }
-  if(entries.size()>0) entries.clear();
-  
+  clearEntries();
+
   int numDataEntries=0;
   for(int i = 0; i<newEntries.size(); i++) {
     if(newEntries[i]->readData()) {
@@ -347,4 +343,13 @@ void AZUREPlot::print()
         QwtPlotRenderer renderer;
         renderer.renderTo(this, printer);
     }
+}
+
+void AZUREPlot::clearEntries() {
+  for(int i = 0; i<entries.size(); i++) {
+    entries[i]->detach();
+    delete entries[i]; 
+  }
+  if(entries.size()>0) entries.clear();
+  update();
 }

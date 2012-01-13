@@ -124,7 +124,7 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   connect(okButton, SIGNAL(clicked()),this,SLOT(accept()));
   connect(cancelButton,SIGNAL(clicked()),this,SLOT(reject()));
 
-  setWindowTitle(tr("Add an Extrapolation Segment Line"));
+  setWindowTitle(tr("Add a Segment Without Data"));
 }
 
 void AddSegTestDialog::dataTypeChanged(int index) {

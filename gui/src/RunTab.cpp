@@ -226,4 +226,5 @@ void RunTab::reset() {
   maxTempText->setText("");
   tempStepText->setText("");
   fileTempText->setText("");
+  runtimeText->clear();
 }

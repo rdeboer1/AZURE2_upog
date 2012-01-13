@@ -41,6 +41,7 @@ class PlotTab : public QWidget {
   PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent = 0);
   QList<PlotEntry*> getDataSegments();
   QList<PlotEntry*> getTestSegments();
+  void reset();
   
  public slots:
   void draw();

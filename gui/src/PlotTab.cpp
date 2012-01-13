@@ -235,3 +235,11 @@ void PlotTab::xAxisLogScaleChanged(bool checked) {
 void PlotTab::yAxisLogScaleChanged(bool checked) {
   azurePlot->setYAxisLog(checked);
 }
+
+void PlotTab::reset() {
+  xAxisTypeCombo->setCurrentIndex(0);
+  xAxisIsLogCheck->setChecked(false);
+  yAxisXSButton->setChecked(true);
+  yAxisIsLogCheck->setChecked(true);
+  azurePlot->clearEntries();
+}

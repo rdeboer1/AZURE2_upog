@@ -137,7 +137,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   connect(okButton, SIGNAL(clicked()),this,SLOT(accept()));
   connect(cancelButton,SIGNAL(clicked()),this,SLOT(reject()));
 
-  setWindowTitle(tr("Add an Data Segment Line"));
+  setWindowTitle(tr("Add a Segment From Data"));
 }
 
 void AddSegDataDialog::setChooseFile() {

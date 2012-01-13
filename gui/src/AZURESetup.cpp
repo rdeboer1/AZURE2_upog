@@ -280,10 +280,10 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
   double tempStep;
 
   inStream >> paramMask;dummyString=inStream.readLine();
-  inStream >> paramFile;dummyString=inStream.readLine();
-  inStream >> integralsFile;dummyString=inStream.readLine();
+  dummyString=inStream.readLine();paramFile=dummyString.trimmed();
+  dummyString=inStream.readLine();integralsFile=dummyString.trimmed();
   inStream >> rateEntrancePair >> rateExitPair;dummyString=inStream.readLine();
-  inStream >> useTempFile >> temperatureFile;dummyString=inStream.readLine();
+  inStream >> useTempFile;dummyString=inStream.readLine();temperatureFile=dummyString.trimmed();
   inStream >> minTemp >> maxTemp >> tempStep;
   
   QString line("");
@@ -362,8 +362,14 @@ bool AZURESetup::readConfig(QTextStream& inStream) {
   QString dummyString;
 
   inStream >> isAMatrix;dummyString=inStream.readLine();
-  inStream >> outputDirectory;dummyString=inStream.readLine();
-  inStream >> checksDirectory;dummyString=inStream.readLine();
+  dummyString=inStream.readLine();
+  int poundSignPos = dummyString.lastIndexOf('#');
+  if(poundSignPos==-1) outputDirectory=dummyString.trimmed();
+  else outputDirectory=dummyString.left(poundSignPos).trimmed();
+  dummyString=inStream.readLine();
+  poundSignPos = dummyString.lastIndexOf('#');
+  if(poundSignPos==-1) checksDirectory=dummyString.trimmed();
+  else checksDirectory=dummyString.left(poundSignPos).trimmed();
   inStream >> compoundCheck;dummyString=inStream.readLine();
   inStream >> boundaryCheck;dummyString=inStream.readLine();
   inStream >> dataCheck;dummyString=inStream.readLine();
@@ -946,6 +952,7 @@ void AZURESetup::reset() {
   segmentsTab->reset();
   targetIntTab->reset();
   runTab->reset();
+  plotTab->reset();
   setWindowTitle(tr("AZURE2 -- untitled"));
   GetConfig().configfile="";
 }

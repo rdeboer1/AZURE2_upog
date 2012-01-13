@@ -349,7 +349,7 @@ void SegmentsTab::editSegDataLine() {
 
 
   AddSegDataDialog aDialog;
-  aDialog.setWindowTitle(tr("Edit A Data Segment Line"));
+  aDialog.setWindowTitle(tr("Edit a Segment From Data"));
   aDialog.entrancePairIndexSpin->setValue(entrancePairIndex);
   aDialog.exitPairIndexSpin->setValue(exitPairIndex);
   aDialog.lowEnergyText->setText(lowEnergy);
@@ -479,7 +479,7 @@ void SegmentsTab::editSegTestLine() {
   int maxAngDistOrder=var.toInt();
 
   AddSegTestDialog aDialog;
-  aDialog.setWindowTitle(tr("Edit A Extrapolation Segment Line"));
+  aDialog.setWindowTitle(tr("Edit a Segment Without Data"));
   aDialog.entrancePairIndexSpin->setValue(entrancePairIndex);
   aDialog.exitPairIndexSpin->setValue(exitPairIndex);
   aDialog.lowEnergyText->setText(lowEnergy);
@@ -730,14 +730,13 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
 	phaseL=0;
       }
       in >> dataNorm >> varyNorm;
-      QString nextVariable;
-      in >> nextVariable;
-      QTextStream stm(&nextVariable);
+      QString restOfLine=in.readLine();
+      QTextStream stm(&restOfLine);
       stm>>dataNormError;
       if(stm.status()!=QTextStream::Ok) {
 	dataNormError=0.;
-	dataFile=nextVariable;
-      } else in >> dataFile;
+	dataFile=restOfLine.trimmed();
+      } else dataFile=stm.readLine().trimmed();
       if(in.status()!=QTextStream::Ok) return false;
       SegmentsDataData newLine = {isActive,entrancePairIndex,exitPairIndex,lowEnergy,highEnergy,lowAngle,
 				  highAngle,dataType,dataFile,dataNorm,dataNormError,varyNorm,phaseJ,phaseL};
