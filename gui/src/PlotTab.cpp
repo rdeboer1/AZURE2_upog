@@ -40,7 +40,7 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
 PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
   configure(config), QWidget(parent)  {
 
-  azurePlot = new AZUREPlot(this);
+  azurePlot = new AZUREPlot(this,this);
 
   segDataProxyModel = new SegDataProxyModel(this);
   segDataProxyModel->setSourceModel(dataModel);
@@ -237,9 +237,9 @@ void PlotTab::yAxisLogScaleChanged(bool checked) {
 }
 
 void PlotTab::reset() {
+  azurePlot->clearEntries();
   xAxisTypeCombo->setCurrentIndex(0);
   xAxisIsLogCheck->setChecked(false);
   yAxisXSButton->setChecked(true);
   yAxisIsLogCheck->setChecked(true);
-  azurePlot->clearEntries();
 }

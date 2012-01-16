@@ -168,19 +168,23 @@ void AZURESetup::updateRecent() {
 void AZURESetup::open() {
   QString filename = QFileDialog::getOpenFileName(this);
   if(!filename.isEmpty()) {
-    if(!this->readFile(filename)) 
+    if(!this->readFile(filename)) {
+      reset();
       QMessageBox::information(this,
 			       tr("Can't Access File"),
 			       tr("An error was encountered while reading the file."));
+    }
   }
 }
 
 void AZURESetup::open(QString filename) {
   if(!filename.isEmpty()) {
-    if(!this->readFile(filename)) 
+    if(!this->readFile(filename)) {
+      reset();
       QMessageBox::information(this,
 			       tr("Can't Access File"),
 			       tr("An error was encountered while reading the file."));
+    }
   }
 }
 
