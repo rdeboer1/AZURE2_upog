@@ -38,12 +38,12 @@ QVariant ChannelsModel::data(const QModelIndex &index, int role) const {
 	else return QString("<center>%1</center>").arg(channel.lValue);
       } else if(channel.radType=='F') {
 	if(channel.reducedWidth!=0.) 
-	  return QString("<center><font style='font-weight:bold;'>Fermi</font></center>");
-	else return QString("<center>Fermi</center>");
+	  return QString("<center><font style='font-weight:bold;'>F</font></center>");
+	else return QString("<center>F</center>");
       } else if(channel.radType=='G') {
 	if(channel.reducedWidth!=0.) 
-	  return QString("<center><font style='font-weight:bold;'>Gamow-Teller</font></center>");
-	else return QString("<center>Gamow-Teller</center>");
+	  return QString("<center><font style='font-weight:bold;'>GT</font></center>");
+	else return QString("<center>GT</center>");
       } else {
 	if(channel.reducedWidth!=0.)
 	  return QString("<center><font style='font-weight:bold;'>%1%2</font></center>").arg(channel.radType).arg(channel.lValue);
@@ -77,11 +77,11 @@ QVariant ChannelsModel::headerData(int section, Qt::Orientation orientation, int
     case 1:
       return tr("level");
     case 2:
-      return tr("Channel Pair");
+      return tr("Channel\nPair");
     case 3:
-      return tr("Channel Spin");
+      return tr("s");
     case 4:
-      return tr("Orbital Momentum/\nMultipolarity");
+      return tr("l");
     case 5:
       return tr("radiation type");
     case 6:
