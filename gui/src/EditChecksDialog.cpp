@@ -43,7 +43,7 @@ EditChecksDialog::EditChecksDialog(QWidget *parent) : QDialog(parent) {
   checkFilesLayout->addWidget(boundaryCheckCombo,1,1);
   checkFilesLayout->addWidget(new QLabel(tr("Data:")),2,0,Qt::AlignRight);
   checkFilesLayout->addWidget(dataCheckCombo,2,1);
-  checkFilesLayout->addWidget(new QLabel(tr("L Matrix:")),3,0,Qt::AlignRight);
+  checkFilesLayout->addWidget(new QLabel(tr("L-Matrix,Phases,Penetrabilities:")),3,0,Qt::AlignRight);
   checkFilesLayout->addWidget(lMatrixCheckCombo,3,1);
   checkFilesLayout->addWidget(new QLabel(tr("Legendre Polynomials:")),4,0,Qt::AlignRight);
   checkFilesLayout->addWidget(legendreCheckCombo,4,1);

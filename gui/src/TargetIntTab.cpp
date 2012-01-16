@@ -293,9 +293,7 @@ bool TargetIntTab::writeFile(QTextStream& outStream) {
 }
 
 bool TargetIntTab::readFile(QTextStream& inStream) {
-  
-  targetIntModel->removeRows(0,targetIntModel->getLines().size(),QModelIndex());
-  
+    
   int isActive;
   QString segmentsList;
   int numPoints;
@@ -357,4 +355,8 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
   targetIntView->resizeRowsToContents();
   if(line.trimmed()!=QString("</targetInt>")) return false;
   return true;
+}
+
+void TargetIntTab::reset() {
+  targetIntModel->removeRows(0,targetIntModel->getLines().size(),QModelIndex());
 }

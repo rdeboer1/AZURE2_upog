@@ -30,7 +30,7 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   dataTypeCombo->addItem(tr("Angle Integrated"));
   dataTypeCombo->addItem(tr("Differential"));
   dataTypeCombo->addItem(tr("Phase Shift"));
-  dataTypeCombo->addItem(tr("Angular Distribution"));
+  dataTypeCombo->addItem(tr("Angular Distribution Coefficients"));
   dataTypeCombo->addItem(tr("Angle Integrated Total Capture"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
   QRegExp spinRX("^\\d{0,2}(\\.[05]{0,1})?$");
@@ -53,9 +53,9 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   QGroupBox *valueBox = new QGroupBox;
   QGridLayout *valueLayout = new QGridLayout;
   QGridLayout *pairLayout = new QGridLayout;
-  pairLayout->addWidget(new QLabel(tr("Entrance Pair Index:")),0,0,Qt::AlignRight);
+  pairLayout->addWidget(new QLabel(tr("Entrance Pair Key:")),0,0,Qt::AlignRight);
   pairLayout->addWidget(entrancePairIndexSpin,0,1);
-  pairLayout->addWidget(new QLabel(tr("Exit Pair Index:")),0,2,Qt::AlignRight);
+  pairLayout->addWidget(new QLabel(tr("Exit Pair Key:")),0,2,Qt::AlignRight);
   pairLayout->addWidget(exitPairIndexSpin,0,3);
   totalCaptureLabel = new QLabel(tr("Total Capture"));
   totalCaptureLabel->setVisible(false);
@@ -124,7 +124,7 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   connect(okButton, SIGNAL(clicked()),this,SLOT(accept()));
   connect(cancelButton,SIGNAL(clicked()),this,SLOT(reject()));
 
-  setWindowTitle(tr("Add an Extrapolation Segment Line"));
+  setWindowTitle(tr("Add a Segment Without Data"));
 }
 
 void AddSegTestDialog::dataTypeChanged(int index) {

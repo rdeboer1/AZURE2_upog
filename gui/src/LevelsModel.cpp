@@ -51,11 +51,11 @@ QVariant LevelsModel::headerData(int section, Qt::Orientation orientation, int r
     case 1:
       return tr("Fix?");
     case 2:
-      return tr("Level Spin");
+      return tr("Level\nSpin");
     case 3:
       return tr("Parity");
     case 4:
-      return tr("Energy [MeV]");
+      return tr("Energy\n[MeV]");
     default: 
       return QVariant();
     }

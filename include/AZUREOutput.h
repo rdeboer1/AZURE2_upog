@@ -18,9 +18,9 @@ class AZUREOutput {
   AZUREOutput(std::string);
   ~AZUREOutput();
   bool IsExtrap() const;
-  std::filebuf *operator()(int,int);
+  std::filebuf *operator()(int entranceKey, int exitKey, bool isAngDist=false);
   int NumAZUREFBuffers() const;
-  int IsAZUREFBuffer(int,int);
+  int IsAZUREFBuffer(int,int,bool);
   std::string GetOutputDir() const;
   void AddAZUREFBuffer(AZUREFBuffer*);
   void SetExtrap();

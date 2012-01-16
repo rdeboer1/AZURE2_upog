@@ -61,6 +61,7 @@ class AZUREPlot : public QwtPlot {
   void setYAxisLog(bool set);
   void setXAxisType(unsigned int type);
   void setYAxisType(unsigned int type);
+  void clearEntries();
 
  public slots:
   void draw(QList<PlotEntry*> newEntries);

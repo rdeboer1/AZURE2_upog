@@ -118,7 +118,7 @@ void ReactionRate::CalculateFileRates() {
 }
 
 void ReactionRate::WriteRates() {
-  std::string outputfile=configure().outputdir+"reactionrates.dat";
+  std::string outputfile=configure().outputdir+"reactionrates.out";
   std::ofstream out;
   out.open(outputfile.c_str());
   if(out) {

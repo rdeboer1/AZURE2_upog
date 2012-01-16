@@ -75,7 +75,7 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   segListLayout->addWidget(segmentsListText);
 
   QHBoxLayout *numPointsLayout = new QHBoxLayout;
-  numPointsLayout->addWidget(new QLabel(tr("Number of Sub-Points:")));
+  numPointsLayout->addWidget(new QLabel(tr("Number of Integration Points:")));
   numPointsLayout->addWidget(numPointsSpin);
   
   QHBoxLayout *topLayout = new QHBoxLayout;
@@ -110,7 +110,7 @@ AddTargetIntDialog::AddTargetIntDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout *qCoefficientCheckBoxLayout = new QGridLayout;
   qCoefficientCheckBoxLayout->addWidget(isQCoefficientCheck,0,0);
   qCoefficientCheckBoxLayout->addItem(new QSpacerItem(1,20),0,1);
-  qCoefficientCheckBoxLayout->addWidget(new QLabel(tr("Number of Coeffients:")),0,2,Qt::AlignRight);
+  qCoefficientCheckBoxLayout->addWidget(new QLabel(tr("Number of Coefficients:")),0,2,Qt::AlignRight);
   qCoefficientCheckBoxLayout->addWidget(numQCoefficientSpin,0,3);
   qCoefficientCheckBoxLayout->setColumnStretch(1,1);
 

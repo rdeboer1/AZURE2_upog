@@ -34,13 +34,13 @@ struct SegPairs {int firstPair; int secondPair;};
 
 void welcomeMessage(const Config& configure) {
   configure.outStream << std::endl
-	    << "O--------------------------O----------------------------O" << std::endl
-	    << "| #### #### #  # ###  #### | Version 2.0                |" << std::endl
-	    << "| #  #    # #  # #  # #    | Object Oriented C++        |" << std::endl
-	    << "| ####   #  #  # ###  ##   | June 14, 2011              |" << std::endl
-	    << "| #  #  #   #  # # #  #    |                            |" << std::endl
-	    << "| #  # ####  ##  #  # #### | University of Notre Dame   |" << std::endl
-	    << "O--------------------------O----------------------------O" << std::endl
+	    << "O--------------------------O-------------------------------O" << std::endl
+	    << "| #### #### #  # ###  ####  ##  | Version 1.0              |" << std::endl
+	    << "| #  #    # #  # #  # #    #  # |                          |" << std::endl
+	    << "| ####   #  #  # ###  ##     #  |                          |" << std::endl
+	    << "| #  #  #   #  # # #  #     #   | Joint Institute for      |" << std::endl
+	    << "| #  # ####  ##  #  # #### #### | Nuclear Astrophysics     |" << std::endl
+	    << "O--------------------------O-------------------------------O" << std::endl
 	    << std::endl;
 }
 
@@ -50,7 +50,7 @@ void welcomeMessage(const Config& configure) {
 
 void exitMessage(const Config& configure) {
   configure.outStream << std::endl
-	    << "Thanks for using AZURE." << std::endl;
+	    << "Thanks for using AZURE2." << std::endl;
 }
 
 /*!
@@ -129,11 +129,11 @@ int commandShell(const Config& configure) {
   int command=0;
 
   configure.outStream << "Please select from the following options: " << std::endl
-	    << "\t1. Data Fit" << std::endl
-	    << "\t2. Data Calculate" << std::endl
-	    << "\t3. Extrapolate (no data)" << std::endl
+	    << "\t1. Calculate Segments From Data" << std::endl
+	    << "\t2. Fit Segments From Data" << std::endl
+	    << "\t3. Calculate Segments Without Data" << std::endl
 	    << "\t4. Perform MINOS Error Analysis" << std::endl
-	    << "\t5. Reaction Rate" << std::endl
+	    << "\t5. Calculate Reaction Rate" << std::endl
 	    << "\t6. Exit" << std::endl;
 
   while(command<1||command>6) {
@@ -158,7 +158,7 @@ int commandShell(const Config& configure) {
  */
 
 void processCommand(int command, Config& configure) {
-  if(command==1) configure.paramMask |= Config::PERFORM_FIT;
+  if(command==2) configure.paramMask |= Config::PERFORM_FIT;
   else if(command==3) configure.paramMask &= ~Config::CALCULATE_WITH_DATA;
   else if(command==4) {
     bool goodAnswer=false;
@@ -517,19 +517,14 @@ void getExternalCaptureFile(bool useReadline, Config& configure) {
 
 void startMessage(const Config& configure) {
   if(configure.paramMask & Config::PERFORM_ERROR_ANALYSIS) 
-    configure.outStream << std::endl
-	      << "Calling AZURE in error analysis mode..." << std::endl;
+    configure.outStream << "Calling AZURE2 for MINOS Error Analysis..." << std::endl;
   else if(configure.paramMask & Config::CALCULATE_REACTION_RATE) 
-    configure.outStream << std::endl
-	      << "Calling AZURE in reaction rate mode..." << std::endl;  
+    configure.outStream << "Calling AZURE2 for reaction rate calculation..." << std::endl;  
   else if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) 
-    configure.outStream << std::endl
-	      << "Calling AZURE in extrapolate mode..." << std::endl; 
+    configure.outStream << "Calling AZURE2 for calculation of segments without data..." << std::endl; 
   else if(configure.paramMask & Config::PERFORM_FIT) 
-    configure.outStream << std::endl
-	      << "Calling AZURE in fit mode..." << std::endl;
-  else  configure.outStream << std::endl
-		  << "Calling AZURE in calculate mode..." << std::endl;
+    configure.outStream << "Calling AZURE2 for fitting of segments from data..." << std::endl;
+  else  configure.outStream << "Calling AZURE2 for calculation of segments from data..." << std::endl;
 }
 
 /*!
@@ -611,7 +606,7 @@ int main(int argc,char *argv[]){
   //Create instance of main AZURE function, print start message,
   // and execute
   AZUREMain azureMain(configure);
-  startMessage(configure);
+  configure.outStream << std::endl; startMessage(configure);
   azureMain();
   
   //Print exit message

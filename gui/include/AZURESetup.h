@@ -44,6 +44,7 @@ class AZURESetup : public QMainWindow {
   void DeleteThread();
 
  private slots:
+  void reset();
   void open();
   void openRecent();
   void clearRecent();
@@ -69,6 +70,7 @@ class AZURESetup : public QMainWindow {
   Config config;
 
   QAction* aboutAction;
+  QAction* resetAction;
   QAction* quitAction;
   QAction* openAction;
   QAction* saveAction;

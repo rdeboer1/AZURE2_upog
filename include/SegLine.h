@@ -18,7 +18,15 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-    stream >> dataNorm_ >> varyNorm_ >> dataNormError_ >> dataFile_;
+    stream >> dataNorm_ >> varyNorm_ >> dataNormError_;
+    std::string dummyString;
+    getline(stream,dummyString);
+    int p2 = dummyString.find_last_not_of(" \n\t\r");
+    if (p2 != std::string::npos) {  
+      int p1 = dummyString.find_first_not_of(" \n\t\r");
+      if (p1 == std::string::npos) p1 = 0;
+      dataFile_=dummyString.substr(p1,(p2-p1)+1);
+    } else dataFile_=std::string();  
   };
   /*!
    * Returns non-zero if the line is to be included in the calculation.

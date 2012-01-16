@@ -15,6 +15,18 @@ QVariant SegTestProxyModel::data(const QModelIndex& index, int role) const {
   return QVariant();
 }
 
+
+bool SegTestProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
+  if(QSortFilterProxyModel::filterAcceptsRow(source_row,source_parent)) {
+    SegmentsTestModel* model = static_cast<SegmentsTestModel*>(sourceModel());
+    QModelIndex source_index = model->index(source_row, 9, source_parent);
+    int dataType = model->data(source_index,Qt::EditRole).toInt();
+    if(dataType!=3) return true;
+    return false;
+  }
+  return false;
+}
+
 QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
   if (index.isValid() && role == Qt::DisplayRole) {
     QModelIndex sourceIndex = mapToSource(index);
@@ -22,6 +34,8 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
   } 
   return QVariant();
 }
+
+
 
 PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
   configure(config), QWidget(parent)  {
@@ -103,10 +117,10 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   dataSegmentSelectorList->setResizeMode(QListView::Adjust);
   testSegmentSelectorList->setResizeMode(QListView::Adjust);
 
-  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Data Segment Selection"));
+  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Segment From Data"));
   QGridLayout *dataSegmentSelectorLayout = new QGridLayout;
   dataSegmentSelectorLayout->setContentsMargins(5,5,5,5);
-  QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Extrapolation Segment Selection"));
+  QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Segments Without Data"));
   QGridLayout *testSegmentSelectorLayout = new QGridLayout;
   testSegmentSelectorLayout->setContentsMargins(5,5,5,5);
 
@@ -220,4 +234,12 @@ void PlotTab::xAxisLogScaleChanged(bool checked) {
 
 void PlotTab::yAxisLogScaleChanged(bool checked) {
   azurePlot->setYAxisLog(checked);
+}
+
+void PlotTab::reset() {
+  xAxisTypeCombo->setCurrentIndex(0);
+  xAxisIsLogCheck->setChecked(false);
+  yAxisXSButton->setChecked(true);
+  yAxisIsLogCheck->setChecked(true);
+  azurePlot->clearEntries();
 }

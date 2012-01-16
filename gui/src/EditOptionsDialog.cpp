@@ -8,7 +8,8 @@ EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
   ignoreExternalsCheck = new QCheckBox(tr("Ignore external width\nif internal width is zeroed"));
   useRMCCheck = new QCheckBox(tr("Use RMC capture formalism"));
   noTransformCheck = new QCheckBox(tr("Do not perform parameter\ntransformations"));
-  noLongWavelengthCheck = new QCheckBox(tr("Do not use long wavelength\napproximation for EL capture"));
+  noLongWavelengthCheck = new QCheckBox(tr("Do not use long wavelength\n"
+					   "approximation for EL external capture"));
 
   connect(useBruneCheck,SIGNAL(stateChanged(int)),this,SLOT(useBruneCheckChanged(int)));
   connect(useRMCCheck,SIGNAL(stateChanged(int)),this,SLOT(useRMCCheckChanged(int)));

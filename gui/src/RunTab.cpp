@@ -5,9 +5,9 @@
 
 RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   calcType = new QComboBox;
-  calcType->addItem(tr("Fit With Data"));
-  calcType->addItem(tr("Calculate With Data"));
-  calcType->addItem(tr("Extrapolate without Data"));
+  calcType->addItem(tr("Calculate Segments From Data"));
+  calcType->addItem(tr("Fit Segments From Data"));
+  calcType->addItem(tr("Calculate Segments Without Data"));
   calcType->addItem(tr("Perform MINOS Error Analysis"));
   calcType->addItem(tr("Calculate Reaction Rate"));
   connect(calcType,SIGNAL(currentIndexChanged(int)),this,SLOT(calculationTypeChanged(int)));
@@ -211,4 +211,20 @@ void RunTab::setChooseFile(QLineEdit *lineEdit) {
   if(!filename.isEmpty()) {
     lineEdit->setText(QDir::fromNativeSeparators(filename));
   }
+}
+
+void RunTab::reset() {
+  calcType->setCurrentIndex(0);
+  newParamFileButton->setChecked(true);
+  paramFileText->setText("");
+  newIntegralsFileButton->setChecked(true);
+  integralsFileText->setText("");
+  rateEntranceKey->setText("");
+  rateExitKey->setText("");
+  gridTempButton->setChecked(true);
+  minTempText->setText("");
+  maxTempText->setText("");
+  tempStepText->setText("");
+  fileTempText->setText("");
+  runtimeText->clear();
 }

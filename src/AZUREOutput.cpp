@@ -34,12 +34,12 @@ bool AZUREOutput::IsExtrap() const {
  * is stored in a vector, and the pointer to the actual new file buffer is returned.
  */
 
-std::filebuf *AZUREOutput::operator()(int entranceKey, int exitKey) {
-  int c=this->IsAZUREFBuffer(entranceKey,exitKey);
+std::filebuf *AZUREOutput::operator()(int entranceKey, int exitKey, bool isAngDist) {
+  int c=this->IsAZUREFBuffer(entranceKey,exitKey,isAngDist);
   if(!c) {
-    AZUREFBuffer *d = new AZUREFBuffer(entranceKey,exitKey,this->GetOutputDir(),this->IsExtrap());
+    AZUREFBuffer *d = new AZUREFBuffer(entranceKey,exitKey,this->GetOutputDir(),this->IsExtrap(),isAngDist);
     this->AddAZUREFBuffer(d);
-    c=this->IsAZUREFBuffer(entranceKey,exitKey);
+    c=this->IsAZUREFBuffer(entranceKey,exitKey,isAngDist);
   }
   return this->GetAZUREFBuffer(c)->GetFBuffer();
 }
@@ -58,11 +58,12 @@ int AZUREOutput::NumAZUREFBuffers() const {
  * is returned.  Otherwise, the function returns 0.
  */
 
-int AZUREOutput::IsAZUREFBuffer(int entranceKey, int exitKey) {
+int AZUREOutput::IsAZUREFBuffer(int entranceKey, int exitKey, bool isAngDist) {
   bool c=false;
   int d=0;
   while(!c&&d<this->NumAZUREFBuffers()) {
-    if(this->GetAZUREFBuffer(d+1)->GetEntranceKey()==entranceKey&&
+    if(this->GetAZUREFBuffer(d+1)->IsAngDist()==isAngDist&&
+       this->GetAZUREFBuffer(d+1)->GetEntranceKey()==entranceKey&&
        this->GetAZUREFBuffer(d+1)->GetExitKey()==exitKey) c=true;
     d++;
   }

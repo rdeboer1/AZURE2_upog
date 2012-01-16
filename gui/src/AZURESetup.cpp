@@ -14,6 +14,9 @@
 struct SegPairs {int firstPair; int secondPair;};
 extern bool readSegmentFile(const Config& configure,std::vector<SegPairs>& segPairs);
 extern bool checkExternalCapture(Config& configure, const std::vector<SegPairs>& segPairs);
+extern void startMessage(const Config& configure);
+extern void exitMessage(const Config& configure);
+
 
 AZURESetup::AZURESetup() : config(std::cout) {
   setMinimumSize(1000,640);
@@ -44,7 +47,7 @@ AZURESetup::AZURESetup() : config(std::cout) {
 
   tabWidget->addTab(pairsTab,tr("Particle Pairs"));
   tabWidget->addTab(levelsTab,tr("Levels and Channels"));
-  tabWidget->addTab(segmentsTab,tr("Data Segments"));
+  tabWidget->addTab(segmentsTab,tr("Segments"));
   tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
   tabWidget->addTab(runTab,tr("Calculate"));
 #ifdef USE_QWT
@@ -67,6 +70,10 @@ Config& AZURESetup::GetConfig() {
 void AZURESetup::createActions() {
   aboutAction = new QAction(tr("&About AZURE2..."),this);
   connect(aboutAction,SIGNAL(triggered()),this,SLOT(showAbout()));
+
+  resetAction = new QAction(tr("&New Project"),this);
+  resetAction->setShortcuts(QKeySequence::New);
+  connect(resetAction,SIGNAL(triggered()),this,SLOT(reset()));
 
   quitAction = new QAction(tr("&Quit"),this);
   quitAction->setShortcuts(QKeySequence::Quit);
@@ -120,6 +127,7 @@ void AZURESetup::createMenus() {
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(aboutAction);
   fileMenu->addSeparator();
+  fileMenu->addAction(resetAction);
   fileMenu->addAction(openAction);
   recentFileMenu = fileMenu->addMenu(tr("Open &Recent..."));
   for(int i = 0; i < numRecent; i++ ) recentFileMenu->addAction(recentFileActions[i]);
@@ -195,7 +203,7 @@ bool AZURESetup::readFile(QString filename) {
   QFileInfo info(file);
   QString directory=info.absolutePath();
 
-  GetConfig().Reset();
+  reset();
 
   QTextStream in(&file);
   QString line("");
@@ -272,10 +280,10 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
   double tempStep;
 
   inStream >> paramMask;dummyString=inStream.readLine();
-  inStream >> paramFile;dummyString=inStream.readLine();
-  inStream >> integralsFile;dummyString=inStream.readLine();
+  dummyString=inStream.readLine();paramFile=dummyString.trimmed();
+  dummyString=inStream.readLine();integralsFile=dummyString.trimmed();
   inStream >> rateEntrancePair >> rateExitPair;dummyString=inStream.readLine();
-  inStream >> useTempFile >> temperatureFile;dummyString=inStream.readLine();
+  inStream >> useTempFile;dummyString=inStream.readLine();temperatureFile=dummyString.trimmed();
   inStream >> minTemp >> maxTemp >> tempStep;
   
   QString line("");
@@ -284,9 +292,9 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
   if(line.trimmed()!=QString("</lastRun>")) return false;
 
   if(paramMask &  Config::CALCULATE_WITH_DATA) {
-    if(paramMask & Config::PERFORM_FIT) runTab->calcType->setCurrentIndex(0);
+    if(paramMask & Config::PERFORM_FIT) runTab->calcType->setCurrentIndex(1);
     else if(paramMask & Config::PERFORM_ERROR_ANALYSIS) runTab->calcType->setCurrentIndex(3);
-    else runTab->calcType->setCurrentIndex(1);
+    else runTab->calcType->setCurrentIndex(0);
   } else {
     if(paramMask &  Config::CALCULATE_REACTION_RATE) runTab->calcType->setCurrentIndex(4);
     else  runTab->calcType->setCurrentIndex(2);
@@ -339,10 +347,6 @@ bool AZURESetup::readLastRun(QTextStream& inStream) {
 }
 
 bool AZURESetup::readConfig(QTextStream& inStream) {
-  GetConfig().screenCheckMask=0;
-  GetConfig().fileCheckMask=0;
-  GetConfig().outputdir="";
-  GetConfig().checkdir="";
   
   QString isAMatrix;
   QString outputDirectory;
@@ -358,8 +362,14 @@ bool AZURESetup::readConfig(QTextStream& inStream) {
   QString dummyString;
 
   inStream >> isAMatrix;dummyString=inStream.readLine();
-  inStream >> outputDirectory;dummyString=inStream.readLine();
-  inStream >> checksDirectory;dummyString=inStream.readLine();
+  dummyString=inStream.readLine();
+  int poundSignPos = dummyString.lastIndexOf('#');
+  if(poundSignPos==-1) outputDirectory=dummyString.trimmed();
+  else outputDirectory=dummyString.left(poundSignPos).trimmed();
+  dummyString=inStream.readLine();
+  poundSignPos = dummyString.lastIndexOf('#');
+  if(poundSignPos==-1) checksDirectory=dummyString.trimmed();
+  else checksDirectory=dummyString.left(poundSignPos).trimmed();
   inStream >> compoundCheck;dummyString=inStream.readLine();
   inStream >> boundaryCheck;dummyString=inStream.readLine();
   inStream >> dataCheck;dummyString=inStream.readLine();
@@ -484,12 +494,35 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
 
   if(GetConfig().paramMask & Config::USE_AMATRIX) isAMatrix="true";
   else isAMatrix="false";
-  if(!GetConfig().outputdir.empty()) 
+  bool emptyCheckDir=false;
+  bool emptyOutputDir=false;
+  if(!GetConfig().outputdir.empty())  
     outputDirectory=QString::fromStdString(GetConfig().outputdir);
-  else outputDirectory=QDir::fromNativeSeparators(directory)+'/';
+  else {
+    outputDirectory=QDir::fromNativeSeparators(directory)+'/';
+    GetConfig().outputdir=outputDirectory.toStdString();
+    emptyOutputDir=true;
+  }
   if(!GetConfig().checkdir.empty()) 
     checksDirectory=QString::fromStdString(GetConfig().checkdir);
-  else checksDirectory=QDir::fromNativeSeparators(directory)+'/';
+  else {
+    checksDirectory=QDir::fromNativeSeparators(directory)+'/';
+    GetConfig().checkdir=checksDirectory.toStdString();
+    emptyCheckDir=true;
+  }
+  if(emptyCheckDir&&emptyOutputDir) { 
+    QMessageBox::information(this,tr("Unspecified Directories"),
+			     QString("The output and checks directories are unspecified. "
+				     "They will be set to %1.").arg(outputDirectory.trimmed()));
+  } else if(emptyCheckDir) {
+    QMessageBox::information(this,tr("Unspecified Directory"),
+			     QString("The checks directory is unspecified. "
+				     "It will be set to %1.").arg(checksDirectory.trimmed()));
+  } else if(emptyOutputDir) {
+    QMessageBox::information(this,tr("Unspecified Directory"),
+			     QString("The output directory is unspecified. "
+				     "It will be set to %1.").arg(outputDirectory.trimmed()));
+  }
   if(GetConfig().fileCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="file";
   else if(GetConfig().screenCheckMask & Config::CHECK_COMPOUND_NUCLEUS) compoundCheck="screen";
   else compoundCheck="none";
@@ -534,7 +567,7 @@ bool AZURESetup::writeConfig(QTextStream& outStream, QString directory) {
 bool AZURESetup::writeLastRun(QTextStream& outStream) {
   unsigned int paramMask = GetConfig().paramMask;
 
-  if(runTab->calcType->currentIndex()==0 ||
+  if(runTab->calcType->currentIndex()==1 ||
      runTab->calcType->currentIndex()==3) paramMask |= Config::PERFORM_FIT;
   else paramMask &= ~Config::PERFORM_FIT;
   if(runTab->calcType->currentIndex()==2||
@@ -730,7 +763,7 @@ void AZURESetup::SaveAndRun() {
   
   GetConfig().chiVariance=runTab->chiVarianceText->text().toDouble();
 
-  if(runTab->calcType->currentIndex()==0 ||
+  if(runTab->calcType->currentIndex()==1 ||
      runTab->calcType->currentIndex()==3) GetConfig().paramMask |= Config::PERFORM_FIT;
   else GetConfig().paramMask &= ~Config::PERFORM_FIT;
   if(runTab->calcType->currentIndex()==2||
@@ -752,6 +785,11 @@ void AZURESetup::SaveAndRun() {
   } else {
     GetConfig().rateParams.entrancePair=runTab->rateEntranceKey->text().toInt();
     GetConfig().rateParams.exitPair=runTab->rateExitKey->text().toInt();
+    if(GetConfig().rateParams.entrancePair==GetConfig().rateParams.exitPair) {
+      QMessageBox::information(this,tr("No Scattering Rates"),
+			       tr("Reaction rates cannot be calculated for elastic scattering."));
+      return;
+    }
     if(!runTab->fileTempButton->isChecked()) {
       GetConfig().rateParams.useFile=false;
       GetConfig().rateParams.minTemp = runTab->minTempText->text().toDouble();
@@ -887,11 +925,15 @@ void AZURESetup::SaveAndRun() {
   runTab->calcButton->setEnabled(false);
   runTab->stopAZUREButton->setEnabled(true);
   runTab->runtimeText->SetMouseFiltered(true);
+  startMessage(azureMain->configure());
   azureMain->start();
 }
 
 void AZURESetup::DeleteThread() {
-  runTab->runtimeText->insertPlainText("\nThanks for using AZURE2.\n");
+  exitMessage(azureMain->configure());
+  QScrollBar *sb = runTab->runtimeText->verticalScrollBar();
+  sb->setValue(sb->maximum());
+
   runTab->calcButton->setEnabled(true);
   runTab->stopAZUREButton->setEnabled(false);
   runTab->runtimeText->SetMouseFiltered(false);
@@ -901,4 +943,16 @@ void AZURESetup::DeleteThread() {
 void AZURESetup::showAbout() {
   AboutAZURE2Dialog aboutDialog;
   aboutDialog.exec();
+}
+
+void AZURESetup::reset() {
+  GetConfig().Reset();
+  aMatrixAction->activate(QAction::Trigger);  
+  levelsTab->reset();
+  segmentsTab->reset();
+  targetIntTab->reset();
+  runTab->reset();
+  plotTab->reset();
+  setWindowTitle(tr("AZURE2 -- untitled"));
+  GetConfig().configfile="";
 }

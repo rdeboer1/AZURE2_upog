@@ -24,6 +24,7 @@ class RunTab : public QWidget {
   RunTab(QWidget* parent=0);
   friend class AZURESetup;
   friend class AZUREMainThread;
+  void reset();
 
  private slots:
   void calculationTypeChanged(int index);

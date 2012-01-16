@@ -18,7 +18,8 @@ class AZUREFBuffer {
    * The AZUREFBuffer object is created with an entrance and exit pair key, as well as an output directory.
    * The filename is determined, and a file buffer is created with that filename.
    */
-  AZUREFBuffer(int entranceKey,int exitKey,std::string outputdir,bool isExtrap) {
+ AZUREFBuffer(int entranceKey,int exitKey,std::string outputdir,bool isExtrap,bool isAngDist) :
+  isAngDist_(isAngDist) {
     char filename[256];
     entrancekey_=entranceKey;
     exitkey_=exitKey;
@@ -27,7 +28,10 @@ class AZUREFBuffer {
       else sprintf(filename,"%sAZUREOut_aa=%d_TOTAL_CAPTURE.extrap",outputdir.c_str(),entranceKey);
     } else {
       if(!isExtrap) sprintf(filename,"%sAZUREOut_aa=%d_R=%d.out",outputdir.c_str(),entranceKey,exitKey);
-      else sprintf(filename,"%sAZUREOut_aa=%d_R=%d.extrap",outputdir.c_str(),entranceKey,exitKey);
+      else {
+	if(!isAngDist) sprintf(filename,"%sAZUREOut_aa=%d_R=%d.extrap",outputdir.c_str(),entranceKey,exitKey);
+	else sprintf(filename,"%sAZUREOut_aa=%d_R=%d.acoeff",outputdir.c_str(),entranceKey,exitKey);
+      }
     }
     fbuffer_=new std::filebuf;
     fbuffer_->open(filename,std::ios::out);
@@ -41,6 +45,10 @@ class AZUREFBuffer {
     delete fbuffer_;
   };
   /*!
+   * Returns true if the buffer is for angular distribution, otherwise returns false.
+   */
+  bool IsAngDist() const {return isAngDist_;};
+  /*!
    * Returns the entrance pair key of the object.
    */
   int GetEntranceKey() const {return entrancekey_;};
@@ -53,6 +61,7 @@ class AZUREFBuffer {
    */
   std::filebuf *GetFBuffer() {return fbuffer_;};
  private:
+  bool isAngDist_;
   int entrancekey_;
   int exitkey_;
   std::filebuf *fbuffer_;

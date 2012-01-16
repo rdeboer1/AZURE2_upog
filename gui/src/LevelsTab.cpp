@@ -38,19 +38,19 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   maxLSpin->setMaximum(10);
   maxLSpin->setSingleStep(1);
   maxLSpin->setValue(2);
-  QLabel *maxLLabel = new QLabel(tr("Maximum Oribtal\nMomentum (L)"));
+  QLabel *maxLLabel = new QLabel(tr("Maximum Oribtal Momentum"));
   maxMultSpin = new QSpinBox;
   maxMultSpin->setMinimum(1);
   maxMultSpin->setMaximum(10);
   maxMultSpin->setSingleStep(1);
   maxMultSpin->setValue(2);
-  QLabel *maxMultLabel = new QLabel(tr("Maximum Gamma\nMultipolarity"));  
+  QLabel *maxMultLabel = new QLabel(tr("Maximum Gamma Multipolarity"));  
   maxNumMultSpin = new QSpinBox;
   maxNumMultSpin->setMinimum(1);
   maxNumMultSpin->setMaximum(10);
   maxNumMultSpin->setSingleStep(1);
   maxNumMultSpin->setValue(2);  
-  QLabel *maxNumMultLabel = new QLabel(tr("Maximum Gamma\nMultipolarities Per Decay"));
+  QLabel *maxNumMultLabel = new QLabel(tr("Maximum Gamma Multipolarities Per Decay"));
   connect(maxLSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
   connect(maxMultSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
   connect(maxNumMultSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
@@ -88,30 +88,35 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   channelDetails->hide();
   connect(channelDetails->reducedWidthText,SIGNAL(textEdited(const QString&)),this,SLOT(updateReducedWidth(const QString&)));
 
-  addLevelButton = new QPushButton(tr("Add Level"));
+  addLevelButton = new QPushButton(tr("+"));
+  addLevelButton->setMaximumSize(28,28);
   connect(addLevelButton,SIGNAL(clicked()),this,SLOT(addLevel()));
-  editLevelButton = new QPushButton(tr("Edit Level"));
-  editLevelButton->setEnabled(false);
-  connect(editLevelButton,SIGNAL(clicked()),this,SLOT(editLevel()));
-  removeLevelButton = new QPushButton(tr("Delete Level"));
+  removeLevelButton = new QPushButton(tr("-"));
+  removeLevelButton->setMaximumSize(28,28);
   removeLevelButton->setEnabled(false);
   connect(removeLevelButton,SIGNAL(clicked()),this,SLOT(removeLevel()));
 
-  QVBoxLayout *buttonBox = new QVBoxLayout;
-  buttonBox->addWidget(addLevelButton);
-  buttonBox->addWidget(editLevelButton);
-  buttonBox->addWidget(removeLevelButton);
+  QGridLayout *buttonBox = new QGridLayout;
+  buttonBox->addWidget(addLevelButton,0,0);
+  buttonBox->addWidget(removeLevelButton,0,1);
+  buttonBox->addItem(new QSpacerItem(28,28),0,2);
+  buttonBox->setColumnStretch(0,0);
+  buttonBox->setColumnStretch(1,0);
+  buttonBox->setColumnStretch(2,1);
+#ifdef MACX_SPACING
+  buttonBox->setHorizontalSpacing(11);
+#else 
+  buttonBox->setHorizontalSpacing(0);
+#endif
 
   QGroupBox *levelsBox=new QGroupBox(tr("Compound Nucleus Levels"));
   QGridLayout *levelsLayout=new QGridLayout;
   levelsLayout->setContentsMargins(6,6,6,6);
   levelsLayout->addWidget(levelsView,0,0);
-  levelsLayout->addLayout(buttonBox,0,1);
-  levelsLayout->setColumnStretch(0,8);
-  levelsLayout->setColumnStretch(1,3);
+  levelsLayout->addLayout(buttonBox,1,0);
   levelsBox->setLayout(levelsLayout);
 
-  QGroupBox *configBox = new QGroupBox(tr("Channel Settings"));
+  QGroupBox *configBox = new QGroupBox(tr("Channel Configuration"));
   QGridLayout *configLayout = new QGridLayout;
   configLayout->addWidget(maxLSpin,0,0);
   configLayout->addWidget(maxLLabel,0,1);
@@ -122,12 +127,13 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   configLayout->setColumnStretch(0,0);
   configLayout->setColumnStretch(1,1);
   configBox->setLayout(configLayout);
-
-  QGridLayout *topLayout = new QGridLayout;
-  topLayout->addWidget(levelsBox,0,0);
-  topLayout->addWidget(configBox,0,1);
-  topLayout->setColumnStretch(0,5);
-  topLayout->setColumnStretch(1,2);
+ 
+  QGroupBox *channelsBox=new QGroupBox(tr("Channels In Selected Level"));
+  QGridLayout *channelsLayout=new QGridLayout;
+  channelsLayout->setContentsMargins(6,6,6,6);
+  channelsLayout->addWidget(channelsView,0,0);
+  channelsLayout->addItem(new QSpacerItem(34,34),1,0);
+  channelsBox->setLayout(channelsLayout);
 
   QGridLayout *detailsBox = new QGridLayout;
   QLabel *detailsLabel = new QLabel(tr("Channel Details (select from list to view):"));
@@ -137,20 +143,18 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   detailsBox->setRowStretch(0,0);
   detailsBox->setRowStretch(1,1);  
 
-  QGroupBox *channelsBox=new QGroupBox(tr("Channels (select from levels to view channels)"));
-  QGridLayout *channelsLayout=new QGridLayout;
-  channelsLayout->setContentsMargins(6,6,6,6);
-  channelsLayout->addWidget(channelsView,0,0);
-  channelsLayout->addLayout(detailsBox,0,1);
-  channelsLayout->setColumnStretch(0,1);
-  channelsLayout->setColumnStretch(1,1);
-  channelsBox->setLayout(channelsLayout);
-  
+  QVBoxLayout *rightLayout = new QVBoxLayout;
+  rightLayout->addWidget(configBox);
+  rightLayout->addLayout(detailsBox);
+
   QGridLayout *mainLayout = new QGridLayout;
-  mainLayout->addLayout(topLayout,0,0);
-  mainLayout->addWidget(channelsBox,1,0);
-  mainLayout->setRowStretch(0,4);
-  mainLayout->setRowStretch(1,9);
+  mainLayout->addWidget(levelsBox,0,0);
+  mainLayout->addWidget(channelsBox,0,1);
+  mainLayout->addLayout(rightLayout,0,2);
+  mainLayout->setColumnStretch(0,4);
+  mainLayout->setColumnStretch(1,4);
+  mainLayout->setColumnStretch(2,5);  
+
   setLayout(mainLayout);
 }
 
@@ -252,10 +256,8 @@ void LevelsTab::updateButtons(const QItemSelection &selection) {
   QModelIndexList indexes=selection.indexes();
   
   if(indexes.isEmpty()) {
-    editLevelButton->setEnabled(false);
     removeLevelButton->setEnabled(false);
   } else {
-    editLevelButton->setEnabled(true);
     removeLevelButton->setEnabled(true);
   }
 }
@@ -484,7 +486,7 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
 
     QString details="";
     QTextStream stm(&details,QIODevice::Append);
-    stm << QString("%1 MeV level populating/depopulating via pair #%2").arg(level.energy).arg(pairIndex+1) 
+    stm << QString("%1 MeV level with total spin %2\n   transitioning via pair key #%3").arg(level.energy).arg(levelsModel->getSpinLabel(level)).arg(pairIndex+1) 
 	<< endl;
     if(channel.radType=='P') {
       stm << QString("Channel configuration is s = %1, l = %2").arg(channelsModel->getSpinLabel(channel)).arg(channel.lValue) 
@@ -528,7 +530,7 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
       stm << qSetFieldWidth(21) << right << "Excitation Energy: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.excitationEnergy) << endl;
     if(channel.radType!='M'&&channel.radType!='E') {
-      stm << qSetFieldWidth(21) << right << "Seperation Energy: "
+      stm << qSetFieldWidth(21) << right << "Separation Energy: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.seperationEnergy) << endl;
       stm << qSetFieldWidth(21) << right << "Channel Radius: "
 	  << qSetFieldWidth(0) << left <<QString("%1").arg(pair.channelRadius) << endl;
@@ -689,10 +691,6 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   int dummyInt;
   int ecMultMask;
 
-  pairsModel->removeRows(0,pairsModel->getPairs().size(),QModelIndex());
-  levelsModel->removeRows(0,levelsModel->getLevels().size(),QModelIndex());
-  channelsModel->removeRows(0,channelsModel->getChannels().size(),QModelIndex());
-
   maxLSpin->blockSignals(true);
   maxMultSpin->blockSignals(true);
   maxNumMultSpin->blockSignals(true);
@@ -796,4 +794,19 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   levelsView->resizeRowsToContents();
 
   return true;
+}
+
+void LevelsTab::reset() {
+  pairsModel->removeRows(0,pairsModel->getPairs().size(),QModelIndex());
+  levelsModel->removeRows(0,levelsModel->getLevels().size(),QModelIndex());
+  channelsModel->removeRows(0,channelsModel->getChannels().size(),QModelIndex());
+  maxLSpin->blockSignals(true);
+  maxMultSpin->blockSignals(true);
+  maxNumMultSpin->blockSignals(true);
+  maxLSpin->setValue(2);
+  maxMultSpin->setValue(2);
+  maxNumMultSpin->setValue(2);
+  maxLSpin->blockSignals(false);
+  maxMultSpin->blockSignals(false);
+  maxNumMultSpin->blockSignals(false);
 }

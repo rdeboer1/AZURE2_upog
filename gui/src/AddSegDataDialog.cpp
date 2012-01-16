@@ -61,9 +61,9 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   QGroupBox *valueBox = new QGroupBox;
   QGridLayout *valueLayout = new QGridLayout;
   QGridLayout *pairLayout = new QGridLayout;
-  pairLayout->addWidget(new QLabel(tr("Entrance Pair Index:")),0,0,Qt::AlignRight);
+  pairLayout->addWidget(new QLabel(tr("Entrance Pair Key:")),0,0,Qt::AlignRight);
   pairLayout->addWidget(entrancePairIndexSpin,0,1);
-  pairLayout->addWidget(new QLabel(tr("Exit Pair Index:")),0,2,Qt::AlignRight);
+  pairLayout->addWidget(new QLabel(tr("Exit Pair Key:")),0,2,Qt::AlignRight);
   pairLayout->addWidget(exitPairIndexSpin,0,3);
   totalCaptureLabel = new QLabel(tr("Total Capture"));
   totalCaptureLabel->setVisible(false);
@@ -137,7 +137,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   connect(okButton, SIGNAL(clicked()),this,SLOT(accept()));
   connect(cancelButton,SIGNAL(clicked()),this,SLOT(reject()));
 
-  setWindowTitle(tr("Add an Data Segment Line"));
+  setWindowTitle(tr("Add a Segment From Data"));
 }
 
 void AddSegDataDialog::setChooseFile() {

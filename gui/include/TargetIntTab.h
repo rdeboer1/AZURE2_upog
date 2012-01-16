@@ -22,6 +22,7 @@ class TargetIntTab : public QWidget {
   TargetIntModel* getTargetIntModel();
   bool writeFile(QTextStream& outStream);
   bool readFile(QTextStream& inStream);
+  void reset();
 
  public slots:
   void addLine();

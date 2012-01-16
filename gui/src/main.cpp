@@ -8,7 +8,9 @@ int start_gui(int argc, char *argv[]) {
   QApplication app(argc, argv);
   
   initResource();
-  
+  QCoreApplication::setOrganizationName("jina");
+  QCoreApplication::setApplicationName("azure2");
+
   AZURESetup azureSetup;
   azureSetup.show();
   

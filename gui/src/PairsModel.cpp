@@ -89,7 +89,7 @@ QVariant PairsModel::headerData(int section, Qt::Orientation orientation, int ro
     case 10:
       return tr("Excitation\nEnergy");
     case 11:
-      return tr("Seperation\nEnergy");
+      return tr("Separation\nEnergy");
     case 12:
       return tr("Channel\nRadius");
     case 13:

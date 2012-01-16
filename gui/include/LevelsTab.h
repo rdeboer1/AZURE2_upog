@@ -25,6 +25,7 @@ class LevelsTab : public QWidget {
   QList<ChannelsData> calculateChannels(int levelIndex);
   bool writeNuclearFile(QTextStream& outStream);
   bool readNuclearFile(QTextStream& inStream);
+  void reset();
 
  public slots:
   void addLevel();
@@ -47,7 +48,6 @@ class LevelsTab : public QWidget {
   QSpinBox *maxMultSpin;
   QSpinBox *maxNumMultSpin;
   QPushButton *addLevelButton;
-  QPushButton *editLevelButton;
   QPushButton *removeLevelButton;
   PairsModel *pairsModel;
   LevelsModel *levelsModel;

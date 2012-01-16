@@ -24,6 +24,8 @@ void Config::Reset() {
   paramMask=0;
   paramMask |= (USE_AMATRIX|TRANSFORM_PARAMETERS|CALCULATE_WITH_DATA|USE_LONGWAVELENGTH_APPROX);
   stopFlag=false;
+  outputdir="";
+  checkdir="";
 }
 
 /*!
@@ -40,8 +42,26 @@ int Config::ReadConfigFile() {
   in >> temp;getline(in,dummy);
   if(temp=="true") paramMask |= USE_AMATRIX;
   else paramMask &= ~USE_AMATRIX;
-  in >> outputdir;getline(in,dummy);
-  in >> checkdir;getline(in,dummy);
+  getline(in,dummy);
+  int poundSignPos=dummy.find_last_of('#');
+  if(poundSignPos==std::string::npos) temp=dummy;
+  else temp=dummy.substr(0,poundSignPos);
+  int p2 = temp.find_last_not_of(" \n\t\r");
+  if (p2 != std::string::npos) {  
+    int p1 = temp.find_first_not_of(" \n\t\r");
+    if (p1 == std::string::npos) p1 = 0;
+    outputdir=temp.substr(p1,(p2-p1)+1);
+  } else outputdir=std::string();  
+  getline(in,dummy);
+  poundSignPos=dummy.find_last_of('#');
+  if(poundSignPos==std::string::npos) temp=dummy;
+  else temp=dummy.substr(0,poundSignPos);
+  p2 = temp.find_last_not_of(" \n\t\r");
+  if (p2 != std::string::npos) {  
+    int p1 = temp.find_first_not_of(" \n\t\r");
+    if (p1 == std::string::npos) p1 = 0;
+    checkdir=temp.substr(p1,(p2-p1)+1);
+  } else checkdir=std::string();   
   in >> temp;getline(in,dummy);
   if(temp=="screen") screenCheckMask |= CHECK_COMPOUND_NUCLEUS;
   else if(temp=="file") fileCheckMask |= CHECK_COMPOUND_NUCLEUS;
