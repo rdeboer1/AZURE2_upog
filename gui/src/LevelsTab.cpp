@@ -50,7 +50,7 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   maxNumMultSpin->setMaximum(10);
   maxNumMultSpin->setSingleStep(1);
   maxNumMultSpin->setValue(2);  
-  QLabel *maxNumMultLabel = new QLabel(tr("Maximum Gamma Multipolarities Per Decay"));
+  QLabel *maxNumMultLabel = new QLabel(tr("Maximum Gamma Multipolarities\nPer Decay"));
   connect(maxLSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
   connect(maxMultSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
   connect(maxNumMultSpin,SIGNAL(valueChanged(int)),this,SLOT(updateChannelsPairAddedEdited()));
@@ -114,7 +114,10 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   levelsLayout->setContentsMargins(6,6,6,6);
   levelsLayout->addWidget(levelsView,0,0);
   levelsLayout->addLayout(buttonBox,1,0);
-  levelsBox->setLayout(levelsLayout);
+#ifdef MACX_SPACING
+  levelsLayout->setVerticalSpacing(0);
+#endif
+  levelsBox->setLayout(levelsLayout);  
 
   QGroupBox *configBox = new QGroupBox(tr("Channel Configuration"));
   QGridLayout *configLayout = new QGridLayout;
@@ -132,7 +135,12 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   QGridLayout *channelsLayout=new QGridLayout;
   channelsLayout->setContentsMargins(6,6,6,6);
   channelsLayout->addWidget(channelsView,0,0);
+#ifdef MACX_SPACING
+  channelsLayout->addItem(new QSpacerItem(40,40),1,0);
+  channelsLayout->setVerticalSpacing(0);
+#else
   channelsLayout->addItem(new QSpacerItem(34,34),1,0);
+#endif
   channelsBox->setLayout(channelsLayout);
 
   QGridLayout *detailsBox = new QGridLayout;
@@ -143,17 +151,14 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   detailsBox->setRowStretch(0,0);
   detailsBox->setRowStretch(1,1);  
 
-  QVBoxLayout *rightLayout = new QVBoxLayout;
-  rightLayout->addWidget(configBox);
-  rightLayout->addLayout(detailsBox);
-
   QGridLayout *mainLayout = new QGridLayout;
-  mainLayout->addWidget(levelsBox,0,0);
-  mainLayout->addWidget(channelsBox,0,1);
-  mainLayout->addLayout(rightLayout,0,2);
-  mainLayout->setColumnStretch(0,4);
-  mainLayout->setColumnStretch(1,4);
-  mainLayout->setColumnStretch(2,5);  
+  mainLayout->addWidget(levelsBox,0,0,2,1);
+  mainLayout->addWidget(channelsBox,0,1,2,1);
+  mainLayout->addWidget(configBox,0,2,1,1);
+  mainLayout->addLayout(detailsBox,1,2,1,1);
+  mainLayout->setColumnStretch(0,1);
+  mainLayout->setColumnStretch(1,1);
+  mainLayout->setColumnStretch(2,1);  
 
   setLayout(mainLayout);
 }
@@ -486,10 +491,10 @@ void LevelsTab::updateDetails(const QItemSelection &selection) {
 
     QString details="";
     QTextStream stm(&details,QIODevice::Append);
-    stm << QString("%1 MeV level with total spin %2\n   transitioning via pair key #%3").arg(level.energy).arg(levelsModel->getSpinLabel(level)).arg(pairIndex+1) 
+    stm << QString("%1 MeV level with spin %2\n   transitioning via pair key #%3").arg(level.energy).arg(levelsModel->getSpinLabel(level)).arg(pairIndex+1) 
 	<< endl;
     if(channel.radType=='P') {
-      stm << QString("Channel configuration is s = %1, l = %2").arg(channelsModel->getSpinLabel(channel)).arg(channel.lValue) 
+      stm << QString("Channel configuration is\n   s = %1, l = %2").arg(channelsModel->getSpinLabel(channel)).arg(channel.lValue) 
 	  << endl << endl;
       stm << qSetFieldWidth(21) << right << "Light Particle Spin: " 
 	  << qSetFieldWidth(0) << left << QString("%1").arg(pairsModel->getSpinLabel(pair,0)) << endl;
