@@ -48,7 +48,6 @@ class LevelsTab : public QWidget {
   QSpinBox *maxMultSpin;
   QSpinBox *maxNumMultSpin;
   QPushButton *addLevelButton;
-  QPushButton *editLevelButton;
   QPushButton *removeLevelButton;
   PairsModel *pairsModel;
   LevelsModel *levelsModel;

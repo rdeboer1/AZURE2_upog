@@ -77,11 +77,11 @@ QVariant ChannelsModel::headerData(int section, Qt::Orientation orientation, int
     case 1:
       return tr("level");
     case 2:
-      return tr("Channel Pair");
+      return tr("Channel\nPair");
     case 3:
-      return tr("Channel Spin");
+      return tr("s");
     case 4:
-      return tr("Orbital Momentum/\nMultipolarity");
+      return tr("l");
     case 5:
       return tr("radiation type");
     case 6:
