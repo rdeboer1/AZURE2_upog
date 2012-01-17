@@ -85,10 +85,11 @@ bool PlotEntry::readData() {
   hasNegative_=false;
   for(QVector<PlotPoint>::const_iterator it=points_.begin();
       it<points_.end();it++) {
-    if(it->fitCrossSection<=0||
-       it->dataCrossSection<=0||
-       (fabs(it->dataCrossSection)-
-	fabs(it->dataErrorCrossSection))<=0) {
+    if(it->fitCrossSection<=0.||
+       (type_==0&&
+	(it->dataCrossSection<=0.||
+	 (fabs(it->dataCrossSection)-
+	  fabs(it->dataErrorCrossSection))<=0.))) {
       hasNegative_=true;
       break;
     }
