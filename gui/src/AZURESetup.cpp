@@ -45,13 +45,13 @@ AZURESetup::AZURESetup() : config(std::cout) {
   plotTab = new PlotTab(config,segmentsTab->getSegmentsDataModel(),segmentsTab->getSegmentsTestModel());
 #endif 
 
-  tabWidget->addTab(pairsTab,tr("Particle Pairs"));
-  tabWidget->addTab(levelsTab,tr("Levels and Channels"));
-  tabWidget->addTab(segmentsTab,tr("Segments"));
-  tabWidget->addTab(targetIntTab,tr("Experimental Effects"));
-  tabWidget->addTab(runTab,tr("Calculate"));
+  tabWidget->addTab(pairsTab,tr("&Particle Pairs"));
+  tabWidget->addTab(levelsTab,tr("&Levels and Channels"));
+  tabWidget->addTab(segmentsTab,tr("&Segments"));
+  tabWidget->addTab(targetIntTab,tr("&Experimental Effects"));
+  tabWidget->addTab(runTab,tr("&Calculate"));
 #ifdef USE_QWT
-  tabWidget->addTab(plotTab,tr("Plot"));
+  tabWidget->addTab(plotTab,tr("Pl&ot"));
 #endif
 
   setCentralWidget(tabWidget);
@@ -139,7 +139,7 @@ void AZURESetup::createMenus() {
   fileMenu->addSeparator();
   fileMenu->addAction(quitAction);
   
-  configMenu = menuBar()->addMenu(tr("&Configure"));
+  configMenu = menuBar()->addMenu(tr("Co&nfigure"));
   formalismMenu = configMenu->addMenu(tr("&Formalism"));
   formalismMenu->addAction(aMatrixAction);
   formalismMenu->addAction(rMatrixAction);
@@ -926,6 +926,7 @@ void AZURESetup::SaveAndRun() {
 
   azureMain = new AZUREMainThread(runTab,GetConfig());
   connect(azureMain,SIGNAL(finished()),this,SLOT(DeleteThread()));
+  setWindowTitle(QString("AZURE2 -- %1 -- Running").arg(QString::fromStdString(GetConfig().configfile)));
   runTab->calcButton->setEnabled(false);
   runTab->stopAZUREButton->setEnabled(true);
   runTab->runtimeText->SetMouseFiltered(true);
@@ -938,6 +939,7 @@ void AZURESetup::DeleteThread() {
   QScrollBar *sb = runTab->runtimeText->verticalScrollBar();
   sb->setValue(sb->maximum());
 
+  setWindowTitle(QString("AZURE2 -- %1").arg(QString::fromStdString(GetConfig().configfile)));
   runTab->calcButton->setEnabled(true);
   runTab->stopAZUREButton->setEnabled(false);
   runTab->runtimeText->SetMouseFiltered(false);

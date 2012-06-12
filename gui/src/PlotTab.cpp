@@ -129,7 +129,7 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   dataSegmentSelectorBox->setLayout(dataSegmentSelectorLayout);
   testSegmentSelectorBox->setLayout(testSegmentSelectorLayout);
 
-  refreshButton = new QPushButton(tr("Draw"));
+  refreshButton = new QPushButton(tr("&Draw"));
   connect(refreshButton,SIGNAL(clicked()),this,SLOT(draw()));
   exportButton = new QPushButton(tr("Export..."));
   connect(exportButton,SIGNAL(clicked()),azurePlot,SLOT(exportPlot()));
