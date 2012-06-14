@@ -6,6 +6,7 @@
 #include <iostream>
 #include <math.h>
 #include <gsl/gsl_integration.h>
+#include <omp.h>
 
 struct gsl_reactionrate_params {
   gsl_reactionrate_params(const Config &config) : configure(config) {};
@@ -30,6 +31,7 @@ double gsl_reactionrate_integrand(double x, void * p) {
     point->Initialize(compound,configure);
     point->Calculate(compound,configure);
     crossSection=point->GetFitCrossSection();
+    delete point;
   } else crossSection=0.0;
 
   return crossSection*x*exp(-x/temperature/boltzConst);
@@ -77,16 +79,39 @@ ReactionRate::ReactionRate(CNuc *compound, const vector_r &params,
  * Calculates the astrophysical reaction rates over a range of stellar temperatures.  
  */
 
-void ReactionRate::CalculateRates() {
-  configure().outStream << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
-  for(double temp=configure().rateParams.minTemp;temp<=configure().rateParams.maxTemp;temp+=configure().rateParams.tempStep) {
-    RateData newRate;
-    newRate.temperature=temp;
-    newRate.rate=gsl_reactionrate_integration(temp,compound(),configure(),entranceKey(),exitKey());
-    rates_.push_back(newRate);
-    configure().outStream << std::setw(20) << newRate.temperature << std::setw(20) << newRate.rate << std::endl;
-    if(configure().rateParams.tempStep==0.0) break;
+void ReactionRate::CalculateRates() {  
+  int numSteps = (configure().rateParams.tempStep!=0.) ? 
+    int((configure().rateParams.maxTemp-configure().rateParams.minTemp)/configure().rateParams.tempStep)+1 : 1;
+  configure().outStream << std::setw(0) << "\t[                         ] 0%";configure().outStream.flush();
+  int pointIndex=0;
+  time_t startTime = time(NULL);
+#pragma omp parallel for
+  for(int i=0;i<numSteps;++i) {
+    CNuc* localCompound = compound()->Clone();
+    int localEntranceKey = entranceKey();
+    int localExitKey = exitKey();
+    const Config localConfigure = configure(); 
+    double temp = localConfigure.rateParams.minTemp+i*localConfigure.rateParams.tempStep;
+
+    double rate=gsl_reactionrate_integration(temp,localCompound,localConfigure,localEntranceKey,localExitKey);
+    rates_.push_back(RateData(temp,rate));
+    delete localCompound;
+    ++pointIndex;
+    if(difftime(time(NULL),startTime)>0.25) {
+      startTime=time(NULL);
+      std::string progress="[";
+      double percent=0.;
+      for(int j = 1;j<=25;j++) {
+	if(pointIndex>=percent*numSteps&&percent<1.) {
+	  percent+=0.04;
+	  progress+='*';
+	} else progress+=' ';
+      } progress+="] ";
+      localConfigure.outStream << std::setw(0) << "\r\t" << progress << percent*100 << '%';localConfigure.outStream.flush();
+    }
   }
+  configure().outStream << std::setw(0) << "\r\t[*************************] 100%" << std::endl;
+  sort(rates_.begin(),rates_.end());
 }
 
 /*!
@@ -100,20 +125,43 @@ void ReactionRate::CalculateFileRates() {
       std::string line;
       getline(inFile,line);
       if(!inFile.eof()) {
-	RateData newRate = {0.,0.};
+	double temp = 0.;
 	std::istringstream stm;
 	stm.str(line);
-	if(stm >> newRate.temperature) {
-	  rates_.push_back(newRate);
+	if(stm >> temp) {
+	  rates_.push_back(RateData(temp,0.));
 	}
       }
     }
     inFile.close();
-    configure().outStream << std::setw(20) << "T9" << std::setw(20) << "Rate" << std::endl;
-    for(std::vector<RateData>::iterator rateIterator = rates_.begin(); rateIterator < rates_.end(); rateIterator++) {
-      rateIterator->rate=gsl_reactionrate_integration(rateIterator->temperature,compound(),configure(),entranceKey(),exitKey());
-      configure().outStream << std::setw(20) << rateIterator->temperature << std::setw(20) << rateIterator->rate << std::endl;
+    configure().outStream << std::setw(0) << "\t[                         ] 0%";configure().outStream.flush();
+    int pointIndex=0;
+    int numSteps = rates_.size();
+    time_t startTime = time(NULL);
+#pragma omp parallel for
+    for(int i=0;i<numSteps;++i) {
+      CNuc* localCompound = compound()->Clone();
+      int localEntranceKey = entranceKey();
+      int localExitKey = exitKey();
+      const Config localConfigure = configure(); 
+      
+      rates_[i].rate=gsl_reactionrate_integration(rates_[i].temperature,localCompound,localConfigure,localEntranceKey,localExitKey);
+      delete localCompound;
+      ++pointIndex;
+      if(difftime(time(NULL),startTime)>0.25) {
+	startTime=time(NULL);
+	std::string progress="[";
+	double percent=0.;
+	for(int j = 1;j<=25;j++) {
+	  if(pointIndex>=percent*numSteps&&percent<1.) {
+	    percent+=0.04;
+	    progress+='*';
+	  } else progress+=' ';
+	} progress+="] ";
+	localConfigure.outStream << std::setw(0) << "\r\t" << progress << percent*100 << '%';localConfigure.outStream.flush();
+      }
     }
+    configure().outStream << std::setw(0) << "\r\t[*************************] 100%" << std::endl;
   } else configure().outStream << "Couldn't open temperature file." << std::endl;
 }
 
