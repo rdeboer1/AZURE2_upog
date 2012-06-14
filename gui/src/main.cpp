@@ -6,7 +6,13 @@ inline void initResource() { Q_INIT_RESOURCE(AZURESetup); }
 
 int start_gui(int argc, char *argv[]) {
   QApplication app(argc, argv);
-  
+ 
+#ifdef WIN_SPACING
+  QFont font = app.font();
+  font.setPointSizeF(10.5);
+  app.setFont(font);
+#endif
+ 
   initResource();
   QCoreApplication::setOrganizationName("jina");
   QCoreApplication::setApplicationName("azure2");

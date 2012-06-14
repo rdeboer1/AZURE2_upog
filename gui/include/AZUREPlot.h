@@ -7,6 +7,7 @@
 
 class QwtPlotCurve;
 class QwtPlotIntervalCurve;
+class PlotTab;
 
 struct PlotPoint {
   double energy;
@@ -39,7 +40,11 @@ class PlotEntry {
   void attach(QwtPlot*,int,int,QwtSymbol::Style);
   void detach();
 
+ public:
+  friend class AZUREPlot;
+
  private:
+  bool hasNegative_;
   int type_;
   int entranceKey_;
   int exitKey_;
@@ -56,7 +61,7 @@ class AZUREPlot : public QwtPlot {
   Q_OBJECT
 
  public:
-  AZUREPlot(QWidget* parent = 0);
+  AZUREPlot(PlotTab* plotTab, QWidget* parent = 0);
   void setXAxisLog(bool set);
   void setYAxisLog(bool set);
   void setXAxisType(unsigned int type);
@@ -74,6 +79,7 @@ class AZUREPlot : public QwtPlot {
   unsigned int yAxisType;
   QList<PlotEntry*> entries;
   AZUREZoomer* zoomer;
+  PlotTab* containingTab;
 };
 
 #endif

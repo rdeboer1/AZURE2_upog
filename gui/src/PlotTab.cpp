@@ -40,7 +40,7 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
 PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
   configure(config), QWidget(parent)  {
 
-  azurePlot = new AZUREPlot(this);
+  azurePlot = new AZUREPlot(this,this);
 
   segDataProxyModel = new SegDataProxyModel(this);
   segDataProxyModel->setSourceModel(dataModel);
@@ -117,7 +117,7 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   dataSegmentSelectorList->setResizeMode(QListView::Adjust);
   testSegmentSelectorList->setResizeMode(QListView::Adjust);
 
-  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Segment From Data"));
+  QGroupBox *dataSegmentSelectorBox = new QGroupBox(tr("Segments From Data"));
   QGridLayout *dataSegmentSelectorLayout = new QGridLayout;
   dataSegmentSelectorLayout->setContentsMargins(5,5,5,5);
   QGroupBox *testSegmentSelectorBox = new QGroupBox(tr("Segments Without Data"));
@@ -129,7 +129,7 @@ PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel
   dataSegmentSelectorBox->setLayout(dataSegmentSelectorLayout);
   testSegmentSelectorBox->setLayout(testSegmentSelectorLayout);
 
-  refreshButton = new QPushButton(tr("Draw"));
+  refreshButton = new QPushButton(tr("&Draw"));
   connect(refreshButton,SIGNAL(clicked()),this,SLOT(draw()));
   exportButton = new QPushButton(tr("Export..."));
   connect(exportButton,SIGNAL(clicked()),azurePlot,SLOT(exportPlot()));
@@ -237,9 +237,9 @@ void PlotTab::yAxisLogScaleChanged(bool checked) {
 }
 
 void PlotTab::reset() {
+  azurePlot->clearEntries();
   xAxisTypeCombo->setCurrentIndex(0);
   xAxisIsLogCheck->setChecked(false);
   yAxisXSButton->setChecked(true);
   yAxisIsLogCheck->setChecked(true);
-  azurePlot->clearEntries();
 }

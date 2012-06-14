@@ -13,7 +13,13 @@ extern double gsl_reactionrate_integration(double,CNuc*,const Config&,int,int);
  * The RateData container structure hold a temperature and the corresponding reaction rate.
  */ 
 
-struct RateData {
+class RateData {
+ public:
+ RateData(double t, double r) :
+  temperature(t),rate(r) {};
+  bool operator<(const RateData& right) const {
+    return temperature < right.temperature;
+  };
   /// Temperature at which the rate was calculated.
   double temperature;
   /// Reaction rate at corresponding temperature.

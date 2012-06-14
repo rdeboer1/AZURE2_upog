@@ -1,4 +1,5 @@
 #include "AZUREPlot.h"
+#include "PlotTab.h"
 #include <QtGui>
 #include "qwt_plot_curve.h"
 #include "qwt_plot_intervalcurve.h"
@@ -80,6 +81,18 @@ bool PlotEntry::readData() {
   file.close();
   if(!foundBlock) {
     return false;
+  }
+  hasNegative_=false;
+  for(QVector<PlotPoint>::const_iterator it=points_.begin();
+      it<points_.end();it++) {
+    if(it->fitCrossSection<=0.||
+       (type_==0&&
+	(it->dataCrossSection<=0.||
+	 (fabs(it->dataCrossSection)-
+	  fabs(it->dataErrorCrossSection))<=0.))) {
+      hasNegative_=true;
+      break;
+    }
   }
   return true;
 }
@@ -202,7 +215,8 @@ void PlotEntry::detach() {
   if(fitCurve_) fitCurve_->detach();
 }
 
-AZUREPlot::AZUREPlot(QWidget* parent) : QwtPlot(parent) {
+AZUREPlot::AZUREPlot(PlotTab* plotTab,QWidget* parent) :
+  containingTab(plotTab), QwtPlot(parent) {
   setCanvasBackground(QColor(Qt::white));
   setAutoReplot(true);
 
@@ -261,18 +275,28 @@ void AZUREPlot::draw(QList<PlotEntry*> newEntries) {
   clearEntries();
 
   int numDataEntries=0;
+  bool hasNegative=false;
   for(int i = 0; i<newEntries.size(); i++) {
     if(newEntries[i]->readData()) {
       QwtSymbol::Style style = (newEntries[i]->type()==0) ? (QwtSymbol::Style) 
 	numDataEntries++ : QwtSymbol::NoSymbol;
       newEntries[i]->attach(this,xAxisType,yAxisType,style);
       entries.push_back(newEntries[i]);
+      if(newEntries[i]->hasNegative_) hasNegative=true;
     } else delete newEntries[i];
   }   
   setAxisAutoScale(QwtPlot::xBottom,true);
   setAxisAutoScale(QwtPlot::yLeft,true);
   replot();
   zoomer->setZoomBase(false);
+  if(hasNegative) {
+    containingTab->yAxisIsLogCheck->setChecked(false);
+    containingTab->yAxisIsLogCheck->setEnabled(false);
+    QMessageBox::information(this,
+			     tr("Negative or Zero Values"),
+			     tr("Negative or zero values were detected in a dataset. "
+				"Log plotting is not available."));
+  }
 }
 
 void AZUREPlot::update() {
@@ -351,5 +375,6 @@ void AZUREPlot::clearEntries() {
     delete entries[i]; 
   }
   if(entries.size()>0) entries.clear();
+  containingTab->yAxisIsLogCheck->setEnabled(true);
   update();
 }

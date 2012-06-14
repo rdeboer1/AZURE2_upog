@@ -50,6 +50,9 @@ class PlotTab : public QWidget {
   void xAxisLogScaleChanged(bool);
   void yAxisLogScaleChanged(bool);
 
+ public:
+  friend class AZUREPlot;
+
  private:
   Config& configure;
   AZUREPlot* azurePlot;

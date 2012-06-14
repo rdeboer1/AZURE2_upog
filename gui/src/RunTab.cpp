@@ -18,7 +18,7 @@ RunTab::RunTab(QWidget* parent) : QWidget(parent) {
   chiVarianceText->setMinimumWidth(50);
   chiVarianceText->setMaximumWidth(50);
  
-  calcButton = new QPushButton(tr("Save and Run"));
+  calcButton = new QPushButton(tr("Save and &Run"));
   stopAZUREButton = new QPushButton(tr("Stop AZURE2"));
   stopAZUREButton->setEnabled(false);
 
