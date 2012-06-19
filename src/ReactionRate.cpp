@@ -7,6 +7,7 @@
 #include <math.h>
 #include <gsl/gsl_integration.h>
 #include <omp.h>
+#include <algorithm>
 
 struct gsl_reactionrate_params {
   gsl_reactionrate_params(const Config &config) : configure(config) {};
@@ -111,7 +112,7 @@ void ReactionRate::CalculateRates() {
     }
   }
   configure().outStream << std::setw(0) << "\r\t[*************************] 100%" << std::endl;
-  sort(rates_.begin(),rates_.end());
+  std::sort(rates_.begin(),rates_.end());
 }
 
 /*!
