@@ -535,8 +535,26 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config&
  * attribute is overwritten with the value calculated from the lab cross section attribute.
  */
 
-void EPoint::ConvertCrossSection() {
-  double conversionFactor=pow(sin(pi/180.*this->GetLabAngle())/sin(pi/180.*this->GetCMAngle()),2.0)*cos(pi/180.*(this->GetCMAngle()-this->GetLabAngle()));
+void EPoint::ConvertCrossSection(PPair *entrancePair, PPair *exitPair) {
+  double conversionFactor;
+  if(this->GetLabAngle()==0.0 || this->GetLabAngle()==180.0) {
+    double m1=entrancePair->GetM(1);
+    double m2=entrancePair->GetM(2);
+    double m3=exitPair->GetM(1);
+    double m4=exitPair->GetM(2);
+    double e1=this->GetLabEnergy();
+    double qValue=entrancePair->GetSepE()+entrancePair->GetExE()-exitPair->GetSepE()-exitPair->GetExE();
+    double et=e1+qValue;
+    double a=m1*m4*e1/(m1+m2)/(m3+m4)/et;
+    double b=m1*m3*e1/(m1+m2)/(m3+m4)/et;
+    double c=m2*m3/(m1+m2)/(m3+m4) * (1+m1*qValue/m2/et);
+    double d=m2*m4/(m1+m2)/(m3+m4) * (1+m1*qValue/m2/et);
+    double e3et=b+d+2*pow(a*c,0.5)*cos(pi/180.*this->GetCMAngle());
+    conversionFactor=pow(a*c,0.5)*pow(d/b-pow(sin(this->GetLabAngle()*pi/180.),2.0),0.5)/e3et;
+  }
+  else {
+    conversionFactor=pow(sin(pi/180.*this->GetLabAngle())/sin(pi/180.*this->GetCMAngle()),2.0)*cos(pi/180.*(this->GetCMAngle()-this->GetLabAngle()));
+  }
   cm_crosssection_=this->GetLabCrossSection()*conversionFactor;
   cm_dcrosssection_=this->GetLabCrossSectionError()*conversionFactor;
 }

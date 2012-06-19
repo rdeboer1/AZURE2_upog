@@ -197,7 +197,7 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 		  } else {
 		    thePoint->ConvertLabAngle(entrancePair,exitPair,configure);
 		  }
-		  thePoint->ConvertCrossSection();
+		  thePoint->ConvertCrossSection(entrancePair,exitPair);
 		}
 		if(eStep==0.0) break;
 	      }
