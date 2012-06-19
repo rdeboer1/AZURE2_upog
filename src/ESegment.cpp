@@ -206,7 +206,7 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
 	  } else {
 	    this->GetPoint(this->NumPoints())->ConvertLabAngle(entrancePair,exitPair,configure);
 	  }
-	  this->GetPoint(this->NumPoints())->ConvertCrossSection();
+	  this->GetPoint(this->NumPoints())->ConvertCrossSection(entrancePair,exitPair);
 	}
       }
     }
