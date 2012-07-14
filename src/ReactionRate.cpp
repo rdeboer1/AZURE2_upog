@@ -8,6 +8,7 @@
 #include <gsl/gsl_integration.h>
 #include <omp.h>
 #include <algorithm>
+#include <time.h>
 
 struct gsl_reactionrate_params {
   gsl_reactionrate_params(const Config &config) : configure(config) {};
