@@ -15,8 +15,10 @@ extern double gsl_reactionrate_integration(double,CNuc*,const Config&,int,int);
 
 class RateData {
  public:
+ /// Constructor creates RateData object from a given temperature and rate value.
  RateData(double t, double r) :
   temperature(t),rate(r) {};
+ /// This function defines the "less than" operator for use in sorting.
   bool operator<(const RateData& right) const {
     return temperature < right.temperature;
   };
