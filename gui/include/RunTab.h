@@ -2,9 +2,12 @@
 #define RUNTAB_H
 
 #include <QWidget>
+#include <QSignalMapper>
+#include <QPointer>
 
 class ChooseFileButton;
 class FilteredTextEdit;
+class InfoDialog;
 
 QT_BEGIN_NAMESPACE
 
@@ -25,6 +28,9 @@ class RunTab : public QWidget {
   friend class AZURESetup;
   friend class AZUREMainThread;
   void reset();
+
+ public slots:
+  void showInfo(int which=0);
 
  private slots:
   void calculationTypeChanged(int index);
@@ -58,7 +64,10 @@ class RunTab : public QWidget {
   ChooseFileButton* rateParamsChoose;
   ChooseFileButton* paramFileChoose;
   ChooseFileButton* integralsFileChoose;
-  
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 

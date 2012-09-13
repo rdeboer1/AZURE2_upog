@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QItemSelection>
 #include <QTableView>
+#include <QSignalMapper>
+#include <QPointer>
 #include "TargetIntModel.h"
 #include "AddTargetIntDialog.h"
 
@@ -13,6 +15,8 @@ class QPushButton;
 class QLineEdit;
 
 QT_END_NAMESPACE
+
+class InfoDialog;
 
 class TargetIntTab : public QWidget {
   Q_OBJECT
@@ -30,12 +34,17 @@ class TargetIntTab : public QWidget {
   void editLine();
   void deleteLine();
   void updateButtons(const QItemSelection &selection);
+  void showInfo(int which=0);
 
  private:
   TargetIntModel *targetIntModel;
   QTableView *targetIntView;
   QPushButton *addButton;
   QPushButton *deleteButton;
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 #endif

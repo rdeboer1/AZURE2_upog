@@ -55,6 +55,7 @@ class AZURESetup : public QMainWindow {
   void editDirs(); 
   void editOptions();
   void showAbout();
+  void showTabInfo();
 
  private:
   bool readFile(QString filename);
@@ -85,6 +86,7 @@ class AZURESetup : public QMainWindow {
   QAction* clearRecentAction;
   enum { numRecent = 5 };
   QAction* recentFileActions[numRecent];
+  QAction* showTabInfoAction; 
 
   QActionGroup* matrixActionGroup;
 
@@ -93,6 +95,7 @@ class AZURESetup : public QMainWindow {
   QMenu *configMenu;
   QMenu *formalismMenu;
   QMenu *recentFileMenu;
+  QMenu *helpMenu;
   QTabWidget *tabWidget;
   PairsTab *pairsTab;
   LevelsTab *levelsTab;

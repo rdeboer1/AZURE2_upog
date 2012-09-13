@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QItemSelection>
+#include <QSignalMapper>
 #include "PairsModel.h"
 #include "AddPairDialog.h"
 
@@ -11,6 +12,8 @@ QT_BEGIN_NAMESPACE
 class QPushButton;
 
 QT_END_NAMESPACE
+
+class InfoDialog;
 
 class PairsTab : public QWidget {
   Q_OBJECT
@@ -27,6 +30,7 @@ class PairsTab : public QWidget {
   void editPair(PairsData pair,int pairIndex,bool fromFile);
   void removePair();
   void updateButtons(const QItemSelection &selection);
+  void showInfo(int which=0);
 
  signals:
   void pairAdded(int);
@@ -38,6 +42,10 @@ class PairsTab : public QWidget {
   QTableView *pairsView;
   QPushButton *addButton;
   QPushButton *deleteButton;
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 #endif
