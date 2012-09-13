@@ -121,6 +121,10 @@ void AZURESetup::createActions() {
   
   editOptionsAction = new QAction(tr("&Runtime Options..."),this);
   connect(editOptionsAction,SIGNAL(triggered()),this,SLOT(editOptions()));
+
+  showTabInfoAction = new QAction(tr("Show Documentation For Current Tab"),this);
+  showTabInfoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+  connect(showTabInfoAction,SIGNAL(triggered()),this,SLOT(showTabInfo()));
 }
 
 void AZURESetup::createMenus() {
@@ -146,6 +150,9 @@ void AZURESetup::createMenus() {
   configMenu->addAction(editChecksAction);
   configMenu->addAction(editDirsAction);
   configMenu->addAction(editOptionsAction);
+
+  helpMenu = menuBar()->addMenu(tr("&Documentation"));
+  helpMenu->addAction(showTabInfoAction);
 }
 
 void AZURESetup::updateRecent() {
@@ -961,4 +968,13 @@ void AZURESetup::reset() {
   plotTab->reset();
   setWindowTitle(tr("AZURE2 -- untitled"));
   GetConfig().configfile="";
+}
+
+void AZURESetup::showTabInfo() {
+  if(tabWidget->currentIndex()==0) pairsTab->showInfo(0);
+  if(tabWidget->currentIndex()==1) levelsTab->showInfo(0);
+  if(tabWidget->currentIndex()==2) segmentsTab->showInfo(0);
+  if(tabWidget->currentIndex()==3) targetIntTab->showInfo(0);
+  if(tabWidget->currentIndex()==4) runTab->showInfo(0);
+  if(tabWidget->currentIndex()==5) plotTab->showInfo(0);
 }

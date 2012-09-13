@@ -8,10 +8,14 @@
 #include <QPushButton>
 #include <QTableView>
 #include <QSortFilterProxyModel>
+#include <QSignalMapper>
+#include <QPointer>
 #include "PairsModel.h"
 #include "LevelsModel.h"
 #include "ChannelsModel.h"
 #include "ChannelDetails.h"
+
+class InfoDialog;
 
 class LevelsTab : public QWidget {
   Q_OBJECT
@@ -38,6 +42,7 @@ class LevelsTab : public QWidget {
   void updateChannelsPairRemoved(int pairIndex);
   void updateDetails(const QItemSelection &selection);
   void updateReducedWidth(const QString &string);
+  void showInfo(int which=0);
 
  signals:
   void readNewPair(PairsData,int,bool);
@@ -57,6 +62,10 @@ class LevelsTab : public QWidget {
   QSortFilterProxyModel *levelsModelProxy;
   QSortFilterProxyModel *proxyModel;
   ChannelDetails *channelDetails;
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 

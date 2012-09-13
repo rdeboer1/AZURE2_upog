@@ -3,10 +3,10 @@
 #include "LevelsHeaderView.h"
 #include "AddLevelDialog.h"
 #include "RichTextDelegate.h"
+#include "InfoDialog.h"
 #include <iostream>
 
 LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
-
   levelsModel=new LevelsModel(this);
   levelsModelProxy = new QSortFilterProxyModel(this);
   levelsModelProxy->setSourceModel(levelsModel);
@@ -96,13 +96,26 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   removeLevelButton->setEnabled(false);
   connect(removeLevelButton,SIGNAL(clicked()),this,SLOT(removeLevel()));
 
+  /*
+  mapper = new QSignalMapper(this);
+  connect(mapper,SIGNAL(mapped(int)),this,SLOT(showInfo(int)));
+  
+  infoButton[0] = new QPushButton(this);
+  infoButton[0]->setMaximumSize(28,28);
+  infoButton[0]->setIcon(style()->standardIcon(QStyle::SP_MessageBoxInformation));
+  mapper->setMapping(infoButton[0],1);
+  connect(infoButton[0],SIGNAL(clicked()),mapper,SLOT(map()));
+  */
+
   QGridLayout *buttonBox = new QGridLayout;
   buttonBox->addWidget(addLevelButton,0,0);
   buttonBox->addWidget(removeLevelButton,0,1);
   buttonBox->addItem(new QSpacerItem(28,28),0,2);
+  //buttonBox->addWidget(infoButton[0],0,3);
   buttonBox->setColumnStretch(0,0);
   buttonBox->setColumnStretch(1,0);
   buttonBox->setColumnStretch(2,1);
+  buttonBox->setColumnStretch(3,0);
 #ifdef MACX_SPACING
   buttonBox->setHorizontalSpacing(11);
 #else 
@@ -814,4 +827,14 @@ void LevelsTab::reset() {
   maxLSpin->blockSignals(false);
   maxMultSpin->blockSignals(false);
   maxNumMultSpin->blockSignals(false);
+}
+
+void LevelsTab::showInfo(int which) {
+  if(which<infoText.size()) {
+    if(!infoDialog[which]) {
+      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
+      infoDialog[which]->show();
+    } else infoDialog[which]->raise();
+  }
 }

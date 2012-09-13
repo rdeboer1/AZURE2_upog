@@ -3,12 +3,15 @@
 
 #include <QWidget>
 #include <QSortFilterProxyModel>
+#include <QSignalMapper>
+#include <QPointer>
 
 class Config;
 class AZUREPlot;
 class PlotEntry;
 class SegmentsDataModel;
 class SegmentsTestModel;
+class InfoDialog;
 
 QT_BEGIN_NAMESPACE
 
@@ -49,6 +52,7 @@ class PlotTab : public QWidget {
   void yAxisTypeChanged();
   void xAxisLogScaleChanged(bool);
   void yAxisLogScaleChanged(bool);
+  void showInfo(int which=0);
 
  public:
   friend class AZUREPlot;
@@ -68,6 +72,10 @@ class PlotTab : public QWidget {
   QPushButton* refreshButton;
   QPushButton* exportButton;
   QPushButton* printButton;
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 #endif

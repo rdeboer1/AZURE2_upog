@@ -1,9 +1,10 @@
 #include "RunTab.h"
 #include "ChooseFileButton.h"
 #include "FilteredTextEdit.h"
+#include "InfoDialog.h"
 #include <QtGui>
 
-RunTab::RunTab(QWidget* parent) : QWidget(parent) {
+RunTab::RunTab(QWidget* parent) : QWidget(parent) { 
   calcType = new QComboBox;
   calcType->addItem(tr("Calculate Segments From Data"));
   calcType->addItem(tr("Fit Segments From Data"));
@@ -227,4 +228,14 @@ void RunTab::reset() {
   tempStepText->setText("");
   fileTempText->setText("");
   runtimeText->clear();
+}
+
+void RunTab::showInfo(int which) {
+  if(which<infoText.size()) {
+    if(!infoDialog[which]) {
+      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
+      infoDialog[which]->show();
+    } else infoDialog[which]->raise();
+  }
 }

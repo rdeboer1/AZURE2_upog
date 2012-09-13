@@ -1,6 +1,7 @@
 #include <QtGui>
 #include "SegmentsTab.h"
 #include "RichTextDelegate.h"
+#include "InfoDialog.h"
 
 SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsDataModel = new SegmentsDataModel;
@@ -849,4 +850,14 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
 void SegmentsTab::reset() {
   segmentsDataModel->removeRows(0,segmentsDataModel->getLines().size(),QModelIndex());
   segmentsTestModel->removeRows(0,segmentsTestModel->getLines().size(),QModelIndex());
+}
+
+void SegmentsTab::showInfo(int which) {
+  if(which<infoText.size()) {
+    if(!infoDialog[which]) {
+      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
+      infoDialog[which]->show();
+    } else infoDialog[which]->raise();
+  }
 }

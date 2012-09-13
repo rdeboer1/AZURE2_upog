@@ -6,10 +6,14 @@
 #include <QItemSelection>
 #include <QTableView>
 #include <QPushButton>
+#include <QSignalMapper>
+#include <QPointer>
 #include "SegmentsDataModel.h"
 #include "SegmentsTestModel.h"
 #include "AddSegDataDialog.h"
 #include "AddSegTestDialog.h"
+
+class InfoDialog;
 
 class SegmentsTab : public QWidget {
   Q_OBJECT
@@ -57,6 +61,7 @@ class SegmentsTab : public QWidget {
     segmentsDataModel->setPairsModel(model);
     segmentsTestModel->setPairsModel(model);
   }
+  void showInfo(int which=0);
 
  private:
   void moveSegDataLine(unsigned int upDown);
@@ -78,6 +83,10 @@ class SegmentsTab : public QWidget {
   QPushButton *segTestDeleteButton;
   QPushButton *segTestUpButton;
   QPushButton *segTestDownButton;
+  QSignalMapper* mapper;
+  QPushButton *infoButton[5];
+  static const std::vector<QString> infoText;
+  QPointer<InfoDialog> infoDialog[5];
 };
 
 #endif

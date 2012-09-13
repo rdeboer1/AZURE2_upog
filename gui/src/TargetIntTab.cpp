@@ -1,4 +1,5 @@
 #include "TargetIntTab.h"
+#include "InfoDialog.h"
 #include <QtGui>
 
 
@@ -359,4 +360,14 @@ bool TargetIntTab::readFile(QTextStream& inStream) {
 
 void TargetIntTab::reset() {
   targetIntModel->removeRows(0,targetIntModel->getLines().size(),QModelIndex());
+}
+
+void TargetIntTab::showInfo(int which) {
+  if(which<infoText.size()) {
+    if(!infoDialog[which]) {
+      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
+      infoDialog[which]->show();
+    } else infoDialog[which]->raise();
+  }
 }

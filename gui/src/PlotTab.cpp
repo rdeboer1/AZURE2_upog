@@ -4,6 +4,7 @@
 #include "SegmentsDataModel.h"
 #include "SegmentsTestModel.h"
 #include "RichTextDelegate.h"
+#include "InfoDialog.h"
 #include <QtGui>
 #include <iostream>
 
@@ -39,7 +40,6 @@ QVariant SegDataProxyModel::data(const QModelIndex& index, int role) const {
 
 PlotTab::PlotTab(Config& config, SegmentsDataModel* dataModel, SegmentsTestModel* testModel, QWidget* parent) :  
   configure(config), QWidget(parent)  {
-
   azurePlot = new AZUREPlot(this,this);
 
   segDataProxyModel = new SegDataProxyModel(this);
@@ -242,4 +242,14 @@ void PlotTab::reset() {
   xAxisIsLogCheck->setChecked(false);
   yAxisXSButton->setChecked(true);
   yAxisIsLogCheck->setChecked(true);
+}
+
+void PlotTab::showInfo(int which) {
+  if(which<infoText.size()) {
+    if(!infoDialog[which]) {
+      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
+      infoDialog[which]->show();
+    } else infoDialog[which]->raise();
+  }
 }
