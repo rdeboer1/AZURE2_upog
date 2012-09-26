@@ -125,6 +125,10 @@ void AZURESetup::createActions() {
   showTabInfoAction = new QAction(tr("Show Documentation For Current Tab"),this);
   showTabInfoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
   connect(showTabInfoAction,SIGNAL(triggered()),this,SLOT(showTabInfo()));
+
+//  showWebSiteAction = new QAction(tr("azure.nd.edu"),this);
+//  showWebSiteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+//  connect(showWebSiteAction,SIGNAL(triggered()),this,SLOT(showWebSite()));
 }
 
 void AZURESetup::createMenus() {
@@ -153,6 +157,7 @@ void AZURESetup::createMenus() {
 
   helpMenu = menuBar()->addMenu(tr("&Documentation"));
   helpMenu->addAction(showTabInfoAction);
+//  helpMenu->addAction(showWebSiteAction);
 }
 
 void AZURESetup::updateRecent() {
