@@ -478,6 +478,10 @@ void CNuc::TransformIn(const Config& configure) {
 	      penes.push_back(1.0);
 	    }
 	  }
+	  if(denom<0.) configure.outStream << "WARNING: Denominator less than zero in E=" 
+					   << theLevel->GetE() << " MeV resonance transformation.  "
+					   <<  "Tranformation may not have been successful." 
+					   << std::endl;
 	  double nFSum=1.0;
 	  for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
 	    AChannel *theChannel=theJGroup->GetChannel(ch);

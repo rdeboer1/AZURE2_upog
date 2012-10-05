@@ -125,6 +125,9 @@ void AZURESetup::createActions() {
   showTabInfoAction = new QAction(tr("Show Documentation For Current Tab"),this);
   showTabInfoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
   connect(showTabInfoAction,SIGNAL(triggered()),this,SLOT(showTabInfo()));
+
+  openAZURESiteAction = new QAction(tr("Open AZURE Website..."),this);
+  connect(openAZURESiteAction,SIGNAL(triggered()),this,SLOT(openWebsite()));
 }
 
 void AZURESetup::createMenus() {
@@ -153,6 +156,7 @@ void AZURESetup::createMenus() {
 
   helpMenu = menuBar()->addMenu(tr("&Documentation"));
   helpMenu->addAction(showTabInfoAction);
+  helpMenu->addAction(openAZURESiteAction);
 }
 
 void AZURESetup::updateRecent() {
@@ -977,4 +981,13 @@ void AZURESetup::showTabInfo() {
   if(tabWidget->currentIndex()==3) targetIntTab->showInfo(0);
   if(tabWidget->currentIndex()==4) runTab->showInfo(0);
   if(tabWidget->currentIndex()==5) plotTab->showInfo(0);
+}
+
+void AZURESetup::openWebsite() {
+  if(!QDesktopServices::openUrl(QUrl("https://azure.nd.edu")))
+    QMessageBox::information(this,
+			     tr("Can't Open Browser"),
+			     tr("AZURE2 could not access your web browser.  "
+				"Please navitgate to https://azure.nd.edu/ "
+				"to visit the website."));
 }
