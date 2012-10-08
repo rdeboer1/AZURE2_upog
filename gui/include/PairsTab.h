@@ -30,7 +30,7 @@ class PairsTab : public QWidget {
   void editPair(PairsData pair,int pairIndex,bool fromFile);
   void removePair();
   void updateButtons(const QItemSelection &selection);
-  void showInfo(int which=0);
+  void showInfo(int which=0,QString title="");
 
  signals:
   void pairAdded(int);

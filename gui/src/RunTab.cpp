@@ -230,10 +230,10 @@ void RunTab::reset() {
   runtimeText->clear();
 }
 
-void RunTab::showInfo(int which) {
+void RunTab::showInfo(int which, QString title) {
   if(which<infoText.size()) {
     if(!infoDialog[which]) {
-      infoDialog[which] = new InfoDialog(infoText[which],this);
+      infoDialog[which] = new InfoDialog(infoText[which],this,title);
       infoDialog[which]->setAttribute(Qt:: WA_DeleteOnClose);
       infoDialog[which]->show();
     } else infoDialog[which]->raise();
