@@ -61,7 +61,7 @@ class SegmentsTab : public QWidget {
     segmentsDataModel->setPairsModel(model);
     segmentsTestModel->setPairsModel(model);
   }
-  void showInfo(int which=0);
+  void showInfo(int which=0,QString title="");
 
  private:
   void moveSegDataLine(unsigned int upDown);

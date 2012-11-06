@@ -7,7 +7,7 @@ class InfoDialog : public QDialog {
 Q_OBJECT
 
  public:
-  InfoDialog(const QString&, QWidget* parent=0);
+  InfoDialog(const QString&, QWidget* parent=0, QString title="");
   
 };
 

@@ -52,7 +52,7 @@ class PlotTab : public QWidget {
   void yAxisTypeChanged();
   void xAxisLogScaleChanged(bool);
   void yAxisLogScaleChanged(bool);
-  void showInfo(int which=0);
+  void showInfo(int which=0,QString title="");
 
  public:
   friend class AZUREPlot;

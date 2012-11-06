@@ -34,7 +34,7 @@ class TargetIntTab : public QWidget {
   void editLine();
   void deleteLine();
   void updateButtons(const QItemSelection &selection);
-  void showInfo(int which=0);
+  void showInfo(int which=0,QString title="");
 
  private:
   TargetIntModel *targetIntModel;

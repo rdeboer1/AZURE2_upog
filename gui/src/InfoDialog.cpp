@@ -1,8 +1,10 @@
 #include "InfoDialog.h"
 #include <QtGui>
 
-InfoDialog::InfoDialog(const QString& string, QWidget* parent) : QDialog(parent) {
-  setWindowTitle(tr("Documentation"));
+InfoDialog::InfoDialog(const QString& string, 
+		       QWidget* parent,
+		       QString title) : QDialog(parent) {
+  setWindowTitle(QString("Documentation for %1 Tab").arg(title));
   setMinimumSize(600,400);
 
   QTextEdit* textEdit = new QTextEdit;

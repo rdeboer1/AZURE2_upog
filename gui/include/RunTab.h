@@ -30,7 +30,7 @@ class RunTab : public QWidget {
   void reset();
 
  public slots:
-  void showInfo(int which=0);
+  void showInfo(int which=0, QString title="");
 
  private slots:
   void calculationTypeChanged(int index);

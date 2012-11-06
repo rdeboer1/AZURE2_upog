@@ -42,7 +42,7 @@ class LevelsTab : public QWidget {
   void updateChannelsPairRemoved(int pairIndex);
   void updateDetails(const QItemSelection &selection);
   void updateReducedWidth(const QString &string);
-  void showInfo(int which=0);
+  void showInfo(int which=0,QString title="");
 
  signals:
   void readNewPair(PairsData,int,bool);

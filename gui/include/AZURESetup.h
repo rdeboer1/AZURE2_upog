@@ -56,6 +56,7 @@ class AZURESetup : public QMainWindow {
   void editOptions();
   void showAbout();
   void showTabInfo();
+  void openWebsite();
 
  private:
   bool readFile(QString filename);
@@ -87,6 +88,7 @@ class AZURESetup : public QMainWindow {
   enum { numRecent = 5 };
   QAction* recentFileActions[numRecent];
   QAction* showTabInfoAction; 
+  QAction* openAZURESiteAction;
 
   QActionGroup* matrixActionGroup;
 
