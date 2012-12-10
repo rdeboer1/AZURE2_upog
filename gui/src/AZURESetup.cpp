@@ -969,7 +969,9 @@ void AZURESetup::reset() {
   segmentsTab->reset();
   targetIntTab->reset();
   runTab->reset();
+#ifdef USE_QWT
   plotTab->reset();
+#endif
   setWindowTitle(tr("AZURE2 -- untitled"));
   GetConfig().configfile="";
 }
@@ -981,7 +983,9 @@ void AZURESetup::showTabInfo() {
   if(tabWidget->currentIndex()==2) segmentsTab->showInfo(0,tabTitle);
   if(tabWidget->currentIndex()==3) targetIntTab->showInfo(0,tabTitle);
   if(tabWidget->currentIndex()==4) runTab->showInfo(0,tabTitle);
+#ifdef USE_QWT
   if(tabWidget->currentIndex()==5) plotTab->showInfo(0,tabTitle);
+#endif
 }
 
 void AZURESetup::openWebsite() {
