@@ -34,10 +34,11 @@ set (AZURESETUP_HEADERS ../include/AddLevelDialog.h
 ../include/TargetIntTab.h ../include/TextEditBuffer.h
 ../include/AboutAZURE2Dialog.h ../include/InfoDialog.h)
 
+set (AZURESETUP_RCCS AZURESetup.qrc)
+
 IF( USE_QWT )
 set (AZURESETUP_SOURCES ${AZURESETUP_SOURCES} PlotTab.cpp AZUREPlot.cpp)
 set (AZURESETUP_HEADERS ${AZURESETUP_HEADERS} ../include/PlotTab.h ../include/AZUREPlot.h)
-set (AZURESETUP_RCCS AZURESetup.qrc)
 add_definitions(-DUSE_QWT)
 ENDIF( USE_QWT )
 

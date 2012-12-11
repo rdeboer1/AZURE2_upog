@@ -51,14 +51,10 @@ double AZURECalc::operator()(const vector_r& p) const {
       thisSegment = firstSumIterator;
     }
     double dataNorm=thisSegment->GetNorm();
-    double dataNormNominal=thisSegment->GetNominalNorm();
-    double dataNormError=dataNormNominal/100.*thisSegment->GetNormError();
     double CrossSection=data.point()->GetCMCrossSection()*dataNorm;
     double CrossSectionError=data.point()->GetCMCrossSectionError()*dataNorm;
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
     double pointChiSquared=pow(chi,2.0);
-    if(dataNormError!=0.) 
-      pointChiSquared+= pow((dataNorm-dataNormNominal)/dataNormError,2.0);
     segmentChiSquared+=pointChiSquared;
     if(data.segment()->GetPoints().end()-1==data.point()) {
       if(!isFit) thisSegment->SetSegmentChiSquared(segmentChiSquared);
@@ -66,6 +62,10 @@ double AZURECalc::operator()(const vector_r& p) const {
 	firstSumIterator=localData->GetSegments().end();
 	lastSumIterator=localData->GetSegments().end();
       }
+      double dataNormNominal=thisSegment->GetNominalNorm();
+      double dataNormError=dataNormNominal/100.*thisSegment->GetNormError();
+      if(dataNormError!=0.)
+	segmentChiSquared += pow((dataNorm-dataNormNominal)/dataNormError,2.0);
       chiSquared+=segmentChiSquared;
     }
   }
