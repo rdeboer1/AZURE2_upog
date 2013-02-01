@@ -1033,6 +1033,7 @@ void EData::FillMnParams(ROOT::Minuit2::MnUserParameters &p) {
     if(segment->IsVaryNorm()) {
       sprintf(varname,"segment_%d_norm",segment->GetSegmentKey());
       p.Add(varname,segment->GetNorm(),segment->GetNorm()*0.05);
+      p.SetLowerLimit(varname,0.0);
     }
     if(segment->IsTotalCapture()) segment+=segment->IsTotalCapture()-1;
   }
