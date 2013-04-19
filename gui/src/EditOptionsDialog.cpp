@@ -6,7 +6,7 @@ EditOptionsDialog::EditOptionsDialog(QWidget* parent) : QDialog(parent) {
   useGSLCoulCheck = new QCheckBox(tr("Use GSL Coulomb functions"));
   useBruneCheck = new QCheckBox(tr("Use Brune formalism"));
   ignoreExternalsCheck = new QCheckBox(tr("Ignore external width\nif internal width is zeroed"));
-  useRMCCheck = new QCheckBox(tr("Use RMC capture formalism"));
+  useRMCCheck = new QCheckBox(tr("Use RMC capture formalism\n(neutron capture only)"));
   noTransformCheck = new QCheckBox(tr("Do not perform parameter\ntransformations"));
   noLongWavelengthCheck = new QCheckBox(tr("Do not use long wavelength\n"
 					   "approximation for EL external capture"));

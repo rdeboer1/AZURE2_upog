@@ -69,7 +69,7 @@ void printHelp() {
 	     << std::setw(25) << std::left << "\t--no-long-wavelenth:" << std::setw(0) << "Do not use long wavelength approximation for EL capture." << std::endl
 	     << std::setw(25) << std::left << "\t--use-brune:" << std::setw(0) << "Use the alternative level matrix of C.R. Brune." << std::endl
 	     << std::setw(25) << std::left << "\t--ignore-externals:" << std::setw(0) << "Ignore external resonant capture amplitude if internal width is zero." << std::endl
-	     << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture." << std::endl
+	     << std::setw(25) << std::left << "\t--use-rmc:" << std::setw(0) << "Use Reich-Moore approximation for capture (neutron capture only)." << std::endl
 	     << std::setw(25) << std::left << "\t--gsl-coul:" << std::setw(0) << "Use GSL Coulomb functions (faster, but less accurate)." << std::endl;
 }
 

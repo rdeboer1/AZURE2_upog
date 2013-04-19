@@ -95,7 +95,7 @@ class Config {
   ///Parameters for calculating reaction rate.
   RateParams  rateParams;
   ///A constant indicating the maximum order of the Legendre polynomials to calculate.
-  static const int maxLOrder=10;
+  static const int maxLOrder=20;
   int ReadConfigFile();
 #ifndef NO_STAT
   int CheckForInputFiles();
