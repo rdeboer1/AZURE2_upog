@@ -5,6 +5,7 @@
 #include "ExtrapLine.h"
 #include "SegLine.h"
 #include "Minuit2/MnUserParameters.h"
+#include "GSLException.h"
 #include <iostream>
 #include <iomanip>
 #include <omp.h>
@@ -629,13 +630,24 @@ void EData::PrintLegendreP(const Config &configure) {
 
 int EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
   for(ESegmentIterator segment=GetSegments().begin(); segment<GetSegments().end(); segment++) {
-#pragma omp parallel for
+    bool localStop = false;
+#pragma omp parallel for shared(localStop,configure)
     for(int i=1;i<=segment->NumPoints();i++) {
-      if(configure.stopFlag) continue;
+      if(configure.stopFlag||localStop) continue;
       EPoint *point = segment->GetPoint(i);
-      if(!(point->IsMapped())) point->CalcEDependentValues(theCNuc,configure);
+      if(!(point->IsMapped())){
+	try {
+	  point->CalcEDependentValues(theCNuc,configure);
+	} catch(GSLException e) {
+#pragma omp critical 
+	  { 
+	    configure.outStream << e.what() << std::endl;
+	    localStop = true;
+	  }
+	}
+      }
     }
-    if(configure.stopFlag) return -1;
+    if(configure.stopFlag||localStop) return -1;
   }
   return 0;
 }
@@ -893,11 +905,22 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 		int numPoints=segment->NumPoints();
 		int pointIndex=0;
 		time_t startTime = time(NULL);
-#pragma omp parallel for
+		bool localStop = false;
+#pragma omp parallel for shared(configure,localStop) 
 		for(int i=1;i<=numPoints;i++) {
-		  if(configure.stopFlag) continue;
+		  if(configure.stopFlag||localStop) continue;
 		  EPoint *point = segment->GetPoint(i);
-		  if(!(point->IsMapped())) point->CalculateECAmplitudes(theCNuc,configure);
+		  if(!(point->IsMapped())) {
+		    try {
+		      point->CalculateECAmplitudes(theCNuc,configure);
+		    } catch(GSLException e) {
+#pragma omp critical
+		      {
+			configure.outStream << e.what() << std::endl;
+			localStop=true;
+		      }
+		    }
+		  }
 		  ++pointIndex;
 		  if(difftime(time(NULL),startTime)>0.25) {
 		    startTime=time(NULL);
@@ -913,7 +936,7 @@ int EData::CalculateECAmplitudes(CNuc *theCNuc,const Config& configure) {
 					<< std::setw(0) << progress << percent*100 << '%';configure.outStream.flush();
 		  }
 		}
-		if(configure.stopFlag) {
+		if(configure.stopFlag||localStop) {
 		  if(out.is_open()) out.close();
 		  if(in.is_open()) in.close();
 		  return -1;
