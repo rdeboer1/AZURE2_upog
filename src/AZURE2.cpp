@@ -612,7 +612,7 @@ int main(int argc,char *argv[]){
   // and execute
   AZUREMain azureMain(configure);
   configure.outStream << std::endl; startMessage(configure);
-  azureMain();
+  int returnValue = azureMain();
   
   //Print exit message
   exitMessage(configure);
@@ -620,5 +620,5 @@ int main(int argc,char *argv[]){
   //Write readline history file
   if(useReadline) write_history("./.azure_history");
   
-  return 0;
+  return returnValue;
 }
