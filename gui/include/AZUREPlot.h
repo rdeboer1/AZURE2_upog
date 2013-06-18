@@ -23,7 +23,7 @@ struct PlotPoint {
 
 class AZUREZoomer : public QwtPlotZoomer {
  public:
-  AZUREZoomer(QwtPlotCanvas *canvas) : QwtPlotZoomer(canvas) {};
+  AZUREZoomer(QWidget *canvas) : QwtPlotZoomer(canvas) {};
  protected:
   QwtText trackerTextF( const QPointF &pos ) const;
   
