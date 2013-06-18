@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "ReactionRate.h"
 #include "Minuit2/MnPrint.h"
+#include "GSLException.h"
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
 #include <Minuit2/MnMinos.h>
@@ -56,8 +57,15 @@ int AZUREMain::operator()(){
   }
 
   //Initialize compound nucleus object
-  compound()->Initialize(configure());
- 
+  try {
+    compound()->Initialize(configure());
+  } catch (GSLException e) {
+    configure().outStream << e.what() << std::endl;
+    configure().outStream << std::endl
+			  << "Calculation was aborted." << std::endl;
+    return -1;
+  }
+
   //Create new parameters for minuit, fill them from compound nucleus object and data file.
   AZUREParams params;
   compound()->FillMnParams(params.GetMinuitParams());
@@ -162,7 +170,14 @@ int AZUREMain::operator()(){
   }
 
   configure().outStream << "Performing final parameter transformation..." << std::endl;
-  compound()->TransformOut(configure());
+  try {
+    compound()->TransformOut(configure());
+  } catch (GSLException e) {
+    configure().outStream << e.what() << std::endl;
+    configure().outStream << "Problem with output transformation.  Aborting." 
+			  << std::endl;
+    return -1;
+  }
   compound()->PrintTransformParams(configure());
 
   return 0;

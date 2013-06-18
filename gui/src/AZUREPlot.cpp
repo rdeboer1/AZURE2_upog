@@ -237,7 +237,7 @@ AZUREPlot::AZUREPlot(PlotTab* plotTab,QWidget* parent) :
 void AZUREPlot::setXAxisLog(bool set) {
   setAxisAutoScale(QwtPlot::xBottom,true);
   setAxisAutoScale(QwtPlot::yLeft,true);
-  if(set) setAxisScaleEngine(QwtPlot::xBottom,new QwtLog10ScaleEngine);
+  if(set) setAxisScaleEngine(QwtPlot::xBottom,new QwtLogScaleEngine);
   else setAxisScaleEngine(QwtPlot::xBottom,new QwtLinearScaleEngine);
   zoomer->setZoomBase(false);
 };
@@ -246,7 +246,7 @@ void AZUREPlot::setYAxisLog(bool set) {
   setAxisAutoScale(QwtPlot::xBottom,true);
   setAxisAutoScale(QwtPlot::yLeft,true);
   if(set) {
-    QwtLog10ScaleEngine* scaleEngine = new QwtLog10ScaleEngine;
+    QwtLogScaleEngine* scaleEngine = new QwtLogScaleEngine;
     scaleEngine->setMargins(0.5,0.5);
     setAxisScaleEngine(QwtPlot::yLeft,scaleEngine);
   } else setAxisScaleEngine(QwtPlot::yLeft,new QwtLinearScaleEngine);

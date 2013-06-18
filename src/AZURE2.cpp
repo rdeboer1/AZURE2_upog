@@ -15,11 +15,13 @@
 #include "NucLine.h"
 #include "SegLine.h"
 #include "ExtrapLine.h"
+#include "GSLException.h"
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <vector>
+#include <gsl/gsl_errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -540,6 +542,9 @@ int main(int argc,char *argv[]){
       printHelp();
       return 0;
     }
+
+  //Set GSL Error Handler
+  gsl_set_error_handler (&GSLException::GSLErrorHandler);
   
   //If GUI is built, look for --no-gui option.  If not set, hand control to GUI.
 #ifdef GUI_BUILD
@@ -607,7 +612,7 @@ int main(int argc,char *argv[]){
   // and execute
   AZUREMain azureMain(configure);
   configure.outStream << std::endl; startMessage(configure);
-  azureMain();
+  int returnValue = azureMain();
   
   //Print exit message
   exitMessage(configure);
@@ -615,5 +620,5 @@ int main(int argc,char *argv[]){
   //Write readline history file
   if(useReadline) write_history("./.azure_history");
   
-  return 0;
+  return returnValue;
 }
