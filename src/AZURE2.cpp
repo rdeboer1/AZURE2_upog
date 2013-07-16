@@ -24,6 +24,7 @@
 #include <gsl/gsl_errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <string.h>
 
 #ifdef GUI_BUILD
 extern int start_gui(int argc, char *argv[]);

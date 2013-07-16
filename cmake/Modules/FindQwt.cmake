@@ -5,7 +5,7 @@ ENDIF(NOT QT4_FOUND)
 IF( QT4_FOUND )
 	# Is Qwt6 installed? Look for header files
 	FIND_PATH( Qwt6_INCLUDE_DIR qwt.h 
-               PATHS ${QT_INCLUDE_DIR} /usr/local/qwt/include /usr/local/include /usr/include/qwt /usr/include /usr/local/qwt-6.0.1 /usr/local/qwt-6.0.0 $ENV{HOME}/local/qwt-6.0.0 $ENV{HOME}/local/qwt-6.0.1
+               PATHS ${QT_INCLUDE_DIR} /usr/local/qwt/include /usr/local/include /usr/include/qwt /usr/include /usr/local/qwt-6.0.1 /usr/local/qwt-6.0.0 $ENV{HOME}/local/qwt-6.0.0 $ENV{HOME}/local/qwt-6.0.1 /usr/local/qwt-6.1.0-svn
                PATH_SUFFIXES qwt qwt6 qwt-qt4 qwt6-qt4 include qwt/include qwt6/include qwt-qt4/include qwt6-qt4/include lib/qwt.framework/Versions/6/Headers ENV PATH)
 	
 	# Find Qwt version
@@ -16,7 +16,7 @@ IF( QT4_FOUND )
 		IF( QWT_IS_VERSION_6 )
 
 		STRING(REGEX REPLACE ".*#define[\\t\\ ]+QWT_VERSION_STR[\\t\\ ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*" "\\1" Qwt_VERSION "${QWT_GLOBAL_H}")
-		FIND_LIBRARY( Qwt6_Qt4_LIBRARY NAMES qwt6-qt4 qwt-qt4 qwt6 qwt PATHS $ENV{HOME}/local/qwt-6.0.0/lib $ENV{HOME}/local/qwt-6.0.1/lib /usr/local/qwt-6.0.0/lib /usr/local/qwt-6.0.1/lib /usr/local/qwt/lib /usr/local/lib /usr/lib ${QT_LIBRARY_DIR})
+		FIND_LIBRARY( Qwt6_Qt4_LIBRARY NAMES qwt6-qt4 qwt-qt4 qwt6 qwt PATHS $ENV{HOME}/local/qwt-6.0.0/lib $ENV{HOME}/local/qwt-6.0.1/lib /usr/local/qwt-6.0.0/lib /usr/local/qwt-6.0.1/lib /usr/local/qwt-6.1.0-svn/lib /usr/local/qwt/lib /usr/local/lib /usr/lib ${QT_LIBRARY_DIR})
 						
 		ENDIF( QWT_IS_VERSION_6 )		
 	
