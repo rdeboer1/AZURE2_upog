@@ -38,7 +38,7 @@ LevelsTab::LevelsTab(QWidget *parent) : QWidget(parent) {
   maxLSpin->setMaximum(10);
   maxLSpin->setSingleStep(1);
   maxLSpin->setValue(2);
-  QLabel *maxLLabel = new QLabel(tr("Maximum Oribtal Momentum"));
+  QLabel *maxLLabel = new QLabel(tr("Maximum Orbital Momentum"));
   maxMultSpin = new QSpinBox;
   maxMultSpin->setMinimum(1);
   maxMultSpin->setMaximum(10);
