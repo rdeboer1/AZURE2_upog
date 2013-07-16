@@ -3,6 +3,7 @@
 #include "AZUREParams.h"
 #include "Config.h"
 #include "ReactionRate.h"
+#include "Minuit2/MnPrint.h"
 #include "GSLException.h"
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnMigrad.h>
@@ -110,7 +111,97 @@ int AZUREMain::operator()(){
 	    errors.push_back(error);
 	  } else errors.push_back(std::pair< double, double > (0.,0.));
 	}
+
+        // New output of the covariance matrix
+        char filename[256];
+        sprintf(filename,"%scovariance_matrix.out",configure().outputdir.c_str());
+        std::ofstream out;
+        out.open(filename);
+        if(out) {
+
+          // Write header information
+          params.GetMinuitParams()=min.UserParameters();
+          out << "Parameter List" << std::endl << std::endl;
+          for(int i = 0; i<params.GetMinuitParams().Params().size(); i++) { 
+            out << std::setw(20) << params.GetMinuitParams().GetName(i)
+                << " (" << std::setw(3) << i << ")"	 
+                << std::scientific << std::setw(20) <<  params.GetMinuitParams().Value(i);
+            if(params.GetMinuitParams().Parameter(i).IsFixed()) {
+	      out << " Fixed" << std::endl;
+            }
+	    else {
+              out << " Fitted by Minuit" << std::endl;    
+            }
+	  }
+
+	  std::cout << min.UserCovariance();
+
+	  std::vector <double> CovarianceData;
+          CovarianceData=min.UserCovariance().Data();
+          int parameterTable[100];
+          int size=0;
+
+          // Header for Covariance Matrix
+          out << std::endl <<  "Covariance Matrix" << std::endl << std::endl;
+          out << std::setw(5) << " ";
+          for(int i = 0; i<params.GetMinuitParams().Params().size(); i++) {
+            if(!params.GetMinuitParams().Parameter(i).IsFixed()) {
+              out << std::setw(15) << i ;
+              parameterTable[size]=i;
+              size=size+1;
+            }
+          }
+          out << std::endl;
+
+	  std::cout << "covariance length " << CovarianceData.size() << std::endl;
+
+          // Covariance matrix
+          for(int i = 0; i<size; i++) {
+            out << std::setw(5) << parameterTable[i];
+            for(int j = 0; j<size; j++) {
+              int k;
+              if(i<=j) { k=((j+1)*j)/2+i; }
+              if(i>j)  { k=((i+1)*i)/2+j; }
+	      std::cout << std::setw(5) << i << std::setw(5) << j << std::setw(5) << k << std::endl;
+              out << std::setw(15) << CovarianceData[k];
+            }
+            out << std::endl;
+	  }
+
+          // Header for Correlation Matrix
+          out << std::endl <<  "Correlation Matrix" << std::endl << std::endl;
+          out << std::setw(5) << " ";
+          for(int i = 0; i<params.GetMinuitParams().Params().size(); i++) {
+            if(!params.GetMinuitParams().Parameter(i).IsFixed()) {
+              out << std::setw(15) << i ;
+            }
+          }
+          out << std::endl;
+
+          // Correlation matrix
+          for(int i = 0; i<size; i++) {
+            out << std::setw(5) << parameterTable[i];
+            for(int j = 0; j<size; j++) {
+              int k;
+              if(i<=j) { k=((j+1)*j)/2+i; }
+              if(i>j)  { k=((i+1)*i)/2+j; }
+              int jdiag=((j+2)*(j+1))/2-1;
+              int idiag=((i+2)*(i+1))/2-1;
+	      std::cout << k << "  " << CovarianceData[k] << std::endl;
+              out << std::setw(15) << std::fixed << CovarianceData[k]/sqrt(fabs(CovarianceData[jdiag]*CovarianceData[idiag]));
+            }
+            out << std::endl;
+	  }
+
+          out.flush();
+          out.close();
+        } else std::cout << "Could not save " << configure().outputdir.c_str() 
+                         << "covariance_matrix.out file." << std::endl;   
+
+        // ECS this line added to set the azure variables to the minimised fit parameters
+        params.GetMinuitParams()=min.UserParameters();
 	params.WriteParameterErrors(errors,configure());
+
       }
       params.GetMinuitParams()=min.UserParameters();
       params.WriteUserParameters(configure(),true);
