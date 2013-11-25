@@ -454,7 +454,7 @@ void CNuc::TransformIn(const Config& configure) {
 		double tempPene=1e-10;
 		double tempGamma=theLevel->GetGamma(ch);
 		if(theChannel->GetRadType()=='M'&&theChannel->GetL()==1) {
-		  tempPene=3.0*jValue/4.0/(jValue+1.);
+		  tempPene=3.0*jValue/4.0/(jValue+1.)/nuclearMagneton/nuclearMagneton;
 		} else if(theChannel->GetRadType()=='E'&&theChannel->GetL()==2) {
 		  tempPene=60.0*jValue*(2.*jValue-1.)/(jValue+1.)/(2.*jValue+3.);
 		  tempGamma=tempGamma*100*sqrt(fstruc*hbarc);
@@ -1367,7 +1367,7 @@ void CNuc::TransformOut(const Config& configure) {
 	    double jValue=theJGroup->GetJ();
 	    double pene=1e-10;
 	    if(theChannel->GetRadType()=='M'&&theChannel->GetL()==1)
-	      pene=3.0*jValue/4.0/(jValue+1.);
+	      pene=3.0*jValue/4.0/(jValue+1.)/nuclearMagneton/nuclearMagneton;
 	    else if(theChannel->GetRadType()=='E'&&theChannel->GetL()==2)
 	      pene=60.0*jValue*(2.*jValue-1.)/(jValue+1.)/(2.*jValue+3.);
 	    if((int)(2*jValue)%2!=0) pene*=-1.;
