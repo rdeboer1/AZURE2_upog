@@ -85,7 +85,7 @@ int AZUREMain::operator()(){
 			  << "Calculation was aborted." << std::endl;
       return -1;
     }
-  
+ 
     //Declare a new instance of FCNBase
     AZURECalc theFunc(data(),compound(),configure());
     theFunc.SetErrorDef(1.0);

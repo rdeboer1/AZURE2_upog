@@ -296,7 +296,7 @@ void CNuc::Initialize(const Config &configure) {
   this->CalcAngularDists(configure.maxLOrder);
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ANGULAR_DISTS) 
     this->PrintAngularDists(configure);
-  
+    
 }
 
 /*!

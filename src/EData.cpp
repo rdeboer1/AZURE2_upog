@@ -450,7 +450,7 @@ int EData::Initialize(CNuc *compound,const Config &configure) {
   if(this->CalcEDependentValues(compound,configure)==-1) return -1;
   if((configure.fileCheckMask|configure.screenCheckMask) & Config::CHECK_ENERGY_DEP) 
     this->PrintEDependentValues(configure,compound);
-
+std::cout << "made it!" << std::endl; 
   //Calculate legendre polynomials for each data point
   configure.outStream << "Calculating Legendre Polynomials..." << std::endl;
   this->CalcLegendreP(configure.maxLOrder);
