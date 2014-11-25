@@ -468,7 +468,7 @@ void CNuc::TransformIn(const Config& configure) {
 		else isNegative.push_back(false);
 		tempGammas.push_back(fabs(theLevel->GetGamma(ch))/1e6);
 		double tempPene = (configure.paramMask & Config::USE_RMC_FORMALISM) ? 1.0 : pow(fabs(localEnergy)/hbarc,2.0*theChannel->GetL()+1);
-		if(tempPene<1e-10) tempPene=1e-10;
+		if(tempPene<1e-16) tempPene=1e-16;
 		penes.push_back(tempPene);
 	      }
 	    } else if(theChannel->GetRadType()=='F'||theChannel->GetRadType()=='G') {
