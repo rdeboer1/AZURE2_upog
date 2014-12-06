@@ -535,7 +535,7 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config&
 void EPoint::ConvertLabAngleGammas(PPair *entrancePair) {
   double beta = sqrt(this->GetLabEnergy()*(this->GetLabEnergy()+2.0*entrancePair->GetM(1)*uconv))/
     ((entrancePair->GetM(1)+entrancePair->GetM(2))*uconv + this->GetLabEnergy());
-  cm_angle_ = acos((cos(this->GetLabAngle()*pi/180.)-beta)/(1-beta*cos(this->GetLabAngle()*pi/180.)));
+  cm_angle_ = 180./pi*acos((cos(this->GetLabAngle()*pi/180.)-beta)/(1-beta*cos(this->GetLabAngle()*pi/180.)));
 }
 
 /*!
