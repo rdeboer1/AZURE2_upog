@@ -200,6 +200,11 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 		  }
 		  thePoint->ConvertCrossSection(entrancePair,exitPair);
 		}
+		if (entrancePair->GetPType()==10&&theSegment->IsDifferential()&&
+		  !theSegment->IsPhase()&&!theSegment->IsAngularDist()){
+		    thePoint->ConvertLabAngleGammas(entrancePair);
+		    thePoint->ConvertCrossSectionGammas(entrancePair);
+		}
 		if(eStep==0.0) break;
 	      }
 	      if(aStep==0.0) break;

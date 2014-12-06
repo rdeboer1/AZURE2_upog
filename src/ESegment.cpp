@@ -208,6 +208,10 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
 	  }
 	  this->GetPoint(this->NumPoints())->ConvertCrossSection(entrancePair,exitPair);
 	}
+	if (entrancePair->GetPType()==10&&this->IsDifferential()&&!this->IsPhase()) {
+	  this->GetPoint(this->NumPoints())->ConvertLabAngleGammas(entrancePair);
+	  this->GetPoint(this->NumPoints())->ConvertCrossSectionGammas(entrancePair);
+	}
       }
     }
   }

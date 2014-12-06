@@ -82,6 +82,8 @@ class EPoint {
   void ConvertLabAngle(PPair*);
   void ConvertLabAngle(PPair*,PPair*,const Config&);
   void ConvertCrossSection(PPair*,PPair*);
+  void ConvertLabAngleGammas(PPair*); 
+  void ConvertCrossSectionGammas(PPair*);
   void AddLegendreP(double);
   void SetGeometricalFactor(double);
   void SetFitCrossSection(double);

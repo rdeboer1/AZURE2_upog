@@ -530,6 +530,15 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config&
 }
 
 /*!
+ * Calculates center of mass angles for gamma rays for the relativistic correction.
+ */
+void EPoint::ConvertLabAngleGammas(PPair *entrancePair) {
+  double beta = sqrt(this->GetLabEnergy()*(this->GetLabEnergy()+2.0*entrancePair->GetM(1)*uconv))/
+    ((entrancePair->GetM(1)+entrancePair->GetM(2))*uconv + this->GetLabEnergy());
+  cm_angle_ = acos((cos(this->GetLabAngle()*pi/180.)-beta)/(1-beta*cos(this->GetLabAngle()*pi/180.)));
+}
+
+/*!
  * Calculates center of mass cross sections.  When a data point is initialized, the same cross section is copied into
  * the attributes for center of mass and lab cross section.  If this function is called, the center of mass cross section
  * attribute is overwritten with the value calculated from the lab cross section attribute.
@@ -555,6 +564,22 @@ void EPoint::ConvertCrossSection(PPair *entrancePair, PPair *exitPair) {
   else {
     conversionFactor=pow(sin(pi/180.*this->GetLabAngle())/sin(pi/180.*this->GetCMAngle()),2.0)*cos(pi/180.*(this->GetCMAngle()-this->GetLabAngle()));
   }
+  cm_crosssection_=this->GetLabCrossSection()*conversionFactor;
+  cm_dcrosssection_=this->GetLabCrossSectionError()*conversionFactor;
+}
+
+/*!
+ * Calculates center of mass cross sections for gamma rays.
+ */
+
+void EPoint::ConvertCrossSectionGammas(PPair *entrancePair) {
+
+  double conversionFactor;
+
+  double beta = sqrt(this->GetLabEnergy()*(this->GetLabEnergy()+2.0*entrancePair->GetM(1)*uconv))/
+    ((entrancePair->GetM(1)+entrancePair->GetM(2))*uconv + this->GetLabEnergy());
+  
+  conversionFactor = pow(1.0-beta,2.0)/(1-beta*cos(this->GetLabAngle()*pi/180.0));
   cm_crosssection_=this->GetLabCrossSection()*conversionFactor;
   cm_dcrosssection_=this->GetLabCrossSectionError()*conversionFactor;
 }
