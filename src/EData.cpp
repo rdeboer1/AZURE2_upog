@@ -645,6 +645,7 @@ int EData::CalcEDependentValues(CNuc *theCNuc,const Config& configure) {
 	} catch(GSLException e) {
 #pragma omp critical 
 	  { 
+	    std::cout<<point->GetLabEnergy()<<"\t"<<point->GetLabAngle()<<std::endl;
 	    configure.outStream << e.what() << std::endl;
 	    localStop = true;
 	  }
