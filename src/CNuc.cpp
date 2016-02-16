@@ -1243,8 +1243,6 @@ void CNuc::TransformOut(const Config& configure) {
 		  double radius=exitPair->GetChRad();
 		  newBoundary=theCoulombFunction.PEShift(theChannel->GetL(),radius,localEnergy);
 		}
-		std::cout << "iteration = " << iteration << std::endl;
-		std::cout << "B_c = " << tempBoundary[ch-1] << "\t" << "B'_c = " << newBoundary << std::endl;
 		boundaryDiff.push_back(newBoundary-tempBoundary[ch-1]);
 		tempBoundary[ch-1]=newBoundary;
 	      } else boundaryDiff.push_back(boundaryDiff[0]);
@@ -1268,7 +1266,6 @@ void CNuc::TransformOut(const Config& configure) {
 	    EigenFunc eigenFunc(cMatrix);	
 	    if(fabs(eigenFunc.eigenvalues()[thisLevel]-tempE[thisLevel])<=energyTolerance) 
 	      done=true;
-	    std::cout << "eigenvalue = " << eigenFunc.eigenvalues()[thisLevel] << "\t" << "tempE = " << tempE[thisLevel] << std::endl;
 	    matrix_r newGamma;
 	    for(int mu=0;mu<tempE.size();mu++) {
 	      vector_r tempChanVector;
