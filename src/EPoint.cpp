@@ -1123,7 +1123,7 @@ void EPoint::IntegrateTargetEffect() {
 	  if(i>=2) integral=energyStep/3.0*(intFirst+4.0*intOddSum+2.0*intEvenSum-3.0*integrand);
       }
     }
-    yield=integral;    
+    yield=integral/(targetEffect->GetDensity()*1.E-24);    
   }
   this->SetFitCrossSection(yield);
 }
