@@ -1473,7 +1473,7 @@ void CNuc::PrintTransformParams(const Config& configure) {
 	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e9 
 		  << " meV      ";
 	  }  
-	  out << "  g_int = " << std::setw(12) << theLevel->GetTransformGamma(ch); 
+	  out << "  g_int = " << std::setw(12)<< std::scientific << theLevel->GetTransformGamma(ch); 
 	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(1/2) ";
 	  else out << "           ";
 	  out << "  g_ext = " << std::setw(20) << theLevel->GetExternalGamma(ch);
