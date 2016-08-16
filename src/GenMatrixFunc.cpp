@@ -2,6 +2,7 @@
 #include "EPoint.h"
 #include "GenMatrixFunc.h"
 #include <assert.h>
+#include <iostream>
 
 /*!
  * The child classes AMatrixFunc or RMatrixFunc contain functions
@@ -78,6 +79,11 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	      int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
 	      if(!tempTNum) {
 		TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
+		/*std::cout<<"jValue: " << "\t" << jValue
+		         <<"lValue: " << "\t" << lValue
+		         <<"lpValue: " << "\t" << lpValue
+		         <<"T-matrix element: " << "\t" << this->GetTMatrixElement(k,m)
+		         <<std::endl; */
 		this->NewTempTMatrix(temptmatrix);
 	      } else this->AddToTempTMatrix(tempTNum,this->GetTMatrixElement(k,m));
 	    }

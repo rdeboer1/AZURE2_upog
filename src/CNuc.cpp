@@ -1440,7 +1440,7 @@ void CNuc::PrintTransformParams(const Config& configure) {
 	  else out << "  L = " << std::setw(2) << theChannel->GetRadType() << theChannel->GetL();
 	  out.precision(1);
 	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F')
-	    out << "  s = " << std::setw(4) << theChannel->GetS();
+	    out << "  s = " << std::setw(4) << std::fixed << std::setprecision(1) << theChannel->GetS();
 	  out.precision(6);
 	  if(localEnergy<0.0&&theChannel->GetRadType()=='P') {
 	    out << "  C  = " << std::setw(12) << sqrt(fabs(theLevel->GetBigGamma(ch))) 
@@ -1464,16 +1464,16 @@ void CNuc::PrintTransformParams(const Config& configure) {
 		<< "          ";
 	  } else {
 	    if(fabs(theLevel->GetBigGamma(ch))>=1e-3)
-	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e3 
+	      out << "  G  = " << std::setw(12) << std::scientific << fabs(theLevel->GetBigGamma(ch))*1e3 
 		  << " keV      ";
 	    else if(fabs(theLevel->GetBigGamma(ch))>=1e-6)
-	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e6 
+	      out << "  G  = " << std::setw(12) << std::scientific << fabs(theLevel->GetBigGamma(ch))*1e6 
 		  << " eV       ";
 	    else
-	      out << "  G  = " << std::setw(12) << fabs(theLevel->GetBigGamma(ch))*1e9 
+	      out << "  G  = " << std::setw(12) << std::scientific << fabs(theLevel->GetBigGamma(ch))*1e9 
 		  << " meV      ";
 	  }  
-	  out << "  g_int = " << std::setw(12)<< std::scientific << theLevel->GetTransformGamma(ch); 
+	  out << "  g_int = " << std::setw(12) << std::scientific << theLevel->GetTransformGamma(ch); 
 	  if(theChannel->GetRadType()!='G'&&theChannel->GetRadType()!='F') out << " MeV^(1/2) ";
 	  else out << "           ";
 	  out << "  g_ext = " << std::setw(20) << theLevel->GetExternalGamma(ch);
