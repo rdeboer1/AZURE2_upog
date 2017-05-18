@@ -24,9 +24,10 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   highAngleText->setEnabled(false);
   dataTypeCombo = new QComboBox;
   dataTypeCombo->addItem(tr("Angle Integrated"));
-  dataTypeCombo->addItem(tr("Differential"));
+  dataTypeCombo->addItem(tr("Differential")); 
   dataTypeCombo->addItem(tr("Phase Shift"));
   dataTypeCombo->addItem(tr("Angle Integrated Total Capture"));
+  dataTypeCombo->addItem(tr("C.M. Differential"));
   connect(dataTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(dataTypeChanged(int)));
   QRegExp spinRX("^\\d{0,2}(\\.[05]{0,1})?$");
   QValidator *spinValidator = new QRegExpValidator(spinRX, this);

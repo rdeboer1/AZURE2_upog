@@ -473,6 +473,15 @@ void EPoint::ConvertLabEnergy(PPair *pPair) {
 }
 
 /*!
+ * Calculates excitation energy. When a data point is initialized, only the excitation energy is calculated
+ * if the data is already in the center of mass frame. Else it is calculated by ConvertLabEnergy.  
+ */
+
+void EPoint::ConvertExcitationEnergy(PPair *pPair) {
+  excitation_energy_=cm_energy_+pPair->GetSepE();
+}
+
+/*!
  * Calculates the total decay energy from the light particle decay energy, assuming the parent nucleus was at
  * rest when it decayed.  When a data point is initialized, the same energy is copied into
  * the attributes for center of mass and lab energy.  If this function is called, the center of mass energy
