@@ -1,8 +1,8 @@
 find_path(MINUIT2_INCLUDE_DIR Minuit2/MnUserFcn.h
-          HINTS $ENV{HOME}/local/include $ENV{HOME}/include $ENV{ROOTSYS}/include /afs/crc.nd.edu/user/n/nsl/nuclear/x86_64_linux_el6/install/root_v5.34.23/include/root)
+          HINTS $ENV{HOME}/local/include $ENV{HOME}/include $ENV{ROOTSYS}/include/root) #/afs/crc.nd.edu/user/n/nsl/nuclear/x86_64_linux_el6/install/root_v5.34.19/include/root
 
 find_library(MINUIT2_LIBRARY NAMES Minuit2
-             HINTS $ENV{HOME}/local/lib $ENV{HOME}/lib $ENV{ROOTSYS}/lib /afs/crc.nd.edu/user/n/nsl/nuclear/x86_64_linux_el6/install/root_v5.34.23/lib/root)
+             HINTS $ENV{HOME}/local/lib $ENV{HOME}/lib $ENV{ROOTSYS}/lib/root) #/afs/crc.nd.edu/user/n/nsl/nuclear/x86_64_linux_el6/install/root_v5.34.19/lib/root
 
 set (MINUIT2_LIBRARIES ${MINUIT2_LIBRARY})
 

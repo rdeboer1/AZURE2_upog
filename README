@@ -37,3 +37,12 @@ GSL_PATH [dir] - If GSL is in a non-standard path, this will add the directory t
 
 After changing options, execute [make clean] and then step 3 above to build/rebuild AZURE2.  
 
+-DCMAKE_BUILD_TYPE=RELEASE
+
+problem: OMP not enabled with MINUIT2 on most root installations. 
+
+solution: Jerry has made a special module, root/5.34.19mp, where this is enabled.
+
+problem: /afs/crc.nd.edu/user/n/nsl/nuclear/x86_64_linux_el6/install/root_v5.34.19mp/lib/root/libMinuit2.so: undefined reference to `std::__throw_out_of_range_fmt(char const*, ...)@GLIBCXX_3.4.20'
+
+solution: module load gcc  (version 4.9 or later, which the default is)
