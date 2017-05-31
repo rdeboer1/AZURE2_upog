@@ -20,7 +20,7 @@ ESegment::ESegment(SegLine segLine) {
   e_step_=0.0;
   a_step_=0.0;
   segment_chi_squared_=0.0;
-  if(segLine.isDiff()==1 || 4) isdifferential_=true;
+  if(segLine.isDiff()==1 || segLine.isDiff()==4) isdifferential_=true;
   else isdifferential_=false;
   if(segLine.isDiff()==4) iscmdifferential_=true;
   else iscmdifferential_=false;
@@ -61,9 +61,9 @@ ESegment::ESegment(ExtrapLine extrapLine) {
   e_step_=extrapLine.eStep();
   a_step_=extrapLine.aStep();
   segment_chi_squared_=0.0;
-  if(extrapLine.isDiff()==1 || 4) isdifferential_=true;
+  if(extrapLine.isDiff()==1 || extrapLine.isDiff()==5) isdifferential_=true;
   else isdifferential_=false;
-  if(extrapLine.isDiff()==4) iscmdifferential_=true;
+  if(extrapLine.isDiff()==5) iscmdifferential_=true;
   else iscmdifferential_=false;
   if(extrapLine.isDiff()==2) {
     isphase_=true;
