@@ -26,7 +26,7 @@ option (USE_STAT
           "Use stat() function to check for directories.  Not
           recommended for windows builds" YES)
 option (USE_QWT
-          "Use Qwt to build Plot tab." NO)
+          "Use Qwt to build Plot tab." ON)
 
 if (BUILD_GUI)
 add_subdirectory (gui)
