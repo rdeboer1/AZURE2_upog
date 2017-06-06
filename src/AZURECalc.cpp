@@ -55,6 +55,12 @@ double AZURECalc::operator()(const vector_r& p) const {
     double CrossSectionError=data.point()->GetCMCrossSectionError()*dataNorm;
     double chi=(fitCrossSection-CrossSection)/CrossSectionError;
     double pointChiSquared=pow(chi,2.0);
+//  enable for alternate goodness of fit function
+/*
+    if(pointChiSquared > 1.0e-15){  
+      pointChiSquared = -1.0*log((1.0-exp(-1.0*pointChiSquared/2.0))/pointChiSquared);
+    }
+*/
     segmentChiSquared+=pointChiSquared;
     if(data.segment()->GetPoints().end()-1==data.point()) {
       if(!isFit) thisSegment->SetSegmentChiSquared(segmentChiSquared);
@@ -64,8 +70,16 @@ double AZURECalc::operator()(const vector_r& p) const {
       }
       double dataNormNominal=thisSegment->GetNominalNorm();
       double dataNormError=dataNormNominal/100.*thisSegment->GetNormError();
-      if(dataNormError!=0.)
+      if(dataNormError!=0.) {
 	segmentChiSquared += pow((dataNorm-dataNormNominal)/dataNormError,2.0);
+/*
+        if(segmentChiSquared > 1.0e-15){
+           double normChiSquared = pow((dataNorm-dataNormNominal)/dataNormError,2.0);
+           segmentChiSquared -= normChiSquared;	
+	   segmentChiSquared += -1.0*log((1.0-exp(-1.0*normChiSquared/2.0))/normChiSquared);
+	}
+*/
+      }
       chiSquared+=segmentChiSquared;
     }
   }
