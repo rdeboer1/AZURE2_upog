@@ -916,25 +916,73 @@ void CNuc::PrintPathways(const Config &configure) {
  */
 
 void CNuc::CalcBoundaryConditions(const Config& configure){
-  for(int j=1;j<=this->NumJGroups();j++) {
-    if(this->GetJGroup(j)->IsInRMatrix()) {
-      JGroup *theJGroup=this->GetJGroup(j);
-      ALevel *firstLevel=theJGroup->GetLevel(1);
-      if(firstLevel->IsInRMatrix()) {
+
+  std::ifstream bcoption;
+  bcoption.open ("bcflag.dat");
+  int bcflag=0;
+  double bcvalue=0.0;
+  if(bcoption){
+    bcoption >> bcflag >> bcvalue;
+    bcoption.close();
+    for(int j=1;j<=this->NumJGroups();j++) {
+      if(this->GetJGroup(j)->IsInRMatrix()) {
+        JGroup *theJGroup=this->GetJGroup(j);
+        ALevel *firstLevel=theJGroup->GetLevel(1);
+        if(firstLevel->IsInRMatrix()) {
+  	for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
+  	  AChannel *theChannel=theJGroup->GetChannel(ch);
+	  PPair *thePair=this->GetPair(theChannel->GetPairNum());
+	  if(thePair->GetPType()==0) {
+	    int lValue=theChannel->GetL();
+	    double levelEnergy=firstLevel->GetE();
+	    double resonanceEnergy=levelEnergy-(thePair->GetSepE()+thePair->GetExE());
+	    if (bcflag==0){
+	      if(resonanceEnergy<0.0) {
+	        ShftFunc theShiftFunction(thePair);
+	        theChannel->SetBoundaryCondition(theShiftFunction(lValue,levelEnergy));
+	      }
+	      else {
+	        CoulFunc theCoulombFunction(thePair,
+					  !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
+	        double radius=thePair->GetChRad();
+	        double boundary=theCoulombFunction.PEShift(lValue,radius,resonanceEnergy);
+	        theChannel->SetBoundaryCondition(boundary);
+	      }
+	    } else if (bcflag==1){
+	      theChannel->SetBoundaryCondition(bcvalue);
+	    } else if (bcflag==2){
+	      theChannel->SetBoundaryCondition(-1*lValue);
+	    }
+	    
+	  }
+	  else {
+	    double boundary=theJGroup->GetChannel(1)->GetBoundaryCondition();
+	    theChannel->SetBoundaryCondition(boundary);
+	  }
+	}
+        }
+      }
+    }
+  } else {
+    for(int j=1;j<=this->NumJGroups();j++) {
+      if(this->GetJGroup(j)->IsInRMatrix()) {
+        JGroup *theJGroup=this->GetJGroup(j);
+        ALevel *firstLevel=theJGroup->GetLevel(1);
+        if(firstLevel->IsInRMatrix()) {
 	for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
 	  AChannel *theChannel=theJGroup->GetChannel(ch);
 	  PPair *thePair=this->GetPair(theChannel->GetPairNum());
 	  if(thePair->GetPType()==0) {
 	    int lValue=theChannel->GetL();
 	    double levelEnergy=firstLevel->GetE();
-	    double resonanceEnergy=levelEnergy-(thePair->GetSepE()+thePair->GetExE());
+	    double resonanceEnergy=levelEnergy-(thePair->GetSepE()+thePair->GetExE());	    
 	    if(resonanceEnergy<0.0) {
-	      ShftFunc theShiftFunction(thePair);
-	      theChannel->SetBoundaryCondition(theShiftFunction(lValue,levelEnergy));
+	        ShftFunc theShiftFunction(thePair);
+	        theChannel->SetBoundaryCondition(theShiftFunction(lValue,levelEnergy));
 	    }
 	    else {
 	      CoulFunc theCoulombFunction(thePair,
-					  !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
+				  !!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	      double radius=thePair->GetChRad();
 	      double boundary=theCoulombFunction.PEShift(lValue,radius,resonanceEnergy);
 	      theChannel->SetBoundaryCondition(boundary);
@@ -945,6 +993,7 @@ void CNuc::CalcBoundaryConditions(const Config& configure){
 	    theChannel->SetBoundaryCondition(boundary);
 	  }
 	}
+        }
       }
     }
   }

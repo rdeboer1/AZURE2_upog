@@ -838,8 +838,10 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
       totalChiSquared+=thisSegment->GetSegmentChiSquared();
       chiOut << "Segment #"
 	     << thisSegment->GetSegmentKey() 
-	     << " Chi-Squared/N: "
-	     << thisSegment->GetSegmentChiSquared()/thisSegment->NumPoints()
+	     << " Chi-Squared: "
+	     << thisSegment->GetSegmentChiSquared()
+             << " N: "
+             << thisSegment->NumPoints()
 	     << std::endl;
     }
     out<<std::endl<<std::endl;out.flush();
