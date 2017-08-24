@@ -806,32 +806,73 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     std::ostream out(buf);	
     ESegmentIterator thisSegment = segment;
     if(firstSumIterator!=GetSegments().end()) thisSegment = firstSumIterator;
-    for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
-      out.precision(4);
-      if(segment->IsAngularDist()) {
-	out << std::setw(13) << std::scientific << point->GetCMEnergy();
-	for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
-	out << std::endl;
-      } else {
-	double fitCrossSection=point->GetFitCrossSection();
-	if(firstSumIterator!=GetSegments().end()) {
-	  int pointIndex=point-segment->GetPoints().begin()+1;
-	  for(ESegmentIterator it=firstSumIterator;it<segment;it++) 
-	    fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
-	}
-	out << std::setw(13) << std::scientific << point->GetCMEnergy()
-	    << std::setw(13) << std::scientific << point->GetExcitationEnergy()
-	    << std::setw(13) << std::scientific << point->GetCMAngle()
-	    << std::setw(13) << std::scientific << fitCrossSection
-	    << std::setw(13) << std::scientific << fitCrossSection*point->GetSFactorConversion();
-	if(!output.IsExtrap()) {
-	  double dataNorm=thisSegment->GetNorm();
-	  out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
-	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
-	      << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
-	      << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
-	      << std::endl;
-	} else out << std::endl;
+    //use kinflag.dat to control output option
+    std::ifstream kinoption;
+    kinoption.open("kinflag.dat");
+    int kinflag=0; // 0 cm output, 1 lab output
+    if(kinoption){
+      kinoption >> kinflag;
+      kinoption.close();
+    } 
+    if(kinflag==0){
+      for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
+        out.precision(4);
+        if(segment->IsAngularDist()) {
+	  out << std::setw(13) << std::scientific << point->GetCMEnergy();
+	  for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
+	  out << std::endl;
+        } else {
+	  double fitCrossSection=point->GetFitCrossSection();
+	  if(firstSumIterator!=GetSegments().end()) {
+	    int pointIndex=point-segment->GetPoints().begin()+1;
+	    for(ESegmentIterator it=firstSumIterator;it<segment;it++) 
+	      fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
+	  }
+	  out << std::setw(13) << std::scientific << point->GetCMEnergy()
+	      << std::setw(13) << std::scientific << point->GetExcitationEnergy()
+	      << std::setw(13) << std::scientific << point->GetCMAngle()
+	      << std::setw(13) << std::scientific << fitCrossSection
+	      << std::setw(13) << std::scientific << fitCrossSection*point->GetSFactorConversion();
+	  if(!output.IsExtrap()) {
+	    double dataNorm=thisSegment->GetNorm();
+	    out << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm
+	        << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm
+	        << std::setw(13) << std::scientific << point->GetCMCrossSection()*dataNorm*point->GetSFactorConversion()
+	        << std::setw(13) << std::scientific << point->GetCMCrossSectionError()*dataNorm*point->GetSFactorConversion()
+	        << std::endl;
+	  } else out << std::endl;
+        }
+      }
+    }
+    if(kinflag==1){
+      configure.outStream<<"Using alternate output format..."<<std::endl;
+      for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
+        out.precision(4);
+        if(segment->IsAngularDist()) {
+	  out << std::setw(13) << std::scientific << point->GetCMEnergy();
+	  for(int i = 0;i<point->GetNumAngularDists();i++) out << std::setw(13) << point->GetAngularDist(i);
+	  out << std::endl;
+        } else {
+	  double fitCrossSection=point->GetFitCrossSection()/point->GetCrossSectionKinFactor();
+	  if(firstSumIterator!=GetSegments().end()) {
+	    int pointIndex=point-segment->GetPoints().begin()+1;
+	    for(ESegmentIterator it=firstSumIterator;it<segment;it++) 
+	      fitCrossSection+=it->GetPoint(pointIndex)->GetFitCrossSection();
+	  }
+	  out << std::setw(13) << std::scientific << point->GetLabEnergy()
+	      << std::setw(13) << std::scientific << point->GetExcitationEnergy()
+	      << std::setw(13) << std::scientific << point->GetLabAngle()
+	      << std::setw(13) << std::scientific << fitCrossSection
+	      << std::setw(13) << std::scientific << fitCrossSection*point->GetSFactorConversion();
+	  if(!output.IsExtrap()) {
+	    double dataNorm=thisSegment->GetNorm();
+	    out << std::setw(13) << std::scientific << point->GetLabCrossSection()*dataNorm
+	        << std::setw(13) << std::scientific << point->GetLabCrossSectionError()*dataNorm
+	        << std::setw(13) << std::scientific << point->GetLabCrossSection()*dataNorm*point->GetSFactorConversion()
+	        << std::setw(13) << std::scientific << point->GetLabCrossSectionError()*dataNorm*point->GetSFactorConversion()
+	        << std::endl;
+	  } else out << std::endl;
+        }
       }
     }
     if(!isFit&&(configure.paramMask & Config::CALCULATE_WITH_DATA)) {

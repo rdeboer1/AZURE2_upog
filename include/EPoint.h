@@ -70,6 +70,8 @@ class EPoint {
   double GetStoppingPower() const;
   double GetTargetThickness() const;
   double GetAngularDist(int) const;
+  double GetAngleKinFactor() const;
+  double GetCrossSectionKinFactor() const;
   complex GetLoElement(int,int) const;
   complex GetExpCoulombPhase(int,int) const;
   complex GetExpHardSpherePhase(int,int) const;
@@ -82,6 +84,7 @@ class EPoint {
   void ConvertDecayEnergy(PPair*);
   void ConvertLabAngle(PPair*);
   void ConvertLabAngle(PPair*,PPair*,const Config&);
+  void ConvertCMAngle(PPair*,PPair*,const Config&);
   void ConvertCrossSection(PPair*,PPair*);
   void ConvertLabAngleGammas(PPair*); 
   void ConvertCrossSectionGammas(PPair*);
@@ -111,6 +114,8 @@ class EPoint {
   void SetStoppingPower(double);
   void SetTargetThickness(double);
   void SetAngularDists(vector_r);
+  void SetAngleKinFactor(double);
+  void SetCrossSectionKinFactor(double);
   EData *GetParentData() const;
   EPoint* GetLocalMappedPoint(int) const;
   EPoint* GetSubPoint(int);
@@ -141,6 +146,8 @@ class EPoint {
   double j_value_;
   double stoppingPower_;
   double targetThickness_;
+  double angleKinFactor_;
+  double crossSectionKinFactor_;
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;

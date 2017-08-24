@@ -45,6 +45,8 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   targetEffectNum_=0;
   parentData_=NULL;
   stoppingPower_=0.0;
+  angleKinFactor_=1.0;
+  crossSectionKinFactor_=1.0;
 }
  
 /*!
@@ -384,6 +386,22 @@ double EPoint::GetAngularDist(int order) const {
 }
 
 /*!
+ * Returns the kinematic factor to convert angle from lab to cm angle;
+ */
+
+double EPoint::GetAngleKinFactor() const {
+  return angleKinFactor_;
+}
+
+/*!
+ * Returns the kinematic factor to convert cross section from lab to cm angle;
+ */
+
+double EPoint::GetCrossSectionKinFactor() const {
+  return crossSectionKinFactor_;
+}
+
+/*!
  * Returns the \f$ L_o \f$ diagonal matrix element for a channel specified
  * by positions in the JGroup and subsequent AChannel vectors.
  */
@@ -536,6 +554,26 @@ void EPoint::ConvertLabAngle(PPair *entrancePair, PPair *exitPair, const Config&
   
   cm_angle_=180./pi*asin(sqrt(E3PerEt/a24)*sin(this->GetLabAngle()*pi/180.));
   if(switchDomain) cm_angle_ = 180.- cm_angle_;
+  //define angle kin factor to convert back to lab frame
+  angleKinFactor_=this->GetLabAngle()/cm_angle_;
+  this->SetAngleKinFactor(angleKinFactor_);
+}
+
+/*!
+ * Calculates center of mass angles as in ConvertLabAngle but uses the reletivistic equations of Iliadis C.37 and C.38.  
+ * When a data point is initialized, the same angle is copied into
+ * the attributes for center of mass and lab angles.  If this function is called, the center of mass angle
+ * attribute is overwritten with the value calculated from the lab angle attribute.  This version of the
+ * overloaded function is for non-elastic particle channels.
+ */
+
+void EPoint::ConvertCMAngle(PPair *entrancePair, PPair *exitPair, const Config& configure) {
+  double qValue=entrancePair->GetSepE()+entrancePair->GetExE()-exitPair->GetSepE()-exitPair->GetExE();
+  double gamma=sqrt(entrancePair->GetM(1)*exitPair->GetM(1)*this->GetLabEnergy()/(exitPair->GetM(1)*
+   (exitPair->GetM(1)+exitPair->GetM(2))*qValue+exitPair->GetM(1)*(exitPair->GetM(1)+exitPair->GetM(2)
+   -entrancePair->GetM(1))*this->GetLabEnergy()));
+  double temp_lab_angle=180./pi*acos((gamma+cos(this->GetCMAngle()*pi/180.))/sqrt(1+gamma*gamma+2.*gamma*cos(this->GetCMAngle()*pi/180.)));
+  std::cout<<temp_lab_angle<<std::endl;
 }
 
 /*!
@@ -575,6 +613,8 @@ void EPoint::ConvertCrossSection(PPair *entrancePair, PPair *exitPair) {
   }
   cm_crosssection_=this->GetLabCrossSection()*conversionFactor;
   cm_dcrosssection_=this->GetLabCrossSectionError()*conversionFactor;
+  crossSectionKinFactor_=conversionFactor;
+  this->SetCrossSectionKinFactor(crossSectionKinFactor_);
 }
 
 /*!
@@ -631,6 +671,22 @@ void EPoint::SetSFactorConversion(double conversion) {
 
 void EPoint::SetExitKey(int key) {
   exit_key_=key;
+}
+
+/*!
+ * Sets the kinematic factor to convert angle from lab to cm angle;
+ */
+
+void EPoint::SetAngleKinFactor(double anglekinfactor) {
+  angleKinFactor_=anglekinfactor;
+}
+
+/*!
+ * Sets the kinematic factor to convert cross section from lab to cm angle;
+ */
+
+void EPoint::SetCrossSectionKinFactor(double crosssectionkinfactor) {
+  crossSectionKinFactor_=crosssectionkinfactor;
 }
 
 /*!
