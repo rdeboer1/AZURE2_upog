@@ -968,7 +968,7 @@ void CNuc::CalcBoundaryConditions(const Config& configure){
             for(int ch=1;ch<=theJGroup->NumChannels();ch++) {
             AChannel *theChannel=theJGroup->GetChannel(ch);
             PPair *thePair=this->GetPair(theChannel->GetPairNum());
-              if(thePair->GetPType()==0 && thePair->IsEntrance()) {
+              if(thePair->GetPType()==0) {
 	        int lValue=theChannel->GetL();
                 if(bcflag==1){
 	          theChannel->SetBoundaryCondition(bcvalue);

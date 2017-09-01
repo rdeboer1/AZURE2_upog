@@ -75,13 +75,17 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	      MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
 	      int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
 	      int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
+              int sValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetS();
+              int spValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetS();
 	      double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	      int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
 	      if(!tempTNum) {
 		TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
 		/*std::cout<<"jValue: " << "\t" << jValue
 		         <<"lValue: " << "\t" << lValue
+                         <<"sValue: " << "\t" << sValue
 		         <<"lpValue: " << "\t" << lpValue
+                         <<"spValue: " << "\t" << spValue
 		         <<"T-matrix element: " << "\t" << this->GetTMatrixElement(k,m)
 		         <<std::endl; */
 		this->NewTempTMatrix(temptmatrix);
@@ -120,10 +124,12 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  Interference *theInterference=theDecay->GetKLGroup(kL)
 	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
+          int svalue, spvalue;
 	  std::string interferenceType=theInterference->GetInterferenceType();
 	  if(interferenceType=="RR") {
 	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+//            svalue = theDecay->GetKGroup()->
 	  } else if(interferenceType=="ER") {
 	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
