@@ -786,6 +786,15 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
   if(!(configure.paramMask & Config::CALCULATE_WITH_DATA)) output.SetExtrap();
   bool isVaryNorm=false;
   double totalChiSquared=0.;
+  //use kinflag.dat to control output option
+  std::ifstream kinoption;
+  kinoption.open("kinflag.dat");
+  int kinflag=0; // 0 cm output, 1 lab output
+  if(kinoption){
+    kinoption >> kinflag;
+    kinoption.close();
+  }
+  if(kinflag!=0) configure.outStream<<"Using alternate output format..."<<std::endl;
   ESegmentIterator firstSumIterator = GetSegments().end();
   for(ESegmentIterator segment=GetSegments().begin();
       segment<GetSegments().end();segment++) {
@@ -806,14 +815,7 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
     std::ostream out(buf);	
     ESegmentIterator thisSegment = segment;
     if(firstSumIterator!=GetSegments().end()) thisSegment = firstSumIterator;
-    //use kinflag.dat to control output option
-    std::ifstream kinoption;
-    kinoption.open("kinflag.dat");
-    int kinflag=0; // 0 cm output, 1 lab output
-    if(kinoption){
-      kinoption >> kinflag;
-      kinoption.close();
-    } 
+     
     if(kinflag==0){
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
         out.precision(4);
@@ -845,7 +847,6 @@ void EData::WriteOutputFiles(const Config &configure, bool isFit) {
       }
     }
     if(kinflag==1){
-      configure.outStream<<"Using alternate output format..."<<std::endl;
       for(EPointIterator point=segment->GetPoints().begin();point<segment->GetPoints().end();point++) {
         out.precision(4);
         if(segment->IsAngularDist()) {
