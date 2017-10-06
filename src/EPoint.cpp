@@ -80,6 +80,8 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   targetEffectNum_=0;
   parentData_=NULL;
   stoppingPower_=0.0;
+  angleKinFactor_=1.0;
+  crossSectionKinFactor_=1.0;
 }
   
 /*!
