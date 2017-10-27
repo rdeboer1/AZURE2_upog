@@ -575,7 +575,7 @@ void EPoint::ConvertCMAngle(PPair *entrancePair, PPair *exitPair, const Config& 
    (exitPair->GetM(1)+exitPair->GetM(2))*qValue+exitPair->GetM(1)*(exitPair->GetM(1)+exitPair->GetM(2)
    -entrancePair->GetM(1))*this->GetLabEnergy()));
   double temp_lab_angle=180./pi*acos((gamma+cos(this->GetCMAngle()*pi/180.))/sqrt(1+gamma*gamma+2.*gamma*cos(this->GetCMAngle()*pi/180.)));
-  std::cout<<temp_lab_angle<<std::endl;
+//  std::cout<<temp_lab_angle<<std::endl;
 }
 
 /*!
@@ -771,6 +771,10 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	    this->AddSqrtPenetrability(j,ch,0.0);
 	    this->AddExpCoulombPhase(j,ch,1.0);
 	    this->AddExpHardSpherePhase(j,ch,1.0);
+//            std::ofstream coul_check;
+//            coul_check.open("coul_check_neg.chk",std::ios::app);
+//            coul_check << this->GetLabEnergy() << "  " << lValue << "  " << eta << "  " << coul.F << "  " << coul.dF << "  " << coul.G << "  " << coul.dG << std::endl;
+//            coul_check.close();
 	  } else {
 	    CoulFunc theCoulombFunction(thePair,!!(configure.paramMask&Config::USE_GSL_COULOMB_FUNC));
 	    double radius=thePair->GetChRad();
@@ -781,6 +785,7 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	    double redmass=thePair->GetRedMass();
 	    double eta=sqrt(uconv/2.)*fstruc*thePair->GetZ(1)*thePair->GetZ(2)*
 	      sqrt(redmass/localEnergy);
+            double rho = sqrt(2.*uconv)/hbarc*radius*sqrt(redmass*localEnergy);
 	    complex expCP(1.0,0.0);
 	    for(int ll=1;ll<=theChannel->GetL();ll++) 
 	      expCP*=complex((double)ll/sqrt(pow(eta,2.0)+pow((double)ll,2.0)),
@@ -793,6 +798,12 @@ void EPoint::CalcEDependentValues(CNuc *theCNuc, const Config& configure) {
 	    this->AddSqrtPenetrability(j,ch,sqrt(localPene));
 	    this->AddExpCoulombPhase(j,ch,expCP);
 	    this->AddExpHardSpherePhase(j,ch,expHSP);
+//            std::ofstream coul_check;
+//            coul_check.open("coul_check_pos.chk",std::ios::app);
+//            coul_check << this->GetLabEnergy() << "  " << lValue << "  " << rho << "  " << eta << "  "
+//                       << coul.F << "  " << coul.dF << "  " << coul.G << "  " << coul.dG << std::endl;
+//            coul_check.close();
+            
 	  }
 	} else if(thePair->GetPType()==10){
 	  complex loElement = complex(0.0,0.0);

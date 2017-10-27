@@ -151,7 +151,7 @@ void AddSegTestDialog::dataTypeChanged(int index) {
     angDistLabel->setVisible(false);
     angDistSpin->setVisible(false);
   }
-  if(index==1) {
+  if(index==1 || index == 5) {
     lowAngleText->setEnabled(true);
     highAngleText->setEnabled(true);
     angleStepText->setEnabled(true);

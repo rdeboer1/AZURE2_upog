@@ -676,13 +676,13 @@ void EData::PrintEDependentValues(const Config &configure,CNuc *theCNuc) {
     << "************************************" << std::endl
     << "*  Lo Matrix and Penetrabilities   *" << std::endl
     << "************************************" << std::endl;
-    out << std::setw(10) << "Seg #"
-    << std::setw(10) << "Point #"
+    out << std::setw(10) << "Seg_#"
+    << std::setw(10) << "Point_#"
     << std::setw(5)  << "j" 
     << std::setw(5)  << "ch" 
     << std::setw(5)  << "l"
-    << std::setw(15) << "E chan"
-    << std::setw(15) << "pene" 
+    << std::setw(15) << "E_chan"
+    << std::setw(15) << "sqrt_pene" 
     << std::setw(25) << "Lo" << std::endl;
     for(EDataIterator data=begin();data!=end();data++) {
       double inEnergy=data.point()->GetCMEnergy()

@@ -1,6 +1,5 @@
 #include "CoulFunc.h"
 #include "PPair.h"
-#include <iostream>
 #include "cwfcomp.H"
 #include <gsl/gsl_sf_coulomb.h>
 #include <gsl/gsl_deriv.h>
@@ -122,7 +121,8 @@ CoulWaves CoulFunc::operator()(int l,double radius,double energy) {
       newResult.F=real(c_F);
       newResult.dF=real(c_dF);
       newResult.G=real(c_G);
-      newResult.dG=real(c_dG);      
+      newResult.dG=real(c_dG);
+      
     } else {
       double eta=sqrt(uconv/2.)*fstruc*z1()*z2()*
 	sqrt(redmass()/energy);
