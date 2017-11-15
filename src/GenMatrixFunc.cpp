@@ -188,9 +188,10 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
 	  double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	  AChannel *entranceChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum());
-	  int lValue=entranceChannel->GetL();	
+	  int lValue=entranceChannel->GetL();
+          double sValue=entranceChannel->GetS();	
 	  AChannel *exitChannel=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum());
-	  if(jValue==segmentJ&&lValue==segmentL&&entranceChannel==exitChannel) {
+	  if(jValue==segmentJ&&lValue==segmentL&&entranceChannel==exitChannel) { //&&sValue==0.5
 	    complex expCoulPhaseSquared=point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum())*
 	      point->GetExpCoulombPhase(theMGroup->GetJNum(),theMGroup->GetChNum());
 	    complex theUMatrix=(expCoulPhaseSquared-this->GetTMatrixElement(k,m))/expCoulPhaseSquared;
