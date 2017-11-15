@@ -126,7 +126,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
 	  std::string interferenceType=theInterference->GetInterferenceType();
-
+/*
           MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
           int lValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChNum())->GetL();
           int lpValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetL();
@@ -140,17 +140,17 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
          
 	  double jValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetJ();
           int lOrder_temp = theDecay->GetKLGroup(kL)->GetLOrder();
-
+*/
 	  if(interferenceType=="RR") {
 	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-            
+/*            
             if(real(T1)!=0&&real(T2)!=0){              
               std::cout<<"L s sp l1 lp1 j1: " << lOrder_temp << "," << sValue << "," << spValue << "," << lValue1 << "," << lpValue1 << ","  << jValue1 << ", T1: " << "\t" << T1 << "\t"
                        <<"l2 lp2 j2: " << lValue2 << "," << lpValue2 << "," << jValue2 << ", T2: " << "\t" << T2
 		       <<std::endl;
             }
-
+*/
 	  } else if(interferenceType=="ER") {
 	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
