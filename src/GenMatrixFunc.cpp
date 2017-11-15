@@ -3,6 +3,7 @@
 #include "GenMatrixFunc.h"
 #include <assert.h>
 #include <iostream>
+#include <fstream>
 
 /*!
  * The child classes AMatrixFunc or RMatrixFunc contain functions
@@ -81,7 +82,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	      int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
 	      if(!tempTNum) {
 		TempTMatrix temptmatrix={jValue,lValue,lpValue,this->GetTMatrixElement(k,m)};
-		/*std::cout<<"jValue: " << "\t" << jValue
+/*		std::cout<<"jValue: " << "\t" << jValue
 		         <<"lValue: " << "\t" << lValue
                          <<"sValue: " << "\t" << sValue
 		         <<"lpValue: " << "\t" << lpValue
@@ -124,12 +125,32 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  Interference *theInterference=theDecay->GetKLGroup(kL)
 	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
-          int svalue, spvalue;
 	  std::string interferenceType=theInterference->GetInterferenceType();
+/*
+          MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
+              int lValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChNum())->GetL();
+              int lpValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetL();
+              int sValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChNum())->GetS();
+              int spValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetS();
+	      double jValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetJ();
+
+              MGroup *theMGroup2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM2());
+              int lValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChNum())->GetL();
+              int lpValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetL();
+              int sValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChNum())->GetS();
+              int spValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetS();
+	      double jValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetJ();
+*/
 	  if(interferenceType=="RR") {
 	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-//            svalue = theDecay->GetKGroup()->
+/*            
+            if(real(T1)!=0&&real(T2)!=0){              
+              std::cout<<"l1 lp1 s1 sp1 j1: " << lValue1 << "," << lpValue1 << "," << sValue1 << "," << spValue1 << "," << jValue1 << ", T1: " << "\t" << T1 << "\t"
+                       <<"l2 lp2 s2 sp2 j2: " << lValue2 << "," << lpValue2 << "," << sValue2 << "," << spValue2 << "," << jValue2 << ", T2: " << "\t" << T2
+		       <<std::endl;
+            }
+*/
 	  } else if(interferenceType=="ER") {
 	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
