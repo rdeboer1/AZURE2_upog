@@ -1048,9 +1048,23 @@ void CNuc::CalcAngularDists(int maxL) {
           for(int m1=1;m1<=theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups();m1++){
             for(int m2=1;m2<=theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups();m2++) {
 	      std::string interferenceType;
-	      double j1,j2,l1,l1p,l2,l2p;
+	      double j1,j2,l1,l1p,s1p,l2,l2p,s2p;
 	      int w1p,w2p,path1,path2;
-	      if(m1>theDecay->GetKGroup(k)->NumMGroups()) {
+              double s=theDecay->GetKGroup(k)->GetS();
+	      double sp=theDecay->GetKGroup(k)->GetSp();
+              if(m1>theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups()){//put in vector after normal mgroups and ECmgroups
+                JGroup *jgroup1=this->GetJGroup(theDecay->GetKGroup(k)->GetMGroup(m1)->GetJNum());
+		AChannel *channel1=jgroup1->GetChannel(theDecay->GetKGroup(k)->GetMGroup(m1)->GetChNum());
+		AChannel *channel1p=jgroup1->GetChannel(theDecay->GetKGroup(k)->GetMGroup(m1)->GetChpNum());
+		j1=jgroup1->GetJ();
+		l1=(double) channel1->GetL();
+		l1p=(double) channel1p->GetL();
+                s1p=(double) channel1p->GetS();		
+		w1p=1;
+		interferenceType='U'; //new interference type for unobserved primary decays
+		path1=m1;  
+              }
+	      else if(m1>theDecay->GetKGroup(k)->NumMGroups()) {
 		int m1_ec=m1-theDecay->GetKGroup(k)->NumMGroups();
 		ECMGroup *theECMGroup1=theDecay->GetKGroup(k)->GetECMGroup(m1_ec);
 		j1=theECMGroup1->GetJ();
@@ -1094,8 +1108,6 @@ void CNuc::CalcAngularDists(int maxL) {
 		interferenceType+='R';
 		path2=m2;
 	      }
-	      double s=theDecay->GetKGroup(k)->GetS();
-	      double sp=theDecay->GetKGroup(k)->GetSp();
 	      if((int)(l1+l2+lOrder)%2==0&&(int)(l1p+l2p+w1p+w2p+lOrder)%2==0) {
 		double z1z2=0.0;
 		double z1=sqrt(2.*l1+1.)*sqrt(2.*l2+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
