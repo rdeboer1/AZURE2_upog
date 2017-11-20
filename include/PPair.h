@@ -34,6 +34,7 @@ public:
   double GetI1I2Factor() const;
   void AddDecay(Decay);
   void SetEntrance();
+  bool isUPOG() const;
   Decay *GetDecay(int);
 private:
   bool entrance_;
@@ -50,6 +51,7 @@ private:
   double pair_ch_rad_;
   double red_mass_;
   double i1i2factor_;
+  int pair_isUPOG_;
   std::vector<Decay> decays_;
 };
 

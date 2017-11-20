@@ -8,6 +8,13 @@ KGroup::KGroup(double s, double sPrime) :
     s_(s), sp_(sPrime) {};
 
 /*!
+ * The version of KGroup is overloaded to accomidate the multiple final spin combinations for unobserved primary, observed secondary reactions.
+ */
+
+KGroup::KGroup(double s, double sPrime, double sPrime2) :
+    s_(s), sp_(sPrime), sp2_(sPrime2) {};
+
+/*!
  * Returns the number of internal reaction pathways in the MGroup vector.
  */
 
@@ -57,6 +64,14 @@ double KGroup::GetS() const {
 
 double KGroup::GetSp() const {
   return sp_;
+}
+
+/*!
+ * Returns the value of the second exit channel spin combination.
+ */
+
+double KGroup::GetSp2() const {
+  return sp2_;
 }
 
 /*!

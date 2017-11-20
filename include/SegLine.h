@@ -18,6 +18,7 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
+    if(isDiff_==5) stream >> finalJ_ >> finalgL_ >> finalgLp_;
     stream >> dataNorm_ >> varyNorm_ >> dataNormError_;
     std::string dummyString;
     getline(stream,dummyString);
@@ -88,6 +89,18 @@ class SegLine {
    * if the segment contains phase shift.
    */
   int phaseL() const {return phaseL_;};
+  /*!
+   * Returns the spin value for the final state if the segment is for an unobserved primary transition.
+   */
+  double finalJ() const {return finalJ_;};
+  /*!
+   * Returns one of the multipolarity amplitudes for the gamma decay to the final state if the segment is for an unobserved primary transition.
+   */
+  double finalgL() const {return finalgL_;};
+  /*!
+   * Returns the other multipolarity amplitude for the gamma decay to the final state if the segment is for an unobserved primary transition.
+   */
+  double finalgLp() const {return finalgLp_;};
  private:
   int isActive_;
   int entranceKey_;
@@ -103,6 +116,9 @@ class SegLine {
   int varyNorm_;
   double phaseJ_;
   int phaseL_;
+  double finalJ_;
+  double finalgL_;
+  double finalgLp_;
 };
 
 #endif

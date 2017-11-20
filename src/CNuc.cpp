@@ -624,7 +624,7 @@ void CNuc::SortPathways(const Config& configure) {
     if(!this->GetPair(aa)->IsEntrance()) continue;
     for(int ir=1;ir<=this->NumPairs();ir++) {
       if(this->GetPair(ir)->GetPType()==20) continue;
-      if(this->GetPair(aa)->GetPType()==20) {
+      if(this->GetPair(aa)->GetPType()==20) { //beta decay
 	for(int l = 0; l < 2; l++) {
 	  for(int j=1;j<=this->NumJGroups();j++) {
 	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;	      
@@ -655,7 +655,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }	  
 	}
-      } else if(this->GetPair(ir)->GetPType()==0) {
+      } else if(this->GetPair(ir)->GetPType()==0) { //nuclear particles
 	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
 	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
@@ -695,7 +695,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }
 	}
-      } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) {
+      } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) { //gamma decay
 	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
 	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(int j=1;j<=this->NumJGroups();j++) {
@@ -731,9 +731,57 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }
 	}
-      }
-    }
-  }
+      } else if(this->GetPair(ir)->GetPType()==0&&this->GetPair(ir)->isUPOG()==true){//adding additional Groups for Unobserved Primary, Observed Secondary
+        for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
+	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
+	      sp<=(this->GetPair(ir)->GetJ(1)+this->GetPair(ir)->GetJ(2));sp+=1.) {
+            for(double sp2=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
+	        sp2<=(this->GetPair(ir)->GetJ(1)+this->GetPair(ir)->GetJ(2));sp2+=1.) {
+	      for(int j=1;j<=this->NumJGroups();j++) {
+	        if(!this->GetJGroup(j)->IsInRMatrix()) continue;
+	        for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+		  if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+		  for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+		    if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		       this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
+		       this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue;
+                      for(int chp2=1;chp2<=this->GetJGroup(j)->NumChannels();chp2++) {
+		        if(this->GetJGroup(j)->GetChannel(chp2)->GetPairNum()!=ir||
+		          this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
+		          this->GetJGroup(j)->GetChannel(chp2)->GetS()!=sp2) continue;
+		        Decay NewDecay(ir);
+		        DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+		        if(!DecayNum) {
+		          this->GetPair(aa)->AddDecay(NewDecay);
+		          DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
+		        }
+		        KGroup NewKGroup(s,sp,sp2);
+		        KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup, true);
+		        if(!KGroupNum) {
+		          this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		          KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		        }
+		        MGroup NewMGroup(j,ch,chp);
+		        MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		        if(!MGroupNum) {
+		          this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		          MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		        }
+		        double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
+		          this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
+		        this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
+		          GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
+                    } //chp2
+                  } //chp
+		} //ch
+	      } //j
+	    } //sp2
+	  } //sp1
+	} //s
+      } //if
+    } //ir 
+  } //aa
   for(int aa=1;aa<=this->NumPairs();aa++) { //loop over all pairs
     PPair *entrancePair=this->GetPair(aa);
     if(entrancePair->GetPType()==20 || !entrancePair->IsEntrance()) continue;
@@ -1048,23 +1096,11 @@ void CNuc::CalcAngularDists(int maxL) {
           for(int m1=1;m1<=theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups();m1++){
             for(int m2=1;m2<=theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups();m2++) {
 	      std::string interferenceType;
-	      double j1,j2,l1,l1p,s1p,l2,l2p,s2p;
+	      double j1,j2,l1,l1p,l2,l2p;
 	      int w1p,w2p,path1,path2;
               double s=theDecay->GetKGroup(k)->GetS();
 	      double sp=theDecay->GetKGroup(k)->GetSp();
-              if(m1>theDecay->GetKGroup(k)->NumMGroups()+theDecay->GetKGroup(k)->NumECMGroups()){//put in vector after normal mgroups and ECmgroups
-                JGroup *jgroup1=this->GetJGroup(theDecay->GetKGroup(k)->GetMGroup(m1)->GetJNum());
-		AChannel *channel1=jgroup1->GetChannel(theDecay->GetKGroup(k)->GetMGroup(m1)->GetChNum());
-		AChannel *channel1p=jgroup1->GetChannel(theDecay->GetKGroup(k)->GetMGroup(m1)->GetChpNum());
-		j1=jgroup1->GetJ();
-		l1=(double) channel1->GetL();
-		l1p=(double) channel1p->GetL();
-                s1p=(double) channel1p->GetS();		
-		w1p=1;
-		interferenceType='U'; //new interference type for unobserved primary decays
-		path1=m1;  
-              }
-	      else if(m1>theDecay->GetKGroup(k)->NumMGroups()) {
+	      if(m1>theDecay->GetKGroup(k)->NumMGroups()) {
 		int m1_ec=m1-theDecay->GetKGroup(k)->NumMGroups();
 		ECMGroup *theECMGroup1=theDecay->GetKGroup(k)->GetECMGroup(m1_ec);
 		j1=theECMGroup1->GetJ();

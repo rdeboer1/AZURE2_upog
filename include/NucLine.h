@@ -20,7 +20,8 @@ class NucLine {
 	   >> s_ >> l_ >> levelID_ >> isActive_ >> channelFix_ >> gamma_ >> j1_ >> pi1_
 	   >> j2_ >> pi2_ >> e2_ >> m1_ >> m2_ >> z1_ >> z2_
 	   >> entranceSepE_ >> sepE_ >> j3_ >> pi3_ >> e3_ 
-	   >> pType_ >> chRad_ >> g1_ >> g2_ >> ecMultMask_;
+	   >> pType_ >> chRad_ >> g1_ >> g2_ >> ecMultMask_
+           >> isUPOG_;
     s_/=2.;
     l_/=2;
   };
@@ -156,6 +157,10 @@ class NucLine {
    * Returns the external capture multiplicity mask for the corresponding pair. 
    */
   double ecMultMask() const {return ecMultMask_;};
+  /*!
+   * Returns the flag for calculation of unobserved primary, observed gamma-ray Tmatrix elements. 
+   */
+  double isUPOG() const {return isUPOG_;};
  private:
   double levelJ_;
   int levelPi_;
@@ -188,6 +193,7 @@ class NucLine {
   double g1_;
   double g2_;
   unsigned int ecMultMask_;
+  int isUPOG_; // 1 = yes, 0 = no
 };
 
 #endif

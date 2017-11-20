@@ -27,6 +27,7 @@ PPair::PPair(NucLine nucLine)
   i1i2factor_=1.0/(2.*nucLine.j1()+1.0)/(2.*nucLine.j2()+1.0);
   entrance_=false;
   ec_entrance_=false;
+  pair_isUPOG_=nucLine.isUPOG();
 }
 
 /*!
@@ -54,7 +55,8 @@ int PPair::GetPi(int particle) const {
 }
 
 /*!
- * Returns the integer particle pair type.  Pair types currently used in AZURE are 0: particle,particle and 10: particle,gamma.
+ * Returns the integer particle pair type.  Pair types currently used in AZURE are 0: particle,particle; 10: particle,gamma;
+ * 20: beta,particle
  */
 
 int PPair::GetPType() const {
@@ -199,5 +201,16 @@ void PPair::SetEntrance() {
 Decay *PPair::GetDecay(int decayNum) {
   Decay *b=&decays_[decayNum-1];
   return b;
+}
+
+/*!
+ * Returns the 1 if the Tmatrix should be calculated for unobserved primary observed gamma decays, 0 otherwise.
+ */
+
+bool PPair::isUPOG() const {
+  bool isUPOG;
+  if(pair_isUPOG_==1) isUPOG = true;
+  else isUPOG = false;
+  return isUPOG;
 }
 
