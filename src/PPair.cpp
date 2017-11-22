@@ -27,7 +27,6 @@ PPair::PPair(NucLine nucLine)
   i1i2factor_=1.0/(2.*nucLine.j1()+1.0)/(2.*nucLine.j2()+1.0);
   entrance_=false;
   ec_entrance_=false;
-  pair_isUPOG_=nucLine.isUPOG();
 }
 
 /*!
@@ -55,8 +54,8 @@ int PPair::GetPi(int particle) const {
 }
 
 /*!
- * Returns the integer particle pair type.  Pair types currently used in AZURE are 0: particle,particle; 10: particle,gamma;
- * 20: beta,particle
+ * Returns the integer particle pair type.  Pair types currently used in AZURE are 0: particle,particle; 10: particle,gamma (exit only);
+ * 20: beta,particle; 30 (entrance only): unobserved primar, observed secondary (exit only)
  */
 
 int PPair::GetPType() const {
@@ -179,6 +178,22 @@ double PPair::GetI1I2Factor() const {
 }
 
 /*!
+ * Returns the final spin of the particle pair for unobserved primary, observed secondary reactions.
+ */
+
+double PPair::GetJFinal() const {
+  return jfinal_;
+}
+
+/*!
+ * Returns the L value of the gamma ray transition for unobserved primary, observed secondary reactions.
+ */
+
+int PPair::GetRadFinal() const {
+  return jfinal_;
+}
+
+/*!
  * Adds a decay particle pair to the Decay vector.
  */
 
@@ -201,16 +216,5 @@ void PPair::SetEntrance() {
 Decay *PPair::GetDecay(int decayNum) {
   Decay *b=&decays_[decayNum-1];
   return b;
-}
-
-/*!
- * Returns the 1 if the Tmatrix should be calculated for unobserved primary observed gamma decays, 0 otherwise.
- */
-
-bool PPair::isUPOG() const {
-  bool isUPOG;
-  if(pair_isUPOG_==1) isUPOG = true;
-  else isUPOG = false;
-  return isUPOG;
 }
 

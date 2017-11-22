@@ -67,7 +67,7 @@ double KGroup::GetSp() const {
 }
 
 /*!
- * Returns the value of the second exit channel spin combination.
+ * Returns the value of the exit channel spin.
  */
 
 double KGroup::GetSp2() const {

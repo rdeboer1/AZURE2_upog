@@ -731,7 +731,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }
 	}
-      } else if(this->GetPair(ir)->GetPType()==0&&this->GetPair(ir)->isUPOG()==true){//adding additional Groups for Unobserved Primary, Observed Secondary
+      } else if(this->GetPair(ir)->GetPType()==30){//adding additional Groups for Unobserved Primary, Observed Secondary
         for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
 	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
@@ -779,7 +779,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    } //sp2
 	  } //sp1
 	} //s
-      } //if
+      } //if upos
     } //ir 
   } //aa
   for(int aa=1;aa<=this->NumPairs();aa++) { //loop over all pairs
@@ -1098,8 +1098,6 @@ void CNuc::CalcAngularDists(int maxL) {
 	      std::string interferenceType;
 	      double j1,j2,l1,l1p,l2,l2p;
 	      int w1p,w2p,path1,path2;
-              double s=theDecay->GetKGroup(k)->GetS();
-	      double sp=theDecay->GetKGroup(k)->GetSp();
 	      if(m1>theDecay->GetKGroup(k)->NumMGroups()) {
 		int m1_ec=m1-theDecay->GetKGroup(k)->NumMGroups();
 		ECMGroup *theECMGroup1=theDecay->GetKGroup(k)->GetECMGroup(m1_ec);
@@ -1144,6 +1142,8 @@ void CNuc::CalcAngularDists(int maxL) {
 		interferenceType+='R';
 		path2=m2;
 	      }
+              double s=theDecay->GetKGroup(k)->GetS();
+	      double sp=theDecay->GetKGroup(k)->GetSp();              
 	      if((int)(l1+l2+lOrder)%2==0&&(int)(l1p+l2p+w1p+w2p+lOrder)%2==0) {
 		double z1z2=0.0;
 		double z1=sqrt(2.*l1+1.)*sqrt(2.*l2+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
@@ -1157,6 +1157,14 @@ void CNuc::CalcAngularDists(int maxL) {
 		  double z2=sqrt(2.*l1p+1.)*sqrt(2.*l2p+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
 		    *AngCoeff::ClebGord(l1p,l2p,lOrder,1.,-1.,0)*AngCoeff::Racah(l1p,j1,l2p,j2,jf,lOrder);
 		  z1z2=pow(-1.,1.+s-jf)/4.*z1*z2;
+                } else if(this->GetPair(theDecay->GetPairNum())->GetPType()==30) {
+                  double sp2=theDecay->GetKGroup(k)->GetSp2();
+                  double j1f=this->GetPair(theDecay->GetPairNum())->GetJ(1);
+                  double j2f=this->GetPair(theDecay->GetPairNum())->GetJ(2);
+                  z1z2 = pow(-1.,lOrder+sp2-sp)*(2.*j1+1.)*(2.*j2+1.)*pow((2.*l1+1.)*(2.*j2f+1.)
+                    *(2.*sp+1.)*(2.*sp2+1.),0.5)*AngCoeff::ClebGord(lOrder,0.,l2,l1,0.,0.)
+                    *AngCoeff::Racah(lOrder,j2f,sp2,j1f,j2f,sp)*AngCoeff::Racah(lOrder,sp,j2,l1p,sp2,j1)
+                    *AngCoeff::Racah(lOrder,j1,l2,s,j2,l1); 
 		}
 		if(fabs(z1z2)>1e-10) {
 		  KLGroup NewKLGroup(k,lOrder);
