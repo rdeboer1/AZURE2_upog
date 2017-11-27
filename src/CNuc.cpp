@@ -655,7 +655,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }	  
 	}
-      } else if(this->GetPair(ir)->GetPType()==0) { //nuclear particles
+      } else if(this->GetPair(ir)->GetPType()==0&&this->GetPair(ir)->IsUPOS()==false) { //nuclear particles
 	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
 	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
@@ -695,43 +695,7 @@ void CNuc::SortPathways(const Config& configure) {
 	    }
 	  }
 	}
-      } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) { //gamma decay
-	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
-	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
-	  for(int j=1;j<=this->NumJGroups();j++) {
-	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;
-	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
-	      if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
-	      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
-		if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
-		   this->GetJGroup(j)->GetChannel(ch)->GetS()!=s) continue;
-		Decay NewDecay(ir);
-		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
-		if(!DecayNum) {
-		  this->GetPair(aa)->AddDecay(NewDecay);
-		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
-		}
-		KGroup NewKGroup(s,0);
-		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-		if(!KGroupNum) {
-		  this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
-		  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
-		}
-		MGroup NewMGroup(j,ch,chp);
-		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-		if(!MGroupNum) {
-		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
-		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
-		}		    
-		double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
-		  this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
-		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
-		  GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
-	      }
-	    }
-	  }
-	}
-      } else if(this->GetPair(ir)->GetPType()==30){//adding additional Groups for Unobserved Primary, Observed Secondary
+      } else if(this->GetPair(ir)->GetPType()==0&&this->GetPair(ir)->IsUPOS()==true){//adding additional Groups for Unobserved Primary, Observed Secondary
         for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
 	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
 	  for(double sp=fabs(this->GetPair(ir)->GetJ(1)-this->GetPair(ir)->GetJ(2));
@@ -779,6 +743,42 @@ void CNuc::SortPathways(const Config& configure) {
 	    } //sp2
 	  } //sp1
 	} //s
+      } else if(this->GetPair(ir)->GetPType()==10 && !(configure.paramMask & Config::USE_RMC_FORMALISM)) { //gamma decay
+	for(double s=fabs(this->GetPair(aa)->GetJ(1)-this->GetPair(aa)->GetJ(2));
+	    s<=(this->GetPair(aa)->GetJ(1)+this->GetPair(aa)->GetJ(2));s+=1.) {
+	  for(int j=1;j<=this->NumJGroups();j++) {
+	    if(!this->GetJGroup(j)->IsInRMatrix()) continue;
+	    for(int ch=1;ch<=this->GetJGroup(j)->NumChannels();ch++) {
+	      if(this->GetJGroup(j)->GetChannel(ch)->GetPairNum()!=aa) continue;
+	      for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
+		if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
+		   this->GetJGroup(j)->GetChannel(ch)->GetS()!=s) continue;
+		Decay NewDecay(ir);
+		DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
+		if(!DecayNum) {
+		  this->GetPair(aa)->AddDecay(NewDecay);
+		  DecayNum=this->GetPair(aa)->IsDecay(NewDecay);		  
+		}
+		KGroup NewKGroup(s,0);
+		KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		if(!KGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->AddKGroup(NewKGroup);
+		  KGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->IsKGroup(NewKGroup);
+		}
+		MGroup NewMGroup(j,ch,chp);
+		MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		if(!MGroupNum) {
+		  this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->AddMGroup(NewMGroup);
+		  MGroupNum=this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->IsMGroup(NewMGroup);
+		}		    
+		double statspinfactor=(2.*this->GetJGroup(j)->GetJ()+1.)*
+		  this->GetPair(this->GetJGroup(j)->GetChannel(chp)->GetPairNum())->GetI1I2Factor();
+		this->GetPair(aa)->GetDecay(DecayNum)->GetKGroup(KGroupNum)->
+		  GetMGroup(MGroupNum)->SetStatSpinFactor(statspinfactor);
+	      }
+	    }
+	  }
+	}
       } //if upos
     } //ir 
   } //aa
@@ -877,6 +877,7 @@ void CNuc::PrintPathways(const Config &configure) {
 	<< std::setw(12) << "K Group #"
 	<< std::setw(16) << "Entrance Ch. s"
 	<< std::setw(13) << "Decay Ch. s"
+        << std::setw(13) << "Decay Ch. s2"
 	<< std::setw(11) << "M Group #"
 	<< std::setw(11) << "J Group #"
 	<< std::setw(16) << "Entrance Ch. #"
@@ -892,6 +893,7 @@ void CNuc::PrintPathways(const Config &configure) {
 		<< std::setw(12) << iii
 		<< std::setw(16) << this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetS()
 		<< std::setw(13) << this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetSp()
+                << std::setw(13) << this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetSp2()
 		<< std::setw(11) << iiii
 		<< std::setw(11) << this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetMGroup(iiii)->GetJNum()
 		<< std::setw(16) << this->GetPair(i)->GetDecay(ii)->GetKGroup(iii)->GetMGroup(iiii)->GetChNum()
@@ -1145,7 +1147,7 @@ void CNuc::CalcAngularDists(int maxL) {
               double s=theDecay->GetKGroup(k)->GetS();
 	      double sp=theDecay->GetKGroup(k)->GetSp();              
 	      if((int)(l1+l2+lOrder)%2==0&&(int)(l1p+l2p+w1p+w2p+lOrder)%2==0) {
-		double z1z2=0.0;
+		double z1z2=0.;
 		double z1=sqrt(2.*l1+1.)*sqrt(2.*l2+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
 		  *AngCoeff::ClebGord(l1,l2,lOrder,0.,0.,0.)*AngCoeff::Racah(l1,j1,l2,j2,s,lOrder);
 		if(this->GetPair(theDecay->GetPairNum())->GetPType()==0) {
@@ -1157,29 +1159,46 @@ void CNuc::CalcAngularDists(int maxL) {
 		  double z2=sqrt(2.*l1p+1.)*sqrt(2.*l2p+1.)*sqrt(2.*j1+1.)*sqrt(2.*j2+1.)
 		    *AngCoeff::ClebGord(l1p,l2p,lOrder,1.,-1.,0)*AngCoeff::Racah(l1p,j1,l2p,j2,jf,lOrder);
 		  z1z2=pow(-1.,1.+s-jf)/4.*z1*z2;
-                } else if(this->GetPair(theDecay->GetPairNum())->GetPType()==30) {
+                }
+                double z1z2_upos=0.; 
+                if(this->GetPair(theDecay->GetPairNum())->GetPType()==0&&this->GetPair(theDecay->GetPairNum())->IsUPOS()==true) {
                   double sp2=theDecay->GetKGroup(k)->GetSp2();
                   double j1f=this->GetPair(theDecay->GetPairNum())->GetJ(1);
                   double j2f=this->GetPair(theDecay->GetPairNum())->GetJ(2);
-                  z1z2 = pow(-1.,lOrder+sp2-sp)*(2.*j1+1.)*(2.*j2+1.)*pow((2.*l1+1.)*(2.*j2f+1.)
-                    *(2.*sp+1.)*(2.*sp2+1.),0.5)*AngCoeff::ClebGord(lOrder,0.,l2,l1,0.,0.)
+                  z1z2_upos = pow(-1.,lOrder+sp2-sp)*(2.*j1+1.)*(2.*j2+1.)*pow((2.*l1+1.)*(2.*j2f+1.)
+                    *(2.*sp+1.)*(2.*sp2+1.),0.5)*AngCoeff::ClebGord(l1,l2,lOrder,0.,0.,0.) //AngCoeff::ClebGord(lOrder,0.,l2,l1,0.,0.) ????
                     *AngCoeff::Racah(lOrder,j2f,sp2,j1f,j2f,sp)*AngCoeff::Racah(lOrder,sp,j2,l1p,sp2,j1)
-                    *AngCoeff::Racah(lOrder,j1,l2,s,j2,l1); 
+                    *AngCoeff::Racah(lOrder,j1,l2,s,j2,l1);
+//                  double test = z1z2_upos;
+//                  if(test>0.) std::cout<<test<<std::endl; 
 		}
-		if(fabs(z1z2)>1e-10) {
+		if(fabs(z1z2)>1e-10) { 
+                  if(this->GetPair(theDecay->GetPairNum())->IsUPOS()==true){
+                    if(fabs(z1z2_upos)<1e-10) continue;
+                  } 
 		  KLGroup NewKLGroup(k,lOrder);
 		  int KLGroupNum=theDecay->IsKLGroup(NewKLGroup);
 		  if(!KLGroupNum) {
 		    theDecay->AddKLGroup(NewKLGroup);
 		    KLGroupNum=theDecay->IsKLGroup(NewKLGroup);
 		  }
-		  Interference NewInterference(path1,path2,z1z2,interferenceType);
-		  int InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
-		  if(!InterNum) {
-		    theDecay->GetKLGroup(KLGroupNum)->AddInterference(NewInterference);
-		    InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
-		  }
-		}
+                  if(this->GetPair(theDecay->GetPairNum())->IsUPOS()==false){
+		    Interference NewInterference(path1,path2,z1z2,interferenceType);
+                    int InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
+		    if(!InterNum) {
+		      theDecay->GetKLGroup(KLGroupNum)->AddInterference(NewInterference);
+		      InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
+		    }
+                  }
+                  if(this->GetPair(theDecay->GetPairNum())->IsUPOS()==true){
+                    Interference NewInterference(path1,path2,z1z2,z1z2_upos,interferenceType);                  
+		    int InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
+		    if(!InterNum) {
+		      theDecay->GetKLGroup(KLGroupNum)->AddInterference(NewInterference);
+		      InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
+		    }
+                  }
+                }
 	      }
             }
           }
@@ -1214,6 +1233,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
 	<< std::setw(10) << "m1" 
 	<< std::setw(10) << "m2"
 	<< std::setw(10) << "z1z2"
+        << std::setw(14) << "z1z2_upos"
 	<< std::setw(10) << "type"
 	<< std::endl;
     for(int aa=1;aa<=this->NumPairs();aa++) {
@@ -1229,6 +1249,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
 		<< std::setw(10) << theInter->GetM1() 
 		<< std::setw(10) << theInter->GetM2()
 		<< std::setw(10) << theInter->GetZ1Z2()
+                << std::setw(14) << theInter->GetZ1Z2_UPOS()
 		<< std::setw(10) << theInter->GetInterferenceType()
 		<< std::endl;
 	  }

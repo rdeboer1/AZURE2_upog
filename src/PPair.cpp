@@ -27,6 +27,7 @@ PPair::PPair(NucLine nucLine)
   i1i2factor_=1.0/(2.*nucLine.j1()+1.0)/(2.*nucLine.j2()+1.0);
   entrance_=false;
   ec_entrance_=false;
+  upos_=nucLine.isUPOS();
 }
 
 /*!
@@ -55,7 +56,7 @@ int PPair::GetPi(int particle) const {
 
 /*!
  * Returns the integer particle pair type.  Pair types currently used in AZURE are 0: particle,particle; 10: particle,gamma (exit only);
- * 20: beta,particle; 30 (entrance only): unobserved primar, observed secondary (exit only)
+ * 20: beta,particle
  */
 
 int PPair::GetPType() const {
@@ -216,5 +217,15 @@ void PPair::SetEntrance() {
 Decay *PPair::GetDecay(int decayNum) {
   Decay *b=&decays_[decayNum-1];
   return b;
+}
+
+/*!
+ * Returns true if the unobserved secondary differential cross section should be calculated for the particle segment.
+ */
+
+bool PPair::IsUPOS() {
+  bool upos_bool_=false;
+  if(upos_ == 1) upos_bool_=true;
+  return upos_bool_;
 }
 

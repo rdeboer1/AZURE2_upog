@@ -37,6 +37,7 @@ public:
   void AddDecay(Decay);
   void SetEntrance();
   Decay *GetDecay(int);
+  bool IsUPOS();
 private:
   bool entrance_;
   bool ec_entrance_;
@@ -54,6 +55,7 @@ private:
   double i1i2factor_;
   double jfinal_;
   double radfinal_;
+  int upos_;
   std::vector<Decay> decays_;
 };
 

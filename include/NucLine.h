@@ -21,6 +21,7 @@ class NucLine {
 	   >> j2_ >> pi2_ >> e2_ >> m1_ >> m2_ >> z1_ >> z2_
 	   >> entranceSepE_ >> sepE_ >> jFinal_ >> radFinal_ >> e3_ 
 	   >> pType_ >> chRad_ >> g1_ >> g2_ >> ecMultMask_;
+//           >>isupos_;
     s_/=2.;
     l_/=2;
   };
@@ -136,7 +137,8 @@ class NucLine {
    */
   double e3() const {return e3_;};
   /*!
-   * Returns 0 for particle-particle and 10 for particle-gamma 
+   * Returns 0 for particle-particle and 10 for particle-gamma
+   * and 20 for beta delayed particle emmission 
    * types in the corresponding pair.
    */
   int pType() const {return pType_;};
@@ -156,6 +158,11 @@ class NucLine {
    * Returns the external capture multiplicity mask for the corresponding pair. 
    */
   double ecMultMask() const {return ecMultMask_;};
+  /*!
+   * Returns 1 if angular distrabutions need to be calculated for unobserved
+   * primar, observed secondary decays.
+   */
+  int isUPOS() const {return 1;}; //isupos_
 
  private:
   double levelJ_;
@@ -189,6 +196,7 @@ class NucLine {
   double g1_;
   double g2_;
   unsigned int ecMultMask_;
+  int isupos_;
 };
 
 #endif

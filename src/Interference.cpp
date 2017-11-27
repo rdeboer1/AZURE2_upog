@@ -12,6 +12,14 @@ Interference::Interference(int mGroupNum1, int mGroupNum2, double z1z2Coeff, std
   m1_(mGroupNum1), m2_(mGroupNum2),z1z2_(z1z2Coeff),intertype_(interferenceType) {};
 
 /*!
+ * Overloaded to accommidate additional z1z2 coefficient for unobserved primary, observed secondar
+ * reactions.
+ */
+
+Interference::Interference(int mGroupNum1, int mGroupNum2, double z1z2Coeff, double z1z2Coeff_upos, std::string interferenceType) :
+  m1_(mGroupNum1), m2_(mGroupNum2), z1z2_(z1z2Coeff), z1z2_upos_(z1z2Coeff_upos), intertype_(interferenceType) {};
+
+/*!
  * Returns the interference type.
  */
 
@@ -41,5 +49,13 @@ int Interference::GetM2() const {
 
 double Interference::GetZ1Z2() const {
   return z1z2_;
+}
+
+/*!
+ * Returns the corresponding \f$ Z_1 Z_2 \f$ coefficient for unobserved primary observed secondary reactions.
+ */
+
+double Interference::GetZ1Z2_UPOS() const {
+  return z1z2_upos_;
 }
 
