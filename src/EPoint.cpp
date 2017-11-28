@@ -47,6 +47,7 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   stoppingPower_=0.0;
   angleKinFactor_=1.0;
   crossSectionKinFactor_=1.0;
+  isUPOS_=parent->IsUPOS();
 }
  
 /*!
@@ -82,6 +83,7 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   stoppingPower_=0.0;
   angleKinFactor_=1.0;
   crossSectionKinFactor_=1.0;
+  isUPOS_=parent->IsUPOS();
 }
   
 /*!
@@ -161,6 +163,14 @@ bool EPoint::IsMapped() const {
 bool EPoint::IsTargetEffect() const {
   if(GetTargetEffectNum()!=0) return true;
   else return false;
+}
+
+/*!
+ * This function returns true if the point is an observed primary observed secondary reaction, otherwise it returns false.
+ */
+
+bool EPoint::IsUPOS() const {
+  return isUPOS_;
 }
 
 /*!

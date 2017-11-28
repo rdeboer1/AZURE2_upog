@@ -6,7 +6,7 @@
 #include "SegLine.h"
 
 /*!
- * This constructor is used if the segment contains actual experimental data.  The segment
+ * This constructor is used if the segment contains actual experimental data. The segment
  * is created with reference to an entry in the segments data file.
  */
 
@@ -43,6 +43,8 @@ ESegment::ESegment(SegLine segLine) {
   else varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
+  if(segLine.isUPOS()==1) isUPOS_=true;
+  else isUPOS_=false;
 }
 
 /*!
@@ -165,6 +167,15 @@ bool ESegment::IsTargetEffect() const {
 
 bool ESegment::IsVaryNorm() const {
   return varyNorm_;
+}
+
+/*!
+ * Returns true if the segment is for an unobserved primary observed secondary, otherwise
+ * returns false.
+ */
+
+bool ESegment::IsUPOS() const {
+  return isUPOS_;
 }
 
 /*!

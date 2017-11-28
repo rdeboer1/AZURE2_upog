@@ -43,6 +43,7 @@ class EPoint {
   bool IsMapped() const;
   bool IsTargetEffect() const;
   bool IsAngularDist() const;
+  bool IsUPOS() const;
   int GetEntranceKey() const;
   int GetExitKey() const;
   int GetMaxLOrder() const;
@@ -148,6 +149,7 @@ class EPoint {
   double targetThickness_;
   double angleKinFactor_;
   double crossSectionKinFactor_;
+  bool isUPOS_;
   struct EnergyMap energy_map_;
   complex coulombamplitude_;
   vector_r legendreP_;

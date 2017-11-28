@@ -13,6 +13,7 @@
 
 void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
   complex sum(0.,0.);
+  complex sumUPOS(0.,0.);
   int aa=compound()->GetPairNumFromKey(point->GetEntranceKey());
   int ir=0;
   while(ir<compound()->GetPair(aa)->NumDecays()) {
@@ -117,7 +118,8 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  point->SetFitCrossSection(angleIntegratedXS);
 	  return;
 	}
-      }   
+      }  
+      //begin calculation of differential cross section
       std::vector<double> angularCoeff(std::min(point->GetMaxLOrder()+1,point->GetMaxAngDistOrder()+1),0.);
       for(int kL=1;kL<=theDecay->NumKLGroups();kL++) {
 	for(int inter=1;inter<=theDecay->GetKLGroup(kL)
@@ -125,7 +127,49 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  Interference *theInterference=theDecay->GetKLGroup(kL)
 	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
+          complex T1U(0.0,0.0),T2U(0.0,0.0);
 	  std::string interferenceType=theInterference->GetInterferenceType();
+          if(compound()->GetPair(aa)->IsUPOS()){ //When unobserved primary, observed secondary angular distributions are being calculated
+            double sp1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetSp();
+            double sp2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetSp2();
+            MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
+            int lp1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetL();
+            MGroup *theMGroup2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM2());
+            int lp2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetL();
+            if(sp1==sp2&&!point->IsUPOS()){ //cut out Tmatrix elements for different sp1 and sp2 values for normal angular distribution calculation
+              if(interferenceType=="RR") {
+	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	      } else if(interferenceType=="ER") {
+	        T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	      } else if(interferenceType=="RE") {
+	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	        T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	      } else if(interferenceType=="EE") {
+	        T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	        T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	      }
+	      int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
+	      sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
+	        point->GetLegendreP(lOrder);
+	      if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
+	        double tempCoeff=angularCoeff[lOrder]+
+	          real(theInterference->GetZ1Z2()*T1*conj(T2))*point->GetGeometricalFactor()*
+	          compound()->GetPair(aa)->GetI1I2Factor()/100.*4./angleIntegratedXS;
+	        angularCoeff[lOrder]=tempCoeff;
+	      }
+            }
+            if(lp1==lp2&&point->IsUPOS()){//cut out Tmatrix elements for different lp1 and lp2 for unobserved primary observed secondary angular distrabution calculation
+              if(interferenceType=="RR") {//only particle interference terms
+	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	      }
+              int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
+	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)* //pow(2.*lOrder+1.,0.5)/(4*pi)*
+	        point->GetLegendreP(lOrder);
+            }
+          } else {                   
 /*
           MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
           int lValue1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChNum())->GetL();
@@ -140,45 +184,51 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
          
 	  double jValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetJ();
           int lOrder_temp = theDecay->GetKLGroup(kL)->GetLOrder();
-*/
-	  if(interferenceType=="RR") {
-	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-/*            
-            if(real(T1)!=0&&real(T2)!=0){              
-              std::cout<<"L s sp l1 lp1 j1: " << lOrder_temp << "," << sValue << "," << spValue << "," << lValue1 << "," << lpValue1 << ","  << jValue1 << ", T1: " << "\t" << T1 << "\t"
-                       <<"l2 lp2 j2: " << lValue2 << "," << lpValue2 << "," << jValue2 << ", T2: " << "\t" << T2
-		       <<std::endl;
-            }
-*/
-	  } else if(interferenceType=="ER") {
-	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  } else if(interferenceType=="RE") {
-	    T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  } else if(interferenceType=="EE") {
-	    T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
-	    T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-	  }
-	  int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
-	  sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
-	    point->GetLegendreP(lOrder);
-	  if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
-	    double tempCoeff=angularCoeff[lOrder]+
-	      real(theInterference->GetZ1Z2()*T1*conj(T2))*point->GetGeometricalFactor()*
-	      compound()->GetPair(aa)->GetI1I2Factor()/100.*4./angleIntegratedXS;
-	    angularCoeff[lOrder]=tempCoeff;
-	  }
+*/          
+	    if(interferenceType=="RR") {
+	      T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	      T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	    } else if(interferenceType=="ER") {
+	      T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	      T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	    } else if(interferenceType=="RE") {
+	      T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	      T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	    } else if(interferenceType=="EE") {
+	      T1=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
+	      T2=this->GetECTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+	    }
+	    int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
+	    sum+=theInterference->GetZ1Z2()*T1*conj(T2)*
+	      point->GetLegendreP(lOrder);
+	    if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
+	      double tempCoeff=angularCoeff[lOrder]+
+	        real(theInterference->GetZ1Z2()*T1*conj(T2))*point->GetGeometricalFactor()*
+	        compound()->GetPair(aa)->GetI1I2Factor()/100.*4./angleIntegratedXS;
+	      angularCoeff[lOrder]=tempCoeff;
+	    }
+          }
 	}
-      }
+      } //end KL loop
       if(point->IsAngularDist()) {
 	point->SetAngularDists(angularCoeff);
 	return;
       }
-      complex RT=sum/pi*point->GetGeometricalFactor()*
+      complex RT(0.,0.);
+/*     
+      if(compound()->GetPair(aa)->IsUPOS()==true){
+        if(point->IsUPOS()){
+          RT=sum/pi*point->GetGeometricalFactor()*
+	    compound()->GetPair(aa)->GetI1I2Factor();
+        } else {
+          RT=sum/pi*point->GetGeometricalFactor()*
+	    compound()->GetPair(aa)->GetI1I2Factor();
+        }
+      } else {
+*/
+        RT=sum/pi*point->GetGeometricalFactor()*
 	compound()->GetPair(aa)->GetI1I2Factor();
-      
+//      }
       complex CT(0.,0.), IT(0.,0.);
       if(aa==ir) {
 	complex coulombAmplitude=point->GetCoulombAmplitude();
@@ -198,8 +248,8 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  }
 	}
 	IT=complex(0.,1.)/sqrt(pi)*sum*point->GetGeometricalFactor();
-      }
-      point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);
+      }      
+      point->SetFitCrossSection((real(CT)+real(RT)+real(IT))/100.);     
     } else if(aa==ir) {
       double segmentJ=point->GetJ();
       int segmentL=point->GetL();

@@ -25,6 +25,7 @@ class ESegment {
   bool IsTargetEffect() const;
   bool IsVaryNorm() const;
   bool IsAngularDist() const;
+  bool IsUPOS() const;
   int IsTotalCapture() const;
   int NumPoints() const;
   int GetEntranceKey() const;
@@ -63,6 +64,7 @@ class ESegment {
   bool isTargetEffect_;
   bool varyNorm_;
   bool isAngDist_;
+  bool isUPOS_;
   int isTotalCapture_;
   int entrancekey_;
   int exitkey_;

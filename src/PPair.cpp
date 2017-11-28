@@ -27,7 +27,9 @@ PPair::PPair(NucLine nucLine)
   i1i2factor_=1.0/(2.*nucLine.j1()+1.0)/(2.*nucLine.j2()+1.0);
   entrance_=false;
   ec_entrance_=false;
-  upos_=nucLine.isUPOS();
+  pair_is_upos_=nucLine.isUPOS();
+  pair_secondary_decay_L=nucLine.secondaryDecayL();
+  pair_Ic=nucLine.Ic();
 }
 
 /*!
@@ -225,7 +227,23 @@ Decay *PPair::GetDecay(int decayNum) {
 
 bool PPair::IsUPOS() {
   bool upos_bool_=false;
-  if(upos_ == 1) upos_bool_=true;
+  if(pair_is_upos_ == 1) upos_bool_=true;
   return upos_bool_;
+}
+
+/*!
+ * Returns angular momentum of secondary decay.
+ */
+
+int PPair::GetSecondaryDecayL() const {
+  return pair_secondary_decay_L;
+}
+
+/*!
+ * Returns spin of final state of secondary decay.
+ */
+
+double PPair::GetIc() const {
+  return pair_Ic;
 }
 

@@ -18,8 +18,8 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-    if(isDiff_==5) stream >> finalJ_ >> finalgL_ >> finalgLp_;
-    stream >> dataNorm_ >> varyNorm_ >> dataNormError_;
+//    if(isDiff_==5) stream >> finalJ_ >> finalgL_ >> finalgLp_;
+    stream >> dataNorm_ >> varyNorm_ >> dataNormError_; // >> isUPOS_
     std::string dummyString;
     getline(stream,dummyString);
     int p2 = dummyString.find_last_not_of(" \n\t\r");
@@ -60,8 +60,13 @@ class SegLine {
    */
   double maxA() const {return maxA_;};
   /*!
-   * Return 0 if the segment is angle-integrated cross section, 1 for 
-   * differential cross section, and 2 for phase shift.
+   * Return 0 if the segment is angle-integrated cross section, 1 for lab
+   * differential cross section, 2 for phase shift, 3 for angle integrated
+   * total capture, and 4 for C.M. differential cross section for data.
+   * for extrapolation segments return 0 for angle-integrated cross section,
+   * 1 for lab differential cross section, 2 for phase shifts, 3 for 
+   * angular distrabution coefficients, 4 for angle-integrated total
+   * capture, and 5 for C.M. differential cross sections.
    */
   int isDiff() const {return isDiff_;};
   /*!
@@ -90,17 +95,10 @@ class SegLine {
    */
   int phaseL() const {return phaseL_;};
   /*!
-   * Returns the spin value for the final state if the segment is for an unobserved primary transition.
+   * Returns flag for if this segment is an unobserved primary transition (1 = is, 0 = not).
    */
-  double finalJ() const {return finalJ_;};
-  /*!
-   * Returns one of the multipolarity amplitudes for the gamma decay to the final state if the segment is for an unobserved primary transition.
-   */
-  double finalgL() const {return finalgL_;};
-  /*!
-   * Returns the other multipolarity amplitude for the gamma decay to the final state if the segment is for an unobserved primary transition.
-   */
-  double finalgLp() const {return finalgLp_;};
+  int isUPOS() const {return 1;}; //isUPOS_
+
  private:
   int isActive_;
   int entranceKey_;
@@ -116,9 +114,7 @@ class SegLine {
   int varyNorm_;
   double phaseJ_;
   int phaseL_;
-  double finalJ_;
-  double finalgL_;
-  double finalgLp_;
+  int isUPOS_;
 };
 
 #endif

@@ -19,9 +19,8 @@ class NucLine {
     stream >> levelJ_ >> levelPi_ >> levelE_ >> levelFix_ >> aa_ >> ir_ 
 	   >> s_ >> l_ >> levelID_ >> isActive_ >> channelFix_ >> gamma_ >> j1_ >> pi1_
 	   >> j2_ >> pi2_ >> e2_ >> m1_ >> m2_ >> z1_ >> z2_
-	   >> entranceSepE_ >> sepE_ >> jFinal_ >> radFinal_ >> e3_ 
+	   >> entranceSepE_ >> sepE_ >> isupos_ >> secondaryDecayL_ >> Ic_ 
 	   >> pType_ >> chRad_ >> g1_ >> g2_ >> ecMultMask_;
-//           >>isupos_;
     s_/=2.;
     l_/=2;
   };
@@ -125,18 +124,6 @@ class NucLine {
    */
   double sepE() const {return sepE_;};
   /*!
-   * Final spin for unobserved primary, observed secondary reactions.
-   */
-  double jFinal() const {return jFinal_;};
-  /*!
-   * This function is depriciated and not used.
-   */
-  int radFinal() const {return radFinal_;};
-  /*!
-   * This function is depriciated and not used.
-   */
-  double e3() const {return e3_;};
-  /*!
    * Returns 0 for particle-particle and 10 for particle-gamma
    * and 20 for beta delayed particle emmission 
    * types in the corresponding pair.
@@ -160,9 +147,19 @@ class NucLine {
   double ecMultMask() const {return ecMultMask_;};
   /*!
    * Returns 1 if angular distrabutions need to be calculated for unobserved
-   * primar, observed secondary decays.
+   * primary, observed secondary decays.
    */
   int isUPOS() const {return 1;}; //isupos_
+  /*!
+   * Returns the angular momentum of the decay for unobserved particle
+   * observed secondary decay
+   */
+  int secondaryDecayL() const {return 2;}; //secondaryDecayL_
+  /*!
+   * Returns the spin of the final state of the decay for unobserved particle
+   * observed secondary decay
+   */
+  double Ic() const {return 0;}; //Ic_
 
  private:
   double levelJ_;
@@ -188,15 +185,14 @@ class NucLine {
   int z2_;
   double entranceSepE_;
   double sepE_;
-  double jFinal_;
-  int radFinal_;
-  double e3_;
   int pType_;
   double chRad_;
   double g1_;
   double g2_;
   unsigned int ecMultMask_;
   int isupos_;
+  int secondaryDecayL_;
+  double Ic_;
 };
 
 #endif
