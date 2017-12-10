@@ -159,7 +159,7 @@ class NucLine {
    * Returns the spin of the final state of the decay for unobserved particle
    * observed secondary decay
    */
-  double Ic() const {return 0;}; //Ic_
+  double Ic() const {return 0.0;}; //Ic_
 
  private:
   double levelJ_;

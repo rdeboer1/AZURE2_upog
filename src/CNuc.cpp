@@ -709,11 +709,8 @@ void CNuc::SortPathways(const Config& configure) {
 		  for(int chp=1;chp<=this->GetJGroup(j)->NumChannels();chp++) {
 		    if(this->GetJGroup(j)->GetChannel(chp)->GetPairNum()!=ir||
 		       this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
-		       this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue;
+		       this->GetJGroup(j)->GetChannel(chp)->GetS()!=sp) continue; 
                       for(int chp2=1;chp2<=this->GetJGroup(j)->NumChannels();chp2++) {
-		        if(this->GetJGroup(j)->GetChannel(chp2)->GetPairNum()!=ir||
-		          this->GetJGroup(j)->GetChannel(ch)->GetS()!=s||
-		          this->GetJGroup(j)->GetChannel(chp2)->GetS()!=sp2) continue;
 		        Decay NewDecay(ir);
 		        DecayNum=this->GetPair(aa)->IsDecay(NewDecay);
 		        if(!DecayNum) {
@@ -1162,7 +1159,7 @@ void CNuc::CalcAngularDists(int maxL) {
                 }
                 double z1z2_upos=0.;
                 double Rk=0.; 
-                if(this->GetPair(theDecay->GetPairNum())->GetPType()==0&&this->GetPair(theDecay->GetPairNum())->IsUPOS()==true) {
+                if(this->GetPair(theDecay->GetPairNum())->GetPType()==0&&this->GetPair(theDecay->GetPairNum())->IsUPOS()==true&&aa!=ir) {
                   double sp2=theDecay->GetKGroup(k)->GetSp2();
                   double j1f=this->GetPair(theDecay->GetPairNum())->GetJ(1);
                   double j2f=this->GetPair(theDecay->GetPairNum())->GetJ(2);
@@ -1174,13 +1171,10 @@ void CNuc::CalcAngularDists(int maxL) {
                     *AngCoeff::Racah(lOrder,j1,l2,s,j2,l1);
                   Rk = pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
                        *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
-//                  double test = Rk;
-//                  if(test>0.) std::cout<<test<<std::endl; 
+//                  double test = z1z2_upos*Rk;
+//                  if(test>0.) std::cout<<lOrder<<","<<test<<std::endl;
 		}
-		if(fabs(z1z2)>1e-10) { 
-                  if(this->GetPair(theDecay->GetPairNum())->IsUPOS()==true){
-                    if(fabs(z1z2_upos*Rk)<1e-10) continue;
-                  } 
+		if(fabs(z1z2)>1e-10||fabs(z1z2_upos*Rk)>1e-10) {                 
 		  KLGroup NewKLGroup(k,lOrder);
 		  int KLGroupNum=theDecay->IsKLGroup(NewKLGroup);
 		  if(!KLGroupNum) {
@@ -1240,6 +1234,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
 	<< std::setw(10) << "z1z2"
         << std::setw(14) << "z1z2_upos"
 	<< std::setw(10) << "type"
+        << std::setw(10) << "inter_num"
 	<< std::endl;
     for(int aa=1;aa<=this->NumPairs();aa++) {
       for(int ir=1;ir<=this->GetPair(aa)->NumDecays();ir++) {
@@ -1256,6 +1251,7 @@ void CNuc::PrintAngularDists(const Config &configure) {
 		<< std::setw(10) << theInter->GetZ1Z2()
                 << std::setw(14) << theInter->GetZ1Z2_UPOS()
 		<< std::setw(10) << theInter->GetInterferenceType()
+                << std::setw(10) << i
 		<< std::endl;
 	  }
 	  out << std::endl;

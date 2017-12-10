@@ -86,10 +86,12 @@ ESegment::ESegment(ExtrapLine extrapLine) {
   isTotalCapture_ =  (extrapLine.isDiff()==4) ? 1 : 0;
   datafile_="";
   dataNorm_= dataNormNominal_ = 1.;
-  dataNormError_=0.;
+  dataNormError_=0.; 
   varyNorm_=false;
   targetEffectNum_=0;
   isTargetEffect_=false;
+  if(extrapLine.isUPOS()==1) isUPOS_=true;
+  else isUPOS_=false;
 }
 
 /*!

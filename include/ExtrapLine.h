@@ -80,6 +80,11 @@ class ExtrapLine {
    * angular distribution.
    */
   int maxAngDistOrder() const {return maxAngDistOrder_;};
+  /*!
+   * Returns flag for if the segment is for an unobserved primary,
+   * observed secondary.
+   */
+  int isUPOS() const {return 1;}; //1 if it is, 0 if not
  private:
   int isActive_;
   int entranceKey_;
@@ -94,6 +99,7 @@ class ExtrapLine {
   double phaseJ_;
   int phaseL_;
   int maxAngDistOrder_;
+  int isUPOS_;
 };
 
 #endif

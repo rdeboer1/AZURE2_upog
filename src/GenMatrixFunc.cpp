@@ -77,8 +77,8 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	      MGroup *theMGroup=theDecay->GetKGroup(k)->GetMGroup(m);
 	      int lValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetL();
 	      int lpValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetL();
-              int sValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetS();
-              int spValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetS();
+//              int sValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChNum())->GetS();
+//              int spValue=compound()->GetJGroup(theMGroup->GetJNum())->GetChannel(theMGroup->GetChpNum())->GetS();
 	      double jValue=compound()->GetJGroup(theMGroup->GetJNum())->GetJ();
 	      int tempTNum=this->IsTempTMatrix(jValue,lValue,lpValue);
 	      if(!tempTNum) {
@@ -127,16 +127,20 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	  Interference *theInterference=theDecay->GetKLGroup(kL)
 	    ->GetInterference(inter);
 	  complex T1(0.0,0.0),T2(0.0,0.0);
-          complex T1U(0.0,0.0),T2U(0.0,0.0);
 	  std::string interferenceType=theInterference->GetInterferenceType();
           if(compound()->GetPair(aa)->IsUPOS()){ //When unobserved primary, observed secondary angular distributions are being calculated
             double sp1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetSp();
             double sp2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetSp2();
             MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
             int lp1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetL();
+//            int sp1_check=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetS();
             MGroup *theMGroup2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM2());
             int lp2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetL();
+//            int sp2_check=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetS();
+//            std::cout<<sp1<<","<<sp1_check<<","<<sp2<<","<<sp2_check<<std::endl;
+//            std::cout<<lp1<<","<<lp2<<std::endl;
             if(sp1==sp2&&!point->IsUPOS()){ //cut out Tmatrix elements for different sp1 and sp2 values for normal angular distribution calculation
+              
               if(interferenceType=="RR") {
 	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
@@ -160,13 +164,15 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	        angularCoeff[lOrder]=tempCoeff;
 	      }
             }
-            if(lp1==lp2&&point->IsUPOS()){//cut out Tmatrix elements for different lp1 and lp2 for unobserved primary observed secondary angular distrabution calculation
-              if(interferenceType=="RR") {//only particle interference terms
+            if(lp1==lp2&&point->IsUPOS()){//cut out Tmatrix elements for different lp1 and lp2 for unobserved primary observed secondary angular distrabution calculation             
+              if(interferenceType=="RR") {//only particle interference terms 
 	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
+//                std::cout<<kL<<","<<T1<<","<<T2<<",";
 	      }
               int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
-	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)* //pow(2.*lOrder+1.,0.5)/(4*pi)*
+//              std::cout<<lOrder<<std::endl;
+	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.*pi)*
 	        point->GetLegendreP(lOrder);
             }
           } else {                   
@@ -184,7 +190,8 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
          
 	  double jValue2=compound()->GetJGroup(theMGroup2->GetJNum())->GetJ();
           int lOrder_temp = theDecay->GetKLGroup(kL)->GetLOrder();
-*/          
+*/
+                      
 	    if(interferenceType=="RR") {
 	      T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	      T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
