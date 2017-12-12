@@ -18,6 +18,12 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   pairTypeCombo->addItem(tr("Particle, Particle"));
   pairTypeCombo->addItem(tr("Particle, Gamma"));
   pairTypeCombo->addItem(tr("Beta Decay"));
+  uposCheck = new QCheckBox(tr("Unobserved Primary?"));
+  uposCheck->setChecked(false);
+  secondaryDecayLLabel = new QLabel(tr("Secondary Multipolarity:"));
+  secondaryDecayLText = new QLineEdit;
+  icLabel = new QLabel(tr("Final State Spin:"));
+  icText = new QLineEdit;
   connect(pairTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLightParticle(int)));
 
   QRegExp rx("^\\d{0,2}(\\.[05]{0,1})?$");
@@ -75,6 +81,11 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   channelLayout->addWidget(seperationEnergyText,1,1);
   channelLayout->addWidget(channelRadiusLabel,2,0,Qt::AlignRight);
   channelLayout->addWidget(channelRadiusText,2,1);
+  channelLayout->addWidget(uposCheck,3,0,Qt::AlignRight);
+  channelLayout->addWidget(secondaryDecayLLabel,4,0,Qt::AlignRight);
+  channelLayout->addWidget(secondaryDecayLText,4,1);
+  channelLayout->addWidget(icLabel,5,0,Qt::AlignRight);
+  channelLayout->addWidget(icText,5,1); 
   channelGroup->setLayout(channelLayout);
   
   QGroupBox *lightGroup = new QGroupBox(tr("Light Particle"));
@@ -115,6 +126,15 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   buttonBox->addWidget(cancelButton);
   buttonBox->addWidget(okButton);
 
+//  uposBox = new QGroupBox(tr("Unobserved Properties"));
+//  uposBox->show();
+//  QGridLayout *uposLayout = new QGridLayout;
+//  uposLayout->addWidget(secondaryDecayLLabel,0,0,Qt::AlignRight);
+//  uposLayout->addWidget(secondaryDecayLText,0,1);
+//  uposLayout->addWidget(icLabel,1,0,Qt::AlignRight);
+//  uposLayout->addWidget(icText,1,1);
+//  uposBox->setLayout(uposLayout);
+
   multBox= new QGroupBox(tr("External Capture Multipolarities"));
   multBox->hide();
   QHBoxLayout *multLayout = new QHBoxLayout;
@@ -127,6 +147,7 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   mainLayout->addLayout(pairTypeLayout);
   mainLayout->addLayout(entryLayout);
   mainLayout->addWidget(channelGroup);
+//  mainLayout->addWidget(uposBox);
   mainLayout->addWidget(multBox);
   mainLayout->addLayout(buttonBox);
 
@@ -156,6 +177,7 @@ void AddPairDialog::updateLightParticle(int index) {
     channelRadiusText->setText("0");
     channelRadiusText->setEnabled(false);
     multBox->show();
+//    uposBox->hide();
   } else if(index==2) {
     lightJText->setEnabled(false);
     lightJText->setText("0.5");
@@ -171,6 +193,7 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setText("0.000");
     channelRadiusText->setEnabled(true);
     multBox->hide();
+//    uposBox->hide();
     this->adjustSize();
   } else {
     lightJText->setEnabled(true);
@@ -182,6 +205,7 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setEnabled(true);
     channelRadiusText->setEnabled(true);
     multBox->hide();
+//    uposBox->show();    
     this->adjustSize();
   }
 }

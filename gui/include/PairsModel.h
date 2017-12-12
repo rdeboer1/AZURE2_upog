@@ -5,7 +5,7 @@
 #include <QList>
 
 struct PairsData {
-  static const int SIZE = 15;
+  static const int SIZE = 18;
   double lightJ;
   int lightPi;
   int lightZ;
@@ -21,6 +21,9 @@ struct PairsData {
   double channelRadius;
   int pairType;
   int ecMultMask;
+  int isUPOS;
+  int secondaryDecayL;
+  double Ic;
 };
 
 class PairsModel : public QAbstractTableModel {

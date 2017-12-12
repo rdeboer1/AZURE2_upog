@@ -657,7 +657,9 @@ bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
 		    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).heavyZ
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(0).seperationEnergy
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).seperationEnergy
-		    << "    0    0          0.0" 
+		    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).isUPOS
+                    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).secondaryDecayL
+                    << qSetFieldWidth(13) << pairs.at(channels.at(ch).pairIndex).Ic
 		    << qSetFieldWidth(6)  << pairs.at(channels.at(ch).pairIndex).pairType
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).channelRadius 
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).lightG 
@@ -701,12 +703,13 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
   int heavyZ;
   double seperationEnergyIn;
   double seperationEnergyOut;
+  int isupos;
+  int secondaryDecayL;
+  double Ic;
   int pairType;
   double channelRadius;
   double lightG;
   double heavyG;
-  double dummyDouble;
-  int dummyInt;
   int ecMultMask;
 
   maxLSpin->blockSignals(true);
@@ -733,7 +736,7 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
       in >> levelJ >> levelPi >> levelEnergy >> levelFix >> aa >> ir >> channelS >> channelL >> levelId >> levelYN >> channelFix
 	 >> channelReducedWidth >> lightJ >> lightPi >> heavyJ >> heavyPi >> excitationEnergy 
 	 >> lightM >> heavyM >> lightZ >> heavyZ >> seperationEnergyIn >> seperationEnergyOut
-	 >> dummyInt >> dummyInt >> dummyDouble >> pairType >> channelRadius >> lightG >> heavyG;
+	 >> isupos >> secondaryDecayL >> Ic >> pairType >> channelRadius >> lightG >> heavyG;
       if(in.status()!=QTextStream::Ok) return false;
       in >> ecMultMask;
       if(in.status()!=QTextStream::Ok) ecMultMask=0;
@@ -752,7 +755,7 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
       }
       
       PairsData newPair={lightJ,lightPi,lightZ,lightM,lightG,heavyJ,heavyPi,heavyZ,heavyM,
-			 heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType,ecMultMask};
+			 heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType,ecMultMask,isupos,secondaryDecayL,Ic};
       int pairIndex=ir-1;
       if(pairsModel->numPairs()<ir) {
 	emit(readNewPair(newPair,pairIndex,true));

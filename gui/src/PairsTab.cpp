@@ -17,6 +17,9 @@ PairsTab::PairsTab(QWidget *parent) : QWidget(parent) {
   pairsView->setColumnHidden(8,true);
   pairsView->setColumnHidden(13,true);
   pairsView->setColumnHidden(14,true);
+  pairsView->setColumnHidden(15,true);
+  pairsView->setColumnHidden(16,true);
+  pairsView->setColumnHidden(17,true);
   RichTextDelegate *rt = new RichTextDelegate();
   pairsView->setItemDelegateForColumn(0,rt);
   pairsView->setItemDelegateForColumn(5,rt);
@@ -102,6 +105,10 @@ void PairsTab::addPair() {
       if(aDialog.m1Check->isChecked()) newMask |= (1<<1);
       if(aDialog.e2Check->isChecked()) newMask |= (1<<2);
       newPair.ecMultMask=newMask;
+      if(aDialog.uposCheck->isChecked()) newPair.isUPOS=1;
+      else newPair.isUPOS=0;
+      newPair.secondaryDecayL=(aDialog.secondaryDecayLText->text()).toInt();
+      newPair.Ic=(aDialog.icText->text()).toDouble();
       addPair(newPair,pairsModel->numPairs(),false);
     } else {
       QMessageBox::information(this, tr("Pair Type Error"),
@@ -144,6 +151,12 @@ void PairsTab::addPair(PairsData pair,int pairIndex,bool fromFile) {
     pairsModel->setData(index,pair.pairType,Qt::EditRole);
     index = pairsModel->index(pairIndex,14,QModelIndex());
     pairsModel->setData(index,pair.ecMultMask,Qt::EditRole);
+    index = pairsModel->index(pairIndex,15,QModelIndex());
+    pairsModel->setData(index,pair.isUPOS,Qt::EditRole);
+    index = pairsModel->index(pairIndex,16,QModelIndex());
+    pairsModel->setData(index,pair.secondaryDecayL,Qt::EditRole);
+    index = pairsModel->index(pairIndex,17,QModelIndex());
+    pairsModel->setData(index,pair.Ic,Qt::EditRole);
 
     pairsView->resizeRowsToContents();
     if(!fromFile) emit(pairAdded(pairIndex));
@@ -159,7 +172,7 @@ void PairsTab::removePair() {
   QModelIndex index=indexes[0];
   bool previousIsGamma=false;
   if(index.row()==0&&(pairsModel->getPairs()).size()!=1) {
-    QModelIndex previousIndex=pairsModel->index(index.row()+1,13,QModelIndex());
+    QModelIndex previousIndex=pairsModel->index(index.row()+1,16,QModelIndex()); //was 13, changing to 16?
     QVariant previousPairType=pairsModel->data(previousIndex,Qt::EditRole);
     if (previousPairType.toInt()==10) previousIsGamma=true;
   }
@@ -222,6 +235,15 @@ void PairsTab::editPair() {
   i = pairsModel->index(index.row(), 14, QModelIndex());
   var = pairsModel->data(i, Qt::EditRole);
   int ecMultMask = var.toInt();
+  i = pairsModel->index(index.row(), 15, QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  int isUPOS = var.toInt();
+  i = pairsModel->index(index.row(), 16, QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  QString secondaryDecayL = var.toString();
+  i = pairsModel->index(index.row(), 17, QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  QString Ic = var.toString();
 
   
   AddPairDialog aDialog;
@@ -250,6 +272,10 @@ void PairsTab::editPair() {
   else aDialog.m1Check->setChecked(false);
   if(ecMultMask&(1<<2)) aDialog.e2Check->setChecked(true);
   else aDialog.e2Check->setChecked(false);
+  if(isUPOS==1) aDialog.uposCheck->setChecked(true);
+  else aDialog.uposCheck->setChecked(false);
+  aDialog.secondaryDecayLText->setText(secondaryDecayL);
+  aDialog.icText->setText(Ic);
   
   if (aDialog.exec()) {
     if(!(index.row()==0&&aDialog.pairTypeCombo->currentIndex()!=0)) {
@@ -277,6 +303,10 @@ void PairsTab::editPair() {
       if(aDialog.m1Check->isChecked()) newECMultMask |= (1<<1);
       if(aDialog.e2Check->isChecked()) newECMultMask |= (1<<2);
       pair.ecMultMask=newECMultMask;
+      if(aDialog.uposCheck->isChecked()) pair.isUPOS = 1;
+      else pair.isUPOS = 0;
+      pair.secondaryDecayL = aDialog.secondaryDecayLText->text().toInt();
+      pair.Ic = aDialog.icText->text().toDouble(); 
       editPair(pair,index.row(),false);
     } else {
       QMessageBox::information(this,tr("Pair Type Error"),
@@ -331,6 +361,15 @@ void PairsTab::editPair(PairsData pair,int pairIndex,bool fromFile) {
   i = pairsModel->index(pairIndex,14,QModelIndex());
   var = pairsModel->data(i, Qt::EditRole);
   if (pair.pairType != var.toInt()) pairsModel->setData(i,pair.ecMultMask, Qt::EditRole);
+  i = pairsModel->index(pairIndex,15,QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  if (pair.pairType != var.toInt()) pairsModel->setData(i,pair.isUPOS, Qt::EditRole);
+  i = pairsModel->index(pairIndex,16,QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole);
+  if (pair.pairType != var.toInt()) pairsModel->setData(i,pair.secondaryDecayL, Qt::EditRole);
+  i = pairsModel->index(pairIndex,17,QModelIndex());
+  var = pairsModel->data(i, Qt::EditRole); 
+  if (pair.pairType != var.toDouble()) pairsModel->setData(i,pair.Ic, Qt::EditRole);
 
   if(!fromFile) emit(pairEdited(pairIndex));
 }
