@@ -1,6 +1,7 @@
 #include "CNuc.h"
 #include "EPoint.h"
 #include "GenMatrixFunc.h"
+#include "AngCoeff.h"
 #include <assert.h>
 #include <iostream>
 #include <fstream>
@@ -171,8 +172,13 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 //                std::cout<<kL<<","<<T1<<","<<T2<<",";
 	      }
               int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
-//              std::cout<<lOrder<<std::endl;
-	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.*pi)*
+              double finalL=(double)point->GetSecondaryDecayL(); //(double)point->GetSecondaryDecayL()
+              double Ic=point->GetIc();
+              double j2f=compound()->GetPair(ir)->GetJ(2);
+              double R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
+                       *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
+//              std::cout<<lOrder<<","<<finalL<<","<<Ic<<","<<j2f<<","<<R_L<<std::endl;
+	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.*pi)*R_L*
 	        point->GetLegendreP(lOrder);
             }
           } else {                   

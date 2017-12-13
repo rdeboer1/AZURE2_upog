@@ -31,6 +31,7 @@ class AddSegDataDialog : public QDialog {
   QLineEdit *dataNormErrorText;
   QLabel *dataNormErrorLabel;
   QCheckBox *varyNormCheck;
+  QCheckBox *uposCheck;
   QLineEdit *phaseJValueText;
   QLineEdit *phaseLValueText;
   QLabel* phaseLValueLabel;

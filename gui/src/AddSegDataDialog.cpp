@@ -54,6 +54,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   dataNormErrorText->setMaximumWidth(50);
   varyNormCheck = new QCheckBox(tr("Vary Norm?"));
   //connect(varyNormCheck,SIGNAL(stateChanged(int)),this,SLOT(varyNormChanged(int)));
+  uposCheck = new QCheckBox(tr("Unobserved?"));
 
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
@@ -90,6 +91,7 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
+  lowerLayout->addWidget(uposCheck,0,2); //unobserved checkbox
 
   QGridLayout* phaseLayout = new QGridLayout;
   phaseLayout->addItem(new QSpacerItem(1,25),0,0);

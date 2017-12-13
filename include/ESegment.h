@@ -35,6 +35,7 @@ class ESegment {
   int GetTargetEffectNum() const;
   int GetSegmentKey() const;
   int GetMaxAngDistOrder() const;
+  int GetSecondaryDecayL() const;
   double GetMinEnergy() const;
   double GetMaxEnergy() const;
   double GetMinAngle() const;
@@ -46,6 +47,7 @@ class ESegment {
   double GetNorm() const;
   double GetNominalNorm() const;
   double GetNormError() const;
+  double GetIc() const;
   std::string GetDataFile() const;
   void AddPoint(EPoint);
   void SetSegmentChiSquared(double);
@@ -65,6 +67,8 @@ class ESegment {
   bool varyNorm_;
   bool isAngDist_;
   bool isUPOS_;
+  int secondaryDecayL_;
+  double Ic_;
   int isTotalCapture_;
   int entrancekey_;
   int exitkey_;

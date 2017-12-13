@@ -48,6 +48,8 @@ EPoint::EPoint(DataLine dataLine, ESegment *parent) {
   angleKinFactor_=1.0;
   crossSectionKinFactor_=1.0;
   isUPOS_=parent->IsUPOS();
+  secondaryDecayL_=parent->GetSecondaryDecayL();
+  Ic_=parent->GetIc();
 }
  
 /*!
@@ -84,6 +86,8 @@ EPoint::EPoint(double angle, double energy, ESegment* parent) {
   angleKinFactor_=1.0;
   crossSectionKinFactor_=1.0;
   isUPOS_=parent->IsUPOS();
+  secondaryDecayL_=parent->GetSecondaryDecayL();
+  Ic_=parent->GetIc();
 }
   
 /*!
@@ -171,6 +175,22 @@ bool EPoint::IsTargetEffect() const {
 
 bool EPoint::IsUPOS() const {
   return isUPOS_;
+}
+
+/*!
+ * Returns angular momentum of secondary decay.
+ */
+
+int EPoint::GetSecondaryDecayL() const {
+  return secondaryDecayL_;
+}
+
+/*!
+ * Returns spin of final state of secondary decay.
+ */
+
+double EPoint::GetIc() const {
+  return Ic_;
 }
 
 /*!

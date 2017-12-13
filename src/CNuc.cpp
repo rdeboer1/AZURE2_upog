@@ -1158,23 +1158,23 @@ void CNuc::CalcAngularDists(int maxL) {
 		  z1z2=pow(-1.,1.+s-jf)/4.*z1*z2;
                 }
                 double z1z2_upos=0.;
-                double Rk=0.; 
+//                double Rk=0.; 
                 if(this->GetPair(theDecay->GetPairNum())->GetPType()==0&&this->GetPair(theDecay->GetPairNum())->IsUPOS()==true&&aa!=ir) {
                   double sp2=theDecay->GetKGroup(k)->GetSp2();
                   double j1f=this->GetPair(theDecay->GetPairNum())->GetJ(1);
                   double j2f=this->GetPair(theDecay->GetPairNum())->GetJ(2);
-                  double finalL=(double)this->GetPair(theDecay->GetPairNum())->GetSecondaryDecayL();
-                  double Ic=this->GetPair(theDecay->GetPairNum())->GetIc();
+//                  double finalL=(double)this->GetPair(theDecay->GetPairNum())->GetSecondaryDecayL();
+//                  double Ic=this->GetPair(theDecay->GetPairNum())->GetIc();
                   z1z2_upos = pow(-1.,lOrder+sp2-sp)*(2.*j1+1.)*(2.*j2+1.)*pow((2.*l1+1.)*(2.*j2f+1.)
                     *(2.*sp+1.)*(2.*sp2+1.),0.5)*AngCoeff::ClebGord(lOrder,l1,l2,0.,0.,0.) //AngCoeff::ClebGord(l1,l2,lOrder,0.,0.,0.)
                     *AngCoeff::Racah(lOrder,j2f,sp2,j1f,j2f,sp)*AngCoeff::Racah(lOrder,sp,j2,l1p,sp2,j1)
                     *AngCoeff::Racah(lOrder,j1,l2,s,j2,l1);
-                  Rk = pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
-                       *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
+//                  Rk = pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
+//                       *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
 //                  double test = z1z2_upos*Rk;
 //                  if(test>0.) std::cout<<lOrder<<","<<test<<std::endl;
 		}
-		if(fabs(z1z2)>1e-10||fabs(z1z2_upos*Rk)>1e-10) {                 
+		if(fabs(z1z2)>1e-10||fabs(z1z2_upos)>1e-10) {                 
 		  KLGroup NewKLGroup(k,lOrder);
 		  int KLGroupNum=theDecay->IsKLGroup(NewKLGroup);
 		  if(!KLGroupNum) {
@@ -1190,7 +1190,7 @@ void CNuc::CalcAngularDists(int maxL) {
 		    }
                   }
                   if(this->GetPair(theDecay->GetPairNum())->IsUPOS()==true){
-                    Interference NewInterference(path1,path2,z1z2,z1z2_upos*Rk,interferenceType);                  
+                    Interference NewInterference(path1,path2,z1z2,z1z2_upos,interferenceType);                  
 		    int InterNum=theDecay->GetKLGroup(KLGroupNum)->IsInterference(NewInterference);
 		    if(!InterNum) {
 		      theDecay->GetKLGroup(KLGroupNum)->AddInterference(NewInterference);

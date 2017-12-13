@@ -659,7 +659,7 @@ bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).seperationEnergy
 		    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).isUPOS
                     << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).secondaryDecayL
-                    << qSetFieldWidth(13) << pairs.at(channels.at(ch).pairIndex).Ic
+                    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).Ic
 		    << qSetFieldWidth(6)  << pairs.at(channels.at(ch).pairIndex).pairType
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).channelRadius 
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).lightG 

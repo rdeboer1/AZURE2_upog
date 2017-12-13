@@ -195,10 +195,10 @@ int EData::MakePoints(const Config& configure, CNuc *theCNuc) {
 		   !theSegment->IsPhase()&&!theSegment->IsAngularDist()) {
 		  if(theSegment->GetEntranceKey()==theSegment->GetExitKey()) {
 		    thePoint->ConvertLabAngle(entrancePair);
-		  } else {
+		  } else if(!theSegment->IsCMDifferential()) {
 		    thePoint->ConvertLabAngle(entrancePair,exitPair,configure);
 		  }
-		  thePoint->ConvertCrossSection(entrancePair,exitPair);
+		  if(!theSegment->IsCMDifferential()) thePoint->ConvertCrossSection(entrancePair,exitPair);
 		}
 		if(exitPair->GetPType()==10&&theSegment->IsDifferential()&&
 		  !theSegment->IsPhase()&&!theSegment->IsAngularDist()){

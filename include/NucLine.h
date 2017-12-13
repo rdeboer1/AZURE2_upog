@@ -154,12 +154,12 @@ class NucLine {
    * Returns the angular momentum of the decay for unobserved particle
    * observed secondary decay
    */
-  int secondaryDecayL() const {return 2;}; //secondaryDecayL_
+//  int secondaryDecayL() const {return secondaryDecayL_;}; //secondaryDecayL_
   /*!
    * Returns the spin of the final state of the decay for unobserved particle
    * observed secondary decay
    */
-  double Ic() const {return 0.0;}; //Ic_
+//  double Ic() const {return Ic_;}; //Ic_
 
  private:
   double levelJ_;

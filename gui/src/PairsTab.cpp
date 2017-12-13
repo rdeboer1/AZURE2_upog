@@ -276,7 +276,7 @@ void PairsTab::editPair() {
   else aDialog.uposCheck->setChecked(false);
   aDialog.secondaryDecayLText->setText(secondaryDecayL);
   aDialog.icText->setText(Ic);
-  
+
   if (aDialog.exec()) {
     if(!(index.row()==0&&aDialog.pairTypeCombo->currentIndex()!=0)) {
       PairsData pair;

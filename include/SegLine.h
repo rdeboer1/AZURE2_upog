@@ -18,8 +18,7 @@ class SegLine {
   SegLine(std::istream &stream) {
     stream >> isActive_ >>  entranceKey_ >> exitKey_ >> minE_ >> maxE_ >> minA_ >> maxA_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-//    if(isDiff_==5) stream >> finalJ_ >> finalgL_ >> finalgLp_;
-    stream >> dataNorm_ >> varyNorm_ >> dataNormError_; // >> isUPOS_
+    stream >> dataNorm_ >> varyNorm_ >> dataNormError_ ; // >> isUPOS_ >> secondaryDecayL_ >> Ic_
     std::string dummyString;
     getline(stream,dummyString);
     int p2 = dummyString.find_last_not_of(" \n\t\r");
@@ -98,6 +97,16 @@ class SegLine {
    * Returns flag for if this segment is an unobserved primary transition (1 = is, 0 = not).
    */
   int isUPOS() const {return 1;}; //isUPOS_
+  /*!
+   * Returns the angular momentum of the decay for unobserved particle
+   * observed secondary decay
+   */
+  int secondaryDecayL() const {return 3;}; //secondaryDecayL_
+  /*!
+   * Returns the spin of the final state of the decay for unobserved particle
+   * observed secondary decay
+   */
+  double Ic() const {return 0.0;}; //Ic_
 
  private:
   int isActive_;

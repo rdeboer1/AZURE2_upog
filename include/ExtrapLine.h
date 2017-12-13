@@ -19,7 +19,7 @@ class ExtrapLine {
     stream >> isActive_ >> entranceKey_ >> exitKey_ >> minE_ 
 	   >> maxE_ >> eStep_ >> minA_ >> maxA_ >> aStep_ >> isDiff_;
     if(isDiff_==2) stream >> phaseJ_ >> phaseL_;
-    else if(isDiff_==3) stream >> maxAngDistOrder_;
+    else if(isDiff_==3) stream >> maxAngDistOrder_; //>> secondaryDecayL_ >> Ic
 
   };
   /*!
@@ -85,6 +85,16 @@ class ExtrapLine {
    * observed secondary.
    */
   int isUPOS() const {return 1;}; //1 if it is, 0 if not
+  /*!
+   * Returns the angular momentum of the decay for unobserved particle
+   * observed secondary decay
+   */  
+  int secondaryDecayL() const {return 1;}; //secondaryDecayL_
+  /*!
+   * Returns the spin of the final state of the decay for unobserved particle
+   * observed secondary decay
+   */
+  double Ic() const {return 0;}; //Ic_
  private:
   int isActive_;
   int entranceKey_;

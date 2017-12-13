@@ -45,6 +45,8 @@ ESegment::ESegment(SegLine segLine) {
   isTargetEffect_=false;
   if(segLine.isUPOS()==1) isUPOS_=true;
   else isUPOS_=false;
+  secondaryDecayL_ = segLine.secondaryDecayL();
+  Ic_ = segLine.Ic();
 }
 
 /*!
@@ -92,6 +94,8 @@ ESegment::ESegment(ExtrapLine extrapLine) {
   isTargetEffect_=false;
   if(extrapLine.isUPOS()==1) isUPOS_=true;
   else isUPOS_=false;
+  secondaryDecayL_ = extrapLine.secondaryDecayL();
+  Ic_ = extrapLine.Ic();
 }
 
 /*!
@@ -181,6 +185,22 @@ bool ESegment::IsUPOS() const {
 }
 
 /*!
+ * Returns angular momentum of secondary decay.
+ */
+
+int ESegment::GetSecondaryDecayL() const {
+  return secondaryDecayL_;
+}
+
+/*!
+ * Returns spin of final state of secondary decay.
+ */
+
+double ESegment::GetIc() const {
+  return Ic_;
+}
+
+/*!
  * Returns the number of data point objects in the segment.
  */
 
@@ -225,9 +245,9 @@ int ESegment::Fill(CNuc *theCNuc, EData *theData, const Config& configure) {
 	this->GetPoint(this->NumPoints())->SetParentData(theData);
 	if(entrancePair->GetPType()==20) {
            this->GetPoint(this->NumPoints())->ConvertDecayEnergy(exitPair);
-        } else if (this->IsCMDifferential()) {
-          this->GetPoint(this->NumPoints())->ConvertExcitationEnergy(entrancePair);
-        } else if(!this->IsCMDifferential()){
+//        } else if (this->IsCMDifferential()) {
+//          this->GetPoint(this->NumPoints())->ConvertExcitationEnergy(entrancePair);
+        } else { //if(!this->IsCMDifferential())
           this->GetPoint(this->NumPoints())->ConvertLabEnergy(entrancePair);
         }
 	if(exitPair->GetPType()==0&&this->IsDifferential()&&!this->IsPhase()&&!this->IsCMDifferential()) {

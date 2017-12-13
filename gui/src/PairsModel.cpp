@@ -1,6 +1,7 @@
 #include "PairsModel.h"
 #include "ElementMap.h"
 #include <math.h>
+#include <iostream>
 
 PairsModel::PairsModel(QObject *parent) : QAbstractTableModel(parent) {
 }
@@ -102,6 +103,12 @@ QVariant PairsModel::headerData(int section, Qt::Orientation orientation, int ro
       return tr("Pair\nType");
     case 14:
       return tr("EC\nMultipolarities");
+    case 15:
+      return tr("Unobserved?");
+    case 16:
+      return tr("Final\nL");
+    case 17:
+      return tr("Final\nJ");
     default: 
       return QVariant();
     }

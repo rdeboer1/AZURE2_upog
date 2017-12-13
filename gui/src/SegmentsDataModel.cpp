@@ -96,6 +96,8 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
       return QVariant();
     } else if(index.column() == 13) {
       return QVariant();
+    } else if(index.column() == 14) {
+      return QVariant();
     }
   } else if (role == Qt::EditRole) {
     SegmentsDataData line = segDataLineList.at(index.row());
@@ -112,6 +114,7 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 11) return line.varyNorm;
     else if(index.column() == 12) return line.phaseJ;
     else if(index.column() == 13) return line.phaseL;
+    else if(index.column() == 14) return line.isUPOS;
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     SegmentsDataData line = segDataLineList.at(index.row());
     if(line.isActive==1) return Qt::Checked;
@@ -153,6 +156,8 @@ QVariant SegmentsDataModel::headerData(int section, Qt::Orientation orientation,
       return QVariant();
     case 13:
       return QVariant();
+    case 14:
+      return QVariant();
     default: 
       return QVariant();
     }
@@ -180,6 +185,7 @@ bool SegmentsDataModel::setData(const QModelIndex &index, const QVariant &value,
     else if(index.column() == 11) tempData.varyNorm=value.toInt();
     else if(index.column() == 12) tempData.phaseJ=value.toDouble();
     else if(index.column() == 13) tempData.phaseL=value.toInt();
+    else if(index.column() == 14) tempData.isUPOS=value.toInt();
     else return false;
 
     segDataLineList.replace(row,tempData);
@@ -246,7 +252,8 @@ int SegmentsDataModel::isSegDataLine(const SegmentsDataData &line) const {
        tempLine.dataNormError==line.dataNormError&&
        tempLine.varyNorm==line.varyNorm&&
        tempLine.phaseJ==line.phaseJ&&
-       tempLine.phaseL==line.phaseL) {
+       tempLine.phaseL==line.phaseL&&
+       tempLine.isUPOS==line.isUPOS) {
       foundLine=i;
       break;
     }

@@ -18,13 +18,14 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   pairTypeCombo->addItem(tr("Particle, Particle"));
   pairTypeCombo->addItem(tr("Particle, Gamma"));
   pairTypeCombo->addItem(tr("Beta Decay"));
+  connect(pairTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLightParticle(int)));
   uposCheck = new QCheckBox(tr("Unobserved Primary?"));
   uposCheck->setChecked(false);
   secondaryDecayLLabel = new QLabel(tr("Secondary Multipolarity:"));
   secondaryDecayLText = new QLineEdit;
   icLabel = new QLabel(tr("Final State Spin:"));
   icText = new QLineEdit;
-  connect(pairTypeCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLightParticle(int)));
+  
 
   QRegExp rx("^\\d{0,2}(\\.[05]{0,1})?$");
   QValidator *validator = new QRegExpValidator(rx, this);
@@ -126,15 +127,6 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   buttonBox->addWidget(cancelButton);
   buttonBox->addWidget(okButton);
 
-//  uposBox = new QGroupBox(tr("Unobserved Properties"));
-//  uposBox->show();
-//  QGridLayout *uposLayout = new QGridLayout;
-//  uposLayout->addWidget(secondaryDecayLLabel,0,0,Qt::AlignRight);
-//  uposLayout->addWidget(secondaryDecayLText,0,1);
-//  uposLayout->addWidget(icLabel,1,0,Qt::AlignRight);
-//  uposLayout->addWidget(icText,1,1);
-//  uposBox->setLayout(uposLayout);
-
   multBox= new QGroupBox(tr("External Capture Multipolarities"));
   multBox->hide();
   QHBoxLayout *multLayout = new QHBoxLayout;
@@ -147,7 +139,6 @@ AddPairDialog::AddPairDialog(QWidget *parent) : QDialog(parent) {
   mainLayout->addLayout(pairTypeLayout);
   mainLayout->addLayout(entryLayout);
   mainLayout->addWidget(channelGroup);
-//  mainLayout->addWidget(uposBox);
   mainLayout->addWidget(multBox);
   mainLayout->addLayout(buttonBox);
 
@@ -176,8 +167,13 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setEnabled(true);
     channelRadiusText->setText("0");
     channelRadiusText->setEnabled(false);
+    secondaryDecayLText->setText("0");
+    secondaryDecayLText->setEnabled(false);
+    icText->setText("0");
+    icText->setEnabled(false);
+    uposCheck->setEnabled(false);
     multBox->show();
-//    uposBox->hide();
+    this->adjustSize();
   } else if(index==2) {
     lightJText->setEnabled(false);
     lightJText->setText("0.5");
@@ -192,8 +188,12 @@ void AddPairDialog::updateLightParticle(int index) {
     excitationEnergyText->setEnabled(false);
     excitationEnergyText->setText("0.000");
     channelRadiusText->setEnabled(true);
+    secondaryDecayLText->setText("0");
+    secondaryDecayLText->setEnabled(false);
+    icText->setText("0");
+    icText->setEnabled(false);
+    uposCheck->setEnabled(false);
     multBox->hide();
-//    uposBox->hide();
     this->adjustSize();
   } else {
     lightJText->setEnabled(true);
@@ -204,8 +204,10 @@ void AddPairDialog::updateLightParticle(int index) {
     seperationEnergyText->setEnabled(true);
     excitationEnergyText->setEnabled(true);
     channelRadiusText->setEnabled(true);
-    multBox->hide();
-//    uposBox->show();    
+    secondaryDecayLText->setEnabled(true);
+    icText->setEnabled(true);
+    uposCheck->setEnabled(true);
+    multBox->hide();   
     this->adjustSize();
   }
 }

@@ -34,7 +34,6 @@ class AddPairDialog : public QDialog {
   QCheckBox *uposCheck;
   QLineEdit *secondaryDecayLText;
   QLineEdit *icText;
-//  QGroupBox *uposBox;
   QComboBox *pairTypeCombo;
   QCheckBox *e1Check;
   QCheckBox *m1Check;
