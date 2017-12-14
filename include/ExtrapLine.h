@@ -89,12 +89,12 @@ class ExtrapLine {
    * Returns the angular momentum of the decay for unobserved particle
    * observed secondary decay
    */  
-  int secondaryDecayL() const {return 1;}; //secondaryDecayL_
+  int secondaryDecayL() const {return 2;}; //secondaryDecayL_
   /*!
    * Returns the spin of the final state of the decay for unobserved particle
    * observed secondary decay
    */
-  double Ic() const {return 0;}; //Ic_
+  double Ic() const {return 0.0;}; //Ic_
  private:
   int isActive_;
   int entranceKey_;

@@ -101,7 +101,7 @@ class SegLine {
    * Returns the angular momentum of the decay for unobserved particle
    * observed secondary decay
    */
-  int secondaryDecayL() const {return 3;}; //secondaryDecayL_
+  int secondaryDecayL() const {return 2;}; //secondaryDecayL_
   /*!
    * Returns the spin of the final state of the decay for unobserved particle
    * observed secondary decay

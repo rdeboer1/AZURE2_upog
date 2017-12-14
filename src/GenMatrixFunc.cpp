@@ -178,7 +178,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
               double R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
                        *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
 //              std::cout<<lOrder<<","<<finalL<<","<<Ic<<","<<j2f<<","<<R_L<<std::endl;
-	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.*pi)*R_L*
+	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.)*R_L* //
 	        point->GetLegendreP(lOrder);
             }
           } else {                   
