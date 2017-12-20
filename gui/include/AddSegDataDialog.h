@@ -31,12 +31,16 @@ class AddSegDataDialog : public QDialog {
   QLineEdit *dataNormErrorText;
   QLabel *dataNormErrorLabel;
   QCheckBox *varyNormCheck;
-  QCheckBox *uposCheck;
   QLineEdit *phaseJValueText;
   QLineEdit *phaseLValueText;
   QLabel* phaseLValueLabel;
   QLabel* phaseJValueLabel;
   QLabel* totalCaptureLabel;
+  QCheckBox *uposCheck;
+  QLineEdit *secondaryLText;
+  QLabel* secondaryLLabel;
+  QLabel* finalJLabel;
+  QLineEdit *finalJText;
 
  public slots:
   void setChooseFile();

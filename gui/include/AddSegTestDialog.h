@@ -36,6 +36,10 @@ class AddSegTestDialog : public QDialog {
   QLabel *totalCaptureLabel;
   QSpinBox *angDistSpin;
   QCheckBox *uposCheck;
+  QLineEdit *secondaryLText;
+  QLineEdit *finalJText;
+  QLabel *secondaryLLabel;
+  QLabel *finalJLabel;
  
  public slots:
   void dataTypeChanged(int);

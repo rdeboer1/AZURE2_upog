@@ -1,6 +1,7 @@
 #include "SegmentsDataModel.h"
 #include "PairsModel.h"
 #include <QColor>
+#include <iostream>
 
 SegmentsDataModel::SegmentsDataModel(QObject *parent) : QAbstractTableModel(parent) {
 }
@@ -98,6 +99,10 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
       return QVariant();
     } else if(index.column() == 14) {
       return QVariant();
+    } else if(index.column() == 15) {
+      return QVariant();
+    } else if(index.column() == 16) {
+      return QVariant();
     }
   } else if (role == Qt::EditRole) {
     SegmentsDataData line = segDataLineList.at(index.row());
@@ -115,6 +120,8 @@ QVariant SegmentsDataModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 12) return line.phaseJ;
     else if(index.column() == 13) return line.phaseL;
     else if(index.column() == 14) return line.isUPOS;
+    else if(index.column() == 15) return line.secondaryL;
+    else if(index.column() == 16) return line.finalJ;
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     SegmentsDataData line = segDataLineList.at(index.row());
     if(line.isActive==1) return Qt::Checked;
@@ -158,6 +165,10 @@ QVariant SegmentsDataModel::headerData(int section, Qt::Orientation orientation,
       return QVariant();
     case 14:
       return QVariant();
+    case 15:
+      return QVariant();
+    case 16:
+      return QVariant();
     default: 
       return QVariant();
     }
@@ -186,6 +197,8 @@ bool SegmentsDataModel::setData(const QModelIndex &index, const QVariant &value,
     else if(index.column() == 12) tempData.phaseJ=value.toDouble();
     else if(index.column() == 13) tempData.phaseL=value.toInt();
     else if(index.column() == 14) tempData.isUPOS=value.toInt();
+    else if(index.column() == 15) tempData.secondaryL=value.toInt();
+    else if(index.column() == 16) tempData.finalJ=value.toDouble();
     else return false;
 
     segDataLineList.replace(row,tempData);
@@ -253,7 +266,9 @@ int SegmentsDataModel::isSegDataLine(const SegmentsDataData &line) const {
        tempLine.varyNorm==line.varyNorm&&
        tempLine.phaseJ==line.phaseJ&&
        tempLine.phaseL==line.phaseL&&
-       tempLine.isUPOS==line.isUPOS) {
+       tempLine.isUPOS==line.isUPOS&&
+       tempLine.secondaryL==line.secondaryL&&
+       tempLine.finalJ==line.finalJ) {
       foundLine=i;
       break;
     }

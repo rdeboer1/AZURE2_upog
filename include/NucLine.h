@@ -149,7 +149,7 @@ class NucLine {
    * Returns 1 if angular distrabutions need to be calculated for unobserved
    * primary, observed secondary decays.
    */
-  int isUPOS() const {return 1;}; //isupos_
+  int isUPOS() const {return isupos_;}; //isupos_
   /*!
    * Returns the angular momentum of the decay for unobserved particle
    * observed secondary decay

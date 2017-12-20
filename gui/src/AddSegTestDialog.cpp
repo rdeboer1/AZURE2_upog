@@ -47,6 +47,8 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   phaseLValueText->setVisible(false);
   phaseLValueText->setMaximumWidth(50);
   uposCheck = new QCheckBox(tr("Unobserved?"));
+  secondaryLText = new QLineEdit;
+  finalJText = new QLineEdit;
 
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
@@ -87,7 +89,15 @@ AddSegTestDialog::AddSegTestDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
-  lowerLayout->addWidget(uposCheck,0,2);
+  lowerLayout->addWidget(uposCheck,1,0);
+
+  QHBoxLayout* uposLayout = new QHBoxLayout;
+  uposLayout->addWidget(new QLabel(tr("Secondary L:")));
+  uposLayout->addWidget(secondaryLText);
+  uposLayout->addWidget(new QLabel(tr("Final J:")));
+  uposLayout->addWidget(finalJText);
+  lowerLayout->addLayout(uposLayout,1,1);
+  
   lowerLayout->addItem(new QSpacerItem(1,25),0,2);
   lowerLayout->setColumnStretch(2,1);
 

@@ -55,6 +55,10 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   varyNormCheck = new QCheckBox(tr("Vary Norm?"));
   //connect(varyNormCheck,SIGNAL(stateChanged(int)),this,SLOT(varyNormChanged(int)));
   uposCheck = new QCheckBox(tr("Unobserved?"));
+  secondaryLText = new QLineEdit;
+  secondaryLLabel = new QLabel(tr("Seconardary L:"));
+  finalJText = new QLineEdit;
+  finalJLabel = new QLabel(tr("Final J:")); 
 
   cancelButton = new QPushButton(tr("Cancel"));
   okButton = new QPushButton(tr("Accept"));
@@ -91,7 +95,16 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   QGridLayout* lowerLayout = new QGridLayout;
   lowerLayout->addWidget(new QLabel(tr("Data Type:")),0,0,Qt::AlignRight);
   lowerLayout->addWidget(dataTypeCombo,0,1);
-  lowerLayout->addWidget(uposCheck,0,2); //unobserved checkbox
+
+  lowerLayout->addWidget(uposCheck,1,0); //unobserved checkbox
+  QHBoxLayout *secondaryLLayout = new QHBoxLayout;
+  secondaryLLayout->addWidget(secondaryLLabel);
+  secondaryLLayout->addWidget(secondaryLText);
+  lowerLayout->addLayout(secondaryLLayout,1,1);
+  QHBoxLayout *finalJLayout = new QHBoxLayout;
+  finalJLayout->addWidget(finalJLabel);
+  finalJLayout->addWidget(finalJText);
+  lowerLayout->addLayout(finalJLayout,1,2);
 
   QGridLayout* phaseLayout = new QGridLayout;
   phaseLayout->addItem(new QSpacerItem(1,25),0,0);
@@ -106,24 +119,24 @@ AddSegDataDialog::AddSegDataDialog(QWidget *parent) : QDialog(parent) {
   phaseLayout->addWidget(phaseLValueText,0,4);
   lowerLayout->addLayout(phaseLayout,0,2);
 
-  lowerLayout->addWidget(new QLabel(tr("Data Norm.:")),1,0,Qt::AlignRight);
+  lowerLayout->addWidget(new QLabel(tr("Data Norm.:")),2,0,Qt::AlignRight);
   QHBoxLayout *normLayout = new QHBoxLayout;
   normLayout->addWidget(dataNormText);
   normLayout->addWidget(varyNormCheck);
-  lowerLayout->addLayout(normLayout,1,1);
+  lowerLayout->addLayout(normLayout,2,1);
   QGridLayout *normErrorLayout = new QGridLayout;
   normErrorLayout->addItem(new QSpacerItem(1,25),0,0);
   normErrorLayout->setColumnStretch(0,1);
   normErrorLayout->addWidget(dataNormErrorLabel,0,1,Qt::AlignRight);
   normErrorLayout->addWidget(dataNormErrorText,0,2);
-  lowerLayout->addLayout(normErrorLayout,1,2);  
+  lowerLayout->addLayout(normErrorLayout,2,2);  
   
-  lowerLayout->addWidget(new QLabel(tr("Data File:")),2,0,Qt::AlignRight);
+  lowerLayout->addWidget(new QLabel(tr("Data File:")),3,0,Qt::AlignRight);
   QGridLayout *fileLayout = new QGridLayout;
   fileLayout->addWidget(dataFileText,0,0);
   fileLayout->addWidget(chooseFileButton,0,1);
   fileLayout->setColumnStretch(0,1);
-  lowerLayout->addLayout(fileLayout,2,1,1,2);
+  lowerLayout->addLayout(fileLayout,3,1,1,2);
   valueLayout->addLayout(lowerLayout,2,0,1,2);
   valueBox->setLayout(valueLayout);
 

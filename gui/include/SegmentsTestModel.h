@@ -7,7 +7,7 @@
 class PairsModel;
 
 struct SegmentsTestData {
-  static const int SIZE = 14;
+  static const int SIZE = 16;
   int isActive;
   int entrancePairIndex;
   int exitPairIndex;
@@ -22,6 +22,8 @@ struct SegmentsTestData {
   int phaseL;
   int maxAngDistOrder;
   int isUPOS;
+  int secondaryL;
+  double finalJ;
 };
 
 class SegmentsTestModel : public QAbstractTableModel {

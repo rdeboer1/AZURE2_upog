@@ -42,8 +42,8 @@ QVariant PairsModel::data(const QModelIndex &index, int role) const {
       else return "Particle, Particle";
     } else if(index.column() == 14) return pair.ecMultMask;
     else if(index.column() == 15) return pair.isUPOS;
-    else if(index.column() == 16) return pair.secondaryDecayL;
-    else if(index.column() == 17) return pair.Ic;
+//    else if(index.column() == 16) return pair.secondaryDecayL;
+//    else if(index.column() == 17) return pair.Ic;
   } else if (role == Qt::EditRole) {
     PairsData pair = pairsList.at(index.row());
     if(index.column() == 0) return pair.lightJ;
@@ -62,8 +62,8 @@ QVariant PairsModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 13) return pair.pairType; 
     else if(index.column() == 14) return pair.ecMultMask;
     else if(index.column() == 15) return pair.isUPOS;
-    else if(index.column() == 16) return pair.secondaryDecayL;
-    else if(index.column() == 17) return pair.Ic;  
+//    else if(index.column() == 16) return pair.secondaryDecayL;
+//    else if(index.column() == 17) return pair.Ic;  
   } else if(role == Qt::TextAlignmentRole) return Qt::AlignCenter;
 
   return QVariant();
@@ -105,10 +105,10 @@ QVariant PairsModel::headerData(int section, Qt::Orientation orientation, int ro
       return tr("EC\nMultipolarities");
     case 15:
       return tr("Unobserved?");
-    case 16:
-      return tr("Final\nL");
-    case 17:
-      return tr("Final\nJ");
+//    case 16:
+//      return tr("Final\nL");
+//    case 17:
+//      return tr("Final\nJ");
     default: 
       return QVariant();
     }
@@ -138,8 +138,8 @@ bool PairsModel::setData(const QModelIndex &index, const QVariant &value, int ro
     else if(index.column() == 13) tempData.pairType=value.toInt();
     else if(index.column() == 14) tempData.ecMultMask=value.toInt();
     else if(index.column() == 15) tempData.isUPOS=value.toInt();
-    else if(index.column() == 16) tempData.secondaryDecayL=value.toInt();
-    else if(index.column() == 17) tempData.Ic=value.toDouble();
+//    else if(index.column() == 16) tempData.secondaryDecayL=value.toInt();
+//    else if(index.column() == 17) tempData.Ic=value.toDouble();
     else return false;
 
     pairsList.replace(row,tempData);
@@ -193,9 +193,10 @@ int PairsModel::isPair(const PairsData &pair) const {
        tempPair.channelRadius==pair.channelRadius&&
        tempPair.pairType==pair.pairType&&
        tempPair.ecMultMask==pair.ecMultMask&&
-       tempPair.isUPOS==pair.isUPOS&&
-       tempPair.secondaryDecayL==pair.secondaryDecayL&&
-       tempPair.Ic==pair.Ic) {
+       tempPair.isUPOS==pair.isUPOS
+//       tempPair.secondaryDecayL==pair.secondaryDecayL&&
+//       tempPair.Ic==pair.Ic) 
+     ){
       foundPair=i;
       break;
     }

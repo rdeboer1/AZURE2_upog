@@ -134,12 +134,8 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
             double sp2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetSp2();
             MGroup *theMGroup1=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM1());
             int lp1=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetL();
-//            int sp1_check=compound()->GetJGroup(theMGroup1->GetJNum())->GetChannel(theMGroup1->GetChpNum())->GetS();
             MGroup *theMGroup2=theDecay->GetKGroup(theDecay->GetKLGroup(kL)->GetK())->GetMGroup(theInterference->GetM2());
             int lp2=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetL();
-//            int sp2_check=compound()->GetJGroup(theMGroup2->GetJNum())->GetChannel(theMGroup2->GetChpNum())->GetS();
-//            std::cout<<sp1<<","<<sp1_check<<","<<sp2<<","<<sp2_check<<std::endl;
-//            std::cout<<lp1<<","<<lp2<<std::endl;
             if(sp1==sp2&&!point->IsUPOS()){ //cut out Tmatrix elements for different sp1 and sp2 values for normal angular distribution calculation
               
               if(interferenceType=="RR") {
@@ -172,10 +168,11 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 //                std::cout<<kL<<","<<T1<<","<<T2<<",";
 	      }
               int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
-              double finalL=(double)point->GetSecondaryDecayL(); //(double)point->GetSecondaryDecayL()
+              double finalL=(double)point->GetSecondaryDecayL(); 
               double Ic=point->GetIc();
               double j2f=compound()->GetPair(ir)->GetJ(2);
-              double R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
+              double R_L=0;
+              if((int)lOrder%2==0) R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
                        *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
 //              std::cout<<lOrder<<","<<finalL<<","<<Ic<<","<<j2f<<","<<R_L<<std::endl;
 	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.)*R_L* //
@@ -228,20 +225,10 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
 	return;
       }
       complex RT(0.,0.);
-/*     
-      if(compound()->GetPair(aa)->IsUPOS()==true){
-        if(point->IsUPOS()){
-          RT=sum/pi*point->GetGeometricalFactor()*
-	    compound()->GetPair(aa)->GetI1I2Factor();
-        } else {
-          RT=sum/pi*point->GetGeometricalFactor()*
-	    compound()->GetPair(aa)->GetI1I2Factor();
-        }
-      } else {
-*/
-        RT=sum/pi*point->GetGeometricalFactor()*
-	compound()->GetPair(aa)->GetI1I2Factor();
-//      }
+
+      RT=sum/pi*point->GetGeometricalFactor()*
+      compound()->GetPair(aa)->GetI1I2Factor();
+
       complex CT(0.,0.), IT(0.,0.);
       if(aa==ir) {
 	complex coulombAmplitude=point->GetCoulombAmplitude();

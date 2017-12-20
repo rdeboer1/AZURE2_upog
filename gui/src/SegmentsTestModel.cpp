@@ -90,7 +90,9 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 10) return QVariant();
     else if(index.column() == 11) return QVariant();
     else if(index.column() == 12) return QVariant();
-//    else if(index.column() == 13) return QVariant();
+    else if(index.column() == 13) return QVariant();
+    else if(index.column() == 14) return QVariant(); 
+    else if(index.column() == 15) return QVariant(); 
   } else if (role == Qt::EditRole) {
     SegmentsTestData line = segTestLineList.at(index.row());
     if(index.column() == 1) return line.entrancePairIndex;
@@ -105,7 +107,9 @@ QVariant SegmentsTestModel::data(const QModelIndex &index, int role) const {
     else if(index.column() == 10) return line.phaseJ;
     else if(index.column() == 11) return line.phaseL;
     else if(index.column() == 12) return line.maxAngDistOrder;
-//    else if(index.column() == 13) return line.isUPOS;
+    else if(index.column() == 13) return line.isUPOS;
+    else if(index.column() == 14) return line.secondaryL;
+    else if(index.column() == 15) return line.finalJ;
   } else if (role==Qt::CheckStateRole && index.column()==0) {
     SegmentsTestData line = segTestLineList.at(index.row());
     if(line.isActive==1) return Qt::Checked;
@@ -145,8 +149,12 @@ QVariant SegmentsTestModel::headerData(int section, Qt::Orientation orientation,
       return QVariant();
     case 12:
       return QVariant();
-//    case 13:
-//      return QVariant();
+    case 13:
+      return QVariant();
+    case 14:
+      return QVariant();
+    case 15:
+      return QVariant();
     default: 
       return QVariant();
     }
@@ -173,7 +181,9 @@ bool SegmentsTestModel::setData(const QModelIndex &index, const QVariant &value,
     else if(index.column() == 10) tempData.phaseJ=value.toDouble();
     else if(index.column() == 11) tempData.phaseL=value.toInt();
     else if(index.column() == 12) tempData.maxAngDistOrder=value.toInt();
-//    else if(index.column() == 13) tempData.isUPOS=value.toInt();
+    else if(index.column() == 13) tempData.isUPOS=value.toInt();
+    else if(index.column() == 14) tempData.secondaryL=value.toInt();
+    else if(index.column() == 15) tempData.finalJ=value.toDouble();
     else return false;
 
     segTestLineList.replace(row,tempData);
@@ -239,8 +249,10 @@ int SegmentsTestModel::isSegTestLine(const SegmentsTestData &line) const {
        tempLine.dataType==line.dataType&&
        tempLine.phaseJ==line.phaseJ&&
        tempLine.phaseL==line.phaseL&&
-       tempLine.maxAngDistOrder==line.maxAngDistOrder) {
-//       tempLine.isUPOS==line.isUPOS) {
+       tempLine.maxAngDistOrder==line.maxAngDistOrder&&
+       tempLine.isUPOS==line.isUPOS&&
+       tempLine.secondaryL==line.secondaryL&&
+       tempLine.finalJ==line.finalJ) {
       foundLine=i;
       break;
     }

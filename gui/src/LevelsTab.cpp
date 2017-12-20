@@ -658,8 +658,8 @@ bool LevelsTab::writeNuclearFile(QTextStream& outStream) {
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(0).seperationEnergy
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).seperationEnergy
 		    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).isUPOS
-                    << qSetFieldWidth(5)  << pairs.at(channels.at(ch).pairIndex).secondaryDecayL
-                    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).Ic
+                    << qSetFieldWidth(5)  << "0" //pairs.at(channels.at(ch).pairIndex).secondaryDecayL
+                    << qSetFieldWidth(13) << "0" //qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).Ic
 		    << qSetFieldWidth(6)  << pairs.at(channels.at(ch).pairIndex).pairType
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).channelRadius 
 		    << qSetFieldWidth(13) << qSetRealNumberPrecision(10) << pairs.at(channels.at(ch).pairIndex).lightG 
@@ -755,7 +755,7 @@ bool LevelsTab::readNuclearFile(QTextStream &inStream) {
       }
       
       PairsData newPair={lightJ,lightPi,lightZ,lightM,lightG,heavyJ,heavyPi,heavyZ,heavyM,
-			 heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType,ecMultMask,isupos,secondaryDecayL,Ic};
+			 heavyG,excitationEnergy,seperationEnergyOut,channelRadius,pairType,ecMultMask,isupos};
       int pairIndex=ir-1;
       if(pairsModel->numPairs()<ir) {
 	emit(readNewPair(newPair,pairIndex,true));

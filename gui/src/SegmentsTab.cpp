@@ -2,6 +2,7 @@
 #include "SegmentsTab.h"
 #include "RichTextDelegate.h"
 #include "InfoDialog.h"
+#include <iostream>
 
 SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsDataModel = new SegmentsDataModel;
@@ -33,6 +34,8 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsDataView->setColumnHidden(12,true);
   segmentsDataView->setColumnHidden(13,true);
   segmentsDataView->setColumnHidden(14,true);
+  segmentsDataView->setColumnHidden(15,true);
+  segmentsDataView->setColumnHidden(16,true);
   connect(segmentsDataView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateSegDataButtons(QItemSelection)));
   connect(segmentsDataView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editSegDataLine()));
 
@@ -63,6 +66,8 @@ SegmentsTab::SegmentsTab(QWidget *parent) : QWidget(parent) {
   segmentsTestView->setColumnHidden(11,true);
   segmentsTestView->setColumnHidden(12,true);
   segmentsTestView->setColumnHidden(13,true);
+  segmentsTestView->setColumnHidden(14,true);
+  segmentsTestView->setColumnHidden(15,true);
   connect(segmentsTestView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(updateSegTestButtons(QItemSelection)));
   connect(segmentsTestView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editSegTestLine()));
 
@@ -204,6 +209,8 @@ void SegmentsTab::addSegDataLine() {
     newLine.phaseL=aDialog.phaseLValueText->text().toInt();
     if(aDialog.uposCheck->isChecked()) newLine.isUPOS=1;
     else newLine.isUPOS=0;
+    newLine.secondaryL=aDialog.secondaryLText->text().toInt();
+    newLine.finalJ=aDialog.finalJText->text().toDouble();
     addSegDataLine(newLine);
   }
 }
@@ -242,6 +249,10 @@ void SegmentsTab::addSegDataLine(SegmentsDataData line) {
     segmentsDataModel->setData(index,line.phaseL,Qt::EditRole);
     index = segmentsDataModel->index(lines.size(),14,QModelIndex());
     segmentsDataModel->setData(index,line.isUPOS,Qt::EditRole);
+    index = segmentsDataModel->index(lines.size(),15,QModelIndex());
+    segmentsDataModel->setData(index,line.secondaryL,Qt::EditRole);
+    index = segmentsDataModel->index(lines.size(),16,QModelIndex());
+    segmentsDataModel->setData(index,line.finalJ,Qt::EditRole);
     segmentsDataView->resizeRowToContents(lines.size());
     updateSegDataButtons(segmentsDataView->selectionModel()->selection());
   } else {
@@ -269,7 +280,9 @@ void SegmentsTab::addSegTestLine() {
     newLine.phaseL=aDialog.phaseLValueText->text().toInt();
     newLine.maxAngDistOrder=aDialog.angDistSpin->value();
     if(aDialog.uposCheck->isChecked()) newLine.isUPOS=1;
-    else newLine.isUPOS=0;    
+    else newLine.isUPOS=0;
+    newLine.secondaryL=aDialog.secondaryLText->text().toInt();
+    newLine.finalJ=aDialog.finalJText->text().toDouble();      
     addSegTestLine(newLine);
    }
 }
@@ -306,6 +319,10 @@ void SegmentsTab::addSegTestLine(SegmentsTestData line) {
     segmentsTestModel->setData(index,line.maxAngDistOrder,Qt::EditRole);
     index = segmentsTestModel->index(lines.size(),13,QModelIndex());
     segmentsTestModel->setData(index,line.isUPOS,Qt::EditRole);
+    index = segmentsTestModel->index(lines.size(),14,QModelIndex());
+    segmentsTestModel->setData(index,line.secondaryL,Qt::EditRole);
+    index = segmentsTestModel->index(lines.size(),15,QModelIndex());
+    segmentsTestModel->setData(index,line.finalJ,Qt::EditRole);
     segmentsTestView->resizeRowToContents(lines.size());
     updateSegTestButtons(segmentsTestView->selectionModel()->selection());
   } else {
@@ -360,6 +377,13 @@ void SegmentsTab::editSegDataLine() {
   i=segmentsDataModel->index(index.row(),14,QModelIndex());
   var=segmentsDataModel->data(i,Qt::EditRole);
   int isUPOS=var.toInt();
+  i=segmentsDataModel->index(index.row(),15,QModelIndex());
+  var=segmentsDataModel->data(i,Qt::EditRole);
+  QString secondaryL=var.toString();
+  i=segmentsDataModel->index(index.row(),16,QModelIndex());
+  var=segmentsDataModel->data(i,Qt::EditRole);
+  QString finalJ=var.toString();
+//  std::cout<<secondaryL.toLocal8Bit().constData()<<","<<finalJ.toLocal8Bit().constData()<<std::endl; 
 
 
   AddSegDataDialog aDialog;
@@ -380,6 +404,8 @@ void SegmentsTab::editSegDataLine() {
   aDialog.phaseLValueText->setText(phaseL);
   if(isUPOS==1) aDialog.uposCheck->setChecked(true);
   else aDialog.uposCheck->setChecked(false);
+  aDialog.secondaryLText->setText(secondaryL);
+  aDialog.finalJText->setText(finalJ);
 
   if(aDialog.exec()) {
     int newEntrancePairIndex=aDialog.entrancePairIndexSpin->value();
@@ -454,7 +480,17 @@ void SegmentsTab::editSegDataLine() {
     if(newIsUPOS!=isUPOS) {
       i=segmentsDataModel->index(index.row(),14,QModelIndex());
       segmentsDataModel->setData(i,newIsUPOS,Qt::EditRole);
+    }
+    QString newSecondaryL=aDialog.secondaryLText->text();
+    if(newSecondaryL!=secondaryL) {
+      i=segmentsDataModel->index(index.row(),15,QModelIndex());
+      segmentsDataModel->setData(i,newSecondaryL,Qt::EditRole);
     } 
+    QString newFinalJ=aDialog.finalJText->text();
+    if(newFinalJ!=finalJ) {
+      i=segmentsDataModel->index(index.row(),16,QModelIndex());
+      segmentsDataModel->setData(i,newFinalJ,Qt::EditRole);
+    }
   }
 }
 
@@ -502,6 +538,13 @@ void SegmentsTab::editSegTestLine() {
   i=segmentsTestModel->index(index.row(),13,QModelIndex());
   var=segmentsTestModel->data(i,Qt::EditRole);
   int isUPOS=var.toInt();
+  i=segmentsTestModel->index(index.row(),14,QModelIndex());
+  var=segmentsTestModel->data(i,Qt::EditRole);
+  QString secondaryL=var.toString(); 
+  i=segmentsTestModel->index(index.row(),15,QModelIndex());
+  var=segmentsTestModel->data(i,Qt::EditRole);
+  QString finalJ=var.toString();
+//  std::cout<<isUPOS<<","<<var.toInt()<<","<<std::endl;
 
   AddSegTestDialog aDialog;
   aDialog.setWindowTitle(tr("Edit a Segment Without Data"));
@@ -519,6 +562,8 @@ void SegmentsTab::editSegTestLine() {
   aDialog.angDistSpin->setValue(maxAngDistOrder);
   if(isUPOS==1) aDialog.uposCheck->setChecked(true);
   else aDialog.uposCheck->setChecked(false);
+  aDialog.secondaryLText->setText(secondaryL);
+  aDialog.finalJText->setText(finalJ);
  
  
   if(aDialog.exec()) {
@@ -583,11 +628,23 @@ void SegmentsTab::editSegTestLine() {
       i=segmentsTestModel->index(index.row(),12,QModelIndex());
       segmentsTestModel->setData(i,newMaxAngDistOrder,Qt::EditRole);      
     }
-    int newIsUPOS=0;
+    int newIsUPOS;
     if(aDialog.uposCheck->isChecked()) newIsUPOS=1;
+    else newIsUPOS=0;
     if(newIsUPOS!=isUPOS) {
-      i=segmentsDataModel->index(index.row(),13,QModelIndex());
-      segmentsDataModel->setData(i,newIsUPOS,Qt::EditRole);
+      i=segmentsTestModel->index(index.row(),13,QModelIndex());
+      segmentsTestModel->setData(i,newIsUPOS,Qt::EditRole);
+//      std::cout<<newIsUPOS<<std::endl;
+    }
+    QString newSecondaryL=aDialog.secondaryLText->text();
+    if(newSecondaryL!=secondaryL) {
+      i=segmentsTestModel->index(index.row(),14,QModelIndex());
+      segmentsTestModel->setData(i,newSecondaryL,Qt::EditRole);
+    }
+    QString newFinalJ=aDialog.finalJText->text();
+    if(newFinalJ!=finalJ) {
+      i=segmentsTestModel->index(index.row(),15,QModelIndex());
+      segmentsTestModel->setData(i,newFinalJ,Qt::EditRole);
     }
   }
 }
@@ -642,6 +699,10 @@ void SegmentsTab::moveSegDataLine(unsigned int upDown) {
   segmentsDataModel->setData(index,line.phaseL,Qt::EditRole);
   index = segmentsDataModel->index(future,14,QModelIndex());
   segmentsDataModel->setData(index,line.isUPOS,Qt::EditRole);
+  index = segmentsDataModel->index(future,15,QModelIndex());
+  segmentsDataModel->setData(index,line.secondaryL,Qt::EditRole);
+  index = segmentsDataModel->index(future,16,QModelIndex());
+  segmentsDataModel->setData(index,line.finalJ,Qt::EditRole);
   segmentsDataView->resizeRowToContents(future);
 
   selectionModel->select(segmentsDataModel->index(future,0,QModelIndex()),
@@ -697,6 +758,10 @@ void SegmentsTab::moveSegTestLine(unsigned int upDown) {
   segmentsTestModel->setData(index,line.maxAngDistOrder,Qt::EditRole);
   index = segmentsTestModel->index(future,13,QModelIndex());
   segmentsTestModel->setData(index,line.isUPOS,Qt::EditRole);
+  index = segmentsTestModel->index(future,14,QModelIndex());
+  segmentsTestModel->setData(index,line.secondaryL,Qt::EditRole);
+  index = segmentsTestModel->index(future,15,QModelIndex());
+  segmentsTestModel->setData(index,line.finalJ,Qt::EditRole);
   segmentsTestView->resizeRowToContents(future);
   
   selectionModel->select(segmentsTestModel->index(future,0,QModelIndex()),
@@ -753,6 +818,8 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
   double phaseJ;
   int phaseL;
   int isUPOS;
+  int secondaryL;
+  double finalJ;
 
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</segmentsData>")) {
@@ -767,17 +834,22 @@ bool SegmentsTab::readSegDataFile(QTextStream& inStream) {
 	phaseJ=0.;
 	phaseL=0;
       }
-      in >> dataNorm >> varyNorm; //>> isUPOS
+      in >> dataNorm >> varyNorm;
       QString restOfLine=in.readLine();
       QTextStream stm(&restOfLine);
-      stm>>dataNormError;
+      stm >> dataNormError >> isUPOS >> secondaryL >> finalJ;
       if(stm.status()!=QTextStream::Ok) {
 	dataNormError=0.;
+        isUPOS=0;
+        secondaryL=0;
+        finalJ=0.;
 	dataFile=restOfLine.trimmed();
       } else dataFile=stm.readLine().trimmed();
       if(in.status()!=QTextStream::Ok) return false;
       SegmentsDataData newLine = {isActive,entrancePairIndex,exitPairIndex,lowEnergy,highEnergy,lowAngle,
-				  highAngle,dataType,dataFile,dataNorm,dataNormError,varyNorm,phaseJ,phaseL}; //,isUPOS
+				  highAngle,dataType,dataFile,dataNorm,dataNormError,varyNorm,phaseJ,phaseL,
+                                  isUPOS,secondaryL,finalJ};
+//      std::cout<<isUPOS<<","<<secondaryL<<","<<finalJ<<std::endl; 
       addSegDataLine(newLine);
     }
   }
@@ -803,7 +875,9 @@ bool SegmentsTab::writeSegDataFile(QTextStream& outStream) {
     outStream << qSetFieldWidth(15) << lines.at(i).dataNorm
 	      << qSetFieldWidth(15) << lines.at(i).varyNorm
 	      << qSetFieldWidth(15) << lines.at(i).dataNormError
-//	      << qSetFieldWidth(15) << lines.at(i).isUPOS
+	      << qSetFieldWidth(15) << lines.at(i).isUPOS
+              << qSetFieldWidth(15) << lines.at(i).secondaryL
+              << qSetFieldWidth(15) << lines.at(i).finalJ
               << qSetFieldWidth(0) << lines.at(i).dataFile
               << endl;
   }
@@ -827,6 +901,8 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
   int phaseL;
   int maxAngDistOrder;
   int isUPOS;
+  int secondaryL;
+  double finalJ;
 
   QString line("");
   while(!inStream.atEnd()&&line.trimmed()!=QString("</segmentsTest>")) {
@@ -847,10 +923,18 @@ bool SegmentsTab::readSegTestFile(QTextStream& inStream) {
       } else {
 	maxAngDistOrder=0;
       }
-//      in >> isUPOS;
+      QString restOfLine=in.readLine();
+      QTextStream stm(&restOfLine);
+      stm >> isUPOS >> secondaryL >> finalJ;
+      if(stm.status()!=QTextStream::Ok) {
+        isUPOS=0;
+        secondaryL=0;
+        finalJ=0.;
+      }
       if(in.status()!=QTextStream::Ok) return false;
       SegmentsTestData newLine = {isActive,entrancePairIndex,exitPairIndex,lowEnergy,highEnergy,energyStep,lowAngle,
-				  highAngle,angleStep,dataType,phaseJ,phaseL,maxAngDistOrder}; //,isUPOS
+				  highAngle,angleStep,dataType,phaseJ,phaseL,maxAngDistOrder,isUPOS,secondaryL,finalJ}; //
+//      std::cout<<isUPOS<<","<<secondaryL<<","<<finalJ<<std::endl;
       addSegTestLine(newLine);
     }
   }
@@ -875,14 +959,19 @@ bool SegmentsTab::writeSegTestFile(QTextStream& outStream) {
     if(lines.at(i).dataType==2) {
       outStream << qSetFieldWidth(15) << lines.at(i).dataType
 		<< qSetFieldWidth(15) << lines.at(i).phaseJ
-		<< qSetFieldWidth(15) << lines.at(i).phaseL 
-		<< endl;	
-    } else if(lines.at(i).dataType==3)  {
+		<< qSetFieldWidth(15) << lines.at(i).phaseL; 	
+    } else if(lines.at(i).dataType==3) {
       outStream  << qSetFieldWidth(15) << lines.at(i).dataType
 		 << qSetFieldWidth(15) << lines.at(i).maxAngDistOrder;
-    } else outStream << qSetFieldWidth(0) << lines.at(i).dataType; 
-//    outStream << qSetFieldWidth(0) << lines.at(i).isUPOS
-	     outStream << endl;
+                 
+    } else { 
+      outStream << qSetFieldWidth(15) << lines.at(i).dataType; 
+    }
+    outStream << qSetFieldWidth(15) << lines.at(i).isUPOS 
+              << qSetFieldWidth(15) << lines.at(i).secondaryL
+              << qSetFieldWidth(0) << lines.at(i).finalJ
+              << endl;
+    
   }
 
   return true;
