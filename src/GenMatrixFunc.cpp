@@ -172,11 +172,29 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
               double Ic=point->GetIc();
               double j2f=compound()->GetPair(ir)->GetJ(2);
               double R_L=0;
-              if((int)lOrder%2==0) R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
-                       *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
+              if((int)lOrder%2==0) {
+                R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
+                    *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
+              
+//            if we have a combination of two "L's", for example E2, M1 mixing, we can write out the somewhat longer form
+                //double finalL2;
+                //double gL;
+                //double gL2;
+                //R_L=pow(2.*j2f+1.,0.5)*pow(-1.,j2f-Ic+lOrder+1.)*
+                //    (gL*gL*(2.*finalL+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic)*
+                //     gL*gL2*pow((2.*finalL+1.),0.5)*pow((2.*finalL2+1.),0.5)*AngCoeff::ClebGord(finalL2,finalL,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL,finalL2,j2f,j2f,lOrder,Ic)*
+                //     gL2*gL*pow((2.*finalL2+1.),0.5)*pow((2.*finalL+1.),0.5)*AngCoeff::ClebGord(finalL,finalL2,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL2,finalL,j2f,j2f,lOrder,Ic)*
+                //     gL2*gL2*(2.*finalL2+1.)*AngCoeff::ClebGord(finalL2,finalL2,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL2,finalL2,j2f,j2f,lOrder,Ic);
 //              std::cout<<lOrder<<","<<finalL<<","<<Ic<<","<<j2f<<","<<R_L<<std::endl;
+              }
 	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.)*R_L* //
 	        point->GetLegendreP(lOrder);
+              if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
+	      double tempCoeff=angularCoeff[lOrder]+
+	        real(theInterference->GetZ1Z2_UPOS()*T1*conj(T2))*point->GetGeometricalFactor()*
+	        compound()->GetPair(aa)->GetI1I2Factor()/100.*pow(2.*lOrder+1.,0.5)*R_L/angleIntegratedXS;
+	      angularCoeff[lOrder]=tempCoeff;
+	      }
             }
           } else {                   
 /*
