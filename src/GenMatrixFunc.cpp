@@ -165,7 +165,7 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
               if(interferenceType=="RR") {//only particle interference terms 
 	        T1=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM1());
 	        T2=this->GetTMatrixElement(theDecay->GetKLGroup(kL)->GetK(),theInterference->GetM2());
-//                std::cout<<kL<<","<<T1<<","<<T2<<",";
+//            std::cout<<kL<<","<<T1<<","<<T2<<",";
 	      }
               int lOrder = theDecay->GetKLGroup(kL)->GetLOrder();
               double finalL=(double)point->GetSecondaryDecayL(); 
@@ -176,18 +176,15 @@ void GenMatrixFunc::CalculateCrossSection(EPoint *point) {
                 R_L=pow(2.*j2f+1.,0.5)*(2.*finalL+1.)*pow(-1.,j2f-Ic+lOrder+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)
                     *AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic);
               
-//            if we have a combination of two "L's", for example E2, M1 mixing, we can write out the somewhat longer form
-                //double finalL2;
-                //double gL;
-                //double gL2;
-                //R_L=pow(2.*j2f+1.,0.5)*pow(-1.,j2f-Ic+lOrder+1.)*
-                //    (gL*gL*(2.*finalL+1.)*AngCoeff::ClebGord(finalL,finalL,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL,finalL,j2f,j2f,lOrder,Ic)*
-                //     gL*gL2*pow((2.*finalL+1.),0.5)*pow((2.*finalL2+1.),0.5)*AngCoeff::ClebGord(finalL2,finalL,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL,finalL2,j2f,j2f,lOrder,Ic)*
-                //     gL2*gL*pow((2.*finalL2+1.),0.5)*pow((2.*finalL+1.),0.5)*AngCoeff::ClebGord(finalL,finalL2,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL2,finalL,j2f,j2f,lOrder,Ic)*
-                //     gL2*gL2*(2.*finalL2+1.)*AngCoeff::ClebGord(finalL2,finalL2,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL2,finalL2,j2f,j2f,lOrder,Ic);
-//              std::cout<<lOrder<<","<<finalL<<","<<Ic<<","<<j2f<<","<<R_L<<std::endl;
+//            if we have a combination of two "L's", for example E2, M1 mixing
+
+                //double gL; //amplitude of first multipolarity
+                //double gL2 = 1.0-gL; //amplitude of second multipolarity
+                //R_L=pow(2.*j2f+1.,0.5)*pow(2.*finalL+1.,0.5)*pow(2.*finalL2+1.,0.5)*pow(-1.,j2f-Ic+finalL+finalL2+lOrder+1.)*
+                //    AngCoeff::ClebGord(finalL2,finalL,lOrder,1.,-1.,0.)*AngCoeff::Racah(finalL,finalL2,j2f,j2f,lOrder,Ic);
+
               }
-	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.)*R_L* //
+	      sum+=theInterference->GetZ1Z2_UPOS()*T1*conj(T2)*pow(2.*lOrder+1.,0.5)/(4.)*R_L*
 	        point->GetLegendreP(lOrder);
               if((lOrder < angularCoeff.size()) && point->IsAngularDist()) {
 	      double tempCoeff=angularCoeff[lOrder]+
